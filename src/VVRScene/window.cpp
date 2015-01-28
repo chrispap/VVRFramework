@@ -1,4 +1,4 @@
-#include "mainwindow.h"
+#include "window.h"
 #include "glwidget.h"
 #include "scene.h"
 
@@ -10,9 +10,9 @@
 #include <QDir>
 #include <iostream>
 
-QString MainWindow::aboutMessage = QString("VVR LAB 2014") + QString(QChar(0xA9));
+QString vvr::Window::aboutMessage = QString("VVR LAB 2014") + QString(QChar(0xA9));
 
-MainWindow::MainWindow(vvr::Scene *scene)
+vvr::Window::Window(vvr::Scene *scene)
 {
     setupUi(this);
     this->scene = scene;
@@ -34,12 +34,12 @@ MainWindow::MainWindow(vvr::Scene *scene)
     glWidget->setFocus();
 }
 
-MainWindow::~MainWindow()
+vvr::Window::~Window()
 {
 
 }
 
-void MainWindow::createActions()
+void vvr::Window::createActions()
 {
     // exit action
     exitAct = new QAction(tr("E&xit"), this);
@@ -51,7 +51,7 @@ void MainWindow::createActions()
     connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
 }
 
-void MainWindow::createMenus()
+void vvr::Window::createMenus()
 {
     // file menu
     fileMenu = QMainWindow::menuBar()->addMenu(tr("&File"));
@@ -63,23 +63,22 @@ void MainWindow::createMenus()
     helpMenu->addAction(aboutAct);
 }
 
-void MainWindow::about()
+void vvr::Window::about()
 {
     QMessageBox::about(this, scene->getName(), aboutMessage);
 }
 
-void MainWindow::keyPressEvent(QKeyEvent* event)
+void vvr::Window::keyPressEvent(QKeyEvent* event)
 {
     std::string str = event->text().toStdString();
     if (str.length()>0) emit keyPressed(event);
 }
 
-/*  Entry point of VVR Scene Framework */
 int vvr::main(int argc, char* argv[], vvr::Scene *scene)
 {
     try {
         QApplication app(argc, argv);
-        MainWindow window(scene);
+        Window window(scene);
         window.show();
         app.exec();
     }

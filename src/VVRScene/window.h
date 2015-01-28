@@ -1,18 +1,20 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef VVRWINDOW_H
+#define VVRWINDOW_H
 
 #include "scene.h"
 #include "ui_mainwindow.h"
 
 class GLWidget;
 
-class MainWindow : public QMainWindow, private Ui::MainWindow
+namespace vvr {
+
+class Window : public QMainWindow, private Ui::MainWindow
 {
     Q_OBJECT
 
 public:
-    MainWindow(vvr::Scene *scene);
-    ~MainWindow();
+    Window(vvr::Scene *scene);
+    ~Window();
 
 private slots:
     void about();
@@ -35,4 +37,6 @@ private: // data
     vvr::Scene *scene;
 };
 
-#endif // MAINWINDOW_H
+}
+
+#endif
