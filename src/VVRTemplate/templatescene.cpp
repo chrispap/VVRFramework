@@ -7,13 +7,19 @@
 #include <string>
 #include <Mathgeolib/MathGeoLib.h>
 
+#define CONFIGFILEPATH "../../config/settings.txt"
+
 using std::vector;
 using std::string;
 using std::cout;
 using std::endl;
 
-TemplateScene::TemplateScene() :
-    m_settings(getExePath() + "../../config/settings.txt")
+const char* TemplateScene::getName() const
+{
+    return "Template VVR Scene";
+}
+
+TemplateScene::TemplateScene() : m_settings(getExePath() + CONFIGFILEPATH)
 {
     // Read params from configuration file
     camera_dist = m_settings.getDbl("camera_dist");
@@ -66,29 +72,29 @@ void TemplateScene::load()
     m_bone_width = scene_width / 4;
     
     // Load 3D model [Ulna]
-    ulna = new vvr::Mesh(objDir, objFile, "");
-    ulna->setBigSize(m_bone_width);
-    ulna->cornerAlign();
-    vvr::Box box = ulna->getBox();
-    ulna->move(vvr::Vec3d( -box.getYSize()*0.3, -box.getYSize()/2, -box.getZSize()/2 ));
+    m_ulna.mesh = new vvr::Mesh(objDir, objFile, "");
+    m_ulna.mesh->setBigSize(m_bone_width);
+    m_ulna.mesh->cornerAlign();
+    vvr::Box box = m_ulna.mesh->getBox();
+    m_ulna.mesh->move(vvr::Vec3d( -box.getYSize()*0.3, -box.getYSize()/2, -box.getZSize()/2 ));
 
     // Load 3D model [Humerus]
-    humerus = new vvr::Mesh(objDir, objFile, "");
-    humerus->setBigSize(m_bone_width);
-    humerus->cornerAlign();
-    box = humerus->getBox();
-    humerus->move(vvr::Vec3d( -box.getYSize()*0.3, -box.getYSize()/2, -box.getZSize()/2 ));
+    m_humerus.mesh = new vvr::Mesh(objDir, objFile, "");
+    m_humerus.mesh->setBigSize(m_bone_width);
+    m_humerus.mesh->cornerAlign();
+    box = m_humerus.mesh->getBox();
+    m_humerus.mesh->move(vvr::Vec3d( -box.getYSize()*0.3, -box.getYSize()/2, -box.getZSize()/2 ));
 
     // Load motion data
-    loadData(getBasePath() + m_settings.getStr("data_file_ulna"), m_rots_ulna, m_times_ulna);
-    loadData(getBasePath() + m_settings.getStr("data_file_humerus"), m_rots_humerus, m_times_humerus);
+    loadData(getBasePath() + m_settings.getStr("data_file_ulna"), m_ulna.rots, m_ulna.times);
+    loadData(getBasePath() + m_settings.getStr("data_file_humerus"), m_humerus.rots, m_humerus.times);
 }
 
 void TemplateScene::draw()
 {
     drawAxes();
-    ulna    -> draw(vvr::ColRGB(0x66, 0x00, 0x66), (vvr::Style) (vvr::SOLID));
-    humerus -> draw(vvr::ColRGB(0x66, 0x00, 0x66), (vvr::Style) (vvr::SOLID));
+    m_ulna.mesh -> draw(vvr::ColRGB(0x66, 0x00, 0x66), (vvr::Style) (vvr::SOLID));
+    m_humerus.mesh -> draw(vvr::ColRGB(0x66, 0x00, 0x66), (vvr::Style) (vvr::SOLID));
 }
 
 bool TemplateScene::idle()
@@ -101,17 +107,17 @@ bool TemplateScene::idle()
     bool anim_on_humerus = true;
 
     // Animate ulna
-    if (m_times_ulna.empty()) {
+    if (m_ulna.times.empty()) {
         anim_on_ulna = false;
     } else {
-        if (wallTime >= m_times_ulna.back() * tsf) {
-            ulna->setRot(m_rots_ulna.back());
+        if (wallTime >= m_ulna.times.back() * tsf) {
+            m_ulna.mesh->setRot(m_ulna.rots.back());
             anim_on_ulna = false;
         }
         else {
-            for (unsigned i = m_times_ulna.size()-1; i>0; i--) {
-                if (wallTime >= m_times_ulna[i] * tsf) {
-                    if (i < m_rots_ulna.size()) ulna->setRot(m_rots_ulna[i]);
+            for (unsigned i = m_ulna.times.size()-1; i>0; i--) {
+                if (wallTime >= m_ulna.times[i] * tsf) {
+                    if (i < m_ulna.rots.size()) m_ulna.mesh->setRot(m_ulna.rots[i]);
                     break;
                 }
             }
@@ -122,25 +128,25 @@ bool TemplateScene::idle()
     // Translate humerus' origin to ulna's end.
     math::float3x3 M = math::float3x3::identity;
     M = M * math::float3x3::RotateX(math::DegToRad(-90));
-    M = M * math::float3x3::RotateZ(math::DegToRad(-ulna->getRot().x));
-    M = M * math::float3x3::RotateX(math::DegToRad(-ulna->getRot().y));
-    M = M * math::float3x3::RotateY(math::DegToRad( ulna->getRot().z));
+    M = M * math::float3x3::RotateZ(math::DegToRad(-m_ulna.mesh->getRot().x));
+    M = M * math::float3x3::RotateX(math::DegToRad(-m_ulna.mesh->getRot().y));
+    M = M * math::float3x3::RotateY(math::DegToRad( m_ulna.mesh->getRot().z));
     M = M * math::float3x3::RotateZ(math::DegToRad(-90));
     math::float3 p = M.Transform(math::float3(m_bone_width,0,0));
 
-    humerus->setPos(vvr::Vec3d(p.x, p.y, p.z));
+    m_humerus.mesh->setPos(vvr::Vec3d(p.x, p.y, p.z));
 
-    if (m_times_humerus.empty()) {
+    if (m_humerus.times.empty()) {
         anim_on_humerus = false;
     } else {
-        if (wallTime >= m_times_humerus.back() * tsf) {
-            humerus->setRot(m_rots_humerus.back());
+        if (wallTime >= m_humerus.times.back() * tsf) {
+            m_humerus.mesh->setRot(m_humerus.rots.back());
             anim_on_humerus = false;
         }
         else {
-            for (unsigned i = m_times_humerus.size()-1; i>0; i--) {
-                if (wallTime >= m_times_humerus[i] * tsf) {
-                    if (i < m_rots_humerus.size()) humerus->setRot(m_rots_humerus[i]);
+            for (unsigned i = m_humerus.times.size()-1; i>0; i--) {
+                if (wallTime >= m_humerus.times[i] * tsf) {
+                    if (i < m_humerus.rots.size()) m_humerus.mesh->setRot(m_humerus.rots[i]);
                     break;
                 }
             }
