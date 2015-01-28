@@ -5,7 +5,6 @@
 
 #include <string>
 #include <vector>
-#include <QtOpenGL>
 
 using namespace std;
 
@@ -48,11 +47,7 @@ protected:
     virtual void drawShape() = 0;
 
 public:
-    void draw() {
-        glColor3ubv(colour.data);
-        drawShape();
-    }
-
+    void draw();
 };
 
 class vvrscene_API Point2D : public Shape

@@ -2,12 +2,12 @@
 #define __MESH_H__
 
 #include "vvrscenedll.h"
+#include "geom.h"
 
 #include <vector>
 #include <string>
 #include <list>
 #include <set>
-#include "geom.h"
 
 using namespace std;
 
@@ -38,7 +38,7 @@ namespace vvr {
 		Box mAABB;                                      ///< The bounding box of the model
 		Vec3d mRot;                                     ///< Model rotation around its local axis
 		Vec3d mPos;                                     ///< Model position in the scene
-		GLuint mTexName;
+        unsigned mTexName;
 		
 		void createTriangleLists();                     ///< Create lists with each vertex's triangles
 		void updateTriangleData ();                     ///< Recalculates the plane equations of the triangles

@@ -18,6 +18,11 @@ ColRGB ColRGB::black  (0x00, 0x00, 0x00);
 ColRGB ColRGB::yellow (0xFF, 0xFF, 0x00);
 
 /* Shape drawing */
+void Shape::draw() {
+    glColor3ubv(colour.data);
+    drawShape();
+}
+
 void Point2D::drawShape() {
     glPointSize(7);
     glEnable(GL_POINT_SMOOTH);

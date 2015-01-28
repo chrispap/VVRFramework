@@ -1,6 +1,6 @@
 #include "mainwindow.h"
 #include "glwidget.h"
-#include "templatescene.h"
+#include "scene.h"
 
 #include <QtOpenGL>
 #include <QtWidgets>
@@ -72,4 +72,21 @@ void MainWindow::keyPressEvent(QKeyEvent* event)
 {
     std::string str = event->text().toStdString();
     if (str.length()>0) emit keyPressed(event);
+}
+
+/*  Entry point of VVR Scene Framework */
+int vvr::main(int argc, char* argv[], vvr::Scene *scene)
+{
+    try {
+        QApplication app(argc, argv);
+        MainWindow window(scene);
+        window.show();
+        app.exec();
+    }
+    catch (string exc) {
+        cerr << exc << endl;
+        return 1;
+    }
+
+    return 0;
 }

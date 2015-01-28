@@ -2,7 +2,6 @@
 #define __SCENE_H__
 
 #include "vvrscenedll.h"
-
 #include "geom.h"
 
 namespace vvr {
@@ -53,6 +52,9 @@ public:
 
     virtual const char* getName() const;
 };
+
+/* This will be the entry point of client applications. */
+int vvrscene_API main(int argc, char* argv[], Scene *scene);
 
 }
 

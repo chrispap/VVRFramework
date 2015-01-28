@@ -1,14 +1,10 @@
 #include "templatescene.h"
-#include "mainwindow.h"
 #include "utils.h"
 #include "canvas.h"
 
-#include <QtOpenGL>
-#include <QApplication>
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <QObject>
 #include <Mathgeolib/MathGeoLib.h>
 
 using std::vector;
@@ -156,17 +152,6 @@ bool TemplateScene::idle()
 
 int main(int argc, char* argv[])
 {
-    try {
-        TemplateScene *scene = new TemplateScene();
-        QApplication app(argc, argv);
-        MainWindow window(scene);
-        window.show();
-        app.exec();
-    }
-    catch (string exc) {
-        cerr << exc << endl;
-        return 1;
-    }
-
-    return 0;
+    TemplateScene *scene = new TemplateScene();
+    return  vvr::main(argc, argv, scene);
 }

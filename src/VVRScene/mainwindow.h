@@ -1,8 +1,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QtOpenGL>
-#include <QMainWindow>
 #include "scene.h"
 #include "ui_mainwindow.h"
 

@@ -2,12 +2,12 @@
 #define GEOM_H
 
 #include "vvrscenedll.h"
+#include "canvas.h"
 
 #include <vector>
 #include <cstdio>
-#include "canvas.h"
 
-using namespace std;
+using std::vector;
 
 namespace vvr {
 

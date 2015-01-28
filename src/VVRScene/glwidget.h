@@ -1,10 +1,10 @@
 #ifndef GLWIDGET_H
 #define GLWIDGET_H
 
+#include "scene.h"
 #include <QtOpenGL>
 #include <QGLWidget>
 #include <QInputEvent>
-#include <scene.h>
 
 class GLWidget : public QGLWidget
 {
