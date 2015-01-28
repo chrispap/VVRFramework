@@ -9,62 +9,64 @@
 #include <list>
 #include <set>
 
-using namespace std;
+using std::vector;
+using std::string;
+using std::list;
+using std::set;
 
 namespace vvr {
 
-	/**
-	* Enum used to controll what to draw in a call of draw()
-	*/
-    enum vvrscene_API Style {
-		SOLID   = (1 << 0),
-		WIRE    = (1 << 1),
-		NORMALS = (1 << 2),
-        BOUND   = (1 << 3),
-	};
+/**
+* Enum used to controll what to draw in a call of draw()
+*/
+enum vvrscene_API Style {
+    SOLID   = (1 << 0),
+    WIRE    = (1 << 1),
+    NORMALS = (1 << 2),
+    BOUND   = (1 << 3),
+};
 
-	/**
-	* Class that handles a 3D model.
-	*/
-    class vvrscene_API Mesh
-	{
-		// Data members
-		vector<Vec3d> mVertices;                        ///< Vertex list
-		vector<Triangle> mTriangles;                    ///< Triangle list | contains indices to the Vertex list
-		vector<Vec3d> mVertexNormals;                   ///< Normals per vertex
-		vector<set<int> > mVertexTriangles;             ///< List of lists of the triangles that are connected to each vertex
-		vector<float> mTexCoords;
-		
-		Box mAABB;                                      ///< The bounding box of the model
-		Vec3d mRot;                                     ///< Model rotation around its local axis
-		Vec3d mPos;                                     ///< Model position in the scene
-        unsigned mTexName;
-		
-		void createTriangleLists();                     ///< Create lists with each vertex's triangles
-		void updateTriangleData ();                     ///< Recalculates the plane equations of the triangles
-		void createNormals ();                          ///< Create a normal for each vertex
-		void drawTriangles (ColRGB col,bool wire=0);    ///< Draw the triangles. This is the actual model drawing.
-		void drawNormals (ColRGB col);                  ///< Draw the normal vectors of each vertex
+/**
+* Class that handles a 3D model.
+*/
+class vvrscene_API Mesh
+{
+    // Data members
+    vector<Vec3d>       mVertices;                  ///< Vertex list
+    vector<Triangle>    mTriangles;                 ///< Triangle list | contains indices to the Vertex list
+    vector<Vec3d>       mVertexNormals;             ///< Normals per vertex
+    vector<set<int> >   mVertexTriangles;           ///< List of lists of the triangles that are connected to each vertex
+    vector<float>       mTexCoords;
+    Box                 mAABB;                      ///< The bounding box of the model
+    Vec3d               mRot;                       ///< Model rotation around its local axis
+    Vec3d               mPos;                       ///< Model position in the scene
+    unsigned            mTexName;
 
-	public:
-		Mesh () {}
-		Mesh (const string &objDir, const string &objFile, const string &texFile);
-		Mesh (const Mesh &original);                    ///< Copy constructor
-		~Mesh (void);                                    ///< Destructor
+    void createTriangleLists();                     ///< Create lists with each vertex's triangles
+    void updateTriangleData ();                     ///< Recalculates the plane equations of the triangles
+    void createNormals ();                          ///< Create a normal for each vertex
+    void drawTriangles (ColRGB col,bool wire=0);    ///< Draw the triangles. This is the actual model drawing.
+    void drawNormals (ColRGB col);                  ///< Draw the normal vectors of each vertex
 
-		void draw (ColRGB col, Style style);            ///< Draw the mesh with the specified style
-        void move   (const Vec3d &p);                   ///< Move the mesh in the world.
-        void rotate (const Vec3d &p);                   ///< Rotate mesh around its local axis
-		void setPos (const Vec3d &p) { mPos = p;}       ///< Set the position of the mesh
-		void setRot (const Vec3d &p) { mRot = p;}       ///< Set the rotation of the mesh
-		void setBigSize (float size);                   ///< Set the meshes size according to the max size of three (x|y|z)
-		void cornerAlign ();                            ///< Align the mesh to the corner of each local axis
-		void centerAlign ();                            ///< Align the mesh to the center of each local axis
+public:
+    Mesh () {}
+    Mesh (const string &objDir, const string &objFile, const string &texFile);
+    Mesh (const Mesh &original);                    ///< Copy constructor
+    ~Mesh (void);                                    ///< Destructor
 
-		Vec3d getPos() {return mPos;}
-		Vec3d getRot() {return mRot;}
-        Box   getBox() {return mAABB;}
-	};
+    void draw (ColRGB col, Style style);            ///< Draw the mesh with the specified style
+    void move   (const Vec3d &p);                   ///< Move the mesh in the world.
+    void rotate (const Vec3d &p);                   ///< Rotate mesh around its local axis
+    void setPos (const Vec3d &p) { mPos = p;}       ///< Set the position of the mesh
+    void setRot (const Vec3d &p) { mRot = p;}       ///< Set the rotation of the mesh
+    void setBigSize (float size);                   ///< Set the meshes size according to the max size of three (x|y|z)
+    void cornerAlign ();                            ///< Align the mesh to the corner of each local axis
+    void centerAlign ();                            ///< Align the mesh to the center of each local axis
+
+    Vec3d getPos() {return mPos;}
+    Vec3d getRot() {return mRot;}
+    Box   getBox() {return mAABB;}
+};
 
 }
 

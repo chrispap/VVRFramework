@@ -13,10 +13,11 @@ using std::vector;
 using std::string;
 using std::cout;
 using std::endl;
+using namespace math;
 
 const char* ArmMotionScene::getName() const
 {
-    return "Template VVR Scene";
+    return "Arm Motion Player";
 }
 
 ArmMotionScene::ArmMotionScene() : m_settings(getExePath() + CONFIGFILEPATH)
@@ -126,13 +127,13 @@ bool ArmMotionScene::idle()
 
     // Animate humerus
     // Translate humerus' origin to ulna's end.
-    math::float3x3 M = math::float3x3::identity;
-    M = M * math::float3x3::RotateX(math::DegToRad(-90));
-    M = M * math::float3x3::RotateZ(math::DegToRad(-m_ulna.mesh->getRot().x));
-    M = M * math::float3x3::RotateX(math::DegToRad(-m_ulna.mesh->getRot().y));
-    M = M * math::float3x3::RotateY(math::DegToRad( m_ulna.mesh->getRot().z));
-    M = M * math::float3x3::RotateZ(math::DegToRad(-90));
-    math::float3 p = M.Transform(math::float3(m_bone_width,0,0));
+    float3x3 M = float3x3::identity;
+    M = M * float3x3::RotateX(DegToRad(-90));
+    M = M * float3x3::RotateZ(DegToRad(-m_ulna.mesh->getRot().x));
+    M = M * float3x3::RotateX(DegToRad(-m_ulna.mesh->getRot().y));
+    M = M * float3x3::RotateY(DegToRad( m_ulna.mesh->getRot().z));
+    M = M * float3x3::RotateZ(DegToRad(-90));
+    float3 p = M.Transform(float3(m_bone_width,0,0));
 
     m_humerus.mesh->setPos(vvr::Vec3d(p.x, p.y, p.z));
 

@@ -7,7 +7,8 @@
 #include <vector>
 #include <cstdlib>
 
-using namespace std;
+using std::string;
+using std::vector;
 
 namespace vvr {
 

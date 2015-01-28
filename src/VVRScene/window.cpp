@@ -10,6 +10,9 @@
 #include <QDir>
 #include <iostream>
 
+using std::cerr;
+using std::endl;
+
 QString vvr::Window::aboutMessage = QString("VVR LAB 2014") + QString(QChar(0xA9));
 
 vvr::Window::Window(vvr::Scene *scene)

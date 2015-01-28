@@ -11,9 +11,6 @@ using std::vector;
 
 namespace vvr {
 
-/**
- * Struct that containts 3 double numbers.
- */
 struct vvrscene_API Vec3d
 {
     union
@@ -71,23 +68,6 @@ struct vvrscene_API Vec3d
     Vec3d &scale(const double s);
 };
 
-/**
- * Struct that contains a line segment.
- */
-struct vvrscene_API Line
-{
-    Vec3d start, end;
-
-    Line() : start(0, 0, 0), end(0, 0, 0) {}
-
-    Line(const Vec3d &_start, const Vec3d &_end) : start(_start), end(_end) {}
-
-    ~Line(void) {}
-};
-
-/**
- * Struct that containts a Box
- */
 struct vvrscene_API Box
 {
     Vec3d min, max;
@@ -201,8 +181,8 @@ struct vvrscene_API Triangle
      */
     Box box;
 
-    Triangle(vector<Vec3d> *_vecList = NULL, int _v1 = 0, int _v2 = 0, int _v3 = 0) :
-        vi1(_v1), vi2(_v2), vi3(_v3), vecList(_vecList)
+    Triangle(vector<Vec3d> *vecList, int v1 = 0, int v2 = 0, int v3 = 0) :
+        vi1(v1), vi2(v2), vi3(v3), vecList(vecList)
     {
         update();
     }
