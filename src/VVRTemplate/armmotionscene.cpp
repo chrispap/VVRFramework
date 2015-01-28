@@ -1,4 +1,4 @@
-#include "templatescene.h"
+#include "armmotionscene.h"
 #include "utils.h"
 #include "canvas.h"
 
@@ -14,12 +14,12 @@ using std::string;
 using std::cout;
 using std::endl;
 
-const char* TemplateScene::getName() const
+const char* ArmMotionScene::getName() const
 {
     return "Template VVR Scene";
 }
 
-TemplateScene::TemplateScene() : m_settings(getExePath() + CONFIGFILEPATH)
+ArmMotionScene::ArmMotionScene() : m_settings(getExePath() + CONFIGFILEPATH)
 {
     // Read params from configuration file
     camera_dist = m_settings.getDbl("camera_dist");
@@ -42,7 +42,7 @@ TemplateScene::TemplateScene() : m_settings(getExePath() + CONFIGFILEPATH)
     m_anim_on = true;
 }
 
-void TemplateScene::loadData(string filename, vector<vvr::Vec3d> &rots, vector<double> &times)
+void ArmMotionScene::loadData(string filename, vector<vvr::Vec3d> &rots, vector<double> &times)
 {
     ifstream file(filename.c_str());
     string line;
@@ -63,7 +63,7 @@ void TemplateScene::loadData(string filename, vector<vvr::Vec3d> &rots, vector<d
 
 }
 
-void TemplateScene::load()
+void ArmMotionScene::load()
 {
     // Construct paths
     const string objDir = getBasePath() + m_settings.getStr("obj_dir");
@@ -90,14 +90,14 @@ void TemplateScene::load()
     loadData(getBasePath() + m_settings.getStr("data_file_humerus"), m_humerus.rots, m_humerus.times);
 }
 
-void TemplateScene::draw()
+void ArmMotionScene::draw()
 {
     drawAxes();
     m_ulna.mesh -> draw(vvr::ColRGB(0x66, 0x00, 0x66), (vvr::Style) (vvr::SOLID));
     m_humerus.mesh -> draw(vvr::ColRGB(0x66, 0x00, 0x66), (vvr::Style) (vvr::SOLID));
 }
 
-bool TemplateScene::idle()
+bool ArmMotionScene::idle()
 {
     if (!m_anim_on) return false;
 
@@ -154,10 +154,4 @@ bool TemplateScene::idle()
     }
 
     return anim_on_ulna || anim_on_humerus;
-}
-
-int main(int argc, char* argv[])
-{
-    TemplateScene *scene = new TemplateScene();
-    return  vvr::main(argc, argv, scene);
 }

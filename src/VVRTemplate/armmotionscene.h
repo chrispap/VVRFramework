@@ -14,10 +14,10 @@ struct Bone {
     vector<vvr::Vec3d> rots;
 };
 
-class TemplateScene : public vvr::Scene
+class ArmMotionScene : public vvr::Scene
 {
 public: 
-    TemplateScene();
+    ArmMotionScene();
     bool idle();
     const char* getName() const;
 
