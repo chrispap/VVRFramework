@@ -1,0 +1,22 @@
+####################################################################
+### Directory paths ################################################
+####################################################################
+res_dir                     = resources/
+obj_dir                     = resources/obj/
+obj_file                    = resources/obj/bone.obj
+data_file_ulna              = resources/data/Ulna.txt
+data_file_humerus           = resources/data/Humerus.txt
+
+####################################################################
+### Graphics parameters ############################################
+####################################################################
+perspective_proj            =  0
+use_mouse_move              =  1
+scene_width                 =  0.3
+scene_height                =  0.3
+camera_dist                 =  1.2
+def_rot_x                   =  30
+def_rot_y                   = -30
+def_rot_z                   =  0
+color_bg                    =  656565
+tsf                         =  1
