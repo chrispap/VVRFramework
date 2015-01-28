@@ -2,7 +2,7 @@
 #define VVRWINDOW_H
 
 #include "scene.h"
-#include "ui_mainwindow.h"
+#include "ui_window.h"
 
 class GLWidget;
 

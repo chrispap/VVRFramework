@@ -3,6 +3,9 @@
 #include "mesh.h"
 #include "canvas.h"
 
+/**
+ * @brief The Simple2DScene class
+ */
 class Simple2DScene : public vvr::Scene
 {
 public: 

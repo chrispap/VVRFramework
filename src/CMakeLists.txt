@@ -4,5 +4,5 @@ project(VVRTemplate)
 
 ### Build subdirs ########################################################################
 add_subdirectory(VVRScene)
-add_subdirectory(VVRTemplate)
+add_subdirectory(VVRExamples)
 ##########################################################################################

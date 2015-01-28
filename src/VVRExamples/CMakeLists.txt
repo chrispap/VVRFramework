@@ -3,7 +3,7 @@ include_directories(../VVRScene)
 ##########################################################################################
 
 ### Executable ###########################################################################
-set(TARGET vvrtemplate CACHE TYPE STRING)
+set(TARGET vvrexamples CACHE TYPE STRING)
 file(GLOB SOURCE_FILES *.h *.cpp)
 set(SOURCE ${SOURCE_FILES})
 ##########################################################################################
