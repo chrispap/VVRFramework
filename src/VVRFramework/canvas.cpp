@@ -1,5 +1,6 @@
 #include "canvas.h"
 
+#include <iostream>
 #include <vector>
 #include <cmath>
 #include <QtOpenGL>
@@ -16,6 +17,7 @@ ColRGB ColRGB::green  (0x00, 0xFF, 0x00);
 ColRGB ColRGB::blue   (0x00, 0x00, 0xFF);
 ColRGB ColRGB::black  (0x00, 0x00, 0x00);
 ColRGB ColRGB::yellow (0xFF, 0xFF, 0x00);
+ColRGB ColRGB::grey (0x66, 0x66, 0x66);
 
 /* Shape drawing */
 void Shape::draw() {
@@ -87,9 +89,26 @@ void Triangle2D::drawShape() {
 }
 
 /* Canvas */
-Canvas2D::Canvas2D() {
+Frame::Frame(bool show_old=true) : show_old(show_old)
+{
+
+}
+
+Canvas2D::Canvas2D()
+{
     frames.push_back(Frame(false));
     fi=0;
+}
+
+Canvas2D::~Canvas2D()
+{
+    cout << "Deleting Canvas" << endl;
+
+    for (int fi=0; fi<frames.size(); fi++) {
+        for (int si=0; si<frames[fi].shapes.size(); si++) {
+            delete frames[fi].shapes[si];
+        }
+    }
 }
 
 void Canvas2D::add(Shape *shape_ptr) {
@@ -132,6 +151,14 @@ void Canvas2D::ff() {
 
 void Canvas2D::resize(int i) {
     if (i<1 || i > size()-1) return;
+
+    // Delete shapes of frames that will be discarded
+    for (int fi=i; fi<frames.size(); fi++) {
+        for (int si=0; si<frames[fi].shapes.size(); si++) {
+            delete frames[fi].shapes[si];
+        }
+    }
+
     frames.resize(i);
     fi=i-1;
 }

@@ -37,6 +37,7 @@ struct vvrframework_API ColRGB
     static ColRGB blue;
     static ColRGB black;
     static ColRGB yellow;
+    static ColRGB grey;
 };
 
 /* Shapes */
@@ -135,9 +136,7 @@ public:
 struct vvrframework_API Frame {
     vector<Shape*> shapes;
     bool show_old;
-
-    Frame(bool _show_old=true) :
-    show_old(_show_old) {};
+    Frame (bool show_old);
 };
 
 class vvrframework_API Canvas2D {
@@ -146,11 +145,12 @@ class vvrframework_API Canvas2D {
 
 public:
     Canvas2D();
+    ~Canvas2D();
 
-    unsigned size()       { return frames.size(); }
+    unsigned size() { return frames.size(); }
     unsigned frameIndex() { return fi; }
-    bool isAtStart()      { return fi == 0; }
-    bool isAtEnd()        { return fi == frames.size()-1; }
+    bool isAtStart() { return fi == 0; }
+    bool isAtEnd() { return fi == frames.size()-1; }
 
     void newFrame(bool show_old_frames=true);
     void add(Shape *shape_ptr);
@@ -160,7 +160,6 @@ public:
     void rew();
     void ff();
     void resize(int i);
-
 };
 
 }

@@ -7,57 +7,78 @@
 #include <fstream>
 #include <string>
 
-#define CONFIGFILEPATH "../../config/settings.txt"
-
 using std::vector;
 using std::string;
 using std::cout;
 using std::endl;
 
+#define APP_TITLE "Simple 2D Drawing"
+#define CONFIGFILEPATH "../../config/settings.txt"
+
 const char* Simple2DScene::getName() const
 {
-    return "Simple 2D Drawing";
+    return APP_TITLE;
 }
 
 Simple2DScene::Simple2DScene() : m_settings(getExePath() + CONFIGFILEPATH)
 {
-    // Read params from configuration file
-    camera_dist = 100;
-    scene_width = 100;
-    scene_height = 100;
-    bgCol = vvr::ColRGB(m_settings.getStr("color_bg"));
-    perspective_proj = 0;
-    globRotDef = vvr::Vec3d(0,0,0);
-    globRot = globRotDef;
-
+    bgCol = vvr::ColRGB::grey;
+    m_rad = 20;
     load();
 }
 
 void Simple2DScene::load()
 {
     // Make 5 circles and add them to the canvas.
-
-    vvr::Circle2D* c[5];
-
-    int i=0;
-    c[i++] = new vvr::Circle2D(-6,  2, 4, vvr::ColRGB::red);
-    c[i++] = new vvr::Circle2D(-3, -2, 4, vvr::ColRGB::green);
-    c[i++] = new vvr::Circle2D( 0,  2, 4, vvr::ColRGB::black);
-    c[i++] = new vvr::Circle2D( 3, -2, 4, vvr::ColRGB::yellow);
-    c[i++] = new vvr::Circle2D( 6,  2, 4, vvr::ColRGB::blue);
-
-    for (i=0; i<5; i++)
-        m_canvas.add(c[i]);
-
+    m_canvas.add(new vvr::Circle2D( -40, -20, 40, vvr::ColRGB::red));
+    m_canvas.add(new vvr::Circle2D( -20,  20, 40, vvr::ColRGB::green));
+    m_canvas.add(new vvr::Circle2D(   0, -20, 40, vvr::ColRGB::blue));
+    m_canvas.add(new vvr::Circle2D(  20,  20, 40, vvr::ColRGB::black));
+    m_canvas.add(new vvr::Circle2D(  40, -20, 40, vvr::ColRGB::yellow));
+    m_canvas.newFrame(true);
 }
 
 void Simple2DScene::draw()
 {
-    drawAxes();
+    enterPixelMode();
     m_canvas.draw();
+    returnFromPixelMode();
 }
 
-bool Simple2DScene::idle()
+void Simple2DScene::mouse2pix(int &x, int &y)
 {
-    return 0;
+    // Transform mouse click coords to pixel scene coords.
+    x -= screen_width/2;
+    y -= screen_height/2;
+}
+
+void Simple2DScene::mousePressed(int x, int y, int modif)
+{
+    mouse2pix(x,y);
+    m_canvas.add(new vvr::Circle2D(x, y, m_rad, vvr::ColRGB::black));
+}
+
+void Simple2DScene::mouseMoved(int x, int y, int modif)
+{
+    mouse2pix(x,y);
+    m_canvas.add(new vvr::Circle2D(x, y, m_rad, vvr::ColRGB::blue));
+}
+
+void Simple2DScene::mouseWheel(int dir, int modif)
+{
+    if (dir>0) {
+        m_rad += 1;
+    }
+    else {
+        m_rad -= 1;
+        if (m_rad<0) m_rad = 0;
+    }
+
+}
+
+void Simple2DScene::reset()
+{
+    vvr::Scene::reset();
+    m_canvas.resize(1);
+    m_canvas.newFrame(true);
 }

@@ -16,6 +16,8 @@ using namespace std;
 Scene::Scene() : perspective_proj(false), globRotDef(0,0,0)
 {
     globRot = globRotDef;
+    globPos = globRotDef;
+    globPosDef = globRotDef;
 }
 
 const char* Scene::getName() const
@@ -37,7 +39,7 @@ void Scene::drawAxes()
     //[Z]
     glColor3f(0, 0, 0xFF);
     glVertex3f(0,0,0);
-    glVertex3f(0, 0, 10.0*camera_dist);
+    glVertex3f(0, 0, 10.0*globPos.z);
 
     glEnd();
 }
@@ -88,8 +90,8 @@ void Scene::GL_Resize(int w, int h)
 //        gluPerspective(
 //            10.0,
 //            (float)w/h,
-//            camera_dist * 0.002,
-//            camera_dist * 20
+//            globPos.z * 0.002,
+//            globPos.z * 20
 //        );
     }
     else
@@ -104,8 +106,8 @@ void Scene::GL_Resize(int w, int h)
             -scene_height / 2,
             scene_height / 2,
 
-            camera_dist * -2, // -Z look to the user! Near should be negative!
-            camera_dist * 2   // Far should be positive!
+            globPos.z * -2, // -Z look to the user! Near should be negative!
+            globPos.z * 2   // Far should be positive!
         );
     }
 
@@ -119,7 +121,7 @@ void Scene::GL_Render()
     glLoadIdentity();
 
     // Push the scene to the back (far from camera)
-    glTranslatef(0,0,-camera_dist);
+    glTranslatef(globPos.x, globPos.y, globPos.z);
 
     // Apply global rotation & draw
     glRotatef(globRot.x, 1, 0, 0);
@@ -138,7 +140,7 @@ void Scene::keyEvent (unsigned char key,  bool up, int x, int y, int modif)
 
     switch (isprint(key)? tolower(key): key) {
     case '0' : globRot = globRotDef; break;
-    case 'r' : reset();
+    case 'r' : this->reset();
     }
 
 }
@@ -176,9 +178,9 @@ void Scene::mouseMoved(int x, int y, int modif)
 
 void Scene::mouseWheel(int dir, int modif)
 {
-    camera_dist += 0.2*dir;
+    globPos.z += 0.2*dir;
 
-    if (camera_dist < 0.01) camera_dist = 0.01;
+    if (globPos.z < 0.01) globPos.z = 0.01;
 }
 
 /* Utils */
@@ -187,7 +189,7 @@ void Scene::enterPixelMode()
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
     glLoadIdentity();
-    glOrtho(0, screen_width, screen_height, 0, 1, -1);
+    glOrtho(-screen_width/2, screen_width/2, screen_height/2, -screen_height/2, 1, -1);
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     glLoadIdentity();

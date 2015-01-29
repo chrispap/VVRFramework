@@ -23,7 +23,6 @@ const char* ArmMotionScene::getName() const
 ArmMotionScene::ArmMotionScene() : m_settings(getExePath() + CONFIGFILEPATH)
 {
     // Read params from configuration file
-    camera_dist = m_settings.getDbl("camera_dist");
     scene_width = m_settings.getDbl("scene_width");
     scene_height = m_settings.getDbl("scene_height");
     bgCol = vvr::ColRGB(m_settings.getStr("color_bg"));
@@ -33,6 +32,8 @@ ArmMotionScene::ArmMotionScene() : m_settings(getExePath() + CONFIGFILEPATH)
     double def_rot_y = m_settings.getDbl("def_rot_y");
     double def_rot_z = m_settings.getDbl("def_rot_z");
     globRotDef = vvr::Vec3d(def_rot_x, def_rot_y, def_rot_z);
+    globPosDef.z = m_settings.getDbl("camera_dist");
+    globPos = globPosDef;
     globRot = globRotDef;
 
     // Load stuff from disk
