@@ -1,5 +1,5 @@
 ### QT STUFF #############################################################################
-set(CMAKE_LIBRARY_PATH CACHE PATH "C:\\Program Files (x86)\\Windows Kits\\8.1\\Lib\\winv6.3\\um\\x86")
+set(CMAKE_LIBRARY_PATH CACHE PATH "C:\\Program Files (x86)/Windows Kits/8.1/Lib/winv6.3/um/x86")
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5OpenGL REQUIRED)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -16,20 +16,20 @@ qt5_wrap_ui(UI_FILES window.ui)
 ##########################################################################################
 
 ##########################################################################################
-add_library(vvrscene SHARED ${SOURCE} ${UI_FILES})
+add_library(vvrframework SHARED ${SOURCE} ${UI_FILES})
 ##########################################################################################
 
 ### QT Used modules ######################################################################
-qt5_use_modules(vvrscene Widgets OpenGL)
-target_link_libraries(vvrscene Qt5::Widgets Qt5::OpenGL)
+qt5_use_modules(vvrframework Widgets OpenGL)
+target_link_libraries(vvrframework Qt5::Widgets Qt5::OpenGL)
 ##########################################################################################
 
 ##########################################################################################
 find_package(OpenGL REQUIRED)
 include_directories(${OPENGL_INCLUDE_DIR})
-target_link_libraries(vvrscene ${OPENGL_LIBRARIES} )
+target_link_libraries(vvrframework ${OPENGL_LIBRARIES} )
 ##########################################################################################
 
 ### Link to MathGeolib ###################################################################
-target_link_libraries(vvrscene MathGeoLib)
+target_link_libraries(vvrframework MathGeoLib)
 ##########################################################################################

@@ -15,5 +15,5 @@ int main(int argc, char* argv[])
         }
     }
 
-    return vvr::main(argc, argv, scene1);
+    return vvr::main(argc, argv, scene2);
 }

@@ -1,7 +1,7 @@
 #ifndef __SCENE_H__
 #define __SCENE_H__
 
-#include "vvrscenedll.h"
+#include "vvrframeworkdll.h"
 #include "geom.h"
 
 namespace vvr {
@@ -13,7 +13,7 @@ enum ArrowDir {
     LEFT
 };
 
-class vvrscene_API Scene
+class vvrframework_API Scene
 {
 protected:
     bool perspective_proj;
@@ -54,7 +54,7 @@ public:
 };
 
 /* This will be the entry point of client applications. */
-int vvrscene_API main(int argc, char* argv[], Scene *scene);
+int vvrframework_API main(int argc, char* argv[], Scene *scene);
 
 }
 

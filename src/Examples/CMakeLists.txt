@@ -1,9 +1,9 @@
 ### Build subdirs. Also add them to include path #########################################
-include_directories(../VVRScene)
+include_directories(../VVRFramework)
 ##########################################################################################
 
 ### Executable ###########################################################################
-set(TARGET vvrex CACHE TYPE STRING)
+set(TARGET example CACHE TYPE STRING)
 file(GLOB SOURCE_FILES *.h *.cpp)
 set(SOURCE ${SOURCE_FILES})
 ##########################################################################################
@@ -13,7 +13,7 @@ add_executable(${TARGET} ${SOURCE})
 ##########################################################################################
 
 ### Specify needed libs ##################################################################
-target_link_libraries(${TARGET} vvrscene)
+target_link_libraries(${TARGET} vvrframework)
 target_link_libraries(${TARGET} MathGeoLib)
 ##########################################################################################
 

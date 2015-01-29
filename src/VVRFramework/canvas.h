@@ -1,7 +1,7 @@
 #ifndef __SHAPE2D_H__
 #define __SHAPE2D_H__
 
-#include "vvrscenedll.h"
+#include "vvrframeworkdll.h"
 
 #include <string>
 #include <vector>
@@ -12,7 +12,7 @@ using std::vector;
 
 namespace vvr {
 
-struct vvrscene_API ColRGB
+struct vvrframework_API ColRGB
 {
     union
     {
@@ -40,7 +40,7 @@ struct vvrscene_API ColRGB
 };
 
 /* Shapes */
-class vvrscene_API Shape
+class vvrframework_API Shape
 {
     ColRGB colour;
 
@@ -52,7 +52,7 @@ public:
     void draw();
 };
 
-class vvrscene_API Point2D : public Shape
+class vvrframework_API Point2D : public Shape
 {
     double x,y;
 
@@ -65,7 +65,7 @@ public:
 
 };
 
-class vvrscene_API LineSeg2D : public Shape
+class vvrframework_API LineSeg2D : public Shape
 {
 protected:
     double x1,y1;
@@ -79,7 +79,7 @@ public:
 
 };
 
-class vvrscene_API Line2D : public LineSeg2D
+class vvrframework_API Line2D : public LineSeg2D
 {
 protected:
     void drawShape();
@@ -90,7 +90,7 @@ public:
 
 };
 
-class vvrscene_API LineSeg3D : public Shape
+class vvrframework_API LineSeg3D : public Shape
 {
 protected:
     double x1,y1,z1;
@@ -105,7 +105,7 @@ public:
 
 };
 
-class vvrscene_API Circle2D : public Shape
+class vvrframework_API Circle2D : public Shape
 {
     double x,y,r;
 
@@ -117,7 +117,7 @@ public:
       x(cx), y(cy), r(rad), Shape(rgb) {}
 };
 
-class vvrscene_API Triangle2D : public Shape
+class vvrframework_API Triangle2D : public Shape
 {
     double x1,y1;
     double x2,y2;
@@ -132,7 +132,7 @@ public:
 };
 
 /* Canvas */
-struct vvrscene_API Frame {
+struct vvrframework_API Frame {
     vector<Shape*> shapes;
     bool show_old;
 
@@ -140,7 +140,7 @@ struct vvrscene_API Frame {
     show_old(_show_old) {};
 };
 
-class vvrscene_API Canvas2D {
+class vvrframework_API Canvas2D {
     vector<Frame> frames;
     unsigned fi;
 
