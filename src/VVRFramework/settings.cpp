@@ -12,6 +12,8 @@ using namespace vvr;
 
 Settings::Settings(string filename)
 {
+    std::cout << "Loading settings from: " << filename << std::endl;
+
     FILE *file;
     file = fopen(filename.c_str(), "r");
     if (!file) throw string("Cannot open config file.");
