@@ -3,7 +3,7 @@ include_directories(../VVRFramework)
 ##########################################################################################
 
 ### Executable ###########################################################################
-set(TARGET example CACHE TYPE STRING)
+set(TARGET vvrexampleapp CACHE TYPE STRING)
 file(GLOB SOURCE_FILES *.h *.cpp)
 set(SOURCE ${SOURCE_FILES})
 ##########################################################################################

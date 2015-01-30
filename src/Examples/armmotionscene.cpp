@@ -2,10 +2,10 @@
 #include "utils.h"
 #include "canvas.h"
 
+#include <MathGeoLib/MathGeoLib.h>
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <Mathgeolib/MathGeoLib.h>
 
 #define CONFIGFILEPATH "../../config/settings.txt"
 

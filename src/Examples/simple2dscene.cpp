@@ -2,7 +2,7 @@
 #include "utils.h"
 #include "canvas.h"
 
-#include <Mathgeolib/MathGeoLib.h>
+#include <MathGeoLib/MathGeoLib.h>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -71,7 +71,7 @@ void Simple2DScene::mouseWheel(int dir, int modif)
     }
     else {
         m_rad -= 1;
-        if (m_rad<0) m_rad = 0;
+        if (m_rad<=0) m_rad = 1;
     }
 
 }
