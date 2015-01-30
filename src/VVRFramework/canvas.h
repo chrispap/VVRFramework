@@ -136,6 +136,7 @@ public:
 struct vvrframework_API Frame {
     vector<Shape*> shapes;
     bool show_old;
+    Frame ();
     Frame (bool show_old);
 };
 

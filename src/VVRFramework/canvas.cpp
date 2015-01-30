@@ -89,7 +89,12 @@ void Triangle2D::drawShape() {
 }
 
 /* Canvas */
-Frame::Frame(bool show_old=true) : show_old(show_old)
+Frame::Frame() : show_old(true)
+{
+
+}
+
+Frame::Frame(bool show_old) : show_old(show_old)
 {
 
 }
