@@ -35,14 +35,12 @@ class vvrframework_API Mesh
     vector<Vec3d>       mVertices;                  ///< Vertex list
     vector<Triangle>    mTriangles;                 ///< Triangle list | contains indices to the Vertex list
     vector<Vec3d>       mVertexNormals;             ///< Normals per vertex
-    vector<set<int> >   mVertexTriangles;           ///< List of lists of the triangles that are connected to each vertex
     vector<float>       mTexCoords;
     Box                 mAABB;                      ///< The bounding box of the model
     Vec3d               mRot;                       ///< Model rotation around its local axis
     Vec3d               mPos;                       ///< Model position in the scene
     unsigned            mTexName;
 
-    void createTriangleLists();                     ///< Create lists with each vertex's triangles
     void updateTriangleData ();                     ///< Recalculates the plane equations of the triangles
     void createNormals ();                          ///< Create a normal for each vertex
     void drawTriangles (ColRGB col,bool wire=0);    ///< Draw the triangles. This is the actual model drawing.

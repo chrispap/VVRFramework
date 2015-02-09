@@ -20,7 +20,8 @@ const char* ArmMotionScene::getName() const
     return "Arm Motion Player";
 }
 
-ArmMotionScene::ArmMotionScene() : m_settings(getExePath() + CONFIGFILEPATH)
+ArmMotionScene::ArmMotionScene() :
+    m_settings(getExePath() + CONFIGFILEPATH)
 {
     // Read params from configuration file
     scene_width = m_settings.getDbl("scene_width");

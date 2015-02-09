@@ -22,26 +22,25 @@ Mesh::Mesh(const string &objDir, const string &objFile, const string &texFile)
 
     vector<float> &positions = shapes[0].mesh.vec_pos;
     vector<unsigned> &indices = shapes[0].mesh.vec_indices;
-    Vec3d v;
+    vector<float> &normals = shapes[0].mesh.vec_norm;
 
-    for (unsigned i=0; i<positions.size() ; i++) {
-        v.x = positions[i++];
-        v.y = positions[i++];
-        v.z = positions[i];
-        mVertices.push_back(v);
-    }
+    for (unsigned i=0; i<positions.size() ; i+=3)
+        mVertices.push_back(Vec3d(positions[i], positions[i+1], positions[i+2]));
 
-    for (unsigned i=0; i<indices.size() ; i+=3) {
+    for (unsigned i=0; i<indices.size() ; i+=3)
         mTriangles.push_back(Triangle(&mVertices, indices[i], indices[i+1], indices[i+2]));
-    }
 
     if (!shapes[0].mesh.vec_tex.empty() && !texFile.empty())
-    {
         mTexCoords = shapes[0].mesh.vec_tex;
+
+    if (!normals.empty()) {
+        for (unsigned i=0; i<indices.size() ; i+=3)
+            mVertexNormals.push_back(Vec3d(normals[i], normals[i+1], normals[i+2]));
+    }
+    else {
+        createNormals();
     }
 
-    createTriangleLists();
-    createNormals();
     mAABB = Box(mVertices);
 }
 
@@ -49,7 +48,6 @@ Mesh::Mesh(const Mesh &copyfrom):
     mVertices (copyfrom.mVertices),
     mTriangles (copyfrom.mTriangles),
     mVertexNormals (copyfrom.mVertexNormals),
-    mVertexTriangles (copyfrom.mVertexTriangles),
     mTexCoords (copyfrom.mTexCoords),
     mRot (copyfrom.mRot),
     mPos (copyfrom.mPos)
@@ -64,8 +62,11 @@ Mesh::~Mesh()
 
 }
 
-void Mesh::createTriangleLists()
+void Mesh::createNormals()
 {
+    // List of lists of the triangles that are connected to each vertex
+    vector<set<int> > mVertexTriangles;
+
     mVertexTriangles.clear();
     mVertexTriangles.resize(mVertices.size());
 
@@ -76,10 +77,7 @@ void Mesh::createTriangleLists()
         mVertexTriangles[ti->vi2].insert(i);
         mVertexTriangles[ti->vi3].insert(i++);
     }
-}
 
-void Mesh::createNormals()
-{
     mVertexNormals.clear();
     mVertexNormals.resize(mVertices.size());
     Vec3d normSum;

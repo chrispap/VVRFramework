@@ -3,7 +3,7 @@
 ####################################################################
 res_dir                     = resources/
 obj_dir                     = resources/obj/
-obj_file                    = resources/obj/bone.obj
+obj_file                    = resources/obj/cube.obj
 data_file_ulna              = resources/data/Ulna.txt
 data_file_humerus           = resources/data/Humerus.txt
 

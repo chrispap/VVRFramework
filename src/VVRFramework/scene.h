@@ -33,8 +33,8 @@ protected:
 
 public:
     Scene();
-
     void GL_Render();
+
     virtual void GL_Init();
     virtual void GL_Resize(int width, int height);
     virtual bool idle(){return false;}
@@ -43,10 +43,11 @@ public:
     virtual void mousePressed(int x, int y, int modif);
     virtual void mouseMoved(int x, int y, int modif);
     virtual void mouseWheel(int dir, int modif);
-    const Vec3d& getRot() const {return globRot;}
-    void setRot(const Vec3d& rot) {globRot = rot;}
-    void setCol(const ColRGB& col) {bgCol = col;}
     virtual const char* getName() const;
+
+    const Vec3d& getRot() const { return globRot; }
+    void setRot(const Vec3d& rot) { globRot = rot; }
+    void setCol(const ColRGB& col) { bgCol = col; }
 };
 
 /* This will be the entry point of client applications. */
