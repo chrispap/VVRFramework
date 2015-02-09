@@ -13,7 +13,7 @@ add_executable(${TARGET} ${SOURCE})
 ##########################################################################################
 
 ### Specify needed libs ##################################################################
-target_link_libraries(${TARGET} vvrframework)
+target_link_libraries(${TARGET} VVRFramework)
 target_link_libraries(${TARGET} MathGeoLib)
 ##########################################################################################
 

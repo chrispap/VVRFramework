@@ -11,7 +11,7 @@ using std::vector;
 
 namespace vvr {
 
-struct vvrframework_API Vec3d
+struct VVRFramework_API Vec3d
 {
     union
     {
@@ -68,7 +68,7 @@ struct vvrframework_API Vec3d
     Vec3d &scale(const double s);
 };
 
-struct vvrframework_API Box
+struct VVRFramework_API Box
 {
     Vec3d min, max;
 
@@ -155,7 +155,7 @@ struct vvrframework_API Box
  * the triangles plane. This is done in order to calculate fast the
  * plane equation and the normal.
  */
-struct vvrframework_API Triangle
+struct VVRFramework_API Triangle
 {
     /**
      * Indices to the veclist

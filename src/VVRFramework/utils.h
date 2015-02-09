@@ -9,9 +9,14 @@ using namespace std;
 
 #define echo(x) cout<<#x<<" = "<<x<<endl
 
-double vvrframework_API getSeconds();
-double vvrframework_API elapsed(double startTime);
-string vvrframework_API getExePath();
-string vvrframework_API getBasePath();
+namespace vvr {
+
+double VVRFramework_API getSeconds();
+double VVRFramework_API elapsed(double startTime);
+string VVRFramework_API getExePath();
+string VVRFramework_API getBasePath();
+double VVRFramework_API  normalizeAngle(double angle);
+
+}
 
 #endif

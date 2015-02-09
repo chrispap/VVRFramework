@@ -1,7 +1,6 @@
 #include "armmotionscene.h"
 #include "utils.h"
 #include "canvas.h"
-
 #include <MathGeoLib/MathGeoLib.h>
 #include <iostream>
 #include <fstream>
@@ -20,10 +19,10 @@ const char* ArmMotionScene::getName() const
     return "Arm Motion Player";
 }
 
-ArmMotionScene::ArmMotionScene() :
-    m_settings(getExePath() + CONFIGFILEPATH)
+ArmMotionScene::ArmMotionScene()
 {
     // Read params from configuration file
+    m_settings = vvr::Settings(vvr::getExePath() + CONFIGFILEPATH);
     scene_width = m_settings.getDbl("scene_width");
     scene_height = m_settings.getDbl("scene_height");
     bgCol = vvr::ColRGB(m_settings.getStr("color_bg"));
@@ -41,7 +40,7 @@ ArmMotionScene::ArmMotionScene() :
     load();
 
     // Start animation just in case.
-    m_anim_start_time = getSeconds();
+    m_anim_start_time = vvr::getSeconds();
     m_anim_on = true;
 }
 
@@ -69,8 +68,8 @@ void ArmMotionScene::loadData(string filename, vector<vvr::Vec3d> &rots, vector<
 void ArmMotionScene::load()
 {
     // Construct paths
-    const string objDir = getBasePath() + m_settings.getStr("obj_dir");
-    const string objFile = getBasePath() +  m_settings.getStr("obj_file");
+    const string objDir = vvr::getBasePath() + m_settings.getStr("obj_dir");
+    const string objFile = vvr::getBasePath() +  m_settings.getStr("obj_file");
 
     m_bone_width = scene_width / 4;
     
@@ -89,8 +88,8 @@ void ArmMotionScene::load()
     m_humerus.mesh->move(vvr::Vec3d( -box.getYSize()*0.3, -box.getYSize()/2, -box.getZSize()/2 ));
 
     // Load motion data
-    loadData(getBasePath() + m_settings.getStr("data_file_ulna"), m_ulna.rots, m_ulna.times);
-    loadData(getBasePath() + m_settings.getStr("data_file_humerus"), m_humerus.rots, m_humerus.times);
+    loadData(vvr::getBasePath() + m_settings.getStr("data_file_ulna"), m_ulna.rots, m_ulna.times);
+    loadData(vvr::getBasePath() + m_settings.getStr("data_file_humerus"), m_humerus.rots, m_humerus.times);
 }
 
 void ArmMotionScene::draw()
@@ -104,7 +103,7 @@ bool ArmMotionScene::idle()
 {
     if (!m_anim_on) return false;
 
-    const double wallTime = getSeconds() - m_anim_start_time;
+    const double wallTime = vvr::getSeconds() - m_anim_start_time;
 
     bool anim_on_ulna = true;
     bool anim_on_humerus = true;

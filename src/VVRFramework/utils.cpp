@@ -16,7 +16,7 @@
 
 using namespace std;
 
-double getSeconds()
+double vvr::getSeconds()
 {
 #ifdef _WIN32
     return (double) GetTickCount() / 1000.0;
@@ -27,12 +27,12 @@ double getSeconds()
 #endif
 }
 
-double elapsed(double startTime) 
+double vvr::elapsed(double startTime)
 {
     return 1.e3* ((double) (clock() - startTime)) / CLOCKS_PER_SEC;
 }
 
-string getExePath()
+string vvr::getExePath()
 {
 #ifdef __linux__
     std::string path = "";
@@ -75,11 +75,21 @@ string getExePath()
 #endif
 }
 
-string getBasePath()
+string vvr::getBasePath()
 {
 #ifdef __APPLE__
     return getExePath() + "../../";
 #else
     return getExePath() + "../../";
 #endif
+}
+
+double vvr::normalizeAngle(double angle)
+{
+    while (angle < 0)
+        angle += 360;
+    while (angle > 360)
+        angle -= 360;
+
+    return angle;
 }

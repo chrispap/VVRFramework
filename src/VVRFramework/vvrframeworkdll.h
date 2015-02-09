@@ -1,9 +1,9 @@
 #ifdef _WIN32
-#	ifdef vvrframework_EXPORTS
-#		define vvrframework_API __declspec(dllexport)
+#	ifdef VVRFramework_EXPORTS
+#		define VVRFramework_API __declspec(dllexport)
 #	else
-#		define vvrframework_API  __declspec(dllimport)
+#		define VVRFramework_API  __declspec(dllimport)
 #	endif
 #else
-#	define vvrframework_API
+#	define VVRFramework_API
 #endif // WIN32

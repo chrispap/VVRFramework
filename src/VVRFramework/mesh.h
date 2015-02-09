@@ -19,17 +19,18 @@ namespace vvr {
 /**
 * Enum used to controll what to draw in a call of draw()
 */
-enum vvrframework_API Style {
+enum VVRFramework_API Style {
     SOLID   = (1 << 0),
     WIRE    = (1 << 1),
     NORMALS = (1 << 2),
     BOUND   = (1 << 3),
+    AXES    = (1 << 4),
 };
 
 /**
 * Class that handles a 3D model.
 */
-class vvrframework_API Mesh
+class VVRFramework_API Mesh
 {
     // Data members
     vector<Vec3d>       mVertices;                  ///< Vertex list
@@ -45,6 +46,7 @@ class vvrframework_API Mesh
     void createNormals ();                          ///< Create a normal for each vertex
     void drawTriangles (ColRGB col,bool wire=0);    ///< Draw the triangles. This is the actual model drawing.
     void drawNormals (ColRGB col);                  ///< Draw the normal vectors of each vertex
+    void drawAxes ();
 
 public:
     Mesh () {}

@@ -11,11 +11,12 @@ using namespace std;
 
 namespace vvr {
 
-class vvrframework_API Settings
+class VVRFramework_API Settings
 {
     map<string, string> sMap;
 
 public:
+    Settings () {}
     Settings (string file);
 
     void getKeys(vector<string> &keys) const;

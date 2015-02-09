@@ -16,20 +16,20 @@ qt5_wrap_ui(UI_FILES window.ui)
 ##########################################################################################
 
 ##########################################################################################
-add_library(vvrframework SHARED ${SOURCE} ${UI_FILES})
+add_library(VVRFramework SHARED ${SOURCE} ${UI_FILES})
 ##########################################################################################
 
 ### QT Used modules ######################################################################
-qt5_use_modules(vvrframework Widgets OpenGL)
-target_link_libraries(vvrframework Qt5::Widgets Qt5::OpenGL)
+qt5_use_modules(VVRFramework Widgets OpenGL)
+target_link_libraries(VVRFramework Qt5::Widgets Qt5::OpenGL)
 ##########################################################################################
 
 ##########################################################################################
 find_package(OpenGL REQUIRED)
 include_directories(${OPENGL_INCLUDE_DIR})
-target_link_libraries(vvrframework ${OPENGL_LIBRARIES} )
+target_link_libraries(VVRFramework ${OPENGL_LIBRARIES} )
 ##########################################################################################
 
 ### Link to MathGeolib ###################################################################
-target_link_libraries(vvrframework MathGeoLib)
+target_link_libraries(VVRFramework MathGeoLib)
 ##########################################################################################

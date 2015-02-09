@@ -13,7 +13,7 @@ enum ArrowDir {
     LEFT
 };
 
-class vvrframework_API Scene
+class VVRFramework_API Scene
 {
 protected:
     bool perspective_proj;
@@ -25,11 +25,11 @@ protected:
     ColRGB bgCol;
 
 protected:
+    virtual void draw() = 0;
+    virtual void reset();
+    void drawAxes();
     void enterPixelMode();
     void returnFromPixelMode();
-    void drawAxes();
-    virtual void reset() { globRot = globRotDef;}
-    virtual void draw() = 0;
 
 public:
     Scene();
@@ -51,7 +51,7 @@ public:
 };
 
 /* This will be the entry point of client applications. */
-int vvrframework_API main(int argc, char* argv[], Scene *scene);
+int VVRFramework_API main(int argc, char* argv[], Scene *scene);
 
 }
 

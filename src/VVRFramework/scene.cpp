@@ -27,6 +27,8 @@ const char* Scene::getName() const
 
 void Scene::drawAxes()
 {
+    glLineWidth(1);
+
     glBegin(GL_LINES);
     //[X]
     glColor3ub(0xFF, 0, 0);
@@ -181,6 +183,11 @@ void Scene::mouseWheel(int dir, int modif)
     globPos.z += 0.2*dir;
 
     if (globPos.z < 0.01) globPos.z = 0.01;
+}
+
+void Scene::reset()
+{
+    globRot = globRotDef;
 }
 
 /* Utils */

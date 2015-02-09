@@ -3,8 +3,7 @@
 
 #include "scene.h"
 #include "ui_window.h"
-
-class GLWidget;
+#include "glwidget.h"
 
 namespace vvr {
 
@@ -33,7 +32,7 @@ private: // data
     static QString aboutMessage;
     QMenu *fileMenu, *helpMenu;
     QAction *exitAct, *aboutAct;
-    GLWidget *glWidget;
+    vvr::GLWidget *glWidget;
     vvr::Scene *scene;
 };
 

@@ -9,34 +9,34 @@
 
 #define ANIM_INTERVAL 10
 
-GLWidget::GLWidget(vvr::Scene *scene, QWidget *parent) : QGLWidget(parent)
+vvr::GLWidget::GLWidget(vvr::Scene *scene, QWidget *parent) : QGLWidget(parent)
 {
      mScene = scene;
      connect(&timer, SIGNAL(timeout()), this, SLOT(idle()));
      timer.start(ANIM_INTERVAL);
 }
 
-GLWidget::~GLWidget()
+vvr::GLWidget::~GLWidget()
 {
     delete mScene;
 }
 
-void GLWidget::initializeGL()
+void vvr::GLWidget::initializeGL()
 {
     mScene->GL_Init();
 }
 
-void GLWidget::paintGL()
+void vvr::GLWidget::paintGL()
 {
     mScene->GL_Render();
 }
 
-void GLWidget::resizeGL(int width, int height)
+void vvr::GLWidget::resizeGL(int width, int height)
 {
     mScene->GL_Resize(width, height);
 }
 
-void GLWidget::idle()
+void vvr::GLWidget::idle()
 {
     if (!mScene->idle())
         timer.stop();
@@ -45,31 +45,31 @@ void GLWidget::idle()
     updateGL();
 }
 
-void GLWidget::mousePressEvent(QMouseEvent *event)
+void vvr::GLWidget::mousePressEvent(QMouseEvent *event)
 {
     setFocus();
     mScene->mousePressed(event->x(), event->y(), mkModif(event));
     idle();
 }
 
-void GLWidget::mouseMoveEvent(QMouseEvent *event)
+void vvr::GLWidget::mouseMoveEvent(QMouseEvent *event)
 {
     mScene->mouseMoved(event->x(), event->y(), mkModif(event));
     idle();
 }
 
-void GLWidget::wheelEvent(QWheelEvent *event)
+void vvr::GLWidget::wheelEvent(QWheelEvent *event)
 {
     mScene->mouseWheel(event->delta()>0?1:-1, mkModif(event));
     updateGL();
 }
 
-void GLWidget::keyPressEvent(QKeyEvent *event)
+void vvr::GLWidget::keyPressEvent(QKeyEvent *event)
 {
     onKeyPressed(event);
 }
 
-void GLWidget::onKeyPressed(QKeyEvent *event)
+void vvr::GLWidget::onKeyPressed(QKeyEvent *event)
 {
     int modif = mkModif(event);
     QString c = event->text();
@@ -84,7 +84,7 @@ void GLWidget::onKeyPressed(QKeyEvent *event)
     updateGL();
 }
 
-int GLWidget::mkModif(QInputEvent *event)
+int vvr::GLWidget::mkModif(QInputEvent *event)
 {
     int ctrl  = event->modifiers() & Qt::ControlModifier ? 1 : 0;
     int shift = event->modifiers() & Qt::ShiftModifier   ? 1 : 0;

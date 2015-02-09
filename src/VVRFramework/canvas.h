@@ -12,7 +12,7 @@ using std::vector;
 
 namespace vvr {
 
-struct vvrframework_API ColRGB
+struct VVRFramework_API ColRGB
 {
     union
     {
@@ -41,7 +41,7 @@ struct vvrframework_API ColRGB
 };
 
 /* Shapes */
-class vvrframework_API Shape
+class VVRFramework_API Shape
 {
     ColRGB colour;
 
@@ -50,10 +50,11 @@ protected:
     virtual void drawShape() = 0;
 
 public:
+    virtual ~Shape(){}
     void draw();
 };
 
-class vvrframework_API Point2D : public Shape
+class VVRFramework_API Point2D : public Shape
 {
     double x,y;
 
@@ -66,7 +67,7 @@ public:
 
 };
 
-class vvrframework_API LineSeg2D : public Shape
+class VVRFramework_API LineSeg2D : public Shape
 {
 protected:
     double x1,y1;
@@ -80,7 +81,7 @@ public:
 
 };
 
-class vvrframework_API Line2D : public LineSeg2D
+class VVRFramework_API Line2D : public LineSeg2D
 {
 protected:
     void drawShape();
@@ -91,7 +92,7 @@ public:
 
 };
 
-class vvrframework_API LineSeg3D : public Shape
+class VVRFramework_API LineSeg3D : public Shape
 {
 protected:
     double x1,y1,z1;
@@ -106,7 +107,7 @@ public:
 
 };
 
-class vvrframework_API Circle2D : public Shape
+class VVRFramework_API Circle2D : public Shape
 {
     double x,y,r;
 
@@ -118,7 +119,7 @@ public:
       x(cx), y(cy), r(rad), Shape(rgb) {}
 };
 
-class vvrframework_API Triangle2D : public Shape
+class VVRFramework_API Triangle2D : public Shape
 {
     double x1,y1;
     double x2,y2;
@@ -133,14 +134,14 @@ public:
 };
 
 /* Canvas */
-struct vvrframework_API Frame {
+struct VVRFramework_API Frame {
     vector<Shape*> shapes;
     bool show_old;
     Frame ();
     Frame (bool show_old);
 };
 
-class vvrframework_API Canvas2D {
+class VVRFramework_API Canvas2D {
     vector<Frame> frames;
     unsigned fi;
 

@@ -187,22 +187,42 @@ void Mesh::drawNormals(ColRGB col)
     return;
 }
 
+void Mesh::drawAxes()
+{
+    glLineWidth(3);
+
+    glBegin(GL_LINES);
+    //[X]
+    glColor3ub(0xFF, 0, 0);
+    glVertex3f(0,0,0);
+    glVertex3f(mAABB.getMaxSize(), 0, 0);
+    //[Y]
+    glColor3f(0, 0xFF, 0);
+    glVertex3f(0,0,0);
+    glVertex3f(0, mAABB.getMaxSize(), 0);
+    //[Z]
+    glColor3f(0, 0, 0xFF);
+    glVertex3f(0,0,0);
+    glVertex3f(0, 0, mAABB.getMaxSize());
+
+    glEnd();
+}
+
 void Mesh::draw(ColRGB col, Style x)
 {
     glPushMatrix();
 
     glTranslatef(mPos.x, mPos.y, mPos.z);
     
-    glRotatef(-90,			1, 0, 0);
-    glRotatef(-mRot.x,		0, 0, 1);
-    glRotatef(-mRot.y,		1, 0, 0);
-    glRotatef( mRot.z,		0, 1, 0);
-    glRotatef(-90,			0, 0, 1);
+    glRotatef( mRot.x,  1, 0, 0);
+    glRotatef( mRot.y,  0, 1, 0);
+    glRotatef( mRot.z,  0, 0, 1);
 
     if (x & SOLID) drawTriangles(col, false);
     if (x & WIRE) drawTriangles(col, true);
     if (x & NORMALS) drawNormals(col);
     if (x & BOUND) mAABB.draw(col);
+    if (x & AXES) drawAxes();
 
     glPopMatrix();
 }

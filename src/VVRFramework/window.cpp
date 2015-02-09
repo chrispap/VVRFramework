@@ -21,7 +21,7 @@ vvr::Window::Window(vvr::Scene *scene)
     this->scene = scene;
 
     // Init glwidget
-    glWidget = new GLWidget(scene);
+    glWidget = new vvr::GLWidget(scene);
     scrollArea->setWidget(glWidget);
     scrollArea->setWidgetResizable(true);
     scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);

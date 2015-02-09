@@ -6,6 +6,8 @@
 #include <QGLWidget>
 #include <QInputEvent>
 
+namespace vvr {
+
 class GLWidget : public QGLWidget
 {
     Q_OBJECT
@@ -37,5 +39,7 @@ private:
     static int mkModif(QInputEvent *event);
 
 };
+
+}
 
 #endif // GLWIDGET_H
