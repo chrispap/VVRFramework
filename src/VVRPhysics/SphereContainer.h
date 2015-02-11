@@ -7,7 +7,7 @@
 #include "Constants.h"
 #include <vector>
 
-class VVRPhysics_API SphereContainer : public Renderable
+class VVRPhysics_API SphereContainer : public IRenderable
 {
 
 	std::vector<Sphere> spheres;

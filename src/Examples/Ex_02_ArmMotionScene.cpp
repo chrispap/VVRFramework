@@ -1,4 +1,4 @@
-#include "armmotionscene.h"
+#include "Ex_02_ArmMotionScene.h"
 #include "utils.h"
 #include "canvas.h"
 #include <MathGeoLib/MathGeoLib.h>

@@ -6,7 +6,7 @@
 #include "Renderable.h"
 #include "Wall.h"
 
-class VVRPhysics_API Sphere : public RigidBody, public Renderable
+class VVRPhysics_API Sphere : public RigidBody, public IRenderable
 {
 public:
 

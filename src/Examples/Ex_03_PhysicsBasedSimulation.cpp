@@ -9,44 +9,36 @@
 
 using namespace vvr::phys;
 
-int simulation(int argc, char** argv)
+int PhysicsBasedSimulation(int argc, char** argv)
 {
-    //renderer
+    // Renderer object
     Viewer viewer(argc, argv);
 
-    //* Task
-    Renderable* sphere = new Sphere(
+    // Create rigid bodies
+    IRenderable* sphere = new Sphere(
         Vector3(0, 6, 0),
         Vector3(6, 6, 0),
         3, 1);
-    viewer.addToDraw(sphere);
-    //*/
-
-    //* Task
-    Renderable* cube = new Cube(
+    IRenderable* cube = new Cube(
         Vector3(0, 0, 0),
         Vector3(0, 0, 0),
         Vector3(0, 0, 1),
         5, 3);
-    viewer.addToDraw(cube);
-    //*/
-
-    //* Task
-    Renderable* sd = new SpringDumper(
-        Vector3(0, -10, 0), Vector3(0, 0, 0), 2, 1,
+    IRenderable* sd = new SpringDumper(
+        Vector3(0, -10, 0), 
+        Vector3(0, 0, 0), 2, 1,
         Vector3(0, 0, 0), 2, 1, 10);
+    IRenderable* spheres = new SphereContainer();
+    IRenderable* box = new Box(BOX_SIZE);
+
+    // Add objects to renderer
+    viewer.addToDraw(sphere);
+    viewer.addToDraw(cube);
     viewer.addToDraw(sd);
-    //*/
-
-    //* Task
-    Renderable* spheres = new SphereContainer();
     viewer.addToDraw(spheres);
-    //*/
-
-    Renderable* box = new Box(BOX_SIZE);
     viewer.addToDraw(box);
 
-    //begin rendering
+    // Begin simulation & rendering
     viewer.start();
 
     return 0;

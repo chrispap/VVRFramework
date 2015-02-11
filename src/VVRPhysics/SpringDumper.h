@@ -6,7 +6,7 @@
 #include "Sphere.h"
 #include "RigidBody.h"
 
-class VVRPhysics_API SpringDumper : public Renderable, public RigidBody
+class VVRPhysics_API SpringDumper : public IRenderable, public RigidBody
 {
 
 	Sphere s1;

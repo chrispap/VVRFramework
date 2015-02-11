@@ -10,7 +10,7 @@ namespace phys {
 /**
  * Represents the bounding box
  */
-class VVRPhysics_API Box : public Renderable {
+class VVRPhysics_API Box : public IRenderable {
 
 public:
 

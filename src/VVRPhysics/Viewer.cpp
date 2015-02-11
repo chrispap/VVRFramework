@@ -37,7 +37,7 @@ Viewer::~Viewer() {
 	delete instance;
 }
 
-void Viewer::addToDraw(Renderable *r){
+void Viewer::addToDraw(IRenderable *r){
 	drawable.push_back(r);	
 }
 

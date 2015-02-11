@@ -5,7 +5,7 @@
 #include "RigidBody.h"
 #include "Renderable.h"
 
-class VVRPhysics_API Cube : public RigidBody, public Renderable
+class VVRPhysics_API Cube : public RigidBody, public IRenderable
 {
 public:
 

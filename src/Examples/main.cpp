@@ -1,6 +1,6 @@
-#include "armmotionscene.h"
-#include "simple2dscene.h"
-#include "simulation.h"
+#include "Ex_01_Simple2DScene.h"
+#include "Ex_02_ArmMotionScene.h"
+#include "Ex_03_PhysicsBasedSimulation.h"
 
 int main(int argc, char* argv[])
 {
@@ -12,11 +12,15 @@ int main(int argc, char* argv[])
 
     if (argc > 1) 
     {
-        return vvr::main(argc, argv, scenes[atoi(argv[1])]);
+        int i = atoi(argv[1]);
+        i = i>2?2:i;
+        i = i<1?1:i;
+        i--;
+        return vvr::main(argc, argv, scenes[i]);
     }
     else
     {
-        return simulation(argc, argv);
+        return PhysicsBasedSimulation(argc, argv);
     }
     
 }

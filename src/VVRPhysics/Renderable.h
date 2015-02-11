@@ -6,11 +6,9 @@
 /**
  * An abstract class for rendering and updating
  */
-class VVRPhysics_API Renderable{
+class VVRPhysics_API IRenderable {
 public:
-	Renderable(){};
-
-	~Renderable(){};
+    virtual ~IRenderable(){}
 
 	/**
 	 * Can be rendered
@@ -21,7 +19,6 @@ public:
 	 * Can be updated
 	 */
 	virtual void update(float t = 0) =0;
-
 };
 
 #endif

@@ -33,7 +33,7 @@ public:
 	 *
 	 * @param (renderable object)
 	 */
-	void addToDraw(Renderable *r);
+	void addToDraw(IRenderable *r);
 
 	/**
 	 * Begin main loop
@@ -47,7 +47,7 @@ private:
 	/**
 	 * Renderable objects
 	 */
-	vector<Renderable *> drawable;
+	vector<IRenderable *> drawable;
 
 
 	/**

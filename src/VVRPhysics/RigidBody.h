@@ -8,7 +8,6 @@
 
 // Task
 #define USE_QUATERNIONS
-
 #define USE_RUNGE_KUTTA
 
 class VVRPhysics_API RigidBody
@@ -36,7 +35,6 @@ public:
 	Vector3 P, L;
 
 	Vector3 f, tau;
-
 
 	RigidBody();
 
