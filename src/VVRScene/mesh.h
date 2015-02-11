@@ -1,7 +1,7 @@
 #ifndef __MESH_H__
 #define __MESH_H__
 
-#include "vvrframeworkdll.h"
+#include "vvrscenedll.h"
 #include "geom.h"
 
 #include <vector>
@@ -19,7 +19,7 @@ namespace vvr {
 /**
 * Enum used to controll what to draw in a call of draw()
 */
-enum VVRFramework_API Style {
+enum VVRScene_API Style {
     SOLID   = (1 << 0),
     WIRE    = (1 << 1),
     NORMALS = (1 << 2),
@@ -30,7 +30,7 @@ enum VVRFramework_API Style {
 /**
 * Class that handles a 3D model.
 */
-class VVRFramework_API Mesh
+class VVRScene_API Mesh
 {
     // Data members
     vector<Vec3d>       mVertices;                  ///< Vertex list

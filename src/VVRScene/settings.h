@@ -1,7 +1,7 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
-#include "vvrframeworkdll.h"
+#include "vvrscenedll.h"
 
 #include <string>
 #include <map>
@@ -11,7 +11,7 @@ using namespace std;
 
 namespace vvr {
 
-class VVRFramework_API Settings
+class VVRScene_API Settings
 {
     map<string, string> sMap;
 

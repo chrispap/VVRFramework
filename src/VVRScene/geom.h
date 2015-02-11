@@ -1,7 +1,7 @@
 #ifndef GEOM_H
 #define GEOM_H
 
-#include "vvrframeworkdll.h"
+#include "vvrscenedll.h"
 #include "canvas.h"
 
 #include <vector>
@@ -11,7 +11,7 @@ using std::vector;
 
 namespace vvr {
 
-struct VVRFramework_API Vec3d
+struct VVRScene_API Vec3d
 {
     union
     {
@@ -68,7 +68,7 @@ struct VVRFramework_API Vec3d
     Vec3d &scale(const double s);
 };
 
-struct VVRFramework_API Box
+struct VVRScene_API Box
 {
     Vec3d min, max;
 
@@ -155,7 +155,7 @@ struct VVRFramework_API Box
  * the triangles plane. This is done in order to calculate fast the
  * plane equation and the normal.
  */
-struct VVRFramework_API Triangle
+struct VVRScene_API Triangle
 {
     /**
      * Indices to the veclist
