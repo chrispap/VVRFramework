@@ -1,3 +1,4 @@
+#include "Ex_03_PhysicsBasedSimulation.h"
 #include "Viewer.h"
 #include "Renderable.h"
 #include "Constants.h"
@@ -9,11 +10,8 @@
 
 using namespace vvr::phys;
 
-int PhysicsBasedSimulation(int argc, char** argv)
+PhysSimScene::PhysSimScene()
 {
-    // Renderer object
-    Viewer viewer(argc, argv);
-
     // Create rigid bodies
     IRenderable* sphere = new Sphere(
         Vector3(0, 6, 0),
@@ -31,15 +29,33 @@ int PhysicsBasedSimulation(int argc, char** argv)
     IRenderable* spheres = new SphereContainer();
     IRenderable* box = new Box(BOX_SIZE);
 
-    // Add objects to renderer
-    viewer.addToDraw(sphere);
-    viewer.addToDraw(cube);
-    viewer.addToDraw(sd);
-    viewer.addToDraw(spheres);
-    viewer.addToDraw(box);
+    m_renderables.push_back(cube);
+    m_renderables.push_back(sphere);
+    m_renderables.push_back(spheres);
+    m_renderables.push_back(box);
+    m_renderables.push_back(sd);
+    m_t = 0;
+    globPos.z = 50;
+}
 
-    // Begin simulation & rendering
-    viewer.start();
+const char* PhysSimScene::getName() const
+{
+    return "Physics Based Simulation";
+}
 
-    return 0;
+bool PhysSimScene::idle()
+{
+    for(unsigned i = 0;i<m_renderables.size();i++) {
+        m_renderables[i]->update(m_t);
+    }
+
+    m_t += dt;
+
+    return true;
+}
+
+void PhysSimScene::draw()
+{
+    for(unsigned i = 0;i<m_renderables.size();i++)
+        m_renderables[i]->draw();
 }

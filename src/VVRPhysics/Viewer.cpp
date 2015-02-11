@@ -1,52 +1,44 @@
 #include "Viewer.h"
-
 #include "GL/glut.h"
 
 Viewer *Viewer::instance = NULL;
 
-Viewer::Viewer(int argc, char** argv) {
-
+Viewer::Viewer(int argc, char** argv) 
+{
 	instance = this;
-
 	t = 0;
-
 	glutInit(&argc, argv);
-
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
-
 	glutInitWindowSize (WINDOW_WIDTH, WINDOW_HEIGHT);
-
 	glutInitWindowPosition (WINDOW_X_POS, WINDOW_Y_POS);
-
 	glutCreateWindow (WINDOW_NAME);
-
 	init ();
-
 	glutDisplayFunc(setDisplayFunction);
 	glutIdleFunc(setIdeleFunction);
 	glutReshapeFunc(setReshapeFunction);
-
 }
 
-Viewer::~Viewer() {
+Viewer::~Viewer() 
+{
 
 	for(unsigned i = 0;i<drawable.size();i++){
 		delete drawable.at(i);
 	}
 
-	delete instance;
 }
 
-void Viewer::addToDraw(IRenderable *r){
+void Viewer::addToDraw(IRenderable *r)
+{
 	drawable.push_back(r);	
 }
 
-void Viewer::start(){
+void Viewer::start()
+{
 	glutMainLoop();
 }
 
-void Viewer::init(){
-
+void Viewer::init()
+{
 	//shader
 	glShadeModel (GL_SMOOTH);
 
@@ -80,13 +72,13 @@ void Viewer::init(){
 	glMatrixMode (GL_MODELVIEW);
 }
 
-void Viewer::render(){
+void Viewer::render()
+{
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glColor3f (1.0, 1.0, 1.0);
 
 	glMatrixMode (GL_MODELVIEW);
 	glLoadIdentity ();
-
 
 	gluLookAt(
 		CAM_POS_X, CAM_POS_Y, CAM_POS_Z,
@@ -97,24 +89,22 @@ void Viewer::render(){
 		drawable.at(i)->draw();
 	}
 		
-
 	glutSwapBuffers();
 }
 
-void Viewer::update(){
-
-	for(unsigned i = 0;i<drawable.size();i++){
+void Viewer::update()
+{
+	for(unsigned i = 0;i<drawable.size();i++) {
 		drawable[i]->update(t);
 	}
 
-	t = t + dt;
+	t += dt;
 
 	glutPostRedisplay();
 }
 
-
-
-void Viewer::reshape (int w, int h){
+void Viewer::reshape (int w, int h)
+{
 	glViewport (0, 0, (GLsizei) w, (GLsizei) h);
 	glMatrixMode (GL_PROJECTION);
 	glLoadIdentity ();
@@ -123,14 +113,17 @@ void Viewer::reshape (int w, int h){
 	glMatrixMode (GL_MODELVIEW);
 }
 
-void Viewer::setDisplayFunction(){
+void Viewer::setDisplayFunction()
+{
 	instance->render();
 }
 
-void Viewer::setIdeleFunction(){
+void Viewer::setIdeleFunction()
+{
 	instance->update();
 }
 
-void Viewer::setReshapeFunction(int w, int h){
+void Viewer::setReshapeFunction(int w, int h)
+{
 	instance->reshape(w, h);
 }
