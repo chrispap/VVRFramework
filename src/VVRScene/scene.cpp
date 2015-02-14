@@ -1,5 +1,4 @@
 #include "scene.h"
-
 #include <cstdio>
 #include <iostream>
 #include <vector>
@@ -10,38 +9,47 @@
 #include <cmath>
 #include <QtOpenGL>
 
+//light
+#define L_POS_X 20.0
+#define L_POS_Y 50.0
+#define L_POS_Z 100.0
+#define L_POS_W 0.0
+
 using namespace vvr;
 using namespace std;
 
-Scene::Scene() : perspective_proj(false), globRotDef(0,0,0)
+Scene::Scene()
 {
-    globRot = globRotDef;
-    globPos = globRotDef;
-    globPosDef = globRotDef;
+    m_globRotDef = Vec3d(0,0,0);
+    m_globRot = m_globRotDef;
+    m_perspective_proj = false;
 }
 
 const char* Scene::getName() const
 {
-    return "OpenGL Scene";
+    return "VVR Framework Scene";
 }
 
 void Scene::drawAxes()
 {
+    GLfloat len = 2.0 * m_scene_width;
     glLineWidth(1);
-
     glBegin(GL_LINES);
-    //[X]
+    
+    // X
     glColor3ub(0xFF, 0, 0);
     glVertex3f(0,0,0);
-    glVertex3f(2.0*scene_width, 0, 0);
-    //[Y]
+    glVertex3f(len, 0, 0);
+    
+    // Y
     glColor3f(0, 0xFF, 0);
     glVertex3f(0,0,0);
-    glVertex3f(0, 10.0*scene_height, 0);
-    //[Z]
+    glVertex3f(0, len, 0);
+    
+    // Z
     glColor3f(0, 0, 0xFF);
     glVertex3f(0,0,0);
-    glVertex3f(0, 0, 10.0*globPos.z);
+    glVertex3f(0, 0, len);
 
     glEnd();
 }
@@ -49,14 +57,18 @@ void Scene::drawAxes()
 /* OpenGL Callbacks */
 void Scene::GL_Init()
 {
-    GLfloat light_position[] = {    0,    0, -200,  1};
-    GLfloat ambientLight[]   = {  0.5,  0.5,  0.5,  1};
-    GLfloat diffuseLight[]   = {  0.8,  0.8,  0.8,  1};
-
-    glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
+    // Light setup
+    GLfloat light_position[] = { 0, m_scene_height, m_scene_dist,   1};
+    GLfloat ambientLight[]   = { .5,  .5,  .5,   1};
+    GLfloat diffuseLight[]   = { .9,  .9,  .9,   1};
+    GLfloat specularLight[]  = { .9,  .9,  .9,   1};
+    
     glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-
+    glLightfv(GL_LIGHT0, GL_AMBIENT,  ambientLight);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE,  diffuseLight);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight);
+    
+    // glEnable(...)
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
     glEnable(GL_LINE_SMOOTH);
@@ -80,36 +92,34 @@ void Scene::GL_Init()
 
 void Scene::GL_Resize(int w, int h)
 {
-    screen_width = w;
-    screen_height = h;
+    m_screen_width = w;
+    m_screen_height = h;
 
     glViewport(0,0,w,h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
 
-    if(perspective_proj)
+    if(m_perspective_proj)
     {
 //        gluPerspective(
 //            10.0,
 //            (float)w/h,
-//            globPos.z * 0.002,
-//            globPos.z * 20
+//            m_scene_dist * 0.002,
+//            m_scene_dist * 20
 //        );
     }
     else
     {
         // Keep constant aspect ratio
-        scene_height = scene_width * h/w;
+        m_scene_height = m_scene_width * h/w;
 
         glOrtho(
-            -scene_width / 2,
-            scene_width / 2,
-
-            -scene_height / 2,
-            scene_height / 2,
-
-            globPos.z * -2, // -Z look to the user! Near should be negative!
-            globPos.z * 2   // Far should be positive!
+            -m_scene_width  / 2,
+             m_scene_width  / 2,
+            -m_scene_height / 2,
+             m_scene_height / 2,
+             m_scene_dist*-2,       // -Z look to the user! Near should be negative!
+             m_scene_dist* 2        // Far should be positive!
         );
     }
 
@@ -117,18 +127,18 @@ void Scene::GL_Resize(int w, int h)
 
 void Scene::GL_Render()
 {
-    glClearColor(bgCol.r/255.0, bgCol.g/255.0, bgCol.b/255.0, 1);
+    glClearColor(m_bgCol.r/255.0, m_bgCol.g/255.0, m_bgCol.b/255.0, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
     // Push the scene to the back (far from camera)
-    glTranslatef(globPos.x, globPos.y, globPos.z);
+    glTranslatef(0,0, m_scene_dist);
 
     // Apply global rotation & draw
-    glRotatef(globRot.x, 1, 0, 0);
-    glRotatef(globRot.y, 0, 1, 0);
-    glRotatef(globRot.z, 0, 0, 1);
+    glRotatef(m_globRot.x, 1, 0, 0);
+    glRotatef(m_globRot.y, 0, 1, 0);
+    glRotatef(m_globRot.z, 0, 0, 1);
     draw();
 }
 
@@ -141,7 +151,7 @@ void Scene::keyEvent (unsigned char key,  bool up, int x, int y, int modif)
     int shift =  modif & 0x02;
 
     switch (isprint(key)? tolower(key): key) {
-    case '0' : globRot = globRotDef; break;
+    case '0' : m_globRot = m_globRotDef; break;
     case 'r' : this->reset();
     }
 
@@ -156,38 +166,38 @@ void Scene::arrowEvent (ArrowDir dir, int modif)
 
 void Scene::mousePressed(int x, int y, int modif)
 {
-    mouselastX = x;
-    mouselastY = y;
+    m_mouselastX = x;
+    m_mouselastY = y;
 }
 
 void Scene::mouseMoved(int x, int y, int modif)
 {
-    int dx = x - mouselastX;
-    int dy = y - mouselastY;
+    int dx = x - m_mouselastX;
+    int dy = y - m_mouselastY;
 
-    globRot.x += dy;
-    globRot.y += dx;
+    m_globRot.x += dy;
+    m_globRot.y += dx;
 
-    globRot.x = fmod(globRot.x, 360.0);
-    while (globRot.x < 0) globRot.x += 360;
+    m_globRot.x = fmod(m_globRot.x, 360.0);
+    while (m_globRot.x < 0) m_globRot.x += 360;
 
-    globRot.y = fmod(globRot.y, 360.0);
-    while (globRot.y < 0) globRot.y += 360;
+    m_globRot.y = fmod(m_globRot.y, 360.0);
+    while (m_globRot.y < 0) m_globRot.y += 360;
 
-    mouselastX = x;
-    mouselastY = y;
+    m_mouselastX = x;
+    m_mouselastY = y;
 }
 
 void Scene::mouseWheel(int dir, int modif)
 {
-    globPos.z += 0.2*dir;
+    m_scene_dist += 0.2*dir;
 
-    if (globPos.z < 0.01) globPos.z = 0.01;
+    if (m_scene_dist < 0.01) m_scene_dist = 0.01;
 }
 
 void Scene::reset()
 {
-    globRot = globRotDef;
+    m_globRot = m_globRotDef;
 }
 
 /* Utils */
@@ -196,7 +206,7 @@ void Scene::enterPixelMode()
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
     glLoadIdentity();
-    glOrtho(-screen_width/2, screen_width/2, screen_height/2, -screen_height/2, 1, -1);
+    glOrtho(-m_screen_width/2, m_screen_width/2, m_screen_height/2, -m_screen_height/2, 1, -1);
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     glLoadIdentity();

@@ -1,7 +1,6 @@
 #include "settings.h"
 #include "scene.h"
 #include "mesh.h"
-
 #include <vector>
 #include <string>
 
@@ -30,9 +29,8 @@ private:
 
 private:
     vvr::Settings m_settings;
-    double m_bone_width, m_anim_start_time, tsf;
+    vvr::Colour m_bone_col;
+    double m_bone_width, m_anim_start_time, m_tsf;
     bool m_anim_on;
-
-private:
     Bone m_ulna, m_humerus;
 };

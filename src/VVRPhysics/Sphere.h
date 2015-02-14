@@ -6,6 +6,9 @@
 #include "Renderable.h"
 #include "Wall.h"
 
+namespace vvr {
+namespace phys {
+
 class VVRPhysics_API Sphere : public RigidBody, public IRenderable
 {
 public:
@@ -14,16 +17,15 @@ public:
 
 	Sphere(Vector3 pos, Vector3 vel, float radius, float mass);
 
-	~Sphere();
+	void draw() const override;
 
-	virtual void draw();
-
-	virtual void update(float t = 0);
+	void update(float t, float dt);
 
 	void handleWallCollision();
 
-	bool checkForWallCollision(Vector3 &pos, float r, Wall &w);
-
+	bool checkForWallCollision(Vector3 &pos, float r, Vector3 &v);
 };
+
+}} // end namespace vvr::phys
 
 #endif

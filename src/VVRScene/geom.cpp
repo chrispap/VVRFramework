@@ -174,7 +174,7 @@ Box& Box::scale(const double s)
     return *this;
 }
 
-void Box::draw(const ColRGB &col, unsigned char a) const 
+void Box::draw(const Colour &col, unsigned char a) const 
 {
     static Vec3d p[8];
     Vec3d *v = p;

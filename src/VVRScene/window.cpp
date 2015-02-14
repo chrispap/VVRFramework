@@ -37,11 +37,6 @@ vvr::Window::Window(vvr::Scene *scene)
     glWidget->setFocus();
 }
 
-vvr::Window::~Window()
-{
-
-}
-
 void vvr::Window::createActions()
 {
     // exit action

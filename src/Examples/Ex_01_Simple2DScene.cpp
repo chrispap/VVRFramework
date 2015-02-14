@@ -22,15 +22,15 @@ const char* Simple2DScene::getName() const
 
 Simple2DScene::Simple2DScene()
 {
-    bgCol = vvr::ColRGB::grey;
+    m_bgCol = vvr::Colour::grey;
     m_rad = 20;
 
     // Add 5 circles to our canvas.
-    m_canvas.add(new vvr::Circle2D( -40, -20, 40, vvr::ColRGB::red));
-    m_canvas.add(new vvr::Circle2D( -20,  20, 40, vvr::ColRGB::green));
-    m_canvas.add(new vvr::Circle2D(   0, -20, 40, vvr::ColRGB::blue));
-    m_canvas.add(new vvr::Circle2D(  20,  20, 40, vvr::ColRGB::black));
-    m_canvas.add(new vvr::Circle2D(  40, -20, 40, vvr::ColRGB::yellow));
+    m_canvas.add(new vvr::Circle2D( -40, -20, 40, vvr::Colour::red));
+    m_canvas.add(new vvr::Circle2D( -20,  20, 40, vvr::Colour::green));
+    m_canvas.add(new vvr::Circle2D(   0, -20, 40, vvr::Colour::blue));
+    m_canvas.add(new vvr::Circle2D(  20,  20, 40, vvr::Colour::black));
+    m_canvas.add(new vvr::Circle2D(  40, -20, 40, vvr::Colour::yellow));
     m_canvas.newFrame(true);
 }
 
@@ -45,21 +45,21 @@ void Simple2DScene::mouse2pix(int &x, int &y)
 {
     // Transform mouse click coords to pixel scene coords
     // because we have moved the (0,0) at the viewport center.
-    x -= screen_width/2;
-    y -= screen_height/2;
+    x -= m_screen_width/2;
+    y -= m_screen_height/2;
 }
 
 void Simple2DScene::mousePressed(int x, int y, int modif)
 {
     mouse2pix(x,y);
     m_canvas.newFrame();
-    m_canvas.add(new vvr::Circle2D(x, y, m_rad, vvr::ColRGB::black));
+    m_canvas.add(new vvr::Circle2D(x, y, m_rad, vvr::Colour::black));
 }
 
 void Simple2DScene::mouseMoved(int x, int y, int modif)
 {
     mouse2pix(x,y);
-    m_canvas.add(new vvr::Circle2D(x, y, m_rad, vvr::ColRGB::red));
+    m_canvas.add(new vvr::Circle2D(x, y, m_rad, vvr::Colour::red));
 }
 
 void Simple2DScene::mouseWheel(int dir, int modif)

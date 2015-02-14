@@ -6,6 +6,9 @@
 #include "Sphere.h"
 #include "RigidBody.h"
 
+namespace vvr {
+namespace phys {
+
 class VVRPhysics_API SpringDumper : public IRenderable, public RigidBody
 {
 
@@ -20,11 +23,11 @@ public:
 	SpringDumper(Vector3 pos, Vector3 vel, float radius, float mass, 
 		Vector3 anchor, float stiffness, float dumping, float restLength);
 	
-	~SpringDumper();
+	void draw() const override;
 
-	virtual void draw();
-
-	virtual void update(float t = 0);
+	void update(float t, float dt) override;
 };
+
+}} // end namespace vvr::phys
 
 #endif

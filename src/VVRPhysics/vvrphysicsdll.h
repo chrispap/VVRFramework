@@ -5,5 +5,5 @@
 #		define VVRPhysics_API  __declspec(dllimport)
 #	endif
 #else
-#	define VVRPhysics__API
+#	define VVRPhysics_API
 #endif // WIN32

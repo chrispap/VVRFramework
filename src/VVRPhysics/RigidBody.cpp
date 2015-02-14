@@ -1,17 +1,12 @@
 #include "RigidBody.h"
 
+using namespace vvr::phys;
+
 RigidBody::RigidBody()
 {
-	m = 1;
-	
+	m = 1;	
 	x = v = w = P = L = f = tau = Vector3(0, 0, 0);
-
-#ifdef USE_QUATERNIONS
 	q = Quaternion(Vector3(1, 0, 0), 0);
-#else
-	R = Matrix3(1, 0, 0, 0, 1, 0, 0, 0, 1);
-#endif
-
 	I_inv = Matrix3(1, 0, 0, 0, 1, 0, 0, 0, 1);
 }
 
@@ -27,23 +22,13 @@ float* RigidBody::getState()
 	*state++ = x.x;
 	*state++ = x.y;
 	*state++ = x.z;
-
-#ifdef USE_QUATERNIONS
 	*state++ = q.x();
 	*state++ = q.y();
 	*state++ = q.z();
 	*state++ = q.w();
-#else
-	for(int i = 0; i < 9; i++)
-	{
-		*state++ = R[i];
-	}
-#endif
-
 	*state++ = P.x;
 	*state++ = P.y;
 	*state++ = P.z;
-
 	*state++ = L.x;
 	*state++ = L.y;
 	*state++ = L.z;
@@ -58,24 +43,13 @@ void RigidBody::setState(float* state)
 	x.x = *state++;
 	x.y = *state++;
 	x.z = *state++;
-	
-#ifdef USE_QUATERNIONS
 	q.x(*state++);
 	q.y(*state++);
 	q.z(*state++);
 	q.w(*state++);
-#else
-	for(int i = 0; i < 9; i++)
-	{
-		R[i] = *state++;
-	}
-#endif
-	
-
 	P.x = *state++;
 	P.y = *state++;
 	P.z = *state++;
-
 	L.x = *state++;
 	L.y = *state++;
 	L.z = *state++;
@@ -84,13 +58,9 @@ void RigidBody::setState(float* state)
 	v = P / m;
 
 	//update inertia matrix
-#ifdef USE_QUATERNIONS
 	q.normalize();
 	Matrix3 R = q.rotationMatrix();
 	I_inv = R * I_inv * R.transpose();
-#else
-	I_inv = R * I_inv * R.transpose();
-#endif
 
 	//angular momentum
 	w = I_inv * L;
@@ -105,7 +75,6 @@ float* RigidBody::dxdt(float t, int n, float u[])
 	*x_dot++ = v.y;
 	*x_dot++ = v.z;
 
-#ifdef USE_QUATERNIONS
 	//q_dot = 1 / 2 * w * q;
 	Quaternion w_hat = Quaternion(w, 0);
 	Quaternion q_dot = (w_hat * q) / 2;
@@ -114,18 +83,6 @@ float* RigidBody::dxdt(float t, int n, float u[])
 	*x_dot++ = q_dot.y();
 	*x_dot++ = q_dot.z();
 	*x_dot++ = q_dot.w();
-#else
-	Matrix3 w_hat = Matrix3(
-		0, -w.z, w.y,
-		w.z, 0, -w.x,
-		-w.y, w.x, 0);
-	Matrix3 R_dot = w_hat * R;
-
-	for(int i = 0; i < 9; i++)
-	{
-		*x_dot++ = R_dot[i];
-	}
-#endif
 
 	//P_dot = f
 	*x_dot++ = f.x;
@@ -146,7 +103,6 @@ float* RigidBody::integrate(float t0, int n, float u0[], float step)
 {
 
 #ifdef USE_RUNGE_KUTTA
-
 	float *f0;
 	float *f1;
 	float *f2;

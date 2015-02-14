@@ -10,8 +10,7 @@
 #include <math.h>
 #include "Matrices.h"
 
-
-class VVRPhysics_API Quaternion {
+class Quaternion {
     float mData[4];
 
 public:
@@ -426,6 +425,4 @@ public:
  */
 Quaternion operator*(float s, const Quaternion& q);
 
-
 #endif /* QUATERNION_H */
-

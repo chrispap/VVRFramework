@@ -5,5 +5,5 @@
 #		define VVRScene_API  __declspec(dllimport)
 #	endif
 #else
-#	define VVRScene__API
+#	define VVRScene_API
 #endif // WIN32

@@ -25,7 +25,7 @@
 ///////////////////////////////////////////////////////////////////////////
 // 2x2 matrix
 ///////////////////////////////////////////////////////////////////////////
-class VVRPhysics_API Matrix2
+class Matrix2
 {
 public:
     // constructors
@@ -919,5 +919,7 @@ inline std::ostream& operator<<(std::ostream& os, const Matrix4& m)
        << "(" << m[12] << ",\t" << m[13] << ",\t" << m[14] <<  ",\t" << m[15] << ")\n";
     return os;
 }
+
 // END OF MATRIX4 INLINE //////////////////////////////////////////////////////
+
 #endif

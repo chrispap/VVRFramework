@@ -44,8 +44,8 @@ class VVRScene_API Mesh
 
     void updateTriangleData ();                     ///< Recalculates the plane equations of the triangles
     void createNormals ();                          ///< Create a normal for each vertex
-    void drawTriangles (ColRGB col,bool wire=0);    ///< Draw the triangles. This is the actual model drawing.
-    void drawNormals (ColRGB col);                  ///< Draw the normal vectors of each vertex
+    void drawTriangles (Colour col,bool wire=0);    ///< Draw the triangles. This is the actual model drawing.
+    void drawNormals (Colour col);                  ///< Draw the normal vectors of each vertex
     void drawAxes ();
 
 public:
@@ -54,7 +54,7 @@ public:
     Mesh (const Mesh &original);                    ///< Copy constructor
     ~Mesh (void);                                    ///< Destructor
 
-    void draw (ColRGB col, Style style);            ///< Draw the mesh with the specified style
+    void draw (Colour col, Style style);            ///< Draw the mesh with the specified style
     void move   (const Vec3d &p);                   ///< Move the mesh in the world.
     void rotate (const Vec3d &p);                   ///< Rotate mesh around its local axis
     void setPos (const Vec3d &p) { mPos = p;}       ///< Set the position of the mesh

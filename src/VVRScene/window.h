@@ -13,7 +13,6 @@ class Window : public QMainWindow, private Ui::MainWindow
 
 public:
     Window(vvr::Scene *scene);
-    ~Window();
 
 private slots:
     void about();
@@ -24,16 +23,16 @@ signals:
 protected:
      virtual void keyPressEvent(QKeyEvent* event);
 
-private: // methods
+private:
     void createActions();
     void createMenus();
 
-private: // data
+private:
     static QString aboutMessage;
     QMenu *fileMenu, *helpMenu;
     QAction *exitAct, *aboutAct;
-    vvr::GLWidget *glWidget;
-    vvr::Scene *scene;
+    GLWidget *glWidget;
+    Scene *scene;
 };
 
 }

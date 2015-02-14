@@ -133,7 +133,7 @@ void Mesh::rotate(const Vec3d &p)
 }
 
 /* Drawing */
-void Mesh::drawTriangles(ColRGB col, bool wire)
+void Mesh::drawTriangles(Colour col, bool wire)
 {
     bool normExist = !mVertexNormals.empty();
     bool texExists = !mTexCoords.empty();
@@ -168,7 +168,7 @@ void Mesh::drawTriangles(ColRGB col, bool wire)
     glEnd();
 }
 
-void Mesh::drawNormals(ColRGB col)
+void Mesh::drawNormals(Colour col)
 {
     Vec3d n;
     glBegin(GL_LINES);
@@ -176,10 +176,10 @@ void Mesh::drawNormals(ColRGB col)
 
     for(ti=mTriangles.begin(); ti!=mTriangles.end(); ++ti) {
         n = ti->getCenter();
-        glColor3ubv(ColRGB(0x00,0,0).data);
+        glColor3ubv(Colour(0x00,0,0).data);
         glVertex3dv(n.data);
         n.add(ti->getNormal());
-        glColor3ubv(ColRGB(0xFF,0,0).data);
+        glColor3ubv(Colour(0xFF,0,0).data);
         glVertex3dv(n.data);
     }
 
@@ -208,7 +208,7 @@ void Mesh::drawAxes()
     glEnd();
 }
 
-void Mesh::draw(ColRGB col, Style x)
+void Mesh::draw(Colour col, Style x)
 {
     glPushMatrix();
 

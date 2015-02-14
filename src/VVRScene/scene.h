@@ -16,13 +16,18 @@ enum ArrowDir {
 class VVRScene_API Scene
 {
 protected:
-    bool perspective_proj;
-    double scene_width, scene_height;
-    int mouselastX, mouselastY;
-    int mouseCurrX, mouseCurrY;
-    int screen_width, screen_height;
-    Vec3d globRot, globRotDef, globPos, globPosDef;
-    ColRGB bgCol;
+    Vec3d   m_globRotDef;
+    Vec3d   m_globRot;
+    double  m_scene_width;
+    double  m_scene_height;
+    double  m_scene_dist;
+    int     m_screen_width;
+    int     m_screen_height;
+    bool    m_perspective_proj;
+    Colour  m_bgCol;
+
+private:
+    int m_mouselastX, m_mouselastY;
 
 protected:
     virtual void draw() = 0;
@@ -33,10 +38,10 @@ protected:
 
 public:
     Scene();
+    virtual ~Scene(){};
     void GL_Render();
-
-    virtual void GL_Init();
-    virtual void GL_Resize(int width, int height);
+    void GL_Init();
+    void GL_Resize(int width, int height);
     virtual bool idle(){return false;}
     virtual void keyEvent(unsigned char key, bool up, int x, int y, int modif);
     virtual void arrowEvent(ArrowDir dir, int modif);
@@ -44,10 +49,9 @@ public:
     virtual void mouseMoved(int x, int y, int modif);
     virtual void mouseWheel(int dir, int modif);
     virtual const char* getName() const;
-
-    const Vec3d& getRot() const { return globRot; }
-    void setRot(const Vec3d& rot) { globRot = rot; }
-    void setCol(const ColRGB& col) { bgCol = col; }
+    const Vec3d& getRot() const { return m_globRot; }
+    void setRot(const Vec3d& rot) { m_globRot = rot; }
+    void setCol(const Colour& col) { m_bgCol = col; }
 };
 
 /* This will be the entry point of client applications. */

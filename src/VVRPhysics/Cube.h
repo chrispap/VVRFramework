@@ -5,8 +5,12 @@
 #include "RigidBody.h"
 #include "Renderable.h"
 
+namespace vvr {
+namespace phys {
+
 class VVRPhysics_API Cube : public RigidBody, public IRenderable
 {
+
 public:
 
 	float l;
@@ -15,10 +19,11 @@ public:
 
 	~Cube();
 
-	virtual void draw();
+	virtual void draw() const override;
 
-	virtual void update(float t = 0);
-
+	virtual void update(float t, float dt);
 };
+
+}} // end namespace vvr::phys
 
 #endif

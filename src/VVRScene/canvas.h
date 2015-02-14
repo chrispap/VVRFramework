@@ -12,7 +12,7 @@ using std::vector;
 
 namespace vvr {
 
-struct VVRScene_API ColRGB
+struct VVRScene_API Colour
 {
     union
     {
@@ -20,33 +20,33 @@ struct VVRScene_API ColRGB
         unsigned char data[3];
     };
 
-    ColRGB () : r(0), g(0), b(0) {}
+    Colour () : r(0), g(0), b(0) {}
 
-    ColRGB (unsigned char red, unsigned char green, unsigned char blue) :
+    Colour (unsigned char red, unsigned char green, unsigned char blue) :
         r(red), g(green), b(blue) {}
 
-    ColRGB(string hex_str) {
+    Colour(string hex_str) {
         r = strtol(hex_str.substr(0,2).c_str(), 0, 16);
         g = strtol(hex_str.substr(2,2).c_str(), 0, 16);
         b = strtol(hex_str.substr(4,2).c_str(), 0, 16);
     }
 
-    static ColRGB white;
-    static ColRGB red;
-    static ColRGB green;
-    static ColRGB blue;
-    static ColRGB black;
-    static ColRGB yellow;
-    static ColRGB grey;
+    static Colour white;
+    static Colour red;
+    static Colour green;
+    static Colour blue;
+    static Colour black;
+    static Colour yellow;
+    static Colour grey;
 };
 
 /* Shapes */
 class VVRScene_API Shape
 {
-    ColRGB colour;
+    Colour colour;
 
 protected:
-    Shape(const ColRGB &rgb) : colour(rgb) {}
+    Shape(const Colour &rgb) : colour(rgb) {}
     virtual void drawShape() = 0;
 
 public:
@@ -62,7 +62,7 @@ protected:
     void drawShape();
 
 public:
-    Point2D(double _x, double _y, const ColRGB &rgb) :
+    Point2D(double _x, double _y, const Colour &rgb) :
       x(_x), y(_y), Shape(rgb) {}
 
 };
@@ -76,7 +76,7 @@ protected:
     void drawShape();
 
 public:
-    LineSeg2D(double _x1, double _y1, double _x2, double _y2, const ColRGB &rgb) :
+    LineSeg2D(double _x1, double _y1, double _x2, double _y2, const Colour &rgb) :
       x1(_x1), y1(_y1), x2(_x2), y2(_y2), Shape(rgb) {}
 
 };
@@ -87,7 +87,7 @@ protected:
     void drawShape();
 
 public:
-    Line2D(double _x1, double _y1, double _x2, double _y2, const ColRGB &rgb) :
+    Line2D(double _x1, double _y1, double _x2, double _y2, const Colour &rgb) :
       LineSeg2D(_x1, _y1, _x2, _y2, rgb) {}
 
 };
@@ -102,7 +102,7 @@ protected:
 
 public:
     LineSeg3D(double _x1, double _y1, double _z1,
-              double _x2, double _y2, double _z2, const ColRGB &rgb) :
+              double _x2, double _y2, double _z2, const Colour &rgb) :
       x1(_x1), y1(_y1), z1(_z1), x2(_x2), y2(_y2), z2(_z2), Shape(rgb) {}
 
 };
@@ -115,7 +115,7 @@ protected:
     void drawShape();
 
 public:
-    Circle2D(double cx, double cy, double rad, const ColRGB &rgb) :
+    Circle2D(double cx, double cy, double rad, const Colour &rgb) :
       x(cx), y(cy), r(rad), Shape(rgb) {}
 };
 
@@ -128,7 +128,7 @@ class VVRScene_API Triangle2D : public Shape
     void drawShape();
 
 public:
-    Triangle2D(double _x1, double _y1, double _x2, double _y2, double _x3, double _y3, const ColRGB &rgb) :
+    Triangle2D(double _x1, double _y1, double _x2, double _y2, double _x3, double _y3, const Colour &rgb) :
       x1(_x1), y1(_y1), x2(_x2), y2(_y2), x3(_x3), y3(_y3), Shape(rgb) {}
 
 };

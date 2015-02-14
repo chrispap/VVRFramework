@@ -13,20 +13,16 @@ namespace phys {
 class VVRPhysics_API Box : public IRenderable {
 
 public:
-
 	Box(float s);
 
-	~Box();
+	void draw() const override;
 
-	void draw();
-
-	void update(float t = 0){};
+	void update(float t, float dt) override {};
 
 	float getSize();
 
 private:
 	float size;
-
 };
 
 }} // end namespace vvr::phys

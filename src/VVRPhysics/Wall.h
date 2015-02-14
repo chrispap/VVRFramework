@@ -3,7 +3,11 @@
 
 #include "vvrphysicsdll.h"
 #include "Vectors.h"
-#include "Constants.h"
+
+namespace vvr {
+namespace phys {
+
+enum WallNorm { WALL_LEFT, WALL_RIGHT, WALL_FAR, WALL_NEAR, WALL_TOP, WALL_BOTTOM };
 
 class VVRPhysics_API Wall {
 
@@ -16,9 +20,7 @@ public:
 	 *
 	 * @param (enumerator index)
 	 */
-	Wall(int dir);
-
-	~Wall(void);
+	Wall(WallNorm dir);
 
 	/**
 	 * Get wall index
@@ -34,5 +36,7 @@ private:
 	
 	int direction;
 };
+
+}} // end namespace vvr::phys
 
 #endif

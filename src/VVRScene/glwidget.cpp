@@ -61,7 +61,7 @@ void vvr::GLWidget::mouseMoveEvent(QMouseEvent *event)
 void vvr::GLWidget::wheelEvent(QWheelEvent *event)
 {
     mScene->mouseWheel(event->delta()>0?1:-1, mkModif(event));
-    updateGL();
+    idle();
 }
 
 void vvr::GLWidget::keyPressEvent(QKeyEvent *event)
@@ -81,7 +81,7 @@ void vvr::GLWidget::onKeyPressed(QKeyEvent *event)
     else if (event->key() == Qt::Key_Up) mScene->arrowEvent(vvr::UP, modif);
     else if (event->key() == Qt::Key_Down) mScene->arrowEvent(vvr::DOWN, modif);
 
-    updateGL();
+    idle();
 }
 
 int vvr::GLWidget::mkModif(QInputEvent *event)

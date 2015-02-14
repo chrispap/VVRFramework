@@ -1,8 +1,3 @@
-### Build subdirs. Also add them to include path #########################################
-include_directories(../VVRScene)
-include_directories(../VVRPhysics)
-##########################################################################################
-
 ### Executable ###########################################################################
 set(TARGET vvrexampleapp CACHE TYPE STRING)
 file(GLOB SOURCE_FILES *.h *.cpp)
@@ -17,6 +12,11 @@ link_directories(${MathGeoLib_DIR}/lib)
 
 ##########################################################################################
 add_executable(${TARGET} ${SOURCE})
+##########################################################################################
+
+### Set include path #####################################################################
+include_directories(${CMAKE_SOURCE_DIR}/VVRScene)
+include_directories(${CMAKE_SOURCE_DIR}/VVRPhysics)
 ##########################################################################################
 
 ### Specify needed libs ##################################################################

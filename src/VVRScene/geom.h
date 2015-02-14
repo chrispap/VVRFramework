@@ -141,7 +141,7 @@ struct VVRScene_API Box
      */
     Box &scale(const double s);
 
-    void draw(const ColRGB &col, unsigned char a = 0) const;
+    void draw(const Colour &col, unsigned char a = 0) const;
 };
 
 /**

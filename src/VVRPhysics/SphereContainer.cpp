@@ -1,11 +1,29 @@
 #include "SphereContainer.h"
-
 #include <ctime>
 #include <stdlib.h>
-
 #include <iostream>
 
+// Box
+#define BOX_SIZE 100.0
+
+// Linear velocity
+#define MIN_VX  -10.0
+#define MAX_VX   10.0
+#define MIN_VY  -10.0
+#define MAX_VY   10.0
+#define MIN_VZ  -10.0
+#define MAX_VZ   10.0
+
+// Volume
+#define MIN_X   -BOX_SIZE / 2.0f
+#define MAX_X    BOX_SIZE / 2.0f
+#define MIN_Y   -BOX_SIZE / 2.0f
+#define MAX_Y    BOX_SIZE / 2.0f
+#define MIN_Z   -BOX_SIZE / 2.0f
+#define MAX_Z    BOX_SIZE / 2.0f
+
 using namespace std;
+using namespace vvr::phys;
 
 SphereContainer::SphereContainer()
 {
@@ -24,36 +42,29 @@ SphereContainer::SphereContainer()
 
         Sphere p = Sphere(
             Vector3(
-            randMM(MIN_X + radius, MAX_X - radius),
-            randMM(MIN_Y + radius, MAX_Y - radius),
-            randMM(MIN_Z + radius, MAX_Z - radius)),
+                randMM(MIN_X + radius, MAX_X - radius),
+                randMM(MIN_Y + radius, MAX_Y - radius),
+                randMM(MIN_Z + radius, MAX_Z - radius)),
             Vector3(
-            randMM(MIN_VX, MAX_VX),
-            randMM(MIN_VX, MAX_VX),
-            randMM(MIN_VX, MAX_VX)), 
+                randMM(MIN_VX, MAX_VX),
+                randMM(MIN_VX, MAX_VX),
+                randMM(MIN_VX, MAX_VX)), 
             radius, mass);
-
         spheres.push_back(p);
     }
 
 }
 
-SphereContainer::~SphereContainer()
+void SphereContainer::draw() const
 {
-
-}
-
-void SphereContainer::draw()
-{
-    for(unsigned int i = 0; i < spheres.size(); i++)
-    {
+    for(unsigned int i = 0; i < spheres.size(); i++) {
         spheres[i].draw();
     }
 }
 
-void SphereContainer::update(float t)
+void SphereContainer::update(float t, float dt)
 {
-    //check collision
+    // Check collision
     for(int i = 0; i < N; i++)
     {
         for(int j = 0; j < N; j++)
@@ -79,15 +90,13 @@ void SphereContainer::update(float t)
         }
     }
 
-    //update
-    for(unsigned int i = 0; i < spheres.size(); i++)
-    {
-        spheres[i].update(t);
+    // Update
+    for(unsigned int i = 0; i < spheres.size(); i++) {
+        spheres[i].update(t, dt);
     }
 }
 
-bool SphereContainer::checkForSpheresCollision(
-    Vector3 &p, float r1, const Vector3 &q, float r2)
+bool SphereContainer::checkForSpheresCollision(Vector3 &p, float r1, const Vector3 &q, float r2)
 {
     // Task
     Vector3 displacement = p - q;

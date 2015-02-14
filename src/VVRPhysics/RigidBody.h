@@ -6,19 +6,15 @@
 #include "Vectors.h"
 #include "Quaternion.h"
 
-// Task
-#define USE_QUATERNIONS
-#define USE_RUNGE_KUTTA
+namespace vvr {
+namespace phys {
 
 class VVRPhysics_API RigidBody
 {
+
 public:
 
-#ifdef USE_QUATERNIONS
 	static const int STATES = 13;
-#else
-	static const int STATES = 18;
-#endif
 
 	float m;
 
@@ -26,11 +22,7 @@ public:
 
 	Matrix3 I_inv;
 
-#ifdef USE_QUATERNIONS
 	Quaternion q;
-#else
-	Matrix3 R;
-#endif
 
 	Vector3 P, L;
 
@@ -48,5 +40,7 @@ public:
 
 	float* integrate(float t0, int m, float u0[], float step);
 };
+
+}} // end namespace vvr::phys
 
 #endif

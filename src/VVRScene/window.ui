@@ -20,6 +20,13 @@
       <item>
        <layout class="QVBoxLayout" name="verticalLayout_0">
         <item>
+         <widget class="Line" name="line_3">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QSlider" name="slider_0">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -41,6 +48,13 @@
          </widget>
         </item>
         <item>
+         <widget class="Line" name="line">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QSlider" name="slider_3">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -56,6 +70,13 @@
         </item>
         <item>
          <widget class="QSlider" name="slider_5">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="Line" name="line_2">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
