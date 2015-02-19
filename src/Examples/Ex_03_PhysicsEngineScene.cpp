@@ -1,17 +1,17 @@
 #include "Ex_03_PhysicsEngineScene.h"
 #include "utils.h"
 #include "Renderable.h"
-#include "Box.h"
 #include "Sphere.h"
 #include "Cube.h"
 #include "SphereContainer.h"
 #include "SpringDumper.h"
+#include "geom.h"
 
 using namespace vvr;
 using namespace vvr::phys;
 
 PhysicsEngineScene::PhysicsEngineScene()
-{    
+{
     // Setup scene
     m_cnf           =  Settings(getBasePath() + "config/settings_03.txt");
     m_scene_width   =  m_cnf.getDbl("scene_width");
@@ -21,7 +21,6 @@ PhysicsEngineScene::PhysicsEngineScene()
     m_bgCol         =  Colour(m_cnf.getStr("color_bg"));
 
     // Create bodies
-    IRenderable* box = new vvr::phys::Box(m_box_size);
     IRenderable* sphere = new Sphere(
         Vector3(0, 0, 0),
         Vector3(5, 5, 5), 3, 1);
@@ -36,13 +35,15 @@ PhysicsEngineScene::PhysicsEngineScene()
     IRenderable* spheres = new SphereContainer();
     
     // Keep bodies to a vector
-    m_bodies.push_back(box);
     m_bodies.push_back(sphere);
     m_bodies.push_back(spheres);
     m_bodies.push_back(cube);
     m_bodies.push_back(sd);
 
     // Reset animation
+    double s = m_box_size/2;
+    m_box = Box(Vec3d(-s,-s,-s), Vec3d(s,s,s));
+
     m_t = 0;
     m_dt = 0.09;
     m_anim_on = true;
@@ -68,8 +69,11 @@ bool PhysicsEngineScene::idle()
 
 void PhysicsEngineScene::draw()
 {
+    m_box.draw(Colour::red, 20);
+    m_box.draw(Colour::red,  0);
     for(unsigned i = 0;i<m_bodies.size();i++)
         m_bodies[i]->draw();
+    
 }
 
 void PhysicsEngineScene::keyEvent(unsigned char key, bool up, int x, int y, int modif)

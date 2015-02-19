@@ -58,10 +58,10 @@ void Scene::drawAxes()
 void Scene::GL_Init()
 {
     // Light setup
-    GLfloat light_position[] = { 0, m_scene_height, m_scene_dist,   1};
-    GLfloat ambientLight[]   = { .5,  .5,  .5,   1};
-    GLfloat diffuseLight[]   = { .9,  .9,  .9,   1};
-    GLfloat specularLight[]  = { .9,  .9,  .9,   1};
+    static GLfloat light_position[] = { 0, m_scene_height, m_scene_dist,   1};
+    static GLfloat ambientLight[]   = { .5,  .5,  .5,   1};
+    static GLfloat diffuseLight[]   = { .9,  .9,  .9,   1};
+    static GLfloat specularLight[]  = { .9,  .9,  .9,   1};
     
     glLightfv(GL_LIGHT0, GL_POSITION, light_position);
     glLightfv(GL_LIGHT0, GL_AMBIENT,  ambientLight);
@@ -72,11 +72,11 @@ void Scene::GL_Init()
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
     glEnable(GL_LINE_SMOOTH);
-    glEnable(GL_DEPTH_TEST);
+    //glEnable(GL_DEPTH_TEST);
     glEnable(GL_COLOR_MATERIAL);
     glEnable(GL_NORMALIZE);
     glEnable(GL_TEXTURE_2D);
-    //glEnable(GL_BLEND);
+    glEnable(GL_BLEND);
 
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
     glDepthMask(GL_TRUE);
@@ -85,9 +85,9 @@ void Scene::GL_Init()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glShadeModel(GL_SMOOTH);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE );
+    glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 void Scene::GL_Resize(int w, int h)

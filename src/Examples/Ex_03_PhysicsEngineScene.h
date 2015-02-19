@@ -26,4 +26,5 @@ private:
     bool m_anim_on;
     float m_t, m_dt;
     float m_box_size;
+    Box m_box;
 };
