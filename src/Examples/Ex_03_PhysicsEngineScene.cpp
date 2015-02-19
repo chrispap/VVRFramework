@@ -87,7 +87,7 @@ void PhysicsEngineScene::keyEvent(unsigned char key, bool up, int x, int y, int 
 
 void PhysicsEngineScene::arrowEvent(ArrowDir dir, int modif)
 {
-    if (!m_anim_on && dir == ArrowDir::RIGHT) {
+    if (!m_anim_on && dir == vvr::RIGHT) {
         for(unsigned i = 0;i<m_bodies.size();i++)
             m_bodies[i]->update(m_t, m_dt);
         m_t += m_dt;

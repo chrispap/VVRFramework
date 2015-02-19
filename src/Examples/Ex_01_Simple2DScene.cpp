@@ -76,10 +76,10 @@ void Simple2DScene::mouseWheel(int dir, int modif)
 
 void Simple2DScene::arrowEvent(vvr::ArrowDir dir, int modif)
 {
-    if (dir==vvr::ArrowDir::LEFT) {
+    if (dir==vvr::LEFT) {
         m_canvas.prev();
     }
-    else if (dir==vvr::ArrowDir::RIGHT) {
+    else if (dir==vvr::RIGHT) {
         m_canvas.next();
     }
 
