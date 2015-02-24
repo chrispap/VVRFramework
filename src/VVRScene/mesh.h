@@ -49,10 +49,10 @@ class VVRScene_API Mesh
     void drawAxes ();
 
 public:
-    Mesh () {}
+    Mesh ();
     Mesh (const string &objDir, const string &objFile, const string &texFile);
     Mesh (const Mesh &original);                    ///< Copy constructor
-    ~Mesh (void);                                    ///< Destructor
+    void operator=(const Mesh &src);                ///< Assigment operator
 
     void draw (Colour col, Style style);            ///< Draw the mesh with the specified style
     void move   (const Vec3d &p);                   ///< Move the mesh in the world.
@@ -63,9 +63,9 @@ public:
     void cornerAlign ();                            ///< Align the mesh to the corner of each local axis
     void centerAlign ();                            ///< Align the mesh to the center of each local axis
 
-    Vec3d getPos() {return mPos;}
-    Vec3d getRot() {return mRot;}
-    Box   getBox() {return mAABB;}
+    Vec3d getPos() const {return mPos;}
+    Vec3d getRot() const {return mRot;}
+    Box   getBox() const {return mAABB;}
 };
 
 }

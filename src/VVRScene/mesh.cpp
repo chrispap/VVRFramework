@@ -14,6 +14,11 @@
 using namespace vvr;
 using namespace tinyobj;
 
+Mesh::Mesh()
+{
+
+}
+
 Mesh::Mesh(const string &objDir, const string &objFile, const string &texFile)
 {
     vector<shape_t> shapes;
@@ -49,17 +54,32 @@ Mesh::Mesh(const Mesh &copyfrom):
     mTriangles (copyfrom.mTriangles),
     mVertexNormals (copyfrom.mVertexNormals),
     mTexCoords (copyfrom.mTexCoords),
+    mAABB (copyfrom.mAABB),
     mRot (copyfrom.mRot),
-    mPos (copyfrom.mPos)
+    mPos (copyfrom.mPos),
+    mTexName(copyfrom.mTexName)
 {
     vector<Triangle>::iterator ti;
-    for (ti=mTriangles.begin(); ti!= mTriangles.end(); ++ti)
+    for (ti=mTriangles.begin(); ti!= mTriangles.end(); ++ti) {
         ti->vecList = &mVertices;
+    }
 }
 
-Mesh::~Mesh()
+void Mesh::operator=(const Mesh &src)
 {
+    mVertices = src.mVertices;
+    mTriangles = src.mTriangles;
+    mVertexNormals = src.mVertexNormals;
+    mTexCoords = src.mTexCoords;
+    mAABB = src.mAABB;
+    mRot = src.mRot;
+    mPos = src.mPos;
+    mTexName= src.mTexName;
 
+    vector<Triangle>::iterator ti;
+    for (ti=mTriangles.begin(); ti!= mTriangles.end(); ++ti) {
+        ti->vecList = &mVertices;
+    }
 }
 
 void Mesh::createNormals()

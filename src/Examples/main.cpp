@@ -10,6 +10,6 @@ int main(int argc, char* argv[])
     glutInit(&argc, argv); 
 
     // return vvr::main(argc, argv, new Simple2DScene());
-    // return vvr::main(argc, argv, new ArmMotionScene());
+    return vvr::main(argc, argv, new ArmMotionScene());
     return vvr::main(argc, argv, new PhysicsEngineScene());
 }
