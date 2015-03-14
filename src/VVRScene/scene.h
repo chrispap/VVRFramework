@@ -18,9 +18,9 @@ class VVRScene_API Scene
 protected:
     Vec3d   m_globRotDef;
     Vec3d   m_globRot;
-    double  m_scene_width;
-    double  m_scene_height;
-    double  m_scene_dist;
+    float   m_scene_width;
+    float   m_scene_height;
+    float   m_scene_dist;
     int     m_screen_width;
     int     m_screen_height;
     bool    m_perspective_proj;

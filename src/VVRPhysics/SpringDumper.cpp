@@ -1,5 +1,4 @@
 #include "SpringDumper.h"
-#include <GL/glut.h>
 
 using namespace vvr::phys;
 
@@ -12,20 +11,20 @@ SpringDumper::SpringDumper(Vector3 pos, Vector3 vel, float radius, float mass,
 
 void SpringDumper::draw() const
 {
-    glPushMatrix();
+//    glPushMatrix();
 
-    //draw spring
-    glLineWidth(3);
-    glBegin(GL_LINES);
-    glVertex3f(a.x, a.y, a.z);
-    glVertex3f(s1.x.x, s1.x.y, s1.x.z);
-    glEnd();
-    glLineWidth(1);
+//    //draw spring
+//    glLineWidth(3);
+//    glBegin(GL_LINES);
+//    glVertex3f(a.x, a.y, a.z);
+//    glVertex3f(s1.x.x, s1.x.y, s1.x.z);
+//    glEnd();
+//    glLineWidth(1);
 
-    //draw sphere
-    s1.draw();
+//    //draw sphere
+//    s1.draw();
 
-    glPopMatrix();
+//    glPopMatrix();
 }
 
 void SpringDumper::update(float t, float dt)

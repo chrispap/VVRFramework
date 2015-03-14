@@ -1,5 +1,4 @@
 #include "Sphere.h"
-#include <GL/glut.h>
 
 using namespace vvr::phys;
 
@@ -24,13 +23,13 @@ Sphere::Sphere(Vector3 pos, Vector3 vel, float radius, float mass)
 
 void Sphere::draw() const
 {
-    glPushMatrix();
+//    glPushMatrix();
 
-    glTranslated(x.x, x.y, x.z);
+//    glTranslated(x.x, x.y, x.z);
 
-    glutSolidSphere(r, 13, 13);
+//    glutSolidSphere(r, 13, 13);
 
-    glPopMatrix();
+//    glPopMatrix();
 }
 
 void Sphere::update(float t, float dt)

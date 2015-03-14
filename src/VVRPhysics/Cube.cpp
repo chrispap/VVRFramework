@@ -1,5 +1,4 @@
 #include "Cube.h"
-#include <GL/glut.h>
 
 using namespace vvr::phys;
 
@@ -33,15 +32,15 @@ Cube::~Cube()
 
 void Cube::draw() const
 {
-    glPushMatrix();
+//    glPushMatrix();
 
-    glTranslated(x.x, x.y, x.z);
+//    glTranslated(x.x, x.y, x.z);
 
-    glMultMatrixf(q.rotationMatrix().toGLMatrix4());
+//    glMultMatrixf(q.rotationMatrix().toGLMatrix4());
 
-    glutSolidCube(l);
+//    glutSolidCube(l);
 
-    glPopMatrix();
+//    glPopMatrix();
 }
 
 void Cube::update(float t, float dt)
