@@ -54,7 +54,7 @@ OrientationViewerScene::OrientationViewerScene()
     m_settings = Settings(getBasePath() + "config/settings_02.txt");
     m_scene_width = m_settings.getDbl("scene_width");
     m_scene_height = m_settings.getDbl("scene_height");
-    m_bgCol = Colour(m_settings.getStr("color_bg"));
+    m_bg_col = Colour(m_settings.getStr("color_bg"));
     m_bone_col = Colour(m_settings.getStr("color_bone"));
     m_perspective_proj = m_settings.getBool("perspective_proj");
     double def_rot_x = m_settings.getDbl("def_rot_x");

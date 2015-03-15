@@ -101,8 +101,7 @@ Frame::Frame(bool show_old) : show_old(show_old)
 
 Canvas2D::Canvas2D()
 {
-    frames.push_back(Frame(false));
-    fi=0;
+    clear();
 }
 
 Canvas2D::~Canvas2D()
@@ -166,4 +165,18 @@ void Canvas2D::resize(int i) {
 
     frames.resize(i);
     fi=i-1;
+}
+
+void Canvas2D::clear()
+{
+    // Delete shapes of frames that will be discarded
+    for (int fi=0; fi<frames.size(); fi++) {
+        for (int si=0; si<frames[fi].shapes.size(); si++) {
+            delete frames[fi].shapes[si];
+        }
+    }
+
+    frames.clear();
+    frames.push_back(Frame(false));
+    fi=0;
 }

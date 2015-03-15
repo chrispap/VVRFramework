@@ -24,7 +24,7 @@ protected:
     int     m_screen_width;
     int     m_screen_height;
     bool    m_perspective_proj;
-    Colour  m_bgCol;
+    Colour  m_bg_col;
 
 private:
     int m_mouselastX, m_mouselastY;
@@ -51,7 +51,7 @@ public:
     virtual const char* getName() const;
     const Vec3d& getRot() const { return m_globRot; }
     void setRot(const Vec3d& rot) { m_globRot = rot; }
-    void setCol(const Colour& col) { m_bgCol = col; }
+    void setCol(const Colour& col) { m_bg_col = col; }
 };
 
 /* This will be the entry point of client applications. */

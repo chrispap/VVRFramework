@@ -162,6 +162,7 @@ public:
     void rew();
     void ff();
     void resize(int i);
+    void clear();
 };
 
 }

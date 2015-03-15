@@ -127,7 +127,7 @@ void Scene::GL_Resize(int w, int h)
 
 void Scene::GL_Render()
 {
-    glClearColor(m_bgCol.r/255.0, m_bgCol.g/255.0, m_bgCol.b/255.0, 1);
+    glClearColor(m_bg_col.r/255.0, m_bg_col.g/255.0, m_bg_col.b/255.0, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();

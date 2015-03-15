@@ -18,7 +18,7 @@ PhysicsEngineScene::PhysicsEngineScene()
     m_scene_height  =  m_cnf.getDbl("scene_height");
     m_scene_dist    =  m_cnf.getDbl("scene_dist");
     m_box_size      =  m_cnf.getDbl("box_size");
-    m_bgCol         =  Colour(m_cnf.getStr("color_bg"));
+    m_bg_col         =  Colour(m_cnf.getStr("color_bg"));
 
     // Create bodies
     IRenderable* sphere = new Sphere(

@@ -3,6 +3,8 @@
 #include "mesh.h"
 #include "canvas.h"
 
+using namespace std;
+
 /**
  * @brief The Simple2DScene class
  */
@@ -26,4 +28,6 @@ private:
 private:
     float m_rad;
     vvr::Canvas2D m_canvas;
+    int m_curve_count;
+    vector<vector<vvr::Vec3d> > m_pts;
 };
