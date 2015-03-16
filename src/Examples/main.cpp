@@ -5,9 +5,9 @@
 
 int main(int argc, char* argv[])
 {
-    /* 3 Example scenes using VVR Framework */
-    //return vvr::main(argc, argv, new ContourEditor);
-    return vvr::main(argc, argv, new Simple2DScene);
-    return vvr::main(argc, argv, new OrientationViewerScene);
-    return vvr::main(argc, argv, new PhysicsEngineScene);
+    /* Example scenes using VVR Framework */
+    return vvr::mainLoop(argc, argv, new Simple2DScene);
+    return vvr::mainLoop(argc, argv, new OrientationViewerScene);
+    return vvr::mainLoop(argc, argv, new PhysicsEngineScene);
+    return vvr::mainLoop(argc, argv, new ContourEditor);
 }

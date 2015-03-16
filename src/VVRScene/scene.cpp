@@ -9,12 +9,6 @@
 #include <cmath>
 #include <QtOpenGL>
 
-//light
-#define L_POS_X 20.0
-#define L_POS_Y 50.0
-#define L_POS_Z 100.0
-#define L_POS_W 0.0
-
 using namespace vvr;
 using namespace std;
 
@@ -143,7 +137,7 @@ void Scene::GL_Render()
 }
 
 /* UI Callbacks */
-void Scene::keyEvent (unsigned char key,  bool up, int x, int y, int modif)
+void Scene::keyEvent (unsigned char key,  bool up, int modif)
 {
     if (up) return;
 
@@ -219,4 +213,10 @@ void Scene::returnFromPixelMode()
     glPopMatrix();
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
+}
+
+void Scene::mouse2pix(int &x, int &y)
+{
+    x -= m_screen_width/2;
+    y -= m_screen_height/2;
 }

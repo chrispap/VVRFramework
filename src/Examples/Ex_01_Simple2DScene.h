@@ -21,9 +21,6 @@ protected:
     void arrowEvent(vvr::ArrowDir dir, int modif) override;
 
 private:
-    void mouse2pix(int &x, int &y);
-
-private:
     float m_rad;
     vvr::Canvas2D m_canvas;
 };

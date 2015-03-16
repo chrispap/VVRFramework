@@ -76,9 +76,9 @@ void PhysicsEngineScene::draw()
     
 }
 
-void PhysicsEngineScene::keyEvent(unsigned char key, bool up, int x, int y, int modif)
+void PhysicsEngineScene::keyEvent(unsigned char key, bool up, int modif)
 {
-    Scene::keyEvent(key, up, x, y, modif);
+    Scene::keyEvent(key, up, modif);
 
     if (key == ' ') {
         m_anim_on = !m_anim_on;

@@ -73,7 +73,7 @@ void vvr::Window::keyPressEvent(QKeyEvent* event)
     if (str.length()>0) emit keyPressed(event);
 }
 
-int vvr::main(int argc, char* argv[], vvr::Scene *scene)
+int vvr::mainLoop(int argc, char* argv[], vvr::Scene *scene)
 {
     try {
         QApplication app(argc, argv);

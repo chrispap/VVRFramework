@@ -25,7 +25,7 @@ public:
     bool idle();
     void onDataReceived(const string &data);
     bool autoDiscoverOnStart();
-    void keyEvent(unsigned char key, bool up, int x, int y, int modif) override;
+    void keyEvent(unsigned char key, bool up, int modif) override;
     void arrowEvent(vvr::ArrowDir dir, int modif) override;
     void reset() override;
 

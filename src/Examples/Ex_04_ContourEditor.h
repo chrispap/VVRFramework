@@ -22,10 +22,9 @@ protected:
     void reset() override;
     void mousePressed(int x, int y, int modif) override;
     void mouseMoved(int x, int y, int modif) override;
-    void keyEvent(unsigned char key, bool up, int x, int y, int modif) override;
+    void keyEvent(unsigned char key, bool up, int modif) override;
 
 private:
-    void mouse2pix(int &x, int &y);
     void saveContoursToFile();
 
 private:

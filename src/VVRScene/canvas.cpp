@@ -106,8 +106,6 @@ Canvas2D::Canvas2D()
 
 Canvas2D::~Canvas2D()
 {
-    cout << "Deleting Canvas" << endl;
-
     for (int fi=0; fi<frames.size(); fi++) {
         for (int si=0; si<frames[fi].shapes.size(); si++) {
             delete frames[fi].shapes[si];

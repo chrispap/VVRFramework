@@ -26,9 +26,6 @@ protected:
     bool    m_perspective_proj;
     Colour  m_bg_col;
 
-private:
-    int m_mouselastX, m_mouselastY;
-
 protected:
     virtual void draw() = 0;
     virtual void reset();
@@ -36,14 +33,17 @@ protected:
     void enterPixelMode();
     void returnFromPixelMode();
 
+private:
+    int m_mouselastX, m_mouselastY;
+
 public:
     Scene();
-    virtual ~Scene(){};
+    virtual ~Scene(){}
     void GL_Render();
     void GL_Init();
     void GL_Resize(int width, int height);
     virtual bool idle(){return false;}
-    virtual void keyEvent(unsigned char key, bool up, int x, int y, int modif);
+    virtual void keyEvent(unsigned char key, bool up, int modif);
     virtual void arrowEvent(ArrowDir dir, int modif);
     virtual void mousePressed(int x, int y, int modif);
     virtual void mouseMoved(int x, int y, int modif);
@@ -52,10 +52,11 @@ public:
     const Vec3d& getRot() const { return m_globRot; }
     void setRot(const Vec3d& rot) { m_globRot = rot; }
     void setCol(const Colour& col) { m_bg_col = col; }
+    void mouse2pix(int &x, int &y);
 };
 
 /* This will be the entry point of client applications. */
-int VVRScene_API main(int argc, char* argv[], Scene *scene);
+int VVRScene_API mainLoop(int argc, char* argv[], Scene *scene);
 
 }
 

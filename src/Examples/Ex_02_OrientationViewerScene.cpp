@@ -133,9 +133,9 @@ bool OrientationViewerScene::idle()
 
 //! Callbacks - UI
 
-void OrientationViewerScene::keyEvent(unsigned char key, bool up, int x, int y, int modif)
+void OrientationViewerScene::keyEvent(unsigned char key, bool up, int modif)
 {
-    Scene::keyEvent(key, up, x, y, modif);
+    Scene::keyEvent(key, up, modif);
 
     if (key == ' ')
     {

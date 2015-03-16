@@ -17,7 +17,7 @@ private:
     const char * getName() const override { return "Game Engine Example";}
     bool idle();
     void draw() override;
-    void keyEvent(unsigned char key, bool up, int x, int y, int modif);
+    void keyEvent(unsigned char key, bool up, int modif);
     void arrowEvent(ArrowDir dir, int modif);
 
 private:

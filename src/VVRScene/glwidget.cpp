@@ -48,13 +48,19 @@ void vvr::GLWidget::idle()
 void vvr::GLWidget::mousePressEvent(QMouseEvent *event)
 {
     setFocus();
-    mScene->mousePressed(event->x(), event->y(), mkModif(event));
+    int x = event->x();
+    int y = event->y();
+    mScene->mouse2pix(x,y);
+    mScene->mousePressed(x, y, mkModif(event));
     idle();
 }
 
 void vvr::GLWidget::mouseMoveEvent(QMouseEvent *event)
 {
-    mScene->mouseMoved(event->x(), event->y(), mkModif(event));
+    int x = event->x();
+    int y = event->y();
+    mScene->mouse2pix(x,y);
+    mScene->mouseMoved(x, y, mkModif(event));
     idle();
 }
 
@@ -75,7 +81,7 @@ void vvr::GLWidget::onKeyPressed(QKeyEvent *event)
     QString c = event->text();
 
     if (event->key() == Qt::Key_Escape) QApplication::exit(0);
-    else if (c.length()>0) mScene->keyEvent(c.toLatin1()[0],false, 0,0,modif);
+    else if (c.length()>0) mScene->keyEvent(c.toLatin1()[0],false, modif);
     else if (event->key() == Qt::Key_Left) mScene->arrowEvent(vvr::LEFT, modif);
     else if (event->key() == Qt::Key_Right) mScene->arrowEvent(vvr::RIGHT, modif);
     else if (event->key() == Qt::Key_Up) mScene->arrowEvent(vvr::UP, modif);

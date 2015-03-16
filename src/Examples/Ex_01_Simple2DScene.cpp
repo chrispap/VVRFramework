@@ -41,24 +41,14 @@ void Simple2DScene::draw()
     returnFromPixelMode();
 }
 
-void Simple2DScene::mouse2pix(int &x, int &y)
-{
-    // Transform mouse click coords to pixel scene coords
-    // because we have moved the (0,0) at the viewport center.
-    x -= m_screen_width/2;
-    y -= m_screen_height/2;
-}
-
 void Simple2DScene::mousePressed(int x, int y, int modif)
 {
-    mouse2pix(x,y);
     m_canvas.newFrame();
     m_canvas.add(new vvr::Circle2D(x, y, m_rad, vvr::Colour::black));
 }
 
 void Simple2DScene::mouseMoved(int x, int y, int modif)
 {
-    mouse2pix(x,y);
     m_canvas.add(new vvr::Circle2D(x, y, m_rad, vvr::Colour::red));
 }
 

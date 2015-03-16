@@ -41,11 +41,12 @@ struct VVRScene_API Colour
 };
 
 /* Shapes */
-class VVRScene_API Shape
+struct VVRScene_API Shape
 {
     Colour colour;
 
 protected:
+    Shape(){};
     Shape(const Colour &rgb) : colour(rgb) {}
     virtual void drawShape() = 0;
 
@@ -54,7 +55,7 @@ public:
     void draw();
 };
 
-class VVRScene_API Point2D : public Shape
+struct VVRScene_API Point2D : public Shape
 {
     double x,y;
 
@@ -62,12 +63,13 @@ protected:
     void drawShape();
 
 public:
+    Point2D(){}
     Point2D(double _x, double _y, const Colour &rgb) :
       x(_x), y(_y), Shape(rgb) {}
 
 };
 
-class VVRScene_API LineSeg2D : public Shape
+struct VVRScene_API LineSeg2D : public Shape
 {
 protected:
     double x1,y1;
@@ -76,23 +78,25 @@ protected:
     void drawShape();
 
 public:
+    LineSeg2D(){}
     LineSeg2D(double _x1, double _y1, double _x2, double _y2, const Colour &rgb) :
       x1(_x1), y1(_y1), x2(_x2), y2(_y2), Shape(rgb) {}
 
 };
 
-class VVRScene_API Line2D : public LineSeg2D
+struct VVRScene_API Line2D : public LineSeg2D
 {
 protected:
     void drawShape();
 
 public:
+    Line2D(){}
     Line2D(double _x1, double _y1, double _x2, double _y2, const Colour &rgb) :
       LineSeg2D(_x1, _y1, _x2, _y2, rgb) {}
 
 };
 
-class VVRScene_API LineSeg3D : public Shape
+struct VVRScene_API LineSeg3D : public Shape
 {
 protected:
     double x1,y1,z1;
@@ -101,13 +105,14 @@ protected:
     void drawShape();
 
 public:
+    LineSeg3D(){}
     LineSeg3D(double _x1, double _y1, double _z1,
               double _x2, double _y2, double _z2, const Colour &rgb) :
       x1(_x1), y1(_y1), z1(_z1), x2(_x2), y2(_y2), z2(_z2), Shape(rgb) {}
 
 };
 
-class VVRScene_API Circle2D : public Shape
+struct VVRScene_API Circle2D : public Shape
 {
     double x,y,r;
 
@@ -115,11 +120,12 @@ protected:
     void drawShape();
 
 public:
+    Circle2D(){};
     Circle2D(double cx, double cy, double rad, const Colour &rgb) :
       x(cx), y(cy), r(rad), Shape(rgb) {}
 };
 
-class VVRScene_API Triangle2D : public Shape
+struct VVRScene_API Triangle2D : public Shape
 {
     double x1,y1;
     double x2,y2;
@@ -128,6 +134,7 @@ class VVRScene_API Triangle2D : public Shape
     void drawShape();
 
 public:
+    Triangle2D(){}
     Triangle2D(double _x1, double _y1, double _x2, double _y2, double _x3, double _y3, const Colour &rgb) :
       x1(_x1), y1(_y1), x2(_x2), y2(_y2), x3(_x3), y3(_y3), Shape(rgb) {}
 
