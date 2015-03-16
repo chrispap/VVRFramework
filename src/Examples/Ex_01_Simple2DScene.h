@@ -3,11 +3,6 @@
 #include "mesh.h"
 #include "canvas.h"
 
-#define APP_TITLE "Simple 2D Drawing"
-
-using namespace std;
-using namespace vvr;
-
 /**
  * @brief The Simple2DScene class
  */
@@ -15,21 +10,20 @@ class Simple2DScene : public vvr::Scene
 {
 public: 
     Simple2DScene();
-    const char* getName() const override { return APP_TITLE;}
+    const char* getName() const override;
 
 protected:
     void draw() override;
     void reset() override;
     void mousePressed(int x, int y, int modif) override;
     void mouseMoved(int x, int y, int modif) override;
-    void keyEvent(unsigned char key, bool up, int x, int y, int modif) override;
+    void mouseWheel(int dir, int modif) override;
+    void arrowEvent(vvr::ArrowDir dir, int modif) override;
 
 private:
     void mouse2pix(int &x, int &y);
-    void saveContoursToFile();
 
 private:
-    Canvas2D                m_canvas;
-    float                   m_rad;
-    vector<vector<Vec3d> >  m_pts;
+    float m_rad;
+    vvr::Canvas2D m_canvas;
 };
