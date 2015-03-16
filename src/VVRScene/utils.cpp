@@ -78,7 +78,7 @@ string vvr::getExePath()
 string vvr::getBasePath()
 {
 #ifdef __APPLE__
-    return getExePath() + "../../";
+    return getExePath() + "../../../../../";
 #else
     return getExePath() + "../../";
 #endif

@@ -38,13 +38,14 @@ void Simple2DScene::draw()
     enterPixelMode();
     m_canvas.draw();
 
+    // Draw all line-strips (Contours)
     for (int ci=0; ci<m_pts.size(); ci++) {
         for (int pi=0; pi<m_pts[ci].size(); pi++) {
             Vec3d &p1 = m_pts[ci][pi];
             Vec3d &p2 = m_pts[ci][(pi+1)%m_pts[ci].size()];
             Colour line_col = Colour::yellow;
             if (ci==m_pts.size()-1 && pi==m_pts[ci].size()-1)
-                line_col = Colour(100,120,155);
+                line_col = Colour::red;
             LineSeg2D(p1.x, p1.y, p2.x, p2.y, line_col).draw();
         }
     }
@@ -98,4 +99,35 @@ void Simple2DScene::reset()
     m_canvas.clear();
     m_pts.clear();
     m_pts.resize(1);
+}
+
+void Simple2DScene::keyEvent(unsigned char key, bool up, int x, int y, int modif)
+{
+    Scene::keyEvent(key, up, x, y, modif);
+
+    switch (key) {
+    case 's': saveContoursToFile(); break;
+
+    }
+
+}
+
+void Simple2DScene::saveContoursToFile()
+{
+    string filename = "contours.dat";
+    filename = vvr::getBasePath() + "resources/data/" + filename;
+    std::cout << "Saving to " << filename << std::endl;
+
+    FILE* file = fopen(filename.c_str(), "w");
+    if (!file) throw "Cannot open <" + filename + "> for writing";
+
+    for (int ci=0; ci<m_pts.size(); ci++) {
+        fprintf(file, "---CONTOUR-LINE---\n");
+        for (int pi=0; pi<m_pts[ci].size(); pi++) {
+            Vec3d &p = m_pts[ci][pi];
+            fprintf(file, "%f %f \n", p.x, p.y);
+        }
+    }
+
+    fclose(file);
 }
