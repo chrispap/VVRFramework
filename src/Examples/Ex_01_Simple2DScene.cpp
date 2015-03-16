@@ -13,13 +13,7 @@ using std::cout;
 using std::endl;
 using namespace vvr;
 
-#define APP_TITLE "Simple 2D Drawing"
 #define CONFIGFILEPATH "../../config/settings.txt"
-
-const char* Simple2DScene::getName() const
-{
-    return APP_TITLE;
-}
 
 /**
  * Create scene.
@@ -28,23 +22,8 @@ const char* Simple2DScene::getName() const
 Simple2DScene::Simple2DScene()
 {
     m_rad = 20;
-    m_bg_col = Colour::grey;
-    m_curve_count = 0;
-
-    // Add 5 circles to our canvas.
-    m_canvas.add(new Circle2D( -40, -20, 40, Colour::red));
-    m_canvas.add(new Circle2D( -20,  20, 40, Colour::green));
-    m_canvas.add(new Circle2D(   0, -20, 40, Colour::blue));
-    m_canvas.add(new Circle2D(  20,  20, 40, Colour::black));
-    m_canvas.add(new Circle2D(  40, -20, 40, Colour::yellow));
-
-    // Add some points
-    for (int i=0; i<10; i++) {
-        m_canvas.add(new Point2D(i*10,i*10, Colour::white));
-    }
-
-    // Create new frame so that everything drawn from now on, go to a different frame
-    m_canvas.newFrame(true);
+    m_bg_col = Colour::black;
+    m_pts.resize(1);
 }
 
 /**
@@ -57,13 +36,16 @@ Simple2DScene::Simple2DScene()
 void Simple2DScene::draw()
 {
     enterPixelMode();
-    // m_canvas.draw();
-    for (int i=0; i<m_pts.size(); i++) {
-        for (int j=0; j<m_pts[i].size(); j++) {
-            Vec3d &p1 = m_pts[i][j];
-            Vec3d &p2 = m_pts[i][(j+1)%m_pts[i].size()];
-            LineSeg2D line(p1.x, p1.y, p2.x, p2.y, Colour::blue);
-            line.draw();
+    m_canvas.draw();
+
+    for (int ci=0; ci<m_pts.size(); ci++) {
+        for (int pi=0; pi<m_pts[ci].size(); pi++) {
+            Vec3d &p1 = m_pts[ci][pi];
+            Vec3d &p2 = m_pts[ci][(pi+1)%m_pts[ci].size()];
+            Colour line_col = Colour::yellow;
+            if (ci==m_pts.size()-1 && pi==m_pts[ci].size()-1)
+                line_col = Colour(100,120,155);
+            LineSeg2D(p1.x, p1.y, p2.x, p2.y, line_col).draw();
         }
     }
 
@@ -92,42 +74,18 @@ void Simple2DScene::mousePressed(int x, int y, int modif)
 {
     mouse2pix(x,y);
 
-    m_pts.resize(++m_curve_count);
-    m_pts[m_curve_count-1].push_back(Vec3d(x,y,0));
+    if (modif)
+        m_pts.resize(m_pts.size()+1);
 
-    m_canvas.newFrame();
+    m_pts.back().push_back(Vec3d(x,y,0));
     m_canvas.add(new Point2D(x,y, Colour::white));
 }
 
 void Simple2DScene::mouseMoved(int x, int y, int modif)
 {
     mouse2pix(x,y);
-
-    m_pts[m_curve_count-1].push_back(Vec3d(x,y,0));
-
-    m_canvas.add(new Point2D(x,y, Colour::white));    }
-
-void Simple2DScene::mouseWheel(int dir, int modif)
-{
-    if (dir>0) {
-        m_rad += 1;
-    }
-    else {
-        m_rad -= 1;
-        if (m_rad<=0) m_rad = 1;
-    }
-
-}
-
-void Simple2DScene::arrowEvent(ArrowDir dir, int modif)
-{
-    if (dir==LEFT) {
-        m_canvas.prev();
-    }
-    else if (dir==RIGHT) {
-        m_canvas.next();
-    }
-
+    m_pts.back().push_back(Vec3d(x,y,0));
+    m_canvas.add(new Point2D(x,y, Colour::white));
 }
 
 /**
@@ -138,4 +96,6 @@ void Simple2DScene::reset()
 {
     Scene::reset();
     m_canvas.clear();
+    m_pts.clear();
+    m_pts.resize(1);
 }

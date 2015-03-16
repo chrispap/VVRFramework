@@ -35,6 +35,7 @@ vvr::Window::Window(vvr::Scene *scene)
     createMenus();
     setWindowTitle(tr(scene->getName()));
     glWidget->setFocus();
+    showMaximized();
 }
 
 void vvr::Window::createActions()

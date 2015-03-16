@@ -59,7 +59,7 @@ void Scene::GL_Init()
 {
     // Light setup
     static GLfloat light_position[] = { 0, m_scene_height, m_scene_dist,   1};
-    static GLfloat ambientLight[]   = { .5,  .5,  .5,   1};
+    static GLfloat ambientLight[]   = { .9,  .9,  .9,   1};
     static GLfloat diffuseLight[]   = { .9,  .9,  .9,   1};
     static GLfloat specularLight[]  = { .9,  .9,  .9,   1};
     
