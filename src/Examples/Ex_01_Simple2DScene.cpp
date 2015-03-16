@@ -6,6 +6,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <algorithm>
 
 using std::vector;
 using std::string;
@@ -47,6 +48,8 @@ void Simple2DScene::draw()
             if (ci==m_pts.size()-1 && pi==m_pts[ci].size()-1)
                 line_col = Colour::red;
             LineSeg2D(p1.x, p1.y, p2.x, p2.y, line_col).draw();
+            Point2D(p1.x, p1.y, Colour::yellow).draw();
+
         }
     }
 
@@ -75,18 +78,16 @@ void Simple2DScene::mousePressed(int x, int y, int modif)
 {
     mouse2pix(x,y);
 
-    if (modif)
+    if (modif) {
         m_pts.resize(m_pts.size()+1);
+    }
 
     m_pts.back().push_back(Vec3d(x,y,0));
-    m_canvas.add(new Point2D(x,y, Colour::white));
 }
 
 void Simple2DScene::mouseMoved(int x, int y, int modif)
 {
     mouse2pix(x,y);
-    m_pts.back().push_back(Vec3d(x,y,0));
-    m_canvas.add(new Point2D(x,y, Colour::white));
 }
 
 /**
@@ -107,7 +108,7 @@ void Simple2DScene::keyEvent(unsigned char key, bool up, int x, int y, int modif
 
     switch (key) {
     case 's': saveContoursToFile(); break;
-
+    case 'd': m_pts.back().resize(std::max(1, (int) m_pts.back().size()-1));
     }
 
 }
@@ -125,7 +126,7 @@ void Simple2DScene::saveContoursToFile()
         fprintf(file, "---CONTOUR-LINE---\n");
         for (int pi=0; pi<m_pts[ci].size(); pi++) {
             Vec3d &p = m_pts[ci][pi];
-            fprintf(file, "%f %f \n", p.x, p.y);
+            fprintf(file, "%f %f\n", p.x, p.y);
         }
     }
 
