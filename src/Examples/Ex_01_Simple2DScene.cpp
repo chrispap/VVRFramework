@@ -108,7 +108,15 @@ void Simple2DScene::keyEvent(unsigned char key, bool up, int x, int y, int modif
 
     switch (key) {
     case 's': saveContoursToFile(); break;
-    case 'd': m_pts.back().resize(std::max(1, (int) m_pts.back().size()-1));
+    case 'd':
+        if (m_pts.back().size()>0) {
+            m_pts.back().resize(m_pts.back().size()-1);
+        }
+        else {
+            m_pts.resize(std::max(1, (int) m_pts.size()-1));
+        }
+
+        echo(m_pts.size());
     }
 
 }
