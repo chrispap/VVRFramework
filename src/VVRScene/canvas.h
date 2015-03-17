@@ -64,9 +64,8 @@ protected:
 
 public:
     Point2D(){}
-    Point2D(double _x, double _y, const Colour &rgb) :
+    Point2D(double _x, double _y, const Colour &rgb=Colour()) :
       x(_x), y(_y), Shape(rgb) {}
-
 };
 
 struct VVRScene_API LineSeg2D : public Shape
@@ -79,9 +78,8 @@ protected:
 
 public:
     LineSeg2D(){}
-    LineSeg2D(double _x1, double _y1, double _x2, double _y2, const Colour &rgb) :
+    LineSeg2D(double _x1, double _y1, double _x2, double _y2, const Colour &rgb=Colour()) :
       x1(_x1), y1(_y1), x2(_x2), y2(_y2), Shape(rgb) {}
-
 };
 
 struct VVRScene_API Line2D : public LineSeg2D
@@ -91,9 +89,8 @@ protected:
 
 public:
     Line2D(){}
-    Line2D(double _x1, double _y1, double _x2, double _y2, const Colour &rgb) :
+    Line2D(double _x1, double _y1, double _x2, double _y2, const Colour &rgb=Colour()) :
       LineSeg2D(_x1, _y1, _x2, _y2, rgb) {}
-
 };
 
 struct VVRScene_API LineSeg3D : public Shape
@@ -107,9 +104,8 @@ protected:
 public:
     LineSeg3D(){}
     LineSeg3D(double _x1, double _y1, double _z1,
-              double _x2, double _y2, double _z2, const Colour &rgb) :
+              double _x2, double _y2, double _z2, const Colour &rgb=Colour()) :
       x1(_x1), y1(_y1), z1(_z1), x2(_x2), y2(_y2), z2(_z2), Shape(rgb) {}
-
 };
 
 struct VVRScene_API Circle2D : public Shape
@@ -121,7 +117,7 @@ protected:
 
 public:
     Circle2D(){};
-    Circle2D(double cx, double cy, double rad, const Colour &rgb) :
+    Circle2D(double cx, double cy, double rad, const Colour &rgb=Colour()) :
       x(cx), y(cy), r(rad), Shape(rgb) {}
 };
 
@@ -135,9 +131,9 @@ struct VVRScene_API Triangle2D : public Shape
 
 public:
     Triangle2D(){}
-    Triangle2D(double _x1, double _y1, double _x2, double _y2, double _x3, double _y3, const Colour &rgb) :
+    Triangle2D(double _x1, double _y1, double _x2, double _y2, double _x3, double _y3, 
+        const Colour &rgb=Colour()) :
       x1(_x1), y1(_y1), x2(_x2), y2(_y2), x3(_x3), y3(_y3), Shape(rgb) {}
-
 };
 
 /* Canvas */
