@@ -8,6 +8,7 @@
 using namespace std;
 
 #define echo(x) cout<<#x<<" = "<<x<<endl
+#define SQUARE(x) ((x)*(x))
 
 namespace vvr {
 
