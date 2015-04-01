@@ -12,11 +12,10 @@ using namespace std;
 
 namespace vvr {
 
-double VVRScene_API getSeconds();
-double VVRScene_API elapsed(double startTime);
+inline float VVRScene_API getSeconds();
+double VVRScene_API  normalizeAngle(double angle);
 string VVRScene_API getExePath();
 string VVRScene_API getBasePath();
-double VVRScene_API  normalizeAngle(double angle);
 
 }
 

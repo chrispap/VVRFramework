@@ -46,7 +46,7 @@ struct VVRScene_API Shape
     Colour colour;
 
 protected:
-    Shape(){};
+    Shape(){}
     Shape(const Colour &rgb) : colour(rgb) {}
     virtual void drawShape() = 0;
 
@@ -116,7 +116,7 @@ protected:
     void drawShape();
 
 public:
-    Circle2D(){};
+    Circle2D(){}
     Circle2D(double cx, double cy, double rad, const Colour &rgb=Colour()) :
       x(cx), y(cy), r(rad), Shape(rgb) {}
 };

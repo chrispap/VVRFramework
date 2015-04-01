@@ -2,6 +2,7 @@
 
 #include <ctime>
 #include <iostream>
+#include <qdatetime.h>
 
 #ifdef _WIN32
 #	include <Windows.h>
@@ -16,20 +17,12 @@
 
 using namespace std;
 
-double vvr::getSeconds()
+float vvr::getSeconds()
 {
-#ifdef _WIN32
-    return (double) GetTickCount() / 1000.0;
-#else
-    struct timeval t;
-    gettimeofday(&t, NULL);
-    return (double) t.tv_sec + (double) t.tv_usec/1000000.0;
-#endif
-}
-
-double vvr::elapsed(double startTime)
-{
-    return 1.e3* ((double) (clock() - startTime)) / CLOCKS_PER_SEC;
+    static quint64 msec_base = 0;
+    quint64 msec = QDateTime::currentMSecsSinceEpoch();
+    if (msec_base==0) msec_base=msec;
+    return (float) (msec-msec_base) / 1000.0;
 }
 
 string vvr::getExePath()
