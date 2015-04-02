@@ -5,5 +5,6 @@ project(VVRFramework)
 ### Build subdirs ########################################################################
 add_subdirectory(VVRScene)
 add_subdirectory(VVRPhysics)
+add_subdirectory(GeoLib)
 add_subdirectory(Examples)
 ##########################################################################################

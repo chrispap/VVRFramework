@@ -15,12 +15,13 @@ add_executable(${TARGET} MACOSX_BUNDLE ${SOURCE})
 ##########################################################################################
 
 ### Set include path #####################################################################
+include_directories(${CMAKE_SOURCE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/VVRScene)
 include_directories(${CMAKE_SOURCE_DIR}/VVRPhysics)
 ##########################################################################################
 
 ### Specify needed libs ##################################################################
-target_link_libraries(${TARGET} VVRPhysics VVRScene MathGeoLib)
+target_link_libraries(${TARGET} VVRPhysics VVRScene MathGeoLib GeoLib)
 ##########################################################################################
 
 ##########################################################################################
