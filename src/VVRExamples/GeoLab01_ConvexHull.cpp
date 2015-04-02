@@ -1,4 +1,4 @@
-#include "Scene_ConvexHull.h"
+#include "GeoLab01_ConvexHull.h"
 #include <utils.h>
 #include <iostream>
 #include <fstream>
