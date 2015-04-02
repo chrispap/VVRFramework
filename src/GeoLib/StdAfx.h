@@ -12,6 +12,17 @@ any modified versions of this cannot be resold to any other party.
 #ifndef _GEOLIB_STDAFX_H 
 #define _GEOLIB_STDAFX_H
 
+#ifdef _WIN32
+#	ifdef GeoLib_EXPORTS
+#		define GeoLib_API __declspec(dllexport)
+#	else
+#		define GeoLib_API  __declspec(dllimport)
+#	endif
+#else
+#	define GeoLib_API
+#endif // WIN32
+
+
 #include <cassert>
 #include <cmath>
 #include <vector>

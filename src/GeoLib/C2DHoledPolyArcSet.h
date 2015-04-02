@@ -39,9 +39,11 @@ Class which represents a set of curved polygons.
 
 #ifdef __linux
 # define POLY_DECLSPEC
+#else
+# include "StdAfx.h"
 #endif
 
-class POLY_DECLSPEC C2DHoledPolyArcSet	: public C2DBaseSet
+class GeoLib_API C2DHoledPolyArcSet	: public C2DBaseSet
 {
 public:
 	_MEMORY_POOL_DECLARATION

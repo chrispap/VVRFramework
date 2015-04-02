@@ -27,22 +27,8 @@ Class which represents a circle.
 
 class C2DTriangle;
 
-#ifdef _EXPORTING
-	#define CLASS_DECLSPEC		__declspec(dllexport)
-#else 
-	#ifdef _STATIC
-		#define CLASS_DECLSPEC
-	#else
-		#define CLASS_DECLSPEC		__declspec(dllimport)
-	#endif
-#endif
 
-
-#ifdef __linux
-# define CLASS_DECLSPEC
-#endif
-
-class CLASS_DECLSPEC C2DCircle : public C2DBase
+class GeoLib_API C2DCircle : public C2DBase
 {
 public:
 	_MEMORY_POOL_DECLARATION

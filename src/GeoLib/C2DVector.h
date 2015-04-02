@@ -24,26 +24,9 @@ simple manipulation.
 
 #include "MemoryPool.h"
 
-
 class C2DPoint;
 
-#ifdef _EXPORTING
-	#define CLASS_DECLSPEC		__declspec(dllexport)
-#else 
-	#ifdef _STATIC
-		#define CLASS_DECLSPEC
-	#else
-		#define CLASS_DECLSPEC		__declspec(dllimport)
-	#endif
-#endif
-
-
-#ifdef __linux
-# define CLASS_DECLSPEC
-#endif
-
-
-class CLASS_DECLSPEC C2DVector
+class GeoLib_API C2DVector
 {
 public:
 	_MEMORY_POOL_DECLARATION

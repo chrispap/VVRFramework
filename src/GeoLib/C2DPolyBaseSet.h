@@ -33,9 +33,11 @@ any modified versions of this cannot be resold to any other party.
 
 #ifdef __linux
 # define POLY_DECLSPEC
+#else
+# include "StdAfx.h"
 #endif
 
-class POLY_DECLSPEC C2DPolyBaseSet			: public C2DBaseSet	
+class GeoLib_API C2DPolyBaseSet			: public C2DBaseSet	
 {
 public:
 	_MEMORY_POOL_DECLARATION

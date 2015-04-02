@@ -56,9 +56,11 @@ class C2DCircle;
 
 #ifdef __linux
 # define POLY_DECLSPEC
+#else
+# include "StdAfx.h"
 #endif
 
-class POLY_DECLSPEC C2DPolygon : public C2DPolyBase
+class GeoLib_API C2DPolygon : public C2DPolyBase
 {
 public:
 	_MEMORY_POOL_DECLARATION

@@ -23,21 +23,7 @@ degenerate errors. All functions are static.
 
 class C2DRect;
 
-#ifdef _EXPORTING
-	#define CLASS_DECLSPEC		__declspec(dllexport)
-#else 
-	#ifdef _STATIC
-		#define CLASS_DECLSPEC
-	#else
-		#define CLASS_DECLSPEC		__declspec(dllimport)
-	#endif
-#endif
-
-#ifdef __linux
-# define CLASS_DECLSPEC
-#endif
-
-class CLASS_DECLSPEC CGrid
+class GeoLib_API CGrid
 {
 public:
 	/// Enumeration for degenerate handling methods.

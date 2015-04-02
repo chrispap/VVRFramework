@@ -22,21 +22,7 @@ for generating random numbers.
 
 #include "MemoryPool.h"
 
-#ifdef _EXPORTING
-	#define CLASS_DECLSPEC		__declspec(dllexport)
-#else 
-	#ifdef _STATIC
-		#define CLASS_DECLSPEC
-	#else
-		#define CLASS_DECLSPEC		__declspec(dllimport)
-	#endif
-#endif
-
-#ifdef __linux
-# define CLASS_DECLSPEC
-#endif
-
-class CLASS_DECLSPEC CRandomNumber
+class GeoLib_API CRandomNumber
 {
 public:
 	_MEMORY_POOL_DECLARATION

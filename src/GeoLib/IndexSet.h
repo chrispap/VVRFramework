@@ -13,30 +13,14 @@ any modified versions of this cannot be resold to any other party.
 \brief Class which is used to store a set of indexes in a simple array. 
 <P>---------------------------------------------------------------------------*/
 
-
+#include "StdAfx.h"
 
 #ifndef _GEOLIB_CINDEXSET_H 
 #define _GEOLIB_CINDEXSET_H
 
 class CSetData;
 
-#ifdef _EXPORTING
-	#define CLASS_DECLSPEC		__declspec(dllexport)
-#else 
-	#ifdef _STATIC
-		#define CLASS_DECLSPEC
-	#else
-		#define CLASS_DECLSPEC		__declspec(dllimport)
-	#endif
-#endif
-
-
-#ifdef __linux
-# define CLASS_DECLSPEC
-#endif
-
-
-class CLASS_DECLSPEC CIndexSet
+class GeoLib_API CIndexSet
 {
 public:
 	/// Constructor

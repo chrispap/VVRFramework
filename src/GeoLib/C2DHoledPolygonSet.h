@@ -22,28 +22,14 @@ Class which represents a collection of holed polygons.
 #define _GEOLIB_C2DHOLEDPOLYGONSET_H
 
 
+#include "StdAfx.h"
 #include "C2DBaseSet.h"
 #include "C2DHoledPolygon.h"
 #include "MemoryPool.h"
 
-
 class C2DPolygon;
 
-#ifdef _POLY_EXPORTING
-	#define POLY_DECLSPEC		__declspec(dllexport)
-#else 
-	#ifdef _STATIC
-		#define POLY_DECLSPEC
-	#else
-		#define POLY_DECLSPEC		__declspec(dllimport)
-	#endif
-#endif
-
-#ifdef __linux
-# define POLY_DECLSPEC
-#endif
-
-class  POLY_DECLSPEC C2DHoledPolygonSet		: public C2DBaseSet	
+class GeoLib_API C2DHoledPolygonSet		: public C2DBaseSet	
 {
 public:
 	_MEMORY_POOL_DECLARATION

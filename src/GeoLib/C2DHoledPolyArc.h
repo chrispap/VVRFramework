@@ -41,9 +41,11 @@ class C2DHoledPolyArcSet;
 
 #ifdef __linux
 # define POLY_DECLSPEC
+#else
+# include "StdAfx.h"
 #endif
 
-class  POLY_DECLSPEC C2DHoledPolyArc : public C2DHoledPolyBase
+class GeoLib_API C2DHoledPolyArc : public C2DHoledPolyBase
 {
 public:
 	_MEMORY_POOL_DECLARATION

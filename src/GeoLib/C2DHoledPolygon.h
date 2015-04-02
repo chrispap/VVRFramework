@@ -44,9 +44,11 @@ class C2DHoledPolygonSet;
 
 #ifdef __linux
 # define POLY_DECLSPEC
+#else
+# include "StdAfx.h"
 #endif
 
-class POLY_DECLSPEC C2DHoledPolygon : public C2DHoledPolyBase
+class GeoLib_API C2DHoledPolygon : public C2DHoledPolyBase
 {
 public:
 	_MEMORY_POOL_DECLARATION

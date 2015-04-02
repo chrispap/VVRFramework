@@ -25,6 +25,7 @@ the same set of operations such as Move, Reflect etc.
 #define _GEOLIB_C2DBASE_H
 
 #include "MemoryPool.h"
+#include "StdAfx.h"
 
 class C2DPoint;
 class C2DRect;
@@ -32,21 +33,8 @@ class C2DLine;
 class CInterval;
 class C2DVector;
 
-#ifdef _EXPORTING
-    #define CLASS_DECLSPEC		__declspec(dllexport)
-#else
-    #ifdef _STATIC
-        #define CLASS_DECLSPEC
-    #else
-        #define CLASS_DECLSPEC		__declspec(dllimport)
-    #endif
-#endif
 
-#ifdef __linux
-# define CLASS_DECLSPEC
-#endif
-
-class  CLASS_DECLSPEC C2DBase
+class  GeoLib_API C2DBase
 {
 public:
 	/// Enumeration of the types the geometric entities that will derive from this

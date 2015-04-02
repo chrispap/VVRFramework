@@ -1,5 +1,5 @@
 ### Executable ###########################################################################
-set(TARGET vvrexampleapp CACHE TYPE STRING)
+set(TARGET VVRExampleApplication CACHE TYPE STRING)
 file(GLOB SOURCE_FILES *.h *.cpp)
 set(SOURCE ${SOURCE_FILES})
 ##########################################################################################

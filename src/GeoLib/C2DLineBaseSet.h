@@ -27,21 +27,7 @@ File for the C2DLineBaseSet class, a collection of lines.
 class C2DBaseSet;
 class CIndexSet;
 
-#ifdef _EXPORTING
-	#define CLASS_DECLSPEC		__declspec(dllexport)
-#else 
-	#ifdef _STATIC
-		#define CLASS_DECLSPEC
-	#else
-		#define CLASS_DECLSPEC		__declspec(dllimport)
-	#endif
-#endif
-
-#ifdef __linux
-# define CLASS_DECLSPEC
-#endif
-
-class CLASS_DECLSPEC C2DLineBaseSet :  public C2DBaseSet
+class GeoLib_API C2DLineBaseSet :  public C2DBaseSet
 {
 public:
 	_MEMORY_POOL_DECLARATION
