@@ -1,13 +1,14 @@
 #include "Sphere.h"
+#include "Wall.h"
 
 using namespace vvr::phys;
 
 Sphere::Sphere(Vector3 pos, Vector3 vel, float radius, float mass)
     : RigidBody()
 {
-    r = radius;
+    r = rad = radius;
     m = mass;
-    x = pos;
+    RigidBody::x = pos;
     v = vel;
     P = m * v;
 
@@ -19,17 +20,6 @@ Sphere::Sphere(Vector3 pos, Vector3 vel, float radius, float mass)
         0, 0, 2.0f/5*mass*radius*radius);
 
     I_inv = I.invert();
-}
-
-void Sphere::draw() const
-{
-//    glPushMatrix();
-
-//    glTranslated(x.x, x.y, x.z);
-
-//    glutSolidSphere(r, 13, 13);
-
-//    glPopMatrix();
 }
 
 void Sphere::update(float t, float dt)
@@ -45,13 +35,18 @@ void Sphere::update(float t, float dt)
     float* new_state = integrate(t, STATES, getState(), dt);
     setState(new_state);
     delete new_state;
+
+    // Set geometric graphic quantities
+    Sphere3D::x = RigidBody::x.x;
+    Sphere3D::y = RigidBody::x.y;
+    Sphere3D::z = RigidBody::x.z;
 }
 
 void Sphere::handleWallCollision()
 {
     Vector3 n;
 
-    if(checkForWallCollision(x, r, n))
+    if(checkForWallCollision(RigidBody::x, r, n))
     {
         // Task
         v = v - n * v.dot(n) * 2;

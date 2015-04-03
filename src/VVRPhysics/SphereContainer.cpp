@@ -72,11 +72,11 @@ void SphereContainer::update(float t, float dt)
             if(j > i)
             {
                 if(checkForSpheresCollision(
-                    spheres[i].x, spheres[i].r, 
-                    spheres[j].x, spheres[j].r))
+                    spheres[i].RigidBody::x, spheres[i].r,
+                    spheres[j].RigidBody::x, spheres[j].r))
                 {
 
-                    Vector3 displacement = spheres[i].x - spheres[j].x;
+                    Vector3 displacement = spheres[i].RigidBody::x - spheres[j].RigidBody::x;
                     Vector3 n = displacement.normalize();
                     Vector3 n_neg = n * (-1);
 

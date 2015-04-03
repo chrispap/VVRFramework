@@ -1,8 +1,6 @@
 #include "Ex_01_Simple2DScene.h"
 #include "utils.h"
 #include "canvas.h"
-
-#include <MathGeoLib/MathGeoLib.h>
 #include <iostream>
 #include <fstream>
 #include <string>

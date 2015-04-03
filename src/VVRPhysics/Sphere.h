@@ -3,29 +3,27 @@
 
 #include "vvrphysicsdll.h"
 #include "RigidBody.h"
-#include "Renderable.h"
-#include "Wall.h"
+#include "../VVRScene/canvas.h"
 
 namespace vvr {
 namespace phys {
 
-class VVRPhysics_API Sphere : public RigidBody, public IRenderable
+class VVRPhysics_API Sphere : public RigidBody, public vvr::Sphere3D
 {
+
 public:
 
-	float r;
+    float r;
 
-	Sphere(Vector3 pos, Vector3 vel, float radius, float mass);
+    Sphere(Vector3 pos, Vector3 vel, float radius, float mass);
 
-	void draw() const override;
+    void update(float t, float dt);
 
-	void update(float t, float dt);
+    void handleWallCollision();
 
-	void handleWallCollision();
-
-	bool checkForWallCollision(Vector3 &pos, float r, Vector3 &v);
+    bool checkForWallCollision(Vector3 &pos, float r, Vector3 &v);
 };
 
-}} // end namespace vvr::phys
+}}
 
 #endif

@@ -30,27 +30,34 @@ Cube::~Cube()
 
 }
 
-void Cube::draw() const
-{
+//void Cube::draw() const
+//{
 //    glPushMatrix();
-
 //    glTranslated(x.x, x.y, x.z);
-
 //    glMultMatrixf(q.rotationMatrix().toGLMatrix4());
-
 //    glutSolidCube(l);
-
 //    glPopMatrix();
-}
+//}
 
 void Cube::update(float t, float dt)
 {
     // - Collision
+    //...
 
     // - Forces
+    //...
 
     // - Integration
     float* new_state = integrate(t, STATES, getState(), dt);
     setState(new_state);
     delete new_state;
+
+    // TODO: This is not correct, need to apply the correct transformation
+
+    x1 = RigidBody::x.x;
+    y1 = RigidBody::x.y;
+    z1 = RigidBody::x.z;
+    x2 = x1 + l;
+    y2 = y1 + l;
+    z2 = z1 + l;
 }

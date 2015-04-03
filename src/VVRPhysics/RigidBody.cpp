@@ -10,11 +10,6 @@ RigidBody::RigidBody()
 	I_inv = Matrix3(1, 0, 0, 0, 1, 0, 0, 0, 1);
 }
 
-RigidBody::~RigidBody()
-{
-
-}
-
 float* RigidBody::getState()
 {
 	float* state = new float[STATES];

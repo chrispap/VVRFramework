@@ -1,11 +1,12 @@
 #include "scene.h"
 #include "settings.h"
-#include "Renderable.h"
+#include "canvas.h"
+#include "RigidBody.h"
 #include <vector>
 
 using namespace std;
 using namespace vvr;
-using namespace vvr::phys;
+using vvr::phys::RigidBody;
 
 class PhysicsEngineScene : public Scene
 {
@@ -21,10 +22,10 @@ private:
     void arrowEvent(ArrowDir dir, int modif);
 
 private:
-    Settings m_cnf;
-    vector<IRenderable*> m_bodies;
-    bool m_anim_on;
-    float m_t, m_dt;
-    float m_box_size;
-    Box m_box;
+    Settings            m_cnf;
+    vector<RigidBody*>  m_bodies;
+    float               m_t, m_dt;
+    float               m_box_size;
+    bool                m_anim_on;
+    Box                 m_box;
 };

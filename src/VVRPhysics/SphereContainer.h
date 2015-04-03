@@ -2,14 +2,14 @@
 #define SPHARE_CONTAINER_H
 
 #include "vvrphysicsdll.h"
-#include "Renderable.h"
 #include "Sphere.h"
+#include "../VVRScene/canvas.h"
 #include <vector>
 
 namespace vvr {
 namespace phys {
 
-class VVRPhysics_API SphereContainer : public IRenderable
+class VVRPhysics_API SphereContainer : public IRenderable, public RigidBody
 {
 	std::vector<Sphere> spheres;
 
@@ -28,6 +28,6 @@ public:
 	float randMM(float min, float max);
 };
 
-}} // end namespace vvr::phys
+}}
 
 #endif

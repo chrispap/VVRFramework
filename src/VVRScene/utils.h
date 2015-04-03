@@ -4,6 +4,9 @@
 #include "vvrscenedll.h"
 
 #include <string>
+#include <iostream>
+#include <sstream>
+#include <vector>
 
 using namespace std;
 
@@ -16,6 +19,8 @@ float VVRScene_API getSeconds();
 double VVRScene_API  normalizeAngle(double angle);
 string VVRScene_API getExePath();
 string VVRScene_API getBasePath();
+vector<string> &split(const string &s, char delim, vector<string> &elems);
+vector<string> split(const string &s, char delim);
 
 }
 

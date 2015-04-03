@@ -3,12 +3,12 @@
 
 #include "vvrphysicsdll.h"
 #include "RigidBody.h"
-#include "Renderable.h"
+#include "../VVRScene/canvas.h"
 
 namespace vvr {
 namespace phys {
 
-class VVRPhysics_API Cube : public RigidBody, public IRenderable
+class VVRPhysics_API Cube : public RigidBody, public Box3D
 {
 
 public:
@@ -19,11 +19,9 @@ public:
 
 	~Cube();
 
-	virtual void draw() const override;
-
-	virtual void update(float t, float dt);
+	void update(float t, float dt) override;
 };
 
-}} // end namespace vvr::phys
+}}
 
 #endif

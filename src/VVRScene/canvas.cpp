@@ -1,4 +1,5 @@
 #include "canvas.h"
+#include "geom.h"
 
 #include <iostream>
 #include <vector>
@@ -20,12 +21,12 @@ Colour Colour::yellow (0xFF, 0xFF, 0x00);
 Colour Colour::grey   (0x66, 0x66, 0x66);
 
 /* Shape drawing */
-void Shape::draw() {
+void Shape::draw() const {
     glColor3ubv(colour.data);
     drawShape();
 }
 
-void Point2D::drawShape() {
+void Point2D::drawShape() const {
     glPointSize(7);
     glEnable(GL_POINT_SMOOTH);
     glBegin(GL_POINTS);
@@ -33,7 +34,7 @@ void Point2D::drawShape() {
     glEnd();
 }
 
-void LineSeg2D::drawShape() {
+void LineSeg2D::drawShape() const {
     glLineWidth(DEF_LINE_WIDTH);
     glBegin(GL_LINES);
     glVertex2f(x1, y1);
@@ -41,7 +42,7 @@ void LineSeg2D::drawShape() {
     glEnd();
 }
 
-void Line2D::drawShape() {
+void Line2D::drawShape() const {
     double dx = x2-x1;
     double dy = y2-y1;
 
@@ -52,7 +53,7 @@ void Line2D::drawShape() {
     glEnd();
 }
 
-void LineSeg3D::drawShape() {
+void LineSeg3D::drawShape() const {
     double dx = x2-x1;
     double dy = y2-y1;
 
@@ -63,22 +64,36 @@ void LineSeg3D::drawShape() {
     glEnd();
 }
 
-void Circle2D::drawShape() {
+void Circle2D::drawShape() const {
     double x_, y_, theta;
     unsigned const numOfSegments = 30;
 
     glLineWidth(DEF_LINE_WIDTH);
     glBegin(GL_LINE_LOOP);
-    for(int i = 0; i < numOfSegments; i++) {
+    for (int i = 0; i < numOfSegments; i++) {
         theta = 2.0f * 3.14159265 * i / numOfSegments;
         x_ = r * cosf(theta);
         y_ = r * sinf(theta);
-        glVertex2f(x + x_, y + y_);
+        glVertex2f(xx + x_, y + y_);
     }
     glEnd();
 }
 
-void Triangle2D::drawShape() {
+void Sphere3D::drawShape() const {
+    glPushMatrix();
+    glScalef(rad, rad, rad);
+    glTranslatef(x, y, z);
+    drawSphere(rad, 30, 30);
+    glPopMatrix();
+}
+
+void Box3D::drawShape() const {
+    Box box(Vec3d(x1, y1, z1), Vec3d(x2, y2, z2));
+    box.draw(colour, 0x100);
+    box.draw(colour, 0);
+}
+
+void Triangle2D::drawShape() const {
     glLineWidth(DEF_LINE_WIDTH);
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glBegin(GL_TRIANGLES);
@@ -177,4 +192,29 @@ void Canvas2D::clear()
     frames.clear();
     frames.push_back(Frame(false));
     fi=0;
+}
+
+void drawSphere(double r, int lats, int longs)
+{
+    int i, j;
+    for (i = 0; i <= lats; i++) {
+        double lat0 = M_PI * (-0.5 + (double)(i - 1) / lats);
+        double z0 = sin(lat0);
+        double zr0 = cos(lat0);
+
+        double lat1 = M_PI * (-0.5 + (double)i / lats);
+        double z1 = sin(lat1);
+        double zr1 = cos(lat1);
+        glBegin(GL_QUAD_STRIP);
+        for (j = 0; j <= longs; j++) {
+            double lng = 2 * M_PI * (double)(j - 1) / longs;
+            double x = cos(lng);
+            double y = sin(lng);
+            glNormal3f(x * zr0, y * zr0, z0);
+            glVertex3f(x * zr0, y * zr0, z0);
+            glNormal3f(x * zr1, y * zr1, z1);
+            glVertex3f(x * zr1, y * zr1, z1);
+        }
+        glEnd();
+    }
 }

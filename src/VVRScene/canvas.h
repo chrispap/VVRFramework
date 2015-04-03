@@ -2,13 +2,15 @@
 #define __SHAPE2D_H__
 
 #include "vvrscenedll.h"
-
+#include "utils.h"
 #include <string>
 #include <vector>
 #include <cstdlib>
 
 using std::string;
 using std::vector;
+
+static void drawSphere(double r, int lats, int longs);
 
 namespace vvr {
 
@@ -40,19 +42,27 @@ struct VVRScene_API Colour
     static Colour grey;
 };
 
-/* Shapes */
-struct VVRScene_API Shape
+/* Renderables */
+
+class VVRScene_API IRenderable {
+public:
+    virtual ~IRenderable() {}
+
+    virtual void draw() const = 0;
+};
+
+struct VVRScene_API Shape : public IRenderable
 {
     Colour colour;
 
 protected:
-    Shape(){}
+    Shape() {}
     Shape(const Colour &rgb) : colour(rgb) {}
-    virtual void drawShape() = 0;
+    virtual void drawShape() const = 0;
 
 public:
-    virtual ~Shape(){}
-    void draw();
+    virtual ~Shape() {}
+    void draw() const override;
 };
 
 struct VVRScene_API Point2D : public Shape
@@ -60,7 +70,7 @@ struct VVRScene_API Point2D : public Shape
     double x,y;
 
 protected:
-    void drawShape();
+    void drawShape() const override;
 
 public:
     Point2D(){}
@@ -70,11 +80,12 @@ public:
 
 struct VVRScene_API LineSeg2D : public Shape
 {
-protected:
     double x1,y1;
     double x2,y2;
 
-    void drawShape();
+protected:
+
+    void drawShape() const override;
 
 public:
     LineSeg2D(){}
@@ -85,7 +96,7 @@ public:
 struct VVRScene_API Line2D : public LineSeg2D
 {
 protected:
-    void drawShape();
+    void drawShape() const override;
 
 public:
     Line2D(){}
@@ -95,11 +106,12 @@ public:
 
 struct VVRScene_API LineSeg3D : public Shape
 {
-protected:
     double x1,y1,z1;
     double x2,y2,z2;
 
-    void drawShape();
+protected:
+
+    void drawShape() const override;
 
 public:
     LineSeg3D(){}
@@ -110,15 +122,42 @@ public:
 
 struct VVRScene_API Circle2D : public Shape
 {
-    double x,y,r;
+    double xx,y,r;
 
 protected:
-    void drawShape();
+    void drawShape() const override;
 
 public:
     Circle2D(){}
     Circle2D(double cx, double cy, double rad, const Colour &rgb=Colour()) :
-      x(cx), y(cy), r(rad), Shape(rgb) {}
+      xx(cx), y(cy), r(rad), Shape(rgb) {}
+};
+
+struct VVRScene_API Sphere3D : public Shape
+{
+    double x, y, z, rad;
+
+protected:
+    void drawShape() const override;
+
+public:
+    Sphere3D(){}
+    Sphere3D(double x, double y, double z, double rad, const Colour &rgb = Colour()) :
+        x(x), y(y), z(z), rad(rad), Shape(rgb) {}
+};
+
+struct VVRScene_API Box3D : public Shape
+{
+    double x1, y1, z1;
+    double x2, y2, z2;
+
+protected:
+    void drawShape() const override;
+
+public:
+    Box3D() {}
+    Box3D(double x, double y, double z, double rad, const Colour &rgb = Colour()) :
+        x1(x1), y1(y1), z1(z1), x2(x2), y2(y2), z2(z2), Shape(rgb) {}
 };
 
 struct VVRScene_API Triangle2D : public Shape
@@ -127,7 +166,8 @@ struct VVRScene_API Triangle2D : public Shape
     double x2,y2;
     double x3,y3;
 
-    void drawShape();
+protected:
+    void drawShape() const override;
 
 public:
     Triangle2D(){}
