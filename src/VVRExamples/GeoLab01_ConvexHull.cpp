@@ -17,7 +17,7 @@
 
 Scene_ConvexHull::Scene_ConvexHull()
 {
-    m_bg_col = Colour(0x44, 0x44, 0x44);
+    m_bg_col = Colour(0x44,0x44,0x44);
     reset();
 }
 
@@ -82,7 +82,44 @@ void Scene_ConvexHull::mousePressed(int x, int y, int modif)
         }
     }
 
+    m_canvas.clear();
     m_canvas.add(new Point2D(x, y, inside ? Colour::yellow : Colour::red));
+
+    if (!inside)
+    {
+        LineSeg2D *l1 = new LineSeg2D(x,y,0,0 ,Colour::blue);
+        LineSeg2D *l2 = new LineSeg2D(*l1);
+        const C2DLine *poly_seg;
+        int i=0;
+
+        // Find the first vissible segment
+        while(!m_convex_hull_polygon.GetLine(i++)->IsOnRight(p));
+        while( m_convex_hull_polygon.GetLine(i++)->IsOnRight(p));
+
+        // Create the first line
+        poly_seg = m_convex_hull_polygon.GetLine(--i);
+        l1->x2 = poly_seg->GetPointFrom().x;
+        l1->y2 = poly_seg->GetPointFrom().y;
+
+        // Colour the vissisble segments
+        do
+        {
+            m_canvas.add(new LineSeg2D(poly_seg->GetPointFrom().x,
+                                       poly_seg->GetPointFrom().y,
+                                       poly_seg->GetPointTo().x,
+                                       poly_seg->GetPointTo().y, Colour::blue));
+            poly_seg = m_convex_hull_polygon.GetLine(++i);
+        } while(!poly_seg->IsOnRight(p));
+
+        // Create the second line
+        poly_seg = m_convex_hull_polygon.GetLine(--i);
+        l2->x2 = poly_seg->GetPointTo().x;
+        l2->y2 = poly_seg->GetPointTo().y;
+
+        m_canvas.add(l1);
+        m_canvas.add(l2);
+    }
+
 }
 
 void Scene_ConvexHull::mouseMoved(int x, int y, int modif)

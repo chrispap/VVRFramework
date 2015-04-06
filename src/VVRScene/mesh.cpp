@@ -38,13 +38,15 @@ Mesh::Mesh(const string &objDir, const string &objFile, const string &texFile)
     if (!shapes[0].mesh.vec_tex.empty() && !texFile.empty())
         mTexCoords = shapes[0].mesh.vec_tex;
 
-    if (!normals.empty()) {
-        for (unsigned i=0; i<indices.size() ; i+=3)
-            mVertexNormals.push_back(Vec3d(normals[i], normals[i+1], normals[i+2]));
-    }
-    else {
-        createNormals();
-    }
+//    if (!normals.empty()) {
+//        for (unsigned i=0; i<indices.size() ; i+=3)
+//            mVertexNormals.push_back(Vec3d(normals[i], normals[i+1], normals[i+2]));
+//    }
+//    else {
+//        createNormals();
+//    }
+
+    createNormals();
 
     mAABB = Box(mVertices);
 }
@@ -132,7 +134,16 @@ void Mesh::setBigSize(float size)
 
 void Mesh::cornerAlign()
 {
-    Vec3d offs(-mAABB.min.x, -mAABB.min.y, -mAABB.min.z);
+    Vec3d offs(mAABB.min);
+    offs.scale(-1.0);
+    move(offs);
+}
+
+void Mesh::centerAlign()
+{
+    Vec3d offs(mAABB.max);
+    offs.add(mAABB.min);
+    offs.scale(-0.5);
     move(offs);
 }
 

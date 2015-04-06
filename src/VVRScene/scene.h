@@ -20,7 +20,7 @@ protected:
     Vec3d   m_globRot;
     float   m_scene_width;
     float   m_scene_height;
-    float   m_scene_dist;
+    float   m_camera_dist;
     int     m_screen_width;
     int     m_screen_height;
     bool    m_perspective_proj;

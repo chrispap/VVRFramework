@@ -62,7 +62,7 @@ OrientationViewerScene::OrientationViewerScene()
     double def_rot_z = m_settings.getDbl("def_rot_z");
     m_globRotDef = Vec3d(def_rot_x, def_rot_y, def_rot_z);
     m_globRot = m_globRotDef;
-    m_scene_dist = m_settings.getDbl("camera_dist");
+    m_camera_dist = m_settings.getDbl("camera_dist");
     load();
     m_anim_speed = m_settings.getDbl("anim_speed");
     m_anim_on = true;

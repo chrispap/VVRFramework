@@ -1,0 +1,15 @@
+####################################################################
+### Directory paths ################################################
+####################################################################
+res_dir                     =  resources/
+obj_dir                     =  resources/obj/
+obj_file                    =  resources/obj/polyhedron.obj
+perspective_proj            =  0
+scene_width                 =  20
+scene_height                =  20
+camera_dist                 =  13.8
+color_bg                    =  768E77
+color_bone                  =  EEC57A
+def_rot_x                   =  0
+def_rot_y                   =  0
+def_rot_z                   =  0

@@ -52,11 +52,11 @@ void Scene::drawAxes()
 void Scene::GL_Init()
 {
     // Light setup
-    static GLfloat light_position[] = { 0, m_scene_height, m_scene_dist,   1};
-    static GLfloat ambientLight[]   = { .9,  .9,  .9,   1};
-    static GLfloat diffuseLight[]   = { .9,  .9,  .9,   1};
-    static GLfloat specularLight[]  = { .9,  .9,  .9,   1};
-    
+    static GLfloat light_position[] = { 0, 0, -m_camera_dist,   1};
+    static GLfloat ambientLight[]   = { .75,  .75,  .75,   1};
+    static GLfloat diffuseLight[]   = { .75,  .75,  .75,   1};
+    static GLfloat specularLight[]  = { .75,  .75,  .75,   1};
+
     glLightfv(GL_LIGHT0, GL_POSITION, light_position);
     glLightfv(GL_LIGHT0, GL_AMBIENT,  ambientLight);
     glLightfv(GL_LIGHT0, GL_DIFFUSE,  diffuseLight);
@@ -98,8 +98,8 @@ void Scene::GL_Resize(int w, int h)
 //        gluPerspective(
 //            10.0,
 //            (float)w/h,
-//            m_scene_dist * 0.002,
-//            m_scene_dist * 20
+//            m_camera_dist * 0.002,
+//            m_camera_dist * 20
 //        );
     }
     else
@@ -112,8 +112,8 @@ void Scene::GL_Resize(int w, int h)
              m_scene_width  / 2,
             -m_scene_height / 2,
              m_scene_height / 2,
-             m_scene_dist*-2,       // -Z look to the user! Near should be negative!
-             m_scene_dist* 2        // Far should be positive!
+             m_camera_dist*-2,       // -Z look to the user! Near should be negative!
+             m_camera_dist* 2        // Far should be positive!
         );
     }
 
@@ -127,7 +127,7 @@ void Scene::GL_Render()
     glLoadIdentity();
 
     // Push the scene to the back (far from camera)
-    glTranslatef(0,0, m_scene_dist);
+    glTranslatef(0,0, m_camera_dist);
 
     // Apply global rotation & draw
     glRotatef(m_globRot.x, 1, 0, 0);
@@ -184,9 +184,9 @@ void Scene::mouseMoved(int x, int y, int modif)
 
 void Scene::mouseWheel(int dir, int modif)
 {
-    m_scene_dist += 0.2*dir;
+    m_camera_dist += 0.2*dir;
 
-    if (m_scene_dist < 0.01) m_scene_dist = 0.01;
+    if (m_camera_dist < 0.01) m_camera_dist = 0.01;
 }
 
 void Scene::reset()

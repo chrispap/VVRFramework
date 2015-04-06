@@ -15,7 +15,7 @@ PhysicsEngineScene::PhysicsEngineScene()
     m_cnf = Settings(getBasePath() + "config/settings_03.txt");
     m_scene_width = m_cnf.getDbl("scene_width");
     m_scene_height = m_cnf.getDbl("scene_height");
-    m_scene_dist = m_cnf.getDbl("scene_dist");
+    m_camera_dist = m_cnf.getDbl("scene_dist");
     m_box_size = m_cnf.getDbl("box_size");
     m_bg_col = Colour(m_cnf.getStr("color_bg"));
 
