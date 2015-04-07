@@ -15,6 +15,12 @@ set(SOURCE ${SOURCE_FILES})
 qt5_wrap_ui(UI_FILES window.ui)
 ##########################################################################################
 
+### Find MathGeoLib ######################################################################
+set(MathGeoLib_DIR CACHE PATH "Installation path of MathGeoLib")
+include_directories(${MathGeoLib_DIR}/include)
+link_directories(${MathGeoLib_DIR}/lib)
+##########################################################################################
+
 ##########################################################################################
 add_library(VVRScene SHARED ${SOURCE} ${UI_FILES})
 ##########################################################################################
@@ -31,5 +37,5 @@ target_link_libraries(VVRScene ${OPENGL_LIBRARIES} )
 ##########################################################################################
 
 ### Link to MathGeolib ###################################################################
-target_link_libraries(VVRScene)
+target_link_libraries(VVRScene PRIVATE MathGeoLib)
 ##########################################################################################

@@ -8,14 +8,16 @@
 #include <locale>
 #include <cmath>
 #include <QtOpenGL>
+#include <MathGeoLib\MathGeoLib.h>
 
 using namespace vvr;
 using namespace std;
+using namespace math;
 
 Scene::Scene()
 {
-    m_globRotDef = Vec3d(0,0,0);
-    m_globRot = m_globRotDef;
+    m_globRot_def = Vec3d(0,0,0);
+    m_globRot = m_globRot_def;
     m_perspective_proj = false;
 }
 
@@ -26,7 +28,7 @@ const char* Scene::getName() const
 
 void Scene::drawAxes()
 {
-    GLfloat len = 2.0 * m_scene_width;
+    GLfloat len = 2.0 * getScreenWidth();
     glLineWidth(1);
     glBegin(GL_LINES);
     
@@ -52,10 +54,10 @@ void Scene::drawAxes()
 void Scene::GL_Init()
 {
     // Light setup
-    static GLfloat light_position[] = { 0, 0, -m_camera_dist,   1};
+    static GLfloat light_position[] = { 0, 0, m_camera_dist*3,   1};
     static GLfloat ambientLight[]   = { .75,  .75,  .75,   1};
     static GLfloat diffuseLight[]   = { .75,  .75,  .75,   1};
-    static GLfloat specularLight[]  = { .75,  .75,  .75,   1};
+    static GLfloat specularLight[]  = { .85,  .85,  .85,   1};
 
     glLightfv(GL_LIGHT0, GL_POSITION, light_position);
     glLightfv(GL_LIGHT0, GL_AMBIENT,  ambientLight);
@@ -82,6 +84,13 @@ void Scene::GL_Init()
     glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    /* PRINT OpenGL INFO */
+    printf("=== VVR Framework ================\n");
+    printf(" %s\n", glGetString(GL_VERSION ));
+    printf(" %s\n", glGetString(GL_VENDOR  ));
+    printf(" %s\n", glGetString(GL_RENDERER));
+    printf("==================================\n");
 }
 
 void Scene::GL_Resize(int w, int h)
@@ -89,34 +98,24 @@ void Scene::GL_Resize(int w, int h)
     m_screen_width = w;
     m_screen_height = h;
 
-    glViewport(0,0,w,h);
+    glViewport(0,0, m_screen_width, m_screen_height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
 
-    if(m_perspective_proj)
-    {
-//        gluPerspective(
-//            10.0,
-//            (float)w/h,
-//            m_camera_dist * 0.002,
-//            m_camera_dist * 20
-//        );
-    }
-    else
-    {
-        // Keep constant aspect ratio
-        m_scene_height = m_scene_width * h/w;
+    const auto d = m_camera_dist;
+    float4x4 proj_mat;
 
-        glOrtho(
-            -m_scene_width  / 2,
-             m_scene_width  / 2,
-            -m_scene_height / 2,
-             m_scene_height / 2,
-             m_camera_dist*-2,       // -Z look to the user! Near should be negative!
-             m_camera_dist* 2        // Far should be positive!
-        );
+    if (m_perspective_proj) 
+    {
+        proj_mat = float4x4::OpenGLPerspProjRH(d*0.5f, d*1.2f, 1.0f, 1.0f * ((float)h/w));
+    }
+    else 
+    {
+        proj_mat = float4x4::OpenGLOrthoProjRH(0, -200, d, d * ((float)h/w));
     }
 
+    glMultMatrixf(proj_mat.ptr());
+    resize();
 }
 
 void Scene::GL_Render()
@@ -127,7 +126,7 @@ void Scene::GL_Render()
     glLoadIdentity();
 
     // Push the scene to the back (far from camera)
-    glTranslatef(0,0, m_camera_dist);
+    glTranslatef(0,0, -m_camera_dist);
 
     // Apply global rotation & draw
     glRotatef(m_globRot.x, 1, 0, 0);
@@ -145,7 +144,7 @@ void Scene::keyEvent (unsigned char key,  bool up, int modif)
     int shift =  modif & 0x02;
 
     switch (isprint(key)? tolower(key): key) {
-    case '0' : m_globRot = m_globRotDef; break;
+    case '0' : m_globRot = m_globRot_def; break;
     case 'r' : this->reset();
     }
 
@@ -184,14 +183,13 @@ void Scene::mouseMoved(int x, int y, int modif)
 
 void Scene::mouseWheel(int dir, int modif)
 {
-    m_camera_dist += 0.2*dir;
-
+    m_camera_dist += 5*dir;
     if (m_camera_dist < 0.01) m_camera_dist = 0.01;
 }
 
 void Scene::reset()
 {
-    m_globRot = m_globRotDef;
+    m_globRot = m_globRot_def;
 }
 
 /* Utils */

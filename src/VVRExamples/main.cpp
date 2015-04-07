@@ -1,31 +1,31 @@
-#include "Ex_01_Simple2DScene.h"
-#include "Ex_02_OrientationViewerScene.h"
-#include "Ex_03_PhysicsEngineScene.h"
-#include "Ex_04_ContourEditor.h"
-#include "Ex_05_Simple3DScene.h"
-#include "GeoLab00_Scene01.h"
-#include "GeoLab00_Scene02.h"
-#include "GeoLab01_ConvexHull.h"
+#include "Simple2DScene.h"
+#include "OrientationViewerScene.h"
+#include "PhysicsEngineScene.h"
+#include "ContourEditorScene.h"
+#include "Simple3DScene.h"
+#include "ConvexHullScene.h"
 
 int main(int argc, char* argv[])
 {
-    try {
+    try 
+    {
         /* Example scenes using VVR Framework */
-
-        //return vvr::mainLoop(argc, argv, new Scene01);
-        //return vvr::mainLoop(argc, argv, new Scene02);
-        //return vvr::mainLoop(argc, argv, new Scene_ConvexHull);
-        //return vvr::mainLoop(argc, argv, new Simple2DScene);
-        return vvr::mainLoop(argc, argv, new Simple3DScene);
-        //return vvr::mainLoop(argc, argv, new OrientationViewerScene);
-        //return vvr::mainLoop(argc, argv, new Scene_ConvexHull);
-        //return vvr::mainLoop(argc, argv, new PhysicsEngineScene);
-        //return vvr::mainLoop(argc, argv, new ContourEditor);
+        //vvr::mainLoop(argc, argv, new Simple2DScene);
+        vvr::mainLoop(argc, argv, new Simple3DScene);
+        //vvr::mainLoop(argc, argv, new OrientationViewerScene);
+        //vvr::mainLoop(argc, argv, new PhysicsEngineScene);
+        //vvr::mainLoop(argc, argv, new ContourEditor);
+        //vvr::mainLoop(argc, argv, new Scene_ConvexHull);
+        return 0;
     }
-    catch (std::string Exception) {
+    catch (std::string Exception) 
+    {
         echo(Exception);
+        return 1;
     }
-    catch (...) {
+    catch (...) 
+    {
         std::cerr << "Unknown exception" << std::endl;
+        return 1;
     }
 }

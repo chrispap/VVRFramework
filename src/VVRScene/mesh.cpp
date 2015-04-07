@@ -21,32 +21,35 @@ Mesh::Mesh()
 
 Mesh::Mesh(const string &objDir, const string &objFile, const string &texFile)
 {
-    vector<shape_t> shapes;
-    string err = LoadObj(shapes, objFile.c_str(), objDir.c_str());
+    std::vector<shape_t> shapes;
+    std::vector<material_t> materials;
+    string err = LoadObj(shapes, materials, objFile.c_str(), objDir.c_str());
     if (!err.empty()) throw err;
 
-    vector<float> &positions = shapes[0].mesh.vec_pos;
-    vector<unsigned> &indices = shapes[0].mesh.vec_indices;
-    vector<float> &normals = shapes[0].mesh.vec_norm;
+    vector<float> &positions = shapes[0].mesh.positions;
+    vector<unsigned> &indices = shapes[0].mesh.indices;
+    vector<float> &normals = shapes[0].mesh.normals;
 
+    // Store vertices.
     for (unsigned i=0; i<positions.size() ; i+=3)
         mVertices.push_back(Vec3d(positions[i], positions[i+1], positions[i+2]));
-
+    
+    // Store faces (triangles).
     for (unsigned i=0; i<indices.size() ; i+=3)
-        mTriangles.push_back(Triangle(&mVertices, indices[i], indices[i+1], indices[i+2]));
+        mTriangles.push_back(Triangle(&mVertices, indices[i], indices[i+2], indices[i+1]));
 
-    if (!shapes[0].mesh.vec_tex.empty() && !texFile.empty())
-        mTexCoords = shapes[0].mesh.vec_tex;
+    // Store texture coordinates.
+    if (!shapes[0].mesh.texcoords.empty() && !texFile.empty())
+        mTexCoords = shapes[0].mesh.texcoords;
 
-//    if (!normals.empty()) {
-//        for (unsigned i=0; i<indices.size() ; i+=3)
-//            mVertexNormals.push_back(Vec3d(normals[i], normals[i+1], normals[i+2]));
-//    }
-//    else {
-//        createNormals();
-//    }
-
-    createNormals();
+    // Store normals.
+    // Or create them.
+    if (!normals.empty()) {
+        const int n = normals.size();
+        for (unsigned i=0; i<n ; i+=3)
+            mVertexNormals.push_back(Vec3d(normals[i], normals[i+1], normals[i+2]));
+    }
+    else createNormals();
 
     mAABB = Box(mVertices);
 }
@@ -201,15 +204,17 @@ void Mesh::drawTriangles(Colour col, bool wire)
 
 void Mesh::drawNormals(Colour col)
 {
-    Vec3d n;
+    const float len = mAABB.getMaxSize() / 50;
+    
     glBegin(GL_LINES);
-    vector<Triangle>::const_iterator ti;
 
-    for(ti=mTriangles.begin(); ti!=mTriangles.end(); ++ti) {
-        n = ti->getCenter();
+    for(int i=0; i<mVertices.size(); i++) {
+        Vec3d n = mVertices[i];
         glColor3ubv(Colour(0x00,0,0).data);
         glVertex3dv(n.data);
-        n.add(ti->getNormal());
+        Vec3d norm = mVertexNormals[i];
+        norm.scale(len);
+        n.add(norm);
         glColor3ubv(Colour(0xFF,0,0).data);
         glVertex3dv(n.data);
     }
