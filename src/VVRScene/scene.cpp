@@ -102,18 +102,15 @@ void Scene::GL_Resize(int w, int h)
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
 
+    m_camera_dist = 800;
     const auto d = m_camera_dist;
     float4x4 proj_mat;
 
     if (m_perspective_proj) 
-    {
-        proj_mat = float4x4::OpenGLPerspProjRH(d*0.5f, d*1.2f, 1.0f, 1.0f * ((float)h/w));
-    }
+        proj_mat = float4x4::OpenGLPerspProjRH(d/2, d*2, 1., 1. * (float)h/w);
     else 
-    {
-        proj_mat = float4x4::OpenGLOrthoProjRH(0, -200, d, d * ((float)h/w));
-    }
-
+        proj_mat = float4x4::OpenGLOrthoProjRH(-d*2, d*2, w, h);
+    
     glMultMatrixf(proj_mat.ptr());
     resize();
 }
@@ -183,7 +180,7 @@ void Scene::mouseMoved(int x, int y, int modif)
 
 void Scene::mouseWheel(int dir, int modif)
 {
-    m_camera_dist += 5*dir;
+    m_camera_dist += -20.0 * dir;
     if (m_camera_dist < 0.01) m_camera_dist = 0.01;
 }
 

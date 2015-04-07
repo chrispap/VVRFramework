@@ -23,7 +23,6 @@ Simple3DScene::Simple3DScene()
     // Load settings.
     m_settings = Settings(getBasePath() + "config/settings_simple3D.txt");
     m_perspective_proj = m_settings.getBool("perspective_proj");
-    m_camera_dist = m_settings.getDbl("camera_dist");
     m_bg_col = Colour(m_settings.getStr("color_bg"));
     m_obj_col = Colour(m_settings.getStr("color_obj"));
     m_style_flag = FLAG_SHOW_SOLID;
@@ -44,13 +43,12 @@ Simple3DScene::Simple3DScene()
 
 void Simple3DScene::resize()
 {
-    m_mesh.setBigSize(50);//getScreenWidth() / 3);
+    m_mesh.setBigSize(getScreenWidth() / 4);
     m_mesh.centerAlign();
 }
 
 void Simple3DScene::draw()
 {
-    vvr::Box(Vec3d(-25,-25,-25),Vec3d(25,25,25)).draw(Colour::red);
 
     if (m_style_flag & FLAG_SHOW_SOLID)     m_mesh.draw(m_obj_col, SOLID);
     if (m_style_flag & FLAG_SHOW_WIRE)      m_mesh.draw(Colour::black, WIRE);

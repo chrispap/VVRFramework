@@ -16,21 +16,23 @@ enum ArrowDir {
 class VVRScene_API Scene
 {
 protected:
-    Vec3d   m_globRot_def;
-    Vec3d   m_globRot;
-    float   m_camera_dist;
-    Colour  m_bg_col;
-    bool    m_perspective_proj;
+    bool m_perspective_proj;
+    Vec3d m_globRot_def;
+    Vec3d m_globRot;
+    Colour m_bg_col;
 
 protected:
     virtual void draw() = 0;
     virtual void reset();
     virtual void resize(){};
+
+protected:
     void drawAxes();
     void enterPixelMode();
     void returnFromPixelMode();
 
 private:
+    float m_camera_dist;
     int m_screen_width, m_screen_height;
     int m_mouselastX, m_mouselastY;
 
