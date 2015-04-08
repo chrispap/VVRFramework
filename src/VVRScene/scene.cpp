@@ -28,7 +28,7 @@ const char* Scene::getName() const
 
 void Scene::drawAxes()
 {
-    GLfloat len = 2.0 * getScreenWidth();
+    GLfloat len = 2.0 * getSceneWidth();
     glLineWidth(1);
     glBegin(GL_LINES);
     
@@ -102,15 +102,39 @@ void Scene::GL_Resize(int w, int h)
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
 
-    m_camera_dist = 800;
-    const auto d = m_camera_dist;
     float4x4 proj_mat;
+    m_camera_dist = 100;
 
     if (m_perspective_proj) 
-        proj_mat = float4x4::OpenGLPerspProjRH(d/2, d*2, 1., 1. * (float)h/w);
+    {
+        const float FOV = 90;
+        
+        const float near_ = m_camera_dist * 0.1;
+        const float far_  = m_camera_dist * 1.5;
+        const float vh    = tanf(DegToRad(FOV/2)) * 2 * near_;
+        const float vv    = vh * h/w;
+
+        m_scene_width = tanf(DegToRad(FOV/2)) * 2 * m_camera_dist;
+        m_scene_height = m_scene_width * h/w;
+        
+        proj_mat = float4x4::OpenGLPerspProjRH(near_, far_, vh, vv);
+        
+        echo(m_camera_dist);
+        echo(near_);
+        echo(far_);
+        echo(vh);
+        echo(vv);
+        echo(m_scene_width);
+        echo(m_scene_height);
+    }
     else 
-        proj_mat = float4x4::OpenGLOrthoProjRH(-d*2, d*2, w, h);
-    
+    {
+        m_scene_width = m_camera_dist/2;
+        m_scene_height = m_scene_width * h/w;
+        proj_mat = float4x4::OpenGLOrthoProjRH(-m_camera_dist*2, m_camera_dist*2, 
+            m_scene_width, m_scene_height);
+    }
+
     glMultMatrixf(proj_mat.ptr());
     resize();
 }
@@ -180,7 +204,7 @@ void Scene::mouseMoved(int x, int y, int modif)
 
 void Scene::mouseWheel(int dir, int modif)
 {
-    m_camera_dist += -20.0 * dir;
+    m_camera_dist += -2.0 * dir;
     if (m_camera_dist < 0.01) m_camera_dist = 0.01;
 }
 
@@ -189,7 +213,7 @@ void Scene::reset()
     m_globRot = m_globRot_def;
 }
 
-/* Utils */
+/* Helpers */
 void Scene::enterPixelMode()
 {
     glMatrixMode(GL_PROJECTION);

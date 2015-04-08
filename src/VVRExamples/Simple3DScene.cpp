@@ -21,11 +21,11 @@ using namespace vvr;
 Simple3DScene::Simple3DScene()
 {
     // Load settings.
-    m_settings = Settings(getBasePath() + "config/settings_simple3D.txt");
-    m_perspective_proj = m_settings.getBool("perspective_proj");
-    m_bg_col = Colour(m_settings.getStr("color_bg"));
-    m_obj_col = Colour(m_settings.getStr("color_obj"));
-    m_style_flag = FLAG_SHOW_SOLID;
+    m_settings          = Settings(getBasePath() + "config/settings_simple3D.txt");
+    m_bg_col            = Colour(m_settings.getStr("color_bg"));
+    m_obj_col           = Colour(m_settings.getStr("color_obj"));
+    m_perspective_proj  = m_settings.getBool("perspective_proj");
+    m_style_flag        = FLAG_SHOW_SOLID;
 
     // Scene rotation.
     const double def_rot_x = m_settings.getDbl("def_rot_x");
@@ -43,12 +43,14 @@ Simple3DScene::Simple3DScene()
 
 void Simple3DScene::resize()
 {
-    m_mesh.setBigSize(getScreenWidth() / 4);
+    m_mesh.setBigSize(getSceneWidth()/3);
     m_mesh.centerAlign();
 }
 
 void Simple3DScene::draw()
 {
+
+    drawAxes();
 
     if (m_style_flag & FLAG_SHOW_SOLID)     m_mesh.draw(m_obj_col, SOLID);
     if (m_style_flag & FLAG_SHOW_WIRE)      m_mesh.draw(Colour::black, WIRE);
