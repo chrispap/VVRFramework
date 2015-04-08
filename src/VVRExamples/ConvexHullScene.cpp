@@ -282,3 +282,8 @@ void Scene_ConvexHull::ConvexHull_Fast()
     // Don't forget to delete the array.
     delete[] pts;
 }
+
+int main(int argc, char* argv[])
+{
+    return vvr::mainLoop(argc, argv, new Scene_ConvexHull);
+}

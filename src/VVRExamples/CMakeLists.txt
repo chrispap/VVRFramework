@@ -1,17 +1,16 @@
-### Executable ###########################################################################
-set(TARGET VVRExampleApplication CACHE TYPE STRING)
-file(GLOB SOURCE_FILES *.h *.cpp)
-set(SOURCE ${SOURCE_FILES})
-##########################################################################################
-
 ### Find MathGeoLib ######################################################################
 set(MathGeoLib_DIR CACHE PATH "Installation path of MathGeoLib")
 include_directories(${MathGeoLib_DIR}/include)
 link_directories(${MathGeoLib_DIR}/lib)
 ##########################################################################################
 
-##########################################################################################
-add_executable(${TARGET} MACOSX_BUNDLE ${SOURCE})
+### Specify Executables ##################################################################
+file(GLOB APP_SRC_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.cpp)
+foreach( srcFile ${APP_SRC_FILES} )
+    string( REPLACE ".cpp" "" appName ${srcFile} )
+    add_executable( ${appName} ${appName}.cpp ${appName}.h )
+    set_property(TARGET ${appName} PROPERTY FOLDER "VVRExampleApps")
+endforeach( srcFile ${APP_SRC_FILES} )
 ##########################################################################################
 
 ### Set include path #####################################################################
@@ -21,7 +20,10 @@ include_directories(${CMAKE_SOURCE_DIR}/VVRPhysics)
 ##########################################################################################
 
 ### Specify needed libs ##################################################################
-target_link_libraries(${TARGET} VVRPhysics VVRScene MathGeoLib GeoLib)
+foreach( srcFile ${APP_SRC_FILES} )
+    string( REPLACE ".cpp" "" appName ${srcFile} )
+    target_link_libraries(${appName} VVRPhysics VVRScene MathGeoLib GeoLib)
+endforeach( srcFile ${APP_SRC_FILES} )
 ##########################################################################################
 
 ##########################################################################################

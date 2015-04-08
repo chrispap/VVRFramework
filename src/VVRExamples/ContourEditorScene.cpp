@@ -82,3 +82,8 @@ void ContourEditor::reset()
     m_pts.clear();
     m_pts.resize(1);
 }
+
+int main(int argc, char* argv[])
+{
+    return vvr::mainLoop(argc, argv, new ContourEditor);
+}

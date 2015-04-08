@@ -11,7 +11,6 @@ using std::cout;
 using std::endl;
 
 #define APP_TITLE "Simple 2D Drawing"
-#define CONFIGFILEPATH "../../config/settings.txt"
 
 const char* Simple2DScene::getName() const
 {
@@ -78,4 +77,9 @@ void Simple2DScene::reset()
     vvr::Scene::reset();
     m_canvas.resize(1);
     m_canvas.newFrame();
+}
+
+int main(int argc, char* argv[])
+{
+    return vvr::mainLoop(argc, argv, new Simple2DScene);
 }

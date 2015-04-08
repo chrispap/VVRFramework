@@ -73,3 +73,8 @@ void Simple3DScene::keyEvent(unsigned char key, bool up, int modif)
     }
 
 }
+
+int main(int argc, char* argv[])
+{
+    return vvr::mainLoop(argc, argv, new Simple3DScene);
+}

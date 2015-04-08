@@ -12,7 +12,7 @@ using namespace vvr::phys;
 PhysicsEngineScene::PhysicsEngineScene()
 {
     // Setup scene
-    m_cnf = Settings(getBasePath() + "config/settings_03.txt");
+    m_cnf = Settings(getBasePath() + "config/settings_physicsEngine.txt");
     m_box_size = m_cnf.getDbl("box_size");
     m_bg_col = Colour(m_cnf.getStr("color_bg"));
 
@@ -89,4 +89,9 @@ void PhysicsEngineScene::arrowEvent(ArrowDir dir, int modif)
             m_bodies[i]->update(m_t, m_dt);
         m_t += m_dt;
     }
+}
+
+int main(int argc, char* argv[])
+{
+    return vvr::mainLoop(argc, argv, new PhysicsEngineScene);
 }

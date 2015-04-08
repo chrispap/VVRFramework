@@ -51,7 +51,7 @@ void Bone::animate(float t, float speed)
 OrientationViewerScene::OrientationViewerScene()
 {
     m_style_flag = 0;
-    m_settings = Settings(getBasePath() + "config/settings_02.txt");
+    m_settings = Settings(getBasePath() + "config/settings_orientationViewer.txt");
     m_bg_col = Colour(m_settings.getStr("color_bg"));
     m_bone_col = Colour(m_settings.getStr("color_bone"));
     m_perspective_proj = m_settings.getBool("perspective_proj");
@@ -348,4 +348,9 @@ void OrientationViewerScene::convertDataFile(const std::vector<std::string> file
     }
 
     outfile.close();
+}
+
+int main(int argc, char* argv[])
+{
+    return vvr::mainLoop(argc, argv, new OrientationViewerScene);
 }
