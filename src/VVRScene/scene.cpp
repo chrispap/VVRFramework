@@ -8,7 +8,7 @@
 #include <locale>
 #include <cmath>
 #include <QtOpenGL>
-#include <MathGeoLib\MathGeoLib.h>
+#include <MathGeoLib/MathGeoLib.h>
 
 using namespace vvr;
 using namespace std;
@@ -107,18 +107,17 @@ void Scene::GL_Resize(int w, int h)
 
     if (m_perspective_proj) 
     {
-        const float FOV = 90;
-        
-        const float near_ = m_camera_dist * 0.1;
-        const float far_  = m_camera_dist * 1.5;
+        const float FOV = 60;
+        // The quantity inside the parenthesis is the vissible width
+        // of the plane which lies on depth with (Z = -m_camera_dist)
+        m_scene_width = 1.5f * (m_camera_dist * 2 * tanf(DegToRad(FOV/2)));
+        m_scene_height = m_scene_width * h/w;
+        const float near_ = m_camera_dist * 0.01;
+        const float far_  = m_camera_dist * 100;
         const float vh    = tanf(DegToRad(FOV/2)) * 2 * near_;
         const float vv    = vh * h/w;
-
-        m_scene_width = tanf(DegToRad(FOV/2)) * 2 * m_camera_dist;
-        m_scene_height = m_scene_width * h/w;
-        
         proj_mat = float4x4::OpenGLPerspProjRH(near_, far_, vh, vv);
-        
+        /// DEBUG
         echo(m_camera_dist);
         echo(near_);
         echo(far_);
@@ -126,6 +125,7 @@ void Scene::GL_Resize(int w, int h)
         echo(vv);
         echo(m_scene_width);
         echo(m_scene_height);
+        cout << "---" << endl;
     }
     else 
     {

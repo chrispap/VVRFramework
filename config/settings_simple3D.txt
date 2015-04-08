@@ -4,7 +4,7 @@
 res_dir                     =  resources/
 obj_dir                     =  resources/obj/
 obj_file                    =  resources/obj/suzanne.obj
-perspective_proj            =  1
+perspective_proj            =  0
 color_bg                    =  768E77
 color_obj                   =  454545
 def_rot_x                   =  10

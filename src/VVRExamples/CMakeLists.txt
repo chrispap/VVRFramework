@@ -8,7 +8,7 @@ link_directories(${MathGeoLib_DIR}/lib)
 file(GLOB APP_SRC_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.cpp)
 foreach( srcFile ${APP_SRC_FILES} )
     string( REPLACE ".cpp" "" appName ${srcFile} )
-    add_executable( ${appName} ${appName}.cpp ${appName}.h )
+    add_executable( ${appName} MACOSX_BUNDLE ${appName}.cpp ${appName}.h )
     set_property(TARGET ${appName} PROPERTY FOLDER "VVRExampleApps")
 endforeach( srcFile ${APP_SRC_FILES} )
 ##########################################################################################

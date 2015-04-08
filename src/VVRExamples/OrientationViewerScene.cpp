@@ -77,7 +77,7 @@ void OrientationViewerScene::load()
 
     // Load & Init: Ulna
     m_humerus.mesh = Mesh(objDir, objFileBone, "");
-    m_humerus.length = getScreenWidth() / 5;
+    m_humerus.length = getSceneWidth() / 5;
     m_humerus.mesh.setBigSize(m_humerus.length);
     m_humerus.mesh.cornerAlign();
     box = m_humerus.mesh.getBox();

@@ -43,14 +43,12 @@ Simple3DScene::Simple3DScene()
 
 void Simple3DScene::resize()
 {
-    m_mesh.setBigSize(getSceneWidth()/3);
+    m_mesh.setBigSize(getSceneWidth()* 0.5f);
     m_mesh.centerAlign();
 }
 
 void Simple3DScene::draw()
 {
-
-    drawAxes();
 
     if (m_style_flag & FLAG_SHOW_SOLID)     m_mesh.draw(m_obj_col, SOLID);
     if (m_style_flag & FLAG_SHOW_WIRE)      m_mesh.draw(Colour::black, WIRE);
