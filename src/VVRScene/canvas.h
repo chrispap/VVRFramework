@@ -156,8 +156,11 @@ protected:
 
 public:
     Box3D() {}
-    Box3D(double x, double y, double z, double rad, const Colour &rgb = Colour()) :
-        x1(x1), y1(y1), z1(z1), x2(x2), y2(y2), z2(z2), Shape(rgb) {}
+    Box3D(double xmin, double ymin, double zmin,
+          double xmax, double ymax, double zmax,
+          const Colour &col = Colour()) :
+        x1(xmin), y1(ymin), z1(zmin),
+        x2(xmax), y2(ymax), z2(zmax), Shape(col) {}
 };
 
 struct VVRScene_API Triangle2D : public Shape

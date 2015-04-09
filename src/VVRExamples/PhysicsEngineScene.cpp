@@ -14,26 +14,33 @@ PhysicsEngineScene::PhysicsEngineScene()
 {
     // Setup scene
     m_cnf = Settings(getBasePath() + CONFIG_FILE_PATH);
+    m_perspective_proj = 1;
     m_box_size = m_cnf.getDbl("box_size");
     m_bg_col = Colour(m_cnf.getStr("color_bg"));
 
-    // Create bodies
+    // Create a sphere.
     RigidBody* sphere = new vvr::phys::Sphere(
         Vector3(0, 0, 0),
         Vector3(5, 5, 5), 3, 1);
+
+    // Create a cube.
     RigidBody* cube = new Cube(
         Vector3(0, 0, 0),
         Vector3(0, 0, 0),
         Vector3(0, 0, 1), 5, 3);
+
+    // Create a spring-dumper.
     RigidBody* sd = new SpringDumper(
         Vector3(0, -10, 0),
         Vector3(0, 0, 0), 2, 1,
         Vector3(0, 0, 0), 2, 1, 10);
+
+    // Create a container of spheres.
     RigidBody* spheres = new SphereContainer();
 
     // Keep bodies to a vector
     m_bodies.push_back(sphere);
-    m_bodies.push_back(spheres);
+    //m_bodies.push_back(spheres);
     m_bodies.push_back(cube);
     m_bodies.push_back(sd);
 
@@ -67,13 +74,14 @@ bool PhysicsEngineScene::idle()
 
 void PhysicsEngineScene::draw()
 {
-    // m_box.draw(Colour::red, 20);
     m_box.draw(Colour::red, 0);
+
     for (unsigned i = 0; i < m_bodies.size(); i++) {
         dynamic_cast<IRenderable*>(m_bodies[i])->draw();
     }
 
 }
+
 void PhysicsEngineScene::keyEvent(unsigned char key, bool up, int modif)
 {
     Scene::keyEvent(key, up, modif);

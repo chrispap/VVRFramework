@@ -25,11 +25,6 @@ Cube::Cube(Vector3 pos, Vector3 vel, Vector3 omega,	float length, float mass)
     I_inv = I.invert();
 }
 
-Cube::~Cube()
-{
-
-}
-
 //void Cube::draw() const
 //{
 //    glPushMatrix();

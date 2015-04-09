@@ -17,8 +17,6 @@ public:
 
 	Cube(Vector3 pos, Vector3 vel, Vector3 omega, float length, float mass);
 
-	~Cube();
-
 	void update(float t, float dt) override;
 };
 
