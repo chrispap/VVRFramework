@@ -26,6 +26,7 @@ protected:
 
 private:
     void saveContoursToFile();
+    void loadContoursFromFile(string filename);
 
 private:
     Canvas2D                m_canvas;
