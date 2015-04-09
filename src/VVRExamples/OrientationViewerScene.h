@@ -19,7 +19,7 @@ struct Bone {
 
 class OrientationViewerScene : public vvr::Scene
 {
-public:
+public: 
     OrientationViewerScene();
     const char* getName() const { return "Orientation Viewer";}
     bool idle();
@@ -51,20 +51,21 @@ public:
 
 protected:
     void draw() override;
+    void resize() override;
     void load();
 
 private:
     /**
      * @return The 3D position (in world coords) of humerus' origin.
-     * It is actually the ending point of Ulna.
+     * It is actually the ending point of Radius.
      */
-    vvr::Vec3d getUlnaOrigin() const;
+    vvr::Vec3d getRadiusOrigin() const;
 
 private:
     vvr::Settings   m_settings;
     vvr::Colour     m_bone_col;
     int             m_style_flag;
-    Bone            m_ulna, m_humerus;
+    Bone            m_radius, m_humerus;
     double          m_anim_time, m_anim_last_update;
     double          m_anim_speed;
     bool            m_anim_on;

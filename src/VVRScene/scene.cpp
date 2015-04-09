@@ -117,15 +117,6 @@ void Scene::GL_Resize(int w, int h)
         const float vh    = tanf(DegToRad(FOV/2)) * 2 * near_;
         const float vv    = vh * h/w;
         proj_mat = float4x4::OpenGLPerspProjRH(near_, far_, vh, vv);
-        /// DEBUG
-        echo(m_camera_dist);
-        echo(near_);
-        echo(far_);
-        echo(vh);
-        echo(vv);
-        echo(m_scene_width);
-        echo(m_scene_height);
-        cout << "---" << endl;
     }
     else 
     {

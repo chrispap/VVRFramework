@@ -9,7 +9,10 @@
 #include <string>
 #include <MathGeoLib/MathGeoLib.h>
 
-#define FLAG_SHOW_AXES 1
+#define CONFIG_PATH "../../config/settings_orientationViewer.txt"
+#define FLAG_SHOW_AXES      1
+#define FLAG_RENDER_SOLID   2
+#define FLAG_RENDER_WIRE    4
 
 using namespace math;
 using namespace vvr;
@@ -50,8 +53,8 @@ void Bone::animate(float t, float speed)
 
 OrientationViewerScene::OrientationViewerScene()
 {
-    m_style_flag = 0;
-    m_settings = Settings(getBasePath() + "config/settings_orientationViewer.txt");
+    m_style_flag = FLAG_RENDER_SOLID;
+    m_settings = Settings(getExePath() + CONFIG_PATH);
     m_bg_col = Colour(m_settings.getStr("color_bg"));
     m_bone_col = Colour(m_settings.getStr("color_bone"));
     m_perspective_proj = m_settings.getBool("perspective_proj");
@@ -73,25 +76,33 @@ void OrientationViewerScene::load()
 {
     const string objDir = getBasePath() + m_settings.getStr("obj_dir");
     const string objFileBone = getBasePath() +  m_settings.getStr("obj_file_bone");
-    Box box;
 
-    // Load & Init: Ulna
+    // Load 3D models Humerus
     m_humerus.mesh = Mesh(objDir, objFileBone, "");
-    m_humerus.length = getSceneWidth() / 5;
-    m_humerus.mesh.setBigSize(m_humerus.length);
-    m_humerus.mesh.cornerAlign();
-    box = m_humerus.mesh.getBox();
-    m_humerus.mesh.move(Vec3d(-box.getYSize()*0.3, -box.getYSize()/2, -box.getZSize()/2));
-    m_ulna.mesh = Mesh(m_humerus.mesh);
-    m_ulna.mesh.setPos(getUlnaOrigin());
+    m_radius.mesh = Mesh(m_humerus.mesh);
 
-    // Switch mode of execution.
-    // Streaming or pre-recorded motion.
+    // Switch mode of execution: {Live Streaming, Playback}
     if (m_settings.getBool("mode_playback")) {
-        loadRecordedMotion(getBasePath() + m_settings.getStr("data_file_ulna"), m_ulna);
+        loadRecordedMotion(getBasePath() + m_settings.getStr("data_file_radius"), m_radius);
         loadRecordedMotion(getBasePath() + m_settings.getStr("data_file_humerus"), m_humerus);
     }
 
+}
+
+void OrientationViewerScene::resize()
+{
+    m_humerus.length = getSceneWidth() / 5;
+    m_humerus.mesh.setBigSize(m_humerus.length);
+    m_humerus.mesh.cornerAlign();
+    Box aabb = m_humerus.mesh.getBox();
+    m_humerus.mesh.move(Vec3d(-aabb.getYSize()*0.3, -aabb.getYSize()/2, -aabb.getZSize()/2));
+
+    m_radius.length = getSceneWidth() / 5;
+    m_radius.mesh.setBigSize(m_radius.length);
+    m_radius.mesh.cornerAlign();
+    m_radius.mesh.move(Vec3d(-aabb.getYSize()*0.3, -aabb.getYSize()/2, -aabb.getZSize()/2));
+
+    m_radius.mesh.setPos(getRadiusOrigin());
 }
 
 void OrientationViewerScene::draw()
@@ -99,11 +110,13 @@ void OrientationViewerScene::draw()
     drawAxes();
 
     // Create style enum
-    int s = SOLID;
+    int s = 0;
+    if (m_style_flag & FLAG_RENDER_SOLID) s |= SOLID;
+    if (m_style_flag & FLAG_RENDER_WIRE) s |= WIRE;
     if (m_style_flag & FLAG_SHOW_AXES) s |= AXES;
 
     // Draw objects
-    m_ulna.mesh.draw(m_bone_col, (Style) s);
+    m_radius.mesh.draw(m_bone_col, (Style) s);
     m_humerus.mesh.draw(m_bone_col, (Style) s);
 }
 
@@ -121,11 +134,11 @@ bool OrientationViewerScene::idle()
 
     // Animate objects
     m_humerus.animate(m_anim_time, m_anim_speed);
-    m_ulna.animate(m_anim_time, m_anim_speed);
-    m_ulna.mesh.setPos(getUlnaOrigin());
+    m_radius.animate(m_anim_time, m_anim_speed);
+    m_radius.mesh.setPos(getRadiusOrigin());
 
     // Return
-    return m_ulna.anim_on || m_humerus.anim_on;
+    return m_radius.anim_on || m_humerus.anim_on;
 }
 
 //! Callbacks - UI
@@ -141,11 +154,9 @@ void OrientationViewerScene::keyEvent(unsigned char key, bool up, int modif)
             m_anim_last_update = getSeconds();
         }
     }
-    else if (key == 'a')
-    {
-        m_style_flag ^= FLAG_SHOW_AXES; // show_axes
-    }
-
+    else if (key == 'a') m_style_flag ^= FLAG_SHOW_AXES;
+    else if (key == 's') m_style_flag ^= FLAG_RENDER_SOLID;
+    else if (key == 'w') m_style_flag ^= FLAG_RENDER_WIRE;
 }
 
 void OrientationViewerScene::arrowEvent(ArrowDir dir, int modif)
@@ -157,6 +168,7 @@ void OrientationViewerScene::reset()
 {
     m_anim_time = 0;
     m_anim_on = true;
+    m_style_flag = FLAG_RENDER_SOLID;
     Scene::reset();
 }
 
@@ -181,8 +193,8 @@ void OrientationViewerScene::onDataReceived(const std::string &data)
         std::istringstream iss(rot_str);
         iss >> rot.x >> rot.y >> rot.z;
 
-        if (strcmp("Ulna", body_loc) == 0) {
-            bone = &m_ulna;
+        if (strcmp("Radius", body_loc) == 0) {
+            bone = &m_radius;
         } else if (strcmp("Humerus", body_loc) == 0) {
             bone = &m_humerus;
         }
@@ -199,8 +211,8 @@ void OrientationViewerScene::onDataReceived(const std::string &data)
         std::istringstream iss(rot_str);
         iss >> rot.x >> rot.y >> rot.z;
 
-        if (strcmp("Ulna", body_loc) == 0) {
-            bone = &m_ulna;
+        if (strcmp("Radius", body_loc) == 0) {
+            bone = &m_radius;
         } else if (strcmp("Humerus", body_loc) == 0) {
             bone = &m_humerus;
         }
@@ -218,7 +230,7 @@ void OrientationViewerScene::onDataReceived(const std::string &data)
         bone->mesh.setRot(rot);
 
         if (bone == &m_humerus) {
-            m_ulna.mesh.setPos(getUlnaOrigin());
+            m_radius.mesh.setPos(getRadiusOrigin());
         }
     }
 
@@ -229,6 +241,10 @@ void OrientationViewerScene::onDataReceived(const std::string &data)
 void OrientationViewerScene::loadRecordedMotion(string filename, Bone &bone)
 {
     ifstream file(filename.c_str());
+
+    if (!file.is_open())
+        throw "Cannot open <" + filename + ">";
+
     string line;
     bone.times.clear();
     bone.rots.clear();
@@ -278,16 +294,19 @@ Quat OrientationViewerScene::getBoneQuaternion(const Vec3d &rot)
     return q;
 }
 
-Vec3d OrientationViewerScene::getUlnaOrigin() const
+Vec3d OrientationViewerScene::getRadiusOrigin() const
 {
-    Vec3d rot = m_humerus.mesh.getRot();
+    Vec3d humerus_rot = m_humerus.mesh.getRot();
+    Vec3d humerus_pos = m_humerus.mesh.getPos();
+    float3 humerus_start = float3(humerus_pos.x, humerus_pos.y, humerus_pos.z);
+    float3 humerus_end   = float3(m_humerus.length,0,0); // asuming x the largest dimension
 
-    rot.x = DegToRad(rot.x);
-    rot.y = DegToRad(rot.y);
-    rot.z = DegToRad(rot.z);
+    humerus_rot.x = DegToRad(humerus_rot.x);
+    humerus_rot.y = DegToRad(humerus_rot.y);
+    humerus_rot.z = DegToRad(humerus_rot.z);
 
-    Quat rot_quat = Quat::FromEulerXYZ(rot.x, rot.y, rot.z);
-    float3 p = rot_quat.Transform(float3(m_humerus.length, 0, 0));
+    Quat rot_quat = Quat::FromEulerXYZ(humerus_rot.x, humerus_rot.y, humerus_rot.z);
+    float3 p = rot_quat.Transform(humerus_end) + humerus_start;
 
     return Vec3d(p.x, p.y, p.z);
 }
@@ -305,8 +324,8 @@ void OrientationViewerScene::convertDataFile(const std::vector<std::string> file
 
     // Load files
     for (unsigned i=0; i<num_bones; i++) {
-        std::cout << "Loading file: " << filenames[i] << std::endl;
         OrientationViewerScene::loadRecordedMotion(filenames[i], bones[i]);
+        std::cout << "Loaded file: " << filenames[i] << std::endl;
     }
 
     // Find max time of the recordings
@@ -327,7 +346,7 @@ void OrientationViewerScene::convertDataFile(const std::vector<std::string> file
     outfile << "PathFileType\t4\t(X/Y/Z)\timu.trc" << std::endl;
     outfile << "DataRate\tCameraRate\tNumFrames\tNumMarkers\tUnits\tOrigDataRate\tOrigDataStartFrame\tOrigNumFrames" << std::endl;
     outfile << "60\t60\t" << num_index << "\t2\tmm\t60\t1\t" << num_index << "" << std::endl;
-    outfile << "Frame#\tTime\thumerus\tulna" << std::endl;
+    outfile << "Frame#\tTime\thumerus\tradius" << std::endl;
     outfile << "X1\tY1\tZ1\tX2\tY2\tZ2" << std::endl;
     outfile << std::endl;
 
@@ -350,7 +369,36 @@ void OrientationViewerScene::convertDataFile(const std::vector<std::string> file
     outfile.close();
 }
 
+//! Entry point of the application
 int main(int argc, char* argv[])
 {
-    return vvr::mainLoop(argc, argv, new OrientationViewerScene);
+    // Convert input data files
+    if (argc>=3 && strcmp(argv[1], "convert")==0)
+    {
+        // Populate vector with filenames to convert.
+        std::vector<std::string> filenames;
+        for (int i=2; i<argc ; i++)
+            filenames.push_back(argv[i]);
+
+        // Convert
+        try {
+            OrientationViewerScene::convertDataFile(filenames);
+        } catch (std::string &exc) {
+            std::cerr << exc << std::endl;
+            return -1;
+        }
+        return 0;
+    }
+    else
+    {
+        try {
+            return vvr::mainLoop(argc, argv, new OrientationViewerScene);
+        }
+        catch (std::string exc) {
+            std::cerr << exc << std::endl;
+            return 1;
+        }
+
+    }
+    return 0;
 }
