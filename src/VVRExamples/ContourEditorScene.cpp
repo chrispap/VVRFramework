@@ -9,13 +9,13 @@
 using namespace vvr;
 using namespace std;
 
-ContourEditor::ContourEditor()
+ContourEditorScene::ContourEditorScene()
 {
     m_bg_col = Colour(0x44, 0x44, 0x44);
     m_pts.resize(1);
 }
 
-void ContourEditor::draw()
+void ContourEditorScene::draw()
 {
     enterPixelMode();
 
@@ -40,7 +40,7 @@ void ContourEditor::draw()
 
 }
 
-void ContourEditor::mousePressed(int x, int y, int modif)
+void ContourEditorScene::mousePressed(int x, int y, int modif)
 {
     Scene::mousePressed(x, y, modif);
 
@@ -51,13 +51,13 @@ void ContourEditor::mousePressed(int x, int y, int modif)
     m_pts.back().push_back(Vec3d(x,y,0));
 }
 
-void ContourEditor::mouseMoved(int x, int y, int modif)
+void ContourEditorScene::mouseMoved(int x, int y, int modif)
 {
     Scene::mouseMoved(x, y, modif);
     m_pts.back().push_back(Vec3d(x,y,0));
 }
 
-void ContourEditor::keyEvent(unsigned char key, bool up, int modif)
+void ContourEditorScene::keyEvent(unsigned char key, bool up, int modif)
 {
     Scene::keyEvent(key, up, modif);
 
@@ -73,7 +73,7 @@ void ContourEditor::keyEvent(unsigned char key, bool up, int modif)
 
 }
 
-void ContourEditor::reset()
+void ContourEditorScene::reset()
 {
     Scene::reset();
 
@@ -85,5 +85,13 @@ void ContourEditor::reset()
 
 int main(int argc, char* argv[])
 {
-    return vvr::mainLoop(argc, argv, new ContourEditor);
+    try
+    {
+        return vvr::mainLoop(argc, argv, new ContourEditorScene);
+    }
+    catch (std::string exc)
+    {
+        std::cerr << exc << std::endl;
+        return 1;
+    }
 }

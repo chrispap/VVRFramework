@@ -11,10 +11,10 @@ using namespace vvr;
 /**
  * @brief The Simple2DScene class
  */
-class ContourEditor : public vvr::Scene
+class ContourEditorScene : public vvr::Scene
 {
 public: 
-    ContourEditor();
+    ContourEditorScene();
     const char* getName() const override { return APP_TITLE;}
 
 protected:

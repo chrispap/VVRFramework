@@ -15,13 +15,13 @@
 
 /* Constructor - Loading */
 
-Scene_ConvexHull::Scene_ConvexHull()
+ConvexHullScene::ConvexHullScene()
 {
     m_bg_col = Colour(0x44,0x44,0x44);
     reset();
 }
 
-void Scene_ConvexHull::reset()
+void ConvexHullScene::reset()
 {
     Scene::reset();
 
@@ -42,7 +42,7 @@ void Scene_ConvexHull::reset()
 
 }
 
-void Scene_ConvexHull::createRandomPoints(C2DPointSet &point_set, int num_pts)
+void ConvexHullScene::createRandomPoints(C2DPointSet &point_set, int num_pts)
 {
     point_set.DeleteAll();
 
@@ -63,7 +63,7 @@ void Scene_ConvexHull::createRandomPoints(C2DPointSet &point_set, int num_pts)
 
 /* UI handling */
 
-void Scene_ConvexHull::mousePressed(int x, int y, int modif)
+void ConvexHullScene::mousePressed(int x, int y, int modif)
 {
     Scene::mousePressed(x, y, modif);
 
@@ -122,18 +122,18 @@ void Scene_ConvexHull::mousePressed(int x, int y, int modif)
 
 }
 
-void Scene_ConvexHull::mouseMoved(int x, int y, int modif)
+void ConvexHullScene::mouseMoved(int x, int y, int modif)
 {
     Scene::mouseMoved(x, y, modif);
     mousePressed(x, y, modif);
 }
 
-void Scene_ConvexHull::keyEvent(unsigned char key, bool up, int modif)
+void ConvexHullScene::keyEvent(unsigned char key, bool up, int modif)
 {
     Scene::keyEvent(key, up, modif);
 }
 
-void Scene_ConvexHull::arrowEvent(vvr::ArrowDir dir, int modif)
+void ConvexHullScene::arrowEvent(vvr::ArrowDir dir, int modif)
 {
     if (dir == vvr::LEFT) {
         if (m_canvas_algo_steps.isAtStart()) m_canvas_algo_steps.ff();
@@ -147,7 +147,7 @@ void Scene_ConvexHull::arrowEvent(vvr::ArrowDir dir, int modif)
 
 /* Drawing */
 
-void Scene_ConvexHull::draw()
+void ConvexHullScene::draw()
 {
     enterPixelMode();
 
@@ -158,7 +158,7 @@ void Scene_ConvexHull::draw()
     m_canvas.draw();
 }
 
-void Scene_ConvexHull::draw(C2DPointSet &point_set, Colour &col)
+void ConvexHullScene::draw(C2DPointSet &point_set, Colour &col)
 {
     /* Draw point cloud */
     for (int i = 0; i < point_set.size(); i++) {
@@ -169,7 +169,7 @@ void Scene_ConvexHull::draw(C2DPointSet &point_set, Colour &col)
     }
 }
 
-void Scene_ConvexHull::draw(C2DLineSet  &line_set, Colour &col)
+void ConvexHullScene::draw(C2DLineSet  &line_set, Colour &col)
 {
     for (int i = 0; i < line_set.size(); i++) {
         LineSeg2D(
@@ -181,7 +181,7 @@ void Scene_ConvexHull::draw(C2DLineSet  &line_set, Colour &col)
     }
 }
 
-void Scene_ConvexHull::draw(C2DPolygon  &polygon, Colour &col)
+void ConvexHullScene::draw(C2DPolygon  &polygon, Colour &col)
 {
     for (int i = 0; i < polygon.GetLines().size(); i++) {
         LineSeg2D(
@@ -195,7 +195,7 @@ void Scene_ConvexHull::draw(C2DPolygon  &polygon, Colour &col)
 
 /* Convex Hull - Implementations */
 
-void Scene_ConvexHull::ConvexHull_Slow()
+void ConvexHullScene::ConvexHull_Slow()
 {
     // HINT:
     // An `p` einai C2DPoint* tote gia na parete to `N` simeio tou point cloud
@@ -264,7 +264,7 @@ void Scene_ConvexHull::ConvexHull_Slow()
     m_convex_hull_polygon.RemoveNullLines();
 }
 
-void Scene_ConvexHull::ConvexHull_Fast()
+void ConvexHullScene::ConvexHull_Fast()
 {
     // Copy the points to a temporary array,
     // to be compatible with GeoLib's functions.
@@ -285,5 +285,13 @@ void Scene_ConvexHull::ConvexHull_Fast()
 
 int main(int argc, char* argv[])
 {
-    return vvr::mainLoop(argc, argv, new Scene_ConvexHull);
+    try
+    {
+        return vvr::mainLoop(argc, argv, new ConvexHullScene);
+    }
+    catch (std::string exc)
+    {
+        std::cerr << exc << std::endl;
+        return 1;
+    }
 }

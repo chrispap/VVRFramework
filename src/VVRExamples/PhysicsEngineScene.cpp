@@ -6,13 +6,14 @@
 #include "SpringDumper.h"
 #include "geom.h"
 
+#define CONFIG_FILE_PATH "config/settings_physicsEngine.txt"
 using namespace vvr;
 using namespace vvr::phys;
 
 PhysicsEngineScene::PhysicsEngineScene()
 {
     // Setup scene
-    m_cnf = Settings(getBasePath() + "config/settings_physicsEngine.txt");
+    m_cnf = Settings(getBasePath() + CONFIG_FILE_PATH);
     m_box_size = m_cnf.getDbl("box_size");
     m_bg_col = Colour(m_cnf.getStr("color_bg"));
 
@@ -93,5 +94,13 @@ void PhysicsEngineScene::arrowEvent(ArrowDir dir, int modif)
 
 int main(int argc, char* argv[])
 {
-    return vvr::mainLoop(argc, argv, new PhysicsEngineScene);
+    try
+    {
+        return vvr::mainLoop(argc, argv, new PhysicsEngineScene);
+    }
+    catch (std::string exc)
+    {
+        std::cerr << exc << std::endl;
+        return 1;
+    }
 }

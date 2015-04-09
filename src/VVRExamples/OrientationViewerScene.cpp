@@ -9,7 +9,7 @@
 #include <string>
 #include <MathGeoLib/MathGeoLib.h>
 
-#define CONFIG_PATH "../../config/settings_orientationViewer.txt"
+#define CONFIG_FILE_PATH "config/settings_orientationViewer.txt"
 #define FLAG_SHOW_AXES      1
 #define FLAG_RENDER_SOLID   2
 #define FLAG_RENDER_WIRE    4
@@ -54,7 +54,7 @@ void Bone::animate(float t, float speed)
 OrientationViewerScene::OrientationViewerScene()
 {
     m_style_flag = FLAG_RENDER_SOLID;
-    m_settings = Settings(getExePath() + CONFIG_PATH);
+    m_settings = Settings(getBasePath() + CONFIG_FILE_PATH);
     m_bg_col = Colour(m_settings.getStr("color_bg"));
     m_bone_col = Colour(m_settings.getStr("color_bone"));
     m_perspective_proj = m_settings.getBool("perspective_proj");

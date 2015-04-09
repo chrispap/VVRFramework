@@ -9,6 +9,8 @@
 #include <string>
 #include <MathGeoLib/MathGeoLib.h>
 
+#define CONFIG_FILE_PATH "config/settings_simple3D.txt"
+
 #define FLAG_SHOW_AXES       1
 #define FLAG_SHOW_AABB       2
 #define FLAG_SHOW_WIRE       4
@@ -21,7 +23,7 @@ using namespace vvr;
 Simple3DScene::Simple3DScene()
 {
     // Load settings.
-    m_settings          = Settings(getBasePath() + "config/settings_simple3D.txt");
+    m_settings          = Settings(getBasePath() + CONFIG_FILE_PATH);
     m_bg_col            = Colour(m_settings.getStr("color_bg"));
     m_obj_col           = Colour(m_settings.getStr("color_obj"));
     m_perspective_proj  = m_settings.getBool("perspective_proj");

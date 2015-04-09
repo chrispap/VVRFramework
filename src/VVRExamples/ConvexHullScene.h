@@ -10,11 +10,11 @@
 using namespace std;
 using namespace vvr;
 
-class Scene_ConvexHull : public vvr::Scene
+class ConvexHullScene : public vvr::Scene
 {
 public:
 
-    Scene_ConvexHull();
+    ConvexHullScene();
     const char* getName() const override { return APP_TITLE; }
 
 protected:
