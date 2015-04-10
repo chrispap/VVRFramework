@@ -10,7 +10,7 @@
 #include <cmath>
 
 #define CONTOUR_FILENAME  "contours.txt"
-#define CONTOUR_DELIMITER "---CONTOUR-LINE---"
+#define CONTOUR_DELIMITER "CONTOUR-LINE"
 
 using namespace vvr;
 using namespace std;
@@ -19,6 +19,7 @@ ContourEditorScene::ContourEditorScene()
 {
     m_bg_col = Colour(0x44, 0x44, 0x44);
     m_pts.resize(1);
+    b_render_pts = false;
     loadContoursFromFile(getBasePath() + CONTOUR_FILENAME);
 }
 
@@ -43,7 +44,8 @@ void ContourEditorScene::draw()
             }
 
             LineSeg2D(p1.x, p1.y, p2.x, p2.y, line_col).draw();
-            //Point2D(p1.x, p1.y, Colour::yellow).draw();
+            if (b_render_pts)
+                Point2D(p1.x, p1.y, Colour::yellow).draw();
         }
     }
 
@@ -87,6 +89,9 @@ void ContourEditorScene::keyEvent(unsigned char key, bool up, int modif)
         break;
     case 's':
         saveContoursToFile();
+        break;
+    case 'p': b_render_pts ^= true;
+        break;
     }
 
 }

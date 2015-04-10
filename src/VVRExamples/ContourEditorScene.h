@@ -32,4 +32,5 @@ private:
     Canvas2D                m_canvas;
     float                   m_rad;
     vector<vector<Vec3d> >  m_pts;
+    bool                    b_render_pts;
 };
