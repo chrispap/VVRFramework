@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <cstdio>
 #include <cstdlib>
+#include <cmath>
 
 #define CONTOUR_FILENAME  "contours.txt"
 #define CONTOUR_DELIMITER "---CONTOUR-LINE---"
@@ -38,7 +39,6 @@ void ContourEditorScene::draw()
             line_col = Colour::yellow;
 
             if (ci==m_pts.size()-1 && pi==m_pts[ci].size()-1) {
-                continue;
                 line_col = Colour::grey;
             }
 
@@ -133,7 +133,6 @@ void ContourEditorScene::loadContoursFromFile(string filename)
         int len;
         if ((len=strlen(line))<1) continue;
         if (line[len-1] == '\n') line[len-1] = 0;
-        echo(line);
 
         if (strcmp(line, CONTOUR_DELIMITER) == 0) {
             m_pts.resize(m_pts.size() + 1);
@@ -143,6 +142,14 @@ void ContourEditorScene::loadContoursFromFile(string filename)
         float x,y;
         sscanf(line, "%f %f", &x, &y);
         m_pts.back().push_back(Vec3d(x,y,0));
+    }
+
+    // Delete degenerate contour lines.
+    for (int i=0; i<m_pts.size(); ++i) {
+        if (m_pts[i].size()<3) {
+            m_pts.erase(m_pts.begin()+i);
+            --i;
+        }
     }
 
 }
