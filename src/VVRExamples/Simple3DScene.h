@@ -17,8 +17,9 @@ protected:
     void resize() override;
 
 private:
-    vvr::Settings   m_settings;
     vvr::Mesh       m_mesh;
+    vvr::Settings   m_settings;
     vvr::Colour     m_obj_col;
+    float           m_sphere_rad;
     int             m_style_flag;
 };

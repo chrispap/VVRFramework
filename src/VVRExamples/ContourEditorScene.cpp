@@ -9,7 +9,7 @@
 #include <cstdlib>
 #include <cmath>
 
-#define CONTOUR_FILENAME  "contours.txt"
+#define CONTOUR_FILENAME  "resources/contours/contours.txt"
 #define CONTOUR_DELIMITER "CONTOUR-LINE"
 #define MIN_POINT_DIST_PIXELS 10
 
@@ -55,10 +55,8 @@ void ContourEditorScene::draw()
             {
                 const double height = m_heights[ci];
 
-                Vec3d p1z = p1; 
-                p1z.z = height;
-                Vec3d p2z = p2; 
-                p2z.z = height;
+                Vec3d p1z = p1; p1z.z = height;
+                Vec3d p2z = p2; p2z.z = height;
 
                 Triangle3D(p1.x,p1.y,p1.z, p2.x,p2.y,p2.z, p2z.x,p2z.y,p2z.z,m_active_contour==ci ? Colour::red:Colour::yellow).draw();
                 Triangle3D(p1.x,p1.y,p1.z, p1z.x,p1z.y,p1z.z, p2z.x,p2z.y,p2z.z,m_active_contour==ci ? Colour::red:Colour::yellow).draw();
@@ -67,7 +65,6 @@ void ContourEditorScene::draw()
         }
     }
 
-    drawAxes();
 }
 
 void ContourEditorScene::mousePressed(int x, int y, int modif)

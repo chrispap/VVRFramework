@@ -54,15 +54,17 @@ public:
 struct VVRScene_API Shape : public IRenderable
 {
     Colour colour;
+    bool b_render_solid;
 
 protected:
-    Shape() {}
+    Shape() {b_render_solid = false;}
     Shape(const Colour &rgb) : colour(rgb) {}
     virtual void drawShape() const = 0;
 
 public:
     virtual ~Shape() {}
     void draw() const override;
+    void setSolidRender(bool render_solid) {b_render_solid = render_solid;}
 };
 
 struct VVRScene_API Point2D : public Shape
@@ -186,10 +188,10 @@ protected:
     void drawShape() const override;
 
 public:
-    Triangle2D(){}
+    Triangle2D(){b_render_solid = false;}
     Triangle2D(double x1, double y1, double x2, double y2, double x3, double y3, 
         const Colour &rgb=Colour()) :
-      x1(x1), y1(y1), x2(x2), y2(y2), x3(x3), y3(y3), Shape(rgb) {}
+      x1(x1), y1(y1), x2(x2), y2(y2), x3(x3), y3(y3), Shape(rgb) {b_render_solid = false;}
 };
 
 struct VVRScene_API Triangle3D : public Shape
@@ -202,7 +204,7 @@ protected:
     void drawShape() const override;
 
 public:
-    Triangle3D(){}
+    Triangle3D(){b_render_solid = true;}
     Triangle3D(double x1, double y1, double z1, 
                double x2, double y2, double z2, 
                double x3, double y3, double z3,
@@ -210,7 +212,7 @@ public:
         x1(x1), y1(y1), z1(z1),
         x2(x2), y2(y2), z2(z2), 
         x3(x3), y3(y3), z3(z3),
-        Shape(rgb) {}
+        Shape(rgb) {b_render_solid = true;}
 };
 
 /* Canvas */

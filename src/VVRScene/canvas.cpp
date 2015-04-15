@@ -22,6 +22,7 @@ Colour Colour::grey   (0x66, 0x66, 0x66);
 
 /* Shape drawing */
 void Shape::draw() const {
+    glPolygonMode(GL_FRONT_AND_BACK, b_render_solid ? GL_FILL : GL_LINE);
     glColor3ubv(colour.data);
     drawShape();
 }
@@ -103,7 +104,6 @@ void Box3D::drawShape() const {
 
 void Triangle2D::drawShape() const {
     glLineWidth(DEF_LINE_WIDTH);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     glBegin(GL_TRIANGLES);
     glVertex2f(x1, y1);
     glVertex2f(x2, y2);
@@ -113,7 +113,6 @@ void Triangle2D::drawShape() const {
 
 void Triangle3D::drawShape() const {
     glLineWidth(DEF_LINE_WIDTH);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     glBegin(GL_TRIANGLES);
     glVertex3f(x1, y1, z1);
     glVertex3f(x2, y2, z2);
