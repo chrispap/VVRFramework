@@ -23,7 +23,7 @@ ContourEditorScene::ContourEditorScene()
     m_perspective_proj = false;
     b_render_3D = true;
     b_show_pts = true;
-    setRot(Vec3d(-45,0,0));
+    setRot(Vec3d(-60,0,0));
     m_pts.resize(1);
     m_heights.resize(1);
     m_heights[0] = 0.1;
@@ -53,7 +53,7 @@ void ContourEditorScene::draw()
             }
             else
             {
-                const double height = m_heights[ci];
+                const double height = 1.8 * m_heights[ci];
 
                 Vec3d p1z = p1; p1z.z = height;
                 Vec3d p2z = p2; p2z.z = height;
@@ -121,7 +121,7 @@ void ContourEditorScene::keyEvent(unsigned char key, bool up, int modif)
     switch (key)
     {
     case 'e':
-        setRot(Vec3d(-45,0,0));
+        setRot(Vec3d(-60,0,0));
         b_render_3D = true;
         break;
     case 'd':
@@ -137,6 +137,9 @@ void ContourEditorScene::keyEvent(unsigned char key, bool up, int modif)
         break;
     case 'p': b_show_pts ^= true;
         break;
+    case '4': setRot(Vec3d(-90,   0, -90)); break;
+    case '5': setRot(Vec3d(-90,   0,   0)); break;
+    case '6': setRot(Vec3d(-90,   0,  90)); break;
     }
 
 }
