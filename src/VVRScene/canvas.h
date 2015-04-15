@@ -74,8 +74,21 @@ protected:
 
 public:
     Point2D(){}
-    Point2D(double _x, double _y, const Colour &rgb=Colour()) :
-      x(_x), y(_y), Shape(rgb) {}
+    Point2D(double x, double y, const Colour &rgb=Colour()) :
+      x(x), y(y), Shape(rgb) {}
+};
+
+struct VVRScene_API Point3D : public Shape
+{
+    double x,y,z;
+
+protected:
+    void drawShape() const override;
+
+public:
+    Point3D(){}
+    Point3D(double x, double y, double z, const Colour &rgb=Colour()) :
+      x(x), y(y), z(z), Shape(rgb) {}
 };
 
 struct VVRScene_API LineSeg2D : public Shape
@@ -115,9 +128,9 @@ protected:
 
 public:
     LineSeg3D(){}
-    LineSeg3D(double _x1, double _y1, double _z1,
-              double _x2, double _y2, double _z2, const Colour &rgb=Colour()) :
-      x1(_x1), y1(_y1), z1(_z1), x2(_x2), y2(_y2), z2(_z2), Shape(rgb) {}
+    LineSeg3D(double x1, double y1, double z1,
+              double x2, double y2, double z2, const Colour &rgb=Colour()) :
+      x1(x1), y1(y1), z1(z1), x2(x2), y2(y2), z2(z2), Shape(rgb) {}
 };
 
 struct VVRScene_API Circle2D : public Shape
@@ -174,9 +187,30 @@ protected:
 
 public:
     Triangle2D(){}
-    Triangle2D(double _x1, double _y1, double _x2, double _y2, double _x3, double _y3, 
+    Triangle2D(double x1, double y1, double x2, double y2, double x3, double y3, 
         const Colour &rgb=Colour()) :
-      x1(_x1), y1(_y1), x2(_x2), y2(_y2), x3(_x3), y3(_y3), Shape(rgb) {}
+      x1(x1), y1(y1), x2(x2), y2(y2), x3(x3), y3(y3), Shape(rgb) {}
+};
+
+struct VVRScene_API Triangle3D : public Shape
+{
+    double x1,y1,z1;
+    double x2,y2,z2;
+    double x3,y3,z3;
+
+protected:
+    void drawShape() const override;
+
+public:
+    Triangle3D(){}
+    Triangle3D(double x1, double y1, double z1, 
+               double x2, double y2, double z2, 
+               double x3, double y3, double z3,
+               const Colour &rgb=Colour()) :
+        x1(x1), y1(y1), z1(z1),
+        x2(x2), y2(y2), z2(z2), 
+        x3(x3), y3(y3), z3(z3),
+        Shape(rgb) {}
 };
 
 /* Canvas */

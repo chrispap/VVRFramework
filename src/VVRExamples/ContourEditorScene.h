@@ -23,14 +23,18 @@ protected:
     void mousePressed(int x, int y, int modif) override;
     void mouseMoved(int x, int y, int modif) override;
     void keyEvent(unsigned char key, bool up, int modif) override;
+    void arrowEvent(ArrowDir dir, int modif) override;
 
 private:
     void saveContoursToFile();
     void loadContoursFromFile(string filename);
+    void pixelCoordsToSceneCoords(float &x, float &y);
 
 private:
     Canvas2D                m_canvas;
     float                   m_rad;
     vector<vector<Vec3d> >  m_pts;
-    bool                    b_show_pts;
+    vector<float>           m_heights;
+    bool                    b_render_3D, b_show_pts;
+    int                     m_active_contour;
 };

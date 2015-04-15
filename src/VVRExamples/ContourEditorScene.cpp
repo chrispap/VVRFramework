@@ -18,17 +18,20 @@ using namespace std;
 
 ContourEditorScene::ContourEditorScene()
 {
+    m_active_contour = 0;
     m_bg_col = Colour(0x44, 0x44, 0x44);
     m_perspective_proj = false;
+    b_render_3D = true;
+    b_show_pts = true;
+    setRot(Vec3d(-45,0,0));
     m_pts.resize(1);
-    b_show_pts = false;
+    m_heights.resize(1);
+    m_heights[0] = 0.1;
     loadContoursFromFile(getBasePath() + CONTOUR_FILENAME);
 }
 
 void ContourEditorScene::draw()
 {
-    //enterPixelMode();
-
     // Draw all contour lines
     for (int ci=0; ci<m_pts.size(); ci++)
     {
@@ -43,14 +46,26 @@ void ContourEditorScene::draw()
                 line_col = Colour::grey;
             }
 
-            LineSeg2D(p1.x, p1.y, p2.x, p2.y, line_col).draw();
-            if (b_show_pts) {
-                Point2D(p1.x, p1.y, Colour::yellow).draw();
+            if (!b_render_3D)
+            {
+                LineSeg2D(p1.x, p1.y, p2.x, p2.y, line_col).draw();
+                if (b_show_pts) Point2D(p1.x, p1.y, Colour::yellow).draw();
+            }
+            else
+            {
+                const double height = m_heights[ci];
+
+                Vec3d p1z = p1; 
+                p1z.z = height;
+                Vec3d p2z = p2; 
+                p2z.z = height;
+
+                Triangle3D(p1.x,p1.y,p1.z, p2.x,p2.y,p2.z, p2z.x,p2z.y,p2z.z,m_active_contour==ci ? Colour::red:Colour::yellow).draw();
+                Triangle3D(p1.x,p1.y,p1.z, p1z.x,p1z.y,p1z.z, p2z.x,p2z.y,p2z.z,m_active_contour==ci ? Colour::red:Colour::yellow).draw();
+                LineSeg3D(p1.x,p1.y,p1.z, p1z.x,p1z.y,p1z.z, Colour::grey).draw();
             }
         }
     }
-
-    //returnFromPixelMode();
 
     drawAxes();
 }
@@ -64,10 +79,12 @@ void ContourEditorScene::mousePressed(int x, int y, int modif)
 
     if (altDown(modif)) {
         m_pts.resize(m_pts.size()+1);
+        m_heights.resize(m_pts.size());
+        m_heights.back() = 0.1;
     }
 
-    float xf = getSceneWidth()  / getViewportWidth()  *  x;
-    float yf = getSceneHeight() / getViewportHeight() *  y;
+    float xf = x; float yf = y;
+    pixelCoordsToSceneCoords(xf, yf);
 
     m_pts.back().push_back(Vec3d(xf, yf ,0));
 }
@@ -79,8 +96,8 @@ void ContourEditorScene::mouseMoved(int x, int y, int modif)
         return;
     }
 
-    float xf = getSceneWidth()  / getViewportWidth()  *  x;
-    float yf = getSceneHeight() / getViewportHeight() *  y;
+    float xf = x; float yf = y;
+    pixelCoordsToSceneCoords(xf, yf);
 
     float d, dmin;
     dmin = getSceneWidth() / getViewportWidth() * MIN_POINT_DIST_PIXELS;
@@ -106,14 +123,17 @@ void ContourEditorScene::keyEvent(unsigned char key, bool up, int modif)
 
     switch (key)
     {
-    case '0': 
-        Scene::reset(); // Reset scene orientation
+    case 'e':
+        setRot(Vec3d(-45,0,0));
+        b_render_3D = true;
         break;
     case 'd':
         if (m_pts.back().size()>0)
             m_pts.back().resize(m_pts.back().size()-1);
-        else
+        else {
             m_pts.resize(max(1, (int) m_pts.size()-1));
+            m_heights.resize(m_pts.size());
+        }
         break;
     case 's':
         saveContoursToFile();
@@ -124,12 +144,33 @@ void ContourEditorScene::keyEvent(unsigned char key, bool up, int modif)
 
 }
 
+void ContourEditorScene::arrowEvent(ArrowDir dir, int modif)
+{
+    if (dir==ArrowDir::LEFT) {
+        m_active_contour = m_active_contour>0? m_active_contour-1: m_active_contour;
+        return;
+    }
+    if (dir==ArrowDir::RIGHT) {
+        m_active_contour = m_active_contour<m_pts.size()-1? m_active_contour+1: m_active_contour;
+        return;
+    }
+    if (dir==ArrowDir::UP) {
+        m_heights[m_active_contour] += 0.1;
+        return;
+    }
+    if (dir==ArrowDir::DOWN) {
+        m_heights[m_active_contour] -= 0.1;
+        if (m_heights[m_active_contour] < 0)
+            m_heights[m_active_contour] = 0;
+        return;
+    }
+
+}
+
 void ContourEditorScene::reset()
 {
-    // Fist clear, then resize.
-    // This way we make sure that m_pts[0] is cleared.
-    m_pts.clear();
-    m_pts.resize(1);
+    setRot(Vec3d(0,0,0));
+    b_render_3D = false;
 }
 
 void ContourEditorScene::saveContoursToFile()
@@ -142,7 +183,7 @@ void ContourEditorScene::saveContoursToFile()
     if (!file) throw "Cannot open <" + filename + "> for writing";
 
     for (int ci=0; ci<m_pts.size(); ci++) {
-        fprintf(file, "%s\n", CONTOUR_DELIMITER);
+        fprintf(file, "%s z=%f \n", CONTOUR_DELIMITER, m_heights[ci]);
         for (int pi=0; pi<m_pts[ci].size(); pi++) {
             Vec3d &p = m_pts[ci][pi];
             fprintf(file, "%f %f \n", p.x, p.y);
@@ -165,8 +206,13 @@ void ContourEditorScene::loadContoursFromFile(string filename)
         if ((len=strlen(line))<1) continue;
         if (line[len-1] == '\n') line[len-1] = 0;
 
-        if (strcmp(line, CONTOUR_DELIMITER) == 0) {
+        if (strncmp(line, CONTOUR_DELIMITER, strlen(CONTOUR_DELIMITER)) == 0) {
+            float height;
+            char trash[256];
+            sscanf(line, "%s z=%f", trash, &height);
             m_pts.resize(m_pts.size() + 1);
+            m_heights.resize(m_pts.size());
+            m_heights.back() = height;
             continue;
         }
 
@@ -183,6 +229,12 @@ void ContourEditorScene::loadContoursFromFile(string filename)
         }
     }
 
+}
+
+void ContourEditorScene::pixelCoordsToSceneCoords(float &x, float &y)
+{
+    x = getSceneWidth()  / getViewportWidth()  *  x;
+    y = getSceneHeight() / getViewportHeight() *  y;
 }
 
 int main(int argc, char* argv[])

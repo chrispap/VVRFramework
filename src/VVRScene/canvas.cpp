@@ -34,6 +34,14 @@ void Point2D::drawShape() const {
     glEnd();
 }
 
+void Point3D::drawShape() const {
+    glPointSize(7);
+    glEnable(GL_POINT_SMOOTH);
+    glBegin(GL_POINTS);
+    glVertex3f(x,y,z);
+    glEnd();
+}
+
 void LineSeg2D::drawShape() const {
     glLineWidth(DEF_LINE_WIDTH);
     glBegin(GL_LINES);
@@ -100,6 +108,16 @@ void Triangle2D::drawShape() const {
     glVertex2f(x1, y1);
     glVertex2f(x2, y2);
     glVertex2f(x3, y3);
+    glEnd();
+}
+
+void Triangle3D::drawShape() const {
+    glLineWidth(DEF_LINE_WIDTH);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glBegin(GL_TRIANGLES);
+    glVertex3f(x1, y1, z1);
+    glVertex3f(x2, y2, z2);
+    glVertex3f(x3, y3, z3);
     glEnd();
 }
 
