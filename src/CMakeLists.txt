@@ -9,4 +9,5 @@ add_subdirectory(GeoLib)
 add_subdirectory(VVRScene)
 add_subdirectory(VVRPhysics)
 add_subdirectory(VVRExamples)
+add_subdirectory(GeoLab_2015)
 ##########################################################################################

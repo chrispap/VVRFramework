@@ -94,6 +94,7 @@ int vvr::GLWidget::mkModif(QInputEvent *event)
 {
     int ctrl  = event->modifiers() & Qt::ControlModifier ? 1 : 0;
     int shift = event->modifiers() & Qt::ShiftModifier   ? 1 : 0;
-    int modif = (shift << 1) | (ctrl << 0);
+    int alt   = event->modifiers() & Qt::AltModifier     ? 1 : 0;
+    int modif = (ctrl << 0) | (shift << 1) | (alt << 2) ;
     return modif;
 }

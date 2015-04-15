@@ -58,7 +58,7 @@ public:
     // Getters
     const Vec3d& getRot() const { return m_globRot;}
     int getViewportWidth() { return m_screen_width;} // In pixels
-    int getViewpoerHeight() { return m_screen_height;} // In pixels
+    int getViewportHeight() { return m_screen_height;} // In pixels
     float getSceneWidth() { return m_scene_width;} 
     float getSceneHeight() { return m_scene_height;}
 
@@ -68,6 +68,9 @@ public:
 
 public: // Helpers
     void mouse2pix(int &x, int &y);
+    bool ctrlDown (int modif) { return modif & (1<<0);}
+    bool shiftDown(int modif) { return modif & (1<<1);}
+    bool altDown  (int modif) { return modif & (1<<2);}
 };
 
 /* This will be the entry point of client applications. */

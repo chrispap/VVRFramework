@@ -180,7 +180,7 @@ void Scene::mouseMoved(int x, int y, int modif)
     int dx = x - m_mouselastX;
     int dy = y - m_mouselastY;
 
-    m_globRot.x += dy;
+    m_globRot.x -= dy;
     m_globRot.y += dx;
 
     m_globRot.x = fmod(m_globRot.x, 360.0);
@@ -210,7 +210,7 @@ void Scene::enterPixelMode()
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
     glLoadIdentity();
-    glOrtho(-m_screen_width/2, m_screen_width/2, m_screen_height/2, -m_screen_height/2, 1, -1);
+    glOrtho(-m_screen_width/2, m_screen_width/2, -m_screen_height/2, m_screen_height/2, 1, -1);
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     glLoadIdentity();
@@ -229,4 +229,6 @@ void Scene::mouse2pix(int &x, int &y)
 {
     x -= m_screen_width/2;
     y -= m_screen_height/2;
+    // Reverse the default window coordinate system so that y grows upwards.
+    y = -y; 
 }
