@@ -27,10 +27,10 @@ private:
     void SetupTask1();
     void SetupTask2();
     void SetupTask3();
-    void HandleTask1(C2DPoint &p);
-    void HandleTask2(C2DPoint &p);
-    void HandleTask3(C2DPoint &p);
-    void HandlePoint(C2DPoint &p);
+    void HandleTask1(const C2DPoint &p);
+    void HandleTask2(const C2DPoint &p);
+    void HandleTask3(const C2DPoint &p);
+    void HandlePoint(const C2DPoint &p);
 
 private: 
     Canvas2D    canvas0, canvas1, canvas2, canvas3;

@@ -211,7 +211,7 @@ void IntersectionsScene::mouseMoved(int x, int y, int modif)
     mousePressed(x,y,modif);
 }
 
-void IntersectionsScene::HandlePoint(C2DPoint &p) 
+void IntersectionsScene::HandlePoint(const C2DPoint &p)
 {
     if (boundary1.IsOnRight(p))
         HandleTask3(p);
@@ -221,7 +221,7 @@ void IntersectionsScene::HandlePoint(C2DPoint &p)
         HandleTask1(p);
 }
 
-void IntersectionsScene::HandleTask1(C2DPoint &p)
+void IntersectionsScene::HandleTask1(const C2DPoint &p)
 {
     C2DTriangle tr[3];
     int count = Task_1_TriangleMesh(triangle, p, tr);
@@ -235,7 +235,7 @@ void IntersectionsScene::HandleTask1(C2DPoint &p)
     canvas1.add(p, Colour::cyan);
 }
 
-void IntersectionsScene::HandleTask2(C2DPoint &p)
+void IntersectionsScene::HandleTask2(const C2DPoint &p)
 {
     canvas2.resize(1);
     canvas2.newFrame(true);
@@ -269,7 +269,7 @@ void IntersectionsScene::HandleTask2(C2DPoint &p)
 
 }
 
-void IntersectionsScene::HandleTask3(C2DPoint &p)
+void IntersectionsScene::HandleTask3(const C2DPoint &p)
 {
     canvas3.resize(1);
     canvas3.newFrame(true);

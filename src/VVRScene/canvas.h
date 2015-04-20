@@ -266,8 +266,8 @@ public:
     }
 
     void add(const C2DLine &line, const Colour &col, bool inf_line=false) {
-        C2DPoint &p1 = line.GetPointFrom();
-        C2DPoint &p2 = line.GetPointTo();
+        const C2DPoint &p1 = line.GetPointFrom();
+        const C2DPoint &p2 = line.GetPointTo();
         add(p1, p2, col, inf_line);
     }
 

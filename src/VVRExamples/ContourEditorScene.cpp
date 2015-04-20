@@ -27,7 +27,12 @@ ContourEditorScene::ContourEditorScene()
     m_pts.resize(1);
     m_heights.resize(1);
     m_heights[0] = 0.1;
-    loadContoursFromFile(getBasePath() + CONTOUR_FILENAME);
+
+    try {
+        loadContoursFromFile(getBasePath() + CONTOUR_FILENAME);
+    } catch (string exc) {
+         std::cerr << exc << endl;
+    }
 }
 
 void ContourEditorScene::draw()
