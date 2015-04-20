@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include <cstdlib>
+#include <GeoLib.h>
 
 using std::string;
 using std::vector;
@@ -40,6 +41,11 @@ struct VVRScene_API Colour
     static Colour black;
     static Colour yellow;
     static Colour grey;
+    static Colour orange;
+    static Colour cyan;
+    static Colour magenta;
+    static Colour darkOrange;
+    static Colour darkRed;
 };
 
 /* Renderables */
@@ -57,8 +63,8 @@ struct VVRScene_API Shape : public IRenderable
     bool b_render_solid;
 
 protected:
-    Shape() {b_render_solid = false;}
-    Shape(const Colour &rgb) : colour(rgb) {}
+    Shape() : b_render_solid(false) {}
+    Shape(const Colour &rgb) : colour(rgb), b_render_solid(false) {}
     virtual void drawShape() const = 0;
 
 public:
@@ -77,7 +83,7 @@ protected:
 public:
     Point2D(){}
     Point2D(double x, double y, const Colour &rgb=Colour()) :
-      x(x), y(y), Shape(rgb) {}
+        x(x), y(y), Shape(rgb) {}
 };
 
 struct VVRScene_API Point3D : public Shape
@@ -90,7 +96,7 @@ protected:
 public:
     Point3D(){}
     Point3D(double x, double y, double z, const Colour &rgb=Colour()) :
-      x(x), y(y), z(z), Shape(rgb) {}
+        x(x), y(y), z(z), Shape(rgb) {}
 };
 
 struct VVRScene_API LineSeg2D : public Shape
@@ -105,7 +111,7 @@ protected:
 public:
     LineSeg2D(){}
     LineSeg2D(double _x1, double _y1, double _x2, double _y2, const Colour &rgb=Colour()) :
-      x1(_x1), y1(_y1), x2(_x2), y2(_y2), Shape(rgb) {}
+        x1(_x1), y1(_y1), x2(_x2), y2(_y2), Shape(rgb) {}
 };
 
 struct VVRScene_API Line2D : public LineSeg2D
@@ -116,7 +122,7 @@ protected:
 public:
     Line2D(){}
     Line2D(double _x1, double _y1, double _x2, double _y2, const Colour &rgb=Colour()) :
-      LineSeg2D(_x1, _y1, _x2, _y2, rgb) {}
+        LineSeg2D(_x1, _y1, _x2, _y2, rgb) {}
 };
 
 struct VVRScene_API LineSeg3D : public Shape
@@ -132,20 +138,20 @@ public:
     LineSeg3D(){}
     LineSeg3D(double x1, double y1, double z1,
               double x2, double y2, double z2, const Colour &rgb=Colour()) :
-      x1(x1), y1(y1), z1(z1), x2(x2), y2(y2), z2(z2), Shape(rgb) {}
+        x1(x1), y1(y1), z1(z1), x2(x2), y2(y2), z2(z2), Shape(rgb) {}
 };
 
 struct VVRScene_API Circle2D : public Shape
 {
-    double xx,y,r;
+    double x,y,r;
 
 protected:
     void drawShape() const override;
 
 public:
     Circle2D(){}
-    Circle2D(double cx, double cy, double rad, const Colour &rgb=Colour()) :
-      xx(cx), y(cy), r(rad), Shape(rgb) {}
+    Circle2D(double x, double y, double rad, const Colour &rgb=Colour()) :
+        x(x), y(y), r(rad), Shape(rgb) {}
 };
 
 struct VVRScene_API Sphere3D : public Shape
@@ -189,9 +195,9 @@ protected:
 
 public:
     Triangle2D(){b_render_solid = false;}
-    Triangle2D(double x1, double y1, double x2, double y2, double x3, double y3, 
-        const Colour &rgb=Colour()) :
-      x1(x1), y1(y1), x2(x2), y2(y2), x3(x3), y3(y3), Shape(rgb) {b_render_solid = false;}
+    Triangle2D(double x1, double y1, double x2, double y2, double x3, double y3,
+               const Colour &rgb=Colour()) :
+        x1(x1), y1(y1), x2(x2), y2(y2), x3(x3), y3(y3), Shape(rgb) {b_render_solid = false;}
 };
 
 struct VVRScene_API Triangle3D : public Shape
@@ -205,12 +211,12 @@ protected:
 
 public:
     Triangle3D(){b_render_solid = true;}
-    Triangle3D(double x1, double y1, double z1, 
-               double x2, double y2, double z2, 
+    Triangle3D(double x1, double y1, double z1,
+               double x2, double y2, double z2,
                double x3, double y3, double z3,
                const Colour &rgb=Colour()) :
         x1(x1), y1(y1), z1(z1),
-        x2(x2), y2(y2), z2(z2), 
+        x2(x2), y2(y2), z2(z2),
         x3(x3), y3(y3), z3(z3),
         Shape(rgb) {b_render_solid = true;}
 };
@@ -245,6 +251,45 @@ public:
     void ff();
     void resize(int i);
     void clear();
+
+    /* Utilities to directly add GeoLib objects to canvas */
+
+    void add(const C2DPoint &p, const Colour &col) {
+        add(new Point2D(p.x, p.y, col));
+    }
+
+    void add(const C2DPoint &p1, const C2DPoint &p2, const Colour &col, bool inf_line=false) {
+        if (inf_line)
+            add(new Line2D(p1.x, p1.y, p2.x, p2.y, col));
+        else
+            add(new LineSeg2D(p1.x, p1.y, p2.x, p2.y, col));
+    }
+
+    void add(const C2DLine &line, const Colour &col, bool inf_line=false) {
+        C2DPoint &p1 = line.GetPointFrom();
+        C2DPoint &p2 = line.GetPointTo();
+        add(p1, p2, col, inf_line);
+    }
+
+    void add(const C2DCircle &circle, const Colour &col, bool solid=false) {
+        Shape * s = new Circle2D(circle.GetCentre().x, circle.GetCentre().y, circle.GetRadius(), col);
+        s->setSolidRender(solid);
+        add(s);
+    }
+
+    void add(const C2DTriangle &tri, const Colour &col, bool solid=false) {
+        Shape *s = new Triangle2D(
+                    tri.GetPoint1().x,
+                    tri.GetPoint1().y,
+                    tri.GetPoint2().x,
+                    tri.GetPoint2().y,
+                    tri.GetPoint3().x,
+                    tri.GetPoint3().y,
+                    col);
+        s->setSolidRender(solid);
+        add(s);
+    }
+
 };
 
 }

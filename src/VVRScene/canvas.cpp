@@ -11,14 +11,19 @@
 using namespace vvr;
 using namespace std;
 
-/* Commont Color Definitions */
-Colour Colour::white  (0xFF, 0xFF, 0xFF);
-Colour Colour::red    (0xFF, 0x00, 0x00);
-Colour Colour::green  (0x00, 0xFF, 0x00);
-Colour Colour::blue   (0x00, 0x00, 0xFF);
-Colour Colour::black  (0x00, 0x00, 0x00);
-Colour Colour::yellow (0xFF, 0xFF, 0x00);
-Colour Colour::grey   (0x66, 0x66, 0x66);
+/* Common Color Definitions */
+Colour Colour::red          (0xFF, 0x00, 0x00);
+Colour Colour::blue         (0x00, 0x00, 0xFF);
+Colour Colour::grey         (0x66, 0x66, 0x66);
+Colour Colour::cyan         (0x00, 0xFF, 0xFF);
+Colour Colour::white        (0xFF, 0xFF, 0xFF);
+Colour Colour::green        (0x00, 0xFF, 0x00);
+Colour Colour::black        (0x00, 0x00, 0x00);
+Colour Colour::yellow       (0xFF, 0xFF, 0x00);
+Colour Colour::orange       (0xFF, 0x66, 0x00);
+Colour Colour::magenta      (0xFF, 0x00, 0xFF);
+Colour Colour::darkRed      (0x8B, 0x00, 0x00);
+Colour Colour::darkOrange   (0xFF, 0x8C, 0x00);
 
 /* Shape drawing */
 void Shape::draw() const {
@@ -78,14 +83,15 @@ void Circle2D::drawShape() const {
     unsigned const numOfSegments = 30;
 
     glLineWidth(DEF_LINE_WIDTH);
-    glBegin(GL_LINE_LOOP);
-    for (int i = 0; i < numOfSegments; i++) {
+    glBegin(b_render_solid? GL_POLYGON : GL_LINE_LOOP);
+    for(int i = 0; i < numOfSegments; i++) {
         theta = 2.0f * 3.14159265 * i / numOfSegments;
         x_ = r * cosf(theta);
         y_ = r * sinf(theta);
-        glVertex2f(xx + x_, y + y_);
+        glVertex2f(x + x_, y + y_);
     }
     glEnd();
+
 }
 
 void Sphere3D::drawShape() const {
