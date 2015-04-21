@@ -13,32 +13,36 @@ using namespace vvr;
 class IntersectionsScene : public vvr::Scene
 {
 public:
-
     IntersectionsScene();
     const char* getName() const override { return APP_TITLE; }
 
-protected:
+protected: // Overriden methods
     void draw() override;
     void reset() override;
     void mousePressed(int x, int y, int modif) override;
     void mouseMoved(int x, int y, int modif) override;
 
-private:
-    void SetupTask1();
-    void SetupTask2();
-    void SetupTask3();
-    void HandleTask1(const C2DPoint &p);
-    void HandleTask2(const C2DPoint &p);
-    void HandleTask3(const C2DPoint &p);
-    void HandlePoint(const C2DPoint &p);
+private: // Methods
+    void Task1(const C2DPoint &p);
+    void Task2(const C2DPoint &p);
+    void Task3(const C2DPoint &p);
+    void Task4(const C2DPoint &p);
 
-private: 
-    Canvas2D    canvas0, canvas1, canvas2, canvas3;
-    C2DLine     boundary1, boundary2;
-    C2DTriangle triangle;
-    C2DPoint    A, B, C;
-    C2DPointSet points;
-    double      path_width;
+private: // Data
+    C2DLine     m_bound_horizontal;
+    C2DLine     m_bound_vertical;
+
+    Canvas2D    m_canvas_0;
+    Canvas2D    m_canvas_1;
+    Canvas2D    m_canvas_2;
+    Canvas2D    m_canvas_3;
+    Canvas2D    m_canvas_4;
+    C2DTriangle m_triangle_1;
+    C2DTriangle m_triangle_2;
+    C2DCircle   m_circle_1;
+    C2DCircle   m_circle_2;
+    C2DLine     m_line_1;
+    C2DLine     m_line_2;
 };
 
 #endif

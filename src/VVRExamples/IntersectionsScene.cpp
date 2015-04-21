@@ -6,12 +6,7 @@
 #include <ctime>
 #include <algorithm>
 
-#define NUMPOINTS   60
-
-/* Task Function prototypes */
-int  Task_1_TriangleMesh (const C2DTriangle&, const C2DPoint&, C2DTriangle[]);
-void Task_2_CollinearPoints (const C2DPointSet&, C2DPointSet&);
-bool Task_3_IsOnPath (const C2DPoint&, const C2DPoint&, const C2DPoint&, const C2DPoint&, double);
+#define NUMPOINTS 60
 
 /* Construct - Load  - Setup */
 
@@ -24,177 +19,65 @@ IntersectionsScene::IntersectionsScene()
 void IntersectionsScene::reset()
 {
     Scene::reset();
-    
-    path_width = 80;
-    A = C2DPoint (-270,   118);
-    B = C2DPoint (  90,   250);
-    C = C2DPoint ( 392,   110);
+
+    // Clear everything
+    m_canvas_0.clear();
+    m_canvas_1.clear();
+    m_canvas_2.clear();
+    m_canvas_3.clear();
 
     // Divide window to Tasks
-    boundary1.Set(C2DPoint(4000, 0), C2DPoint(-4000, 0));
-    boundary2.Set(C2DPoint(0, -3000), C2DPoint(0,0));
-    canvas0.add(boundary1, Colour::black);
-    canvas0.add(boundary2, Colour::black);
+    m_bound_vertical.Set(C2DPoint(0, -3000), C2DPoint(0,3000));
+    m_bound_horizontal.Set(C2DPoint(4000, 0), C2DPoint(-4000, 0));
+    m_canvas_0.add(m_bound_horizontal, Colour::black);
+    m_canvas_0.add(m_bound_vertical, Colour::black);
 
-    SetupTask1();
-    SetupTask2();
-    SetupTask3();
+    // Setup Task 1:
+    {
+        C2DPoint a1(-300, 100);
+        C2DPoint a2(-100, 200);
+        C2DPoint b1(-350, 230);
+        C2DPoint b2(-50,   50);
 
-    // Execute Tasks
-    C2DPointSet colPts;
-    Task_2_CollinearPoints(points, colPts);
-
-    double dist1, dist2, dist3;
-    for (unsigned j=0; j<colPts.size(); j+=3) {
-        dist1 = colPts[j].Distance(colPts[j+1]);
-        dist2 = colPts[j+1].Distance(colPts[j+2]);
-        dist3 = colPts[j+2].Distance(colPts[j]);
-
-        if (dist1>dist2 && dist1>dist3) {
-            canvas2.add(C2DLine(colPts[j],colPts[j+1]), Colour::darkRed);
-        }
-        else if (dist2 > dist3) {
-            canvas2.add(C2DLine(colPts[j+1],colPts[j+2]), Colour::darkRed);
-        }
-        else {
-            canvas2.add(C2DLine(colPts[j+2],colPts[j]), Colour::darkRed);
-        }
-    }
-    for (unsigned i=0; i<colPts.size(); i++) {
-        canvas2.add(colPts[i], Colour::red);
+        m_line_1 = C2DLine(a1, a2);
+        m_line_2 = C2DLine(b1, b2);
+        m_canvas_0.add(a1, Colour::orange);
+        m_canvas_0.add(a2, Colour::orange);
+        m_canvas_0.add(m_line_1, Colour::orange);
+        m_canvas_1.add(b1, Colour::cyan);
+        m_canvas_1.add(b2, Colour::cyan);
+        m_canvas_1.add(m_line_2, Colour::cyan);
     }
 
-}
+    // Setup Task 2:
+    {
+        C2DPoint c1(150, 120);
+        C2DPoint c2(290, 150);
 
-void IntersectionsScene::SetupTask1()
-{
-    triangle.Set(C2DPoint(-350, -100), C2DPoint(-150,-100), C2DPoint(-250, -250));
-    canvas1.add(triangle, Colour::orange);
-}
-
-void IntersectionsScene::SetupTask2()
-{
-    points.AddCopy(C2DPoint(125, -55));
-    points.AddCopy(C2DPoint( 75, -55));
-    points.AddCopy(C2DPoint( 25, -55));
-    points.AddCopy(C2DPoint(125,-105));
-    points.AddCopy(C2DPoint( 25,-105));
-    points.AddCopy(C2DPoint(125,-155));
-    points.AddCopy(C2DPoint( 75,-155));
-    points.AddCopy(C2DPoint( 25,-155));
-
-    points.AddCopy(C2DPoint(175, -40));
-    points.AddCopy(C2DPoint(175, -90));
-    points.AddCopy(C2DPoint(175,-140));
-    points.AddCopy(C2DPoint(205, -40));
-    points.AddCopy(C2DPoint(205, -90));
-    points.AddCopy(C2DPoint(205,-140));
-    points.AddCopy(C2DPoint(235, -40));
-    points.AddCopy(C2DPoint(235,-140));
-
-    canvas2.add(C2DPoint(125, -55), Colour::green);
-    canvas2.add(C2DPoint( 75, -55), Colour::green);
-    canvas2.add(C2DPoint( 25, -55), Colour::green);
-    canvas2.add(C2DPoint(125,-105), Colour::green);
-    canvas2.add(C2DPoint( 25,-105), Colour::green);
-    canvas2.add(C2DPoint(125,-155), Colour::green);
-    canvas2.add(C2DPoint( 75,-155), Colour::green);
-    canvas2.add(C2DPoint( 25,-155), Colour::green);
-
-    canvas2.add(C2DPoint(175, -40), Colour::green);
-    canvas2.add(C2DPoint(175, -90), Colour::green);
-    canvas2.add(C2DPoint(175,-140), Colour::green);
-    canvas2.add(C2DPoint(205, -40), Colour::green);
-    canvas2.add(C2DPoint(205, -90), Colour::green);
-    canvas2.add(C2DPoint(205,-140), Colour::green);
-    canvas2.add(C2DPoint(235, -40), Colour::green);
-    canvas2.add(C2DPoint(235,-140), Colour::green);
-
-    C2DPoint pt;
-    CRandomNumber rnX(  5, 500);
-    CRandomNumber rnY(-350, -10);
-
-    for (int i=0; i<NUMPOINTS; i++) {
-        pt.Set(rnX.Get(), rnY.Get());
-        points.AddCopy(pt);
-        canvas2.add(pt, Colour::green);
+        m_circle_1 = C2DCircle(c1, 80);
+        m_circle_2 = C2DCircle(c2, 60);
+        m_canvas_0.add(c1, Colour::orange);
+        m_canvas_0.add(m_circle_1, Colour::orange);
+        m_canvas_2.add(c2, Colour::cyan);
+        m_canvas_2.add(m_circle_2, Colour::cyan);
     }
 
-    canvas2.newFrame(true);
+    // Task 3:
+    {
+        C2DPoint t1a(-300, -50);
+        C2DPoint t1b(-40,  -45);
+        C2DPoint t1c(-70, -170);
+        m_triangle_1 = C2DTriangle(t1a, t1b, t1c);
 
-    C2DPoint mousePt = C2DPoint(37, -10);
-    points.AddCopy(mousePt);
-    canvas2.add(mousePt, Colour::yellow);
-}
+        C2DPoint t2a(-197, -266);
+        C2DPoint t2b(-368, -136);
+        C2DPoint t2c(-108,  -76);
+        m_triangle_2 = C2DTriangle(t2a, t2b, t2c);
 
-void IntersectionsScene::SetupTask3()
-{
-    // Make line segments
-    C2DLine AB(A, B);
-    C2DLine BC(B, C);
+        m_canvas_0.add(m_triangle_1, Colour::orange);
+        m_canvas_3.add(m_triangle_2, Colour::cyan);
+    }
 
-    // Make path edges
-    C2DVector vw1(A, B);
-    vw1.SetLength(path_width);
-    vw1.TurnRight();
-    C2DVector vw2(B, C);
-    vw2.SetLength(path_width);
-    vw2.TurnRight();
-    C2DLine E2(A+vw1, B+vw1);
-    C2DLine E1(A+vw1*-1, B+vw1*-1);
-    C2DLine E4(B+vw2, C+vw2);
-    C2DLine E3(B+vw2*-1, C+vw2*-1);
-    E1.GrowFromCentre(100);
-    E2.GrowFromCentre(100);
-    E3.GrowFromCentre(100);
-    E4.GrowFromCentre(100);
-
-    // Find edge intersections
-    C2DPointSet S;
-    E1.Crosses(boundary1, &S);
-    E2.Crosses(boundary1, &S);
-    E1.Crosses(E3, &S);
-    E2.Crosses(E4, &S);
-    E4.Crosses(boundary1, &S);
-    E3.Crosses(boundary1, &S);
-    S[0] = A+vw1*-1;
-    S[1] = A+vw1;
-    S[4] = C+vw2;
-    S[5] = C+vw2*-1;
-
-    // Make dashed line helper vars
-    C2DVector l1(A,B);
-    C2DVector g1(l1);
-    l1.SetLength(20);
-    g1.SetLength(-5);
-    C2DVector l2(B,C);
-    C2DVector g2 = l2;
-    l2.SetLength(22);
-    g2.SetLength(-5);
-
-    if (S.size()!=6) return;
-
-    /* Add shapes */
-    canvas3.clear();
-    canvas3.add(C2DLine(S[0], S[2]), Colour::white);
-    canvas3.add(C2DLine(S[1], S[3]), Colour::white);
-    canvas3.add(C2DLine(S[2], S[5]), Colour::white);
-    canvas3.add(C2DLine(S[3], S[4]), Colour::white);
-    canvas3.add(C2DCircle(A,path_width), Colour::white, 0);
-    canvas3.add(C2DCircle(C,path_width), Colour::white, 0);
-    canvas3.add(C2DTriangle(S[0], S[2], S[1]), Colour::grey, 1);
-    canvas3.add(C2DTriangle(S[1], S[2], S[3]), Colour::grey, 1);
-    canvas3.add(C2DTriangle(S[2], S[5], S[4]), Colour::grey, 1);
-    canvas3.add(C2DTriangle(S[3], S[2], S[4]), Colour::grey, 1);
-    canvas3.add(C2DCircle(A,path_width), Colour::grey, true);
-    canvas3.add(C2DCircle(C,path_width), Colour::grey, true);
-    for (int i=0;i<19; i++) canvas3.add(C2DLine(A+l1*i, A+l1*(i+1)+g1), Colour::white);
-    for (int i=0;i<15; i++) canvas3.add(C2DLine(B+l2*i, B+l2*(i+1)+g2), Colour::white);
-    canvas3.add(C2DLine(AB.GetMidPoint(), AB.GetMidPoint()+vw1), Colour::blue);
-
-    canvas3.add(A, Colour::cyan);
-    canvas3.add(C, Colour::cyan);
-    canvas3.add(B, Colour::cyan);
 }
 
 /* UI Handling */
@@ -202,7 +85,13 @@ void IntersectionsScene::SetupTask3()
 void IntersectionsScene::mousePressed(int x, int y, int modif)
 {
     Scene::mousePressed(x, y, modif);
-    HandlePoint(C2DPoint(x,y));
+    echo(x);
+    echo(y);
+    const C2DPoint p(x,y);
+    if ( m_bound_horizontal.IsOnRight(p) && !m_bound_vertical.IsOnRight(p)) Task1(p);
+    if ( m_bound_horizontal.IsOnRight(p) &&  m_bound_vertical.IsOnRight(p)) Task2(p);
+    if (!m_bound_horizontal.IsOnRight(p) && !m_bound_vertical.IsOnRight(p)) Task3(p);
+    if (!m_bound_horizontal.IsOnRight(p) &&  m_bound_vertical.IsOnRight(p)) Task4(p);
 }
 
 void IntersectionsScene::mouseMoved(int x, int y, int modif)
@@ -211,69 +100,63 @@ void IntersectionsScene::mouseMoved(int x, int y, int modif)
     mousePressed(x,y,modif);
 }
 
-void IntersectionsScene::HandlePoint(const C2DPoint &p)
+/* Tasks */
+
+void IntersectionsScene::Task1(const C2DPoint &p)
 {
-    if (boundary1.IsOnRight(p))
-        HandleTask3(p);
-    else if (boundary2.IsOnRight(p))
-        HandleTask2(p);
-    else
-        HandleTask1(p);
+    C2DPoint p1 = m_line_2.GetPointFrom();   // To arxiko simeio paremenei idio.
+    m_line_2 = C2DLine(p1, p);   // To teliko simeio tis grammis akolouthei to mouse.
+
+    m_canvas_1.clear();
+    m_canvas_1.add(p, Colour::cyan);
+    m_canvas_1.add(p1, Colour::cyan);
+    m_canvas_1.add(m_line_2, Colour::cyan);
 }
 
-void IntersectionsScene::HandleTask1(const C2DPoint &p)
+void IntersectionsScene::Task2(const C2DPoint &p)
 {
-    C2DTriangle tr[3];
-    int count = Task_1_TriangleMesh(triangle, p, tr);
-    canvas1.resize(1);
-    canvas1.newFrame(true);
+    m_circle_2.SetCentre(p);
+    m_canvas_2.clear();
+    m_canvas_2.add(p, Colour::cyan);
+    m_canvas_2.add(m_circle_2, Colour::cyan);
 
-    for (int i=0; i<count; i++) {
-        canvas1.add(tr[i], Colour::darkOrange);
-    }
+    const double x1 = m_circle_1.GetCentre().x;
+    const double y1 = m_circle_1.GetCentre().y;
+    const double r1 = m_circle_1.GetRadius();
 
-    canvas1.add(p, Colour::cyan);
+    const double x2 = m_circle_2.GetCentre().x;
+    const double y2 = m_circle_2.GetCentre().y;
+    const double r2 = m_circle_2.GetRadius();
+
+    double d = sqrt(SQUARE(x1-x2) + SQUARE(y1-y2));
+    double l = (SQUARE(r1) - SQUARE(r2) + SQUARE(d))  /  (d*2);
+    double h = sqrt(SQUARE(r1) - SQUARE(l));
+
+    double i1x = (x2-x1)*l/d + (y2-y1)*h/d + x1;
+    double i1y = (y2-y1)*l/d - (x2-x1)*h/d + y1;
+    C2DPoint i1(i1x,i1y);
+
+    double i2x = (x2-x1)*l/d - (y2-y1)*h/d + x1;
+    double i2y = (y2-y1)*l/d + (x2-x1)*h/d + y1;
+    C2DPoint i2(i2x,i2y);
+
+    m_canvas_2.add(i1, Colour::red);
+    m_canvas_2.add(i2, Colour::red);
 }
 
-void IntersectionsScene::HandleTask2(const C2DPoint &p)
+void IntersectionsScene::Task3(const C2DPoint &p)
 {
-    canvas2.resize(1);
-    canvas2.newFrame(true);
+    const C2DPoint &p1 = m_triangle_2.GetPoint1();
+    const C2DPoint &p2 = m_triangle_2.GetPoint2();
+    m_triangle_2.Set(p1, p2, p);
 
-    points[points.size()-1].Set(p.x, p.y);
-    canvas2.add(p, Colour::yellow);
-
-    C2DPointSet colPts;
-    Task_2_CollinearPoints(points, colPts);
-
-    double dist1, dist2, dist3;
-    for (unsigned j=0; j<colPts.size(); j+=3) {
-        dist1 = colPts[j].Distance(colPts[j+1]);
-        dist2 = colPts[j+1].Distance(colPts[j+2]);
-        dist3 = colPts[j+2].Distance(colPts[j]);
-
-        if (dist1>dist2 && dist1>dist3) {
-            canvas2.add(C2DLine(colPts[j],colPts[j+1]), Colour::darkRed);
-        }
-        else if (dist2 > dist3) {
-            canvas2.add(C2DLine(colPts[j+1],colPts[j+2]), Colour::darkRed);
-        }
-        else {
-            canvas2.add(C2DLine(colPts[j+2],colPts[j]), Colour::darkRed);
-        }
-    }
-
-    for (unsigned i=0; i<colPts.size(); i++) {
-        canvas2.add(colPts[i], Colour::red);
-    }
-
+    m_canvas_3.clear();
+    m_canvas_3.add(m_triangle_2, Colour::cyan);
 }
 
-void IntersectionsScene::HandleTask3(const C2DPoint &p)
+void IntersectionsScene::Task4(const C2DPoint &p)
 {
-    canvas3.resize(1);
-    canvas3.newFrame(true);
-    canvas3.add(p, Task_3_IsOnPath(A, B, C, p, path_width) ? Colour::green : Colour::red);
+
 }
 
 /* Drawing */
@@ -282,10 +165,10 @@ void IntersectionsScene::draw()
 {
     enterPixelMode();
 
-    canvas0.draw();
-    canvas1.draw();
-    canvas2.draw();
-    canvas3.draw();
+    m_canvas_0.draw();
+    m_canvas_1.draw();
+    m_canvas_2.draw();
+    m_canvas_3.draw();
 }
 
 /* Application Entry Point */
@@ -293,108 +176,4 @@ void IntersectionsScene::draw()
 int main(int argc, char* argv[])
 {
     return vvr::mainLoop(argc, argv, new IntersectionsScene);
-}
-
-/*! Dosmenou enos trigwnou kai enos shmeiou dhmiourghste ta trigwna pou exoun koryfh
- *  to shmeio auto kai 2 apo ta shmeia tou arxikou trigwnou.
- *  Oi pleures twn trigwn pou tha ftia3ete den tha prepei na diastauronontai me to
- *  tis pleures tou arxikou trigwnou
- * @param[in]  tr To trigwno pou dinetai einai to portokali pou vlepetai me clockwise
- *  fora shmeiwn 1,2,3
- * @param[in]  pt To shmeio pou dinetai einai to shmeio pou kanate aristero click
- * @param[out] newTriangles[] Pinakas poy meta thn klish ths synarthshs tha prepei na
- *  periexei ta trigwna pou dhmiourgountai apo to shmeio pt kai to trigwno tr kai dn
- *  temnontai meta3i tous. Ta trigwna tha prepei na briskontai sthn mikroterh adeia
- *  thesh tou pinaka (to poly tria).
- * @return Epistrefei ton arithmo twn trigwnwn pou dhmiourgh8hkan
- */
-int Task_1_TriangleMesh(const C2DTriangle &tr, const C2DPoint &pt, C2DTriangle newTriangles[]) 
-{
-    C2DLine ln1, ln2, ln3;
-    int counter=0;
-
-    ln1 = C2DLine(tr.GetPoint1(), tr.GetPoint2());
-    ln2 = C2DLine(tr.GetPoint2(), tr.GetPoint3());
-    ln3 = C2DLine(tr.GetPoint3(), tr.GetPoint1());
-
-    if (ln1.IsOnRight(pt) && ln3.IsOnRight(pt) && ln2.IsOnRight(pt)) {
-        newTriangles[0].Set(tr.GetPoint1(), tr.GetPoint2(), pt);
-        newTriangles[1].Set(tr.GetPoint2(), tr.GetPoint3(), pt);
-        newTriangles[2].Set(tr.GetPoint3(), tr.GetPoint1(), pt);
-        return 3;
-    }
-
-    if (!ln1.IsOnRight(pt))
-        newTriangles[counter++].Set(tr.GetPoint1(), tr.GetPoint2(), pt);
-
-    if (!ln2.IsOnRight(pt))
-        newTriangles[counter++].Set(tr.GetPoint2(), tr.GetPoint3(), pt);
-
-    if (!ln3.IsOnRight(pt))
-        newTriangles[counter++].Set(tr.GetPoint3(), tr.GetPoint1(), pt);
-
-    return counter;
-}
-
-/*! Dosmenwn triwn shmeiwn epistrefei an auta einai syneftheiaka
- * @param[in]  p1 To prwto shmeio
- * @param[in]  p2 To deutero shmeio
- * @param[in]  p3 To trito shmeio
- * @return Epistrefei an ta tria auta shmeia einai shneftheiaka me akribeia klishs
- *  4 dekadikwn psifiwn
- */
-bool isCollinear(const C2DPoint &p1, const C2DPoint &p2, const C2DPoint &p3)
-{
-    if ((p1.x==p2.x) && (p1.x==p3.x)) return true;
-    
-    double a1 = (p1.y - p2.y)/(p1.x - p2.x);
-    double a2 = (p1.y - p3.y)/(p1.x - p3.x);
-    return (abs(a1 - a2) < 0.0001);
-}
-
-/*! Dosmenou enos nefous shmeiwn ypologizei poia apo afta einai suneftheiaka
- * @param[in]  cloudPts C2DPointSet apo shmeia
- * @param[out] collinearPts C2DPointSet ta shmeia pou einai shneftheiaka ana triades
- *  ena shmeio mporei na einai panw apo mia fora sto Set.
- */
-void Task_2_CollinearPoints(const C2DPointSet &cloudPts, C2DPointSet &collinearPts) 
-{
-    for (unsigned i=0, num=cloudPts.size(); i<num; i++) {
-        for (unsigned j=i+1; j<num; j++) {
-            for (unsigned k=j+1; k<num; k++) {
-                if (isCollinear(cloudPts[i], cloudPts[j], cloudPts[k])) {
-                    collinearPts.AddCopy(cloudPts[i]);
-                    collinearPts.AddCopy(cloudPts[j]);
-                    collinearPts.AddCopy(cloudPts[k]);
-                }
-            }
-        }
-    }
-}
-
-/*! Dosmenou enos dromou pou orizetai apo ta euthigrama tmhmata(?) AB,BC, kai me platos
- *  path_width apo tis eutheies, opws fainetai sto sxhma kai enos shmeiou p ypologiste
- *  kai epistrepste true h false an to shmeio afto brisketai entos h ektos tou dromou.
- * @param[in]  A To shmeio A tou dromou opws fainetai sto sxhma
- * @param[in]  B To shmeio B tou dromou opws fainetai sto sxhma
- * @param[in]  C To shmeio C tou dromou opws fainetai sto sxhma
- * @param[in]  p To shmeio pou kaneis click me to pontiki
- * @param[in]  path_width To paxos tou dromou opws fainetai me thn mple gramh sto sxhma
- * @return Epistrefei true an to shmeio p einai mesa entos tou dromou alliws false
- */
-bool Task_3_IsOnPath(const C2DPoint &A, const C2DPoint &B, const C2DPoint &C, const C2DPoint &p, double path_width)
-{
-    // Make line segments
-    C2DLine AB(B, A);
-    C2DLine BC(B, C);
-
-    double d1, d2, d1_, d2_;
-    C2DPoint np1, np2;
-    d1 = AB.Distance(p);
-    d2 = BC.Distance(p);
-    d1_ = AB.DistanceAsRay(p);
-    d2_ = BC.DistanceAsRay(p);
-
-    if (d1==d2) return (d1_<path_width && d2_<path_width);
-    else return (min(d1,d2)<path_width);
 }
