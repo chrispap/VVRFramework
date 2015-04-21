@@ -3,8 +3,8 @@
 ####################################################################
 res_dir                     =  resources/
 obj_dir                     =  resources/obj/
-obj_file                    =  resources/obj/icosahedron.obj
-perspective_proj            =  0
+obj_file                    =  resources/obj/vvrlab.obj
+perspective_proj            =  1
 color_bg                    =  768E77
 color_obj                   =  454545
 def_rot_x                   =  0
