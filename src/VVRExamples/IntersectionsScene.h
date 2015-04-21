@@ -26,7 +26,6 @@ private: // Methods
     void Task1(const C2DPoint &p);
     void Task2(const C2DPoint &p);
     void Task3(const C2DPoint &p);
-    void Task4(const C2DPoint &p);
 
 private: // Data
     C2DLine     m_bound_horizontal;

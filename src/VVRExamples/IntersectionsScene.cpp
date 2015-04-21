@@ -6,8 +6,6 @@
 #include <ctime>
 #include <algorithm>
 
-#define NUMPOINTS 60
-
 /* Construct - Load  - Setup */
 
 IntersectionsScene::IntersectionsScene()
@@ -51,7 +49,7 @@ void IntersectionsScene::reset()
 
     // Setup Task 2:
     {
-        C2DPoint c1(150, 120);
+        C2DPoint c1(166, 112);
         C2DPoint c2(290, 150);
 
         m_circle_1 = C2DCircle(c1, 80);
@@ -78,6 +76,9 @@ void IntersectionsScene::reset()
         m_canvas_3.add(m_triangle_2, Colour::cyan);
     }
 
+    Task1(m_line_2.GetPointTo());
+    Task2(m_circle_2.GetCentre());
+    Task3(m_triangle_2.GetPoint3());
 }
 
 /* UI Handling */
@@ -91,7 +92,7 @@ void IntersectionsScene::mousePressed(int x, int y, int modif)
     if ( m_bound_horizontal.IsOnRight(p) && !m_bound_vertical.IsOnRight(p)) Task1(p);
     if ( m_bound_horizontal.IsOnRight(p) &&  m_bound_vertical.IsOnRight(p)) Task2(p);
     if (!m_bound_horizontal.IsOnRight(p) && !m_bound_vertical.IsOnRight(p)) Task3(p);
-    if (!m_bound_horizontal.IsOnRight(p) &&  m_bound_vertical.IsOnRight(p)) Task4(p);
+    //if (!m_bound_horizontal.IsOnRight(p) &&  m_bound_vertical.IsOnRight(p)) Task4(p);
 }
 
 void IntersectionsScene::mouseMoved(int x, int y, int modif)
@@ -111,6 +112,16 @@ void IntersectionsScene::Task1(const C2DPoint &p)
     m_canvas_1.add(p, Colour::cyan);
     m_canvas_1.add(p1, Colour::cyan);
     m_canvas_1.add(m_line_2, Colour::cyan);
+
+    /**
+     * Breite to simeio tomis twn 2 euth. tmimatwn
+     */
+
+    C2DPoint i;
+    //...
+    //...
+    //...
+    m_canvas_1.add(i, Colour::red);
 }
 
 void IntersectionsScene::Task2(const C2DPoint &p)
@@ -123,23 +134,31 @@ void IntersectionsScene::Task2(const C2DPoint &p)
     const double x1 = m_circle_1.GetCentre().x;
     const double y1 = m_circle_1.GetCentre().y;
     const double r1 = m_circle_1.GetRadius();
-
     const double x2 = m_circle_2.GetCentre().x;
     const double y2 = m_circle_2.GetCentre().y;
     const double r2 = m_circle_2.GetRadius();
 
+    /**
+     * Breite ta simeia tomis twn 2 kyklwn.
+     */
+
+    C2DPoint i1, i2;
+
+    //---SOLUTION---
     double d = sqrt(SQUARE(x1-x2) + SQUARE(y1-y2));
     double l = (SQUARE(r1) - SQUARE(r2) + SQUARE(d))  /  (d*2);
     double h = sqrt(SQUARE(r1) - SQUARE(l));
-
     double i1x = (x2-x1)*l/d + (y2-y1)*h/d + x1;
     double i1y = (y2-y1)*l/d - (x2-x1)*h/d + y1;
-    C2DPoint i1(i1x,i1y);
-
+    i1 = C2DPoint(i1x,i1y);
     double i2x = (x2-x1)*l/d - (y2-y1)*h/d + x1;
     double i2y = (y2-y1)*l/d + (x2-x1)*h/d + y1;
-    C2DPoint i2(i2x,i2y);
+    i2 = C2DPoint(i2x,i2y);
+    //---SOLUTION---
 
+    //...
+    //...
+    //...
     m_canvas_2.add(i1, Colour::red);
     m_canvas_2.add(i2, Colour::red);
 }
@@ -149,14 +168,17 @@ void IntersectionsScene::Task3(const C2DPoint &p)
     const C2DPoint &p1 = m_triangle_2.GetPoint1();
     const C2DPoint &p2 = m_triangle_2.GetPoint2();
     m_triangle_2.Set(p1, p2, p);
-
     m_canvas_3.clear();
     m_canvas_3.add(m_triangle_2, Colour::cyan);
-}
 
-void IntersectionsScene::Task4(const C2DPoint &p)
-{
+    /**
+     * Breite ola ta simeia tomis twn 2 trigwnwn
+     * kai kante ta add sto m_canvas_3.
+     */
 
+    //...
+    //...
+    //...
 }
 
 /* Drawing */
