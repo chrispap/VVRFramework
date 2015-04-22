@@ -117,11 +117,32 @@ void IntersectionsScene::Task1(const C2DPoint &p)
      * Breite to simeio tomis twn 2 euth. tmimatwn
      */
 
+    bool seg_intersect = false;
     C2DPoint i;
-    //...
-    //...
-    //...
-    m_canvas_1.add(i, Colour::red);
+    
+    //---SOLUTION---
+    double l1_x1 = m_line_1.GetPointFrom().x;
+    double l1_y1 = m_line_1.GetPointFrom().y;
+    double l1_x2 = m_line_1.GetPointTo().x;
+    double l1_y2 = m_line_1.GetPointTo().y;
+    double l2_x1 = m_line_2.GetPointFrom().x;
+    double l2_y1 = m_line_2.GetPointFrom().y;
+    double l2_x2 = m_line_2.GetPointTo().x;
+    double l2_y2 = m_line_2.GetPointTo().y;
+
+    double l1_a = (l1_y2 - l1_y1) / (l1_x2 - l1_x1);
+    double l2_a = (l2_y2 - l2_y1) / (l2_x2 - l2_x1);
+    double l1_b = l1_y1 - l1_a * l1_x1;
+    double l2_b = l2_y1 - l2_a * l2_x1;
+    
+    i.x = (l2_b - l1_b) / (l1_a - l2_a);
+    i.y = l1_a * i.x + l1_b;
+
+    seg_intersect = (i.x > max(l1_x1, l1_x2) || i.x < min(l1_x1, l1_x2)) ||
+                    (i.x > max(l2_x1, l2_x2) || i.x < min(l2_x1, l2_x2));
+    //---SOLUTION---
+
+    m_canvas_1.add(i, seg_intersect ? Colour::green : Colour::red);
 }
 
 void IntersectionsScene::Task2(const C2DPoint &p)
@@ -156,9 +177,6 @@ void IntersectionsScene::Task2(const C2DPoint &p)
     i2 = C2DPoint(i2x,i2y);
     //---SOLUTION---
 
-    //...
-    //...
-    //...
     m_canvas_2.add(i1, Colour::red);
     m_canvas_2.add(i2, Colour::red);
 }
