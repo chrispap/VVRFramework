@@ -98,7 +98,7 @@ void Sphere3D::drawShape() const {
     glPushMatrix();
     glScalef(rad, rad, rad);
     glTranslatef(x, y, z);
-    drawSphere(rad, 30, 30);
+    drawSphere(rad, 60, 60);
     glPopMatrix();
 }
 

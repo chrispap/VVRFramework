@@ -27,7 +27,7 @@ Simple3DScene::Simple3DScene()
     m_bg_col            = Colour(m_settings.getStr("color_bg"));
     m_obj_col           = Colour(m_settings.getStr("color_obj"));
     m_perspective_proj  = m_settings.getBool("perspective_proj");
-    m_style_flag        = FLAG_SHOW_SOLID | FLAG_SHOW_WIRE;
+    m_style_flag        = FLAG_SHOW_SOLID;
 
     // Scene rotation.
     const double def_rot_x = m_settings.getDbl("def_rot_x");
@@ -63,11 +63,18 @@ void Simple3DScene::draw()
     if (m_style_flag & FLAG_SHOW_AXES)      m_mesh.draw(Colour::black, AXES);
     if (m_style_flag & FLAG_SHOW_AABB)      m_mesh.draw(Colour::black, BOUND);
 
-    vvr::Sphere3D s(0,0,0, m_sphere_rad, Colour::red);
-    s.setSolidRender(false);
-    s.draw();
+    if (m_style_flag & FLAG_SHOW_SOLID) {
+        vvr::Sphere3D sphere(0, 0, 0, m_sphere_rad, Colour(134, 100, 25));
+        sphere.setSolidRender(true);
+        sphere.draw();
+    }
 
-    LineSeg3D(0,0,0, getSceneWidth()/4, 0,0).draw();
+    if (m_style_flag & FLAG_SHOW_WIRE) {
+        vvr::Sphere3D sphere(0, 0, 0, m_sphere_rad, Colour::black);
+        sphere.setSolidRender(false);
+        sphere.draw();
+    }
+
 }
 
 void Simple3DScene::keyEvent(unsigned char key, bool up, int modif)
