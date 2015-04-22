@@ -14,7 +14,7 @@ Settings::Settings(string filename)
 {
     FILE *file;
     file = fopen(filename.c_str(), "r");
-    if (!file) throw string("Cannot open config file.")+filename;
+    if (!file) throw string("Cannot open config file <")+filename+">";
 
     char Line[MAX_LINE_LEN], Key[128], Val[MAX_LINE_LEN-128];
     while (fgets(Line, MAX_LINE_LEN, file)) {

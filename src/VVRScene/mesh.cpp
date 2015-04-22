@@ -122,6 +122,12 @@ void Mesh::updateTriangleData()
         ti->update();
 }
 
+void Mesh::update()
+{
+    updateTriangleData();
+    createNormals();
+}
+
 void Mesh::setBigSize(float size)
 {
     float s = size / mAABB.getMaxSize();
@@ -225,8 +231,6 @@ void Mesh::drawNormals(Colour col)
 
 void Mesh::drawAxes()
 {
-    glLineWidth(3);
-
     glBegin(GL_LINES);
     //[X]
     glColor3ub(0xFF, 0, 0);

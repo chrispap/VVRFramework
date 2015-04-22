@@ -29,7 +29,7 @@ const char* Scene::getName() const
 void Scene::drawAxes()
 {
     GLfloat len = 2.0 * getSceneWidth();
-    glLineWidth(1);
+
     glBegin(GL_LINES);
     
     // X

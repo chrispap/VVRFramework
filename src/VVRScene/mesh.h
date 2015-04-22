@@ -66,6 +66,10 @@ public:
     Vec3d getPos() const {return mPos;}
     Vec3d getRot() const {return mRot;}
     Box   getBox() const {return mAABB;}
+
+    void update();                                  ///< Call after making changes to the vertices
+    vector<Vec3d> &getVertices() { return mVertices; }
+    vector<Triangle> &getTriangles() { return mTriangles; }
 };
 
 }

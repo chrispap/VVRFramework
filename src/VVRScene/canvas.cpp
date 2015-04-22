@@ -96,8 +96,8 @@ void Circle2D::drawShape() const {
 
 void Sphere3D::drawShape() const {
     glPushMatrix();
-    glScalef(rad, rad, rad);
-    glTranslatef(x, y, z);
+    glTranslated(x, y, z);
+    glScaled(rad, rad, rad);
     drawSphere(rad, 60, 60);
     glPopMatrix();
 }

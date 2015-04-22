@@ -17,7 +17,7 @@ protected:
     void resize() override;
 
 private:
-    vvr::Mesh       m_mesh;
+    vvr::Mesh       m_icosahedron;
     vvr::Settings   m_settings;
     vvr::Colour     m_obj_col;
     float           m_sphere_rad;
