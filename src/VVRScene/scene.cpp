@@ -19,6 +19,7 @@ Scene::Scene()
     m_globRot_def = Vec3d(0,0,0);
     m_globRot = m_globRot_def;
     m_perspective_proj = false;
+    m_camera_dist = 100;
 }
 
 const char* Scene::getName() const
@@ -54,7 +55,8 @@ void Scene::drawAxes()
 void Scene::GL_Init()
 {
     // Light setup
-    static GLfloat light_position[] = { 0, 0, m_camera_dist*3,   1};
+    float lz = m_camera_dist * 3;
+    static GLfloat light_position[] = {   0,    0,   lz,   1};
     static GLfloat ambientLight[]   = { .75,  .75,  .75,   1};
     static GLfloat diffuseLight[]   = { .75,  .75,  .75,   1};
     static GLfloat specularLight[]  = { .85,  .85,  .85,   1};
@@ -103,7 +105,6 @@ void Scene::GL_Resize(int w, int h)
     glLoadIdentity();
 
     float4x4 proj_mat;
-    m_camera_dist = 100;
 
     if (m_perspective_proj) 
     {
