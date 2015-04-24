@@ -8,6 +8,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cmath>
+#include <cstring>
 
 #define CONTOUR_FILENAME  "resources/contours/contours.txt"
 #define CONTOUR_DELIMITER "CONTOUR-LINE"

@@ -22,7 +22,7 @@ include_directories(${CMAKE_SOURCE_DIR}/VVRPhysics)
 ### Specify needed libs ##################################################################
 foreach( srcFile ${APP_SRC_FILES} )
     string( REPLACE ".cpp" "" appName ${srcFile} )
-    target_link_libraries(${appName} VVRPhysics VVRScene MathGeoLib GeoLib)
+    target_link_libraries(${appName} VVRPhysics VVRScene GeoLib MathGeoLib)
 endforeach( srcFile ${APP_SRC_FILES} )
 ##########################################################################################
 

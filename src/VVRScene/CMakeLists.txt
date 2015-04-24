@@ -37,7 +37,7 @@ add_library(VVRScene SHARED ${SOURCE} ${UI_FILES})
 qt5_use_modules(VVRScene Widgets OpenGL)
 ##########################################################################################
 
-### Link to MathGeolib ###################################################################
-target_link_libraries(VVRScene PRIVATE ${OPENGL_LIBRARIES} Qt5::Widgets Qt5::OpenGL
-    MathGeoLib GeoLib)
+### Link to Libraries ####################################################################
+target_link_libraries(VVRScene LINK_PRIVATE ${OPENGL_LIBRARIES} Qt5::Widgets Qt5::OpenGL)
+target_link_libraries(VVRScene GeoLib )
 ##########################################################################################
