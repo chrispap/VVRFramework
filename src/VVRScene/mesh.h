@@ -33,6 +33,7 @@ enum VVRScene_API Style {
 class VVRScene_API Mesh
 {
     // Data members
+    bool                mCCW;
     vector<Vec3d>       mVertices;                  ///< Vertex list
     vector<Triangle>    mTriangles;                 ///< Triangle list | contains indices to the Vertex list
     vector<Vec3d>       mVertexNormals;             ///< Normals per vertex
@@ -50,7 +51,7 @@ class VVRScene_API Mesh
 
 public:
     Mesh ();
-    Mesh (const string &objDir, const string &objFile, const string &texFile);
+    Mesh (const string &objDir, const string &objFile, const string &texFile, bool ccw=true);
     Mesh (const Mesh &original);                    ///< Copy constructor
     void operator=(const Mesh &src);                ///< Assigment operator
 

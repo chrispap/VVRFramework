@@ -19,8 +19,10 @@ Mesh::Mesh()
 
 }
 
-Mesh::Mesh(const string &objDir, const string &objFile, const string &texFile)
+Mesh::Mesh(const string &objDir, const string &objFile, const string &texFile, bool ccw)
 {
+    mCCW = ccw;
+
     std::vector<shape_t> shapes;
     std::vector<material_t> materials;
     string err = LoadObj(shapes, materials, objFile.c_str(), objDir.c_str());
@@ -55,6 +57,7 @@ Mesh::Mesh(const string &objDir, const string &objFile, const string &texFile)
 }
 
 Mesh::Mesh(const Mesh &copyfrom):
+    mCCW(copyfrom.mCCW),
     mVertices (copyfrom.mVertices),
     mTriangles (copyfrom.mTriangles),
     mVertexNormals (copyfrom.mVertexNormals),
@@ -72,6 +75,7 @@ Mesh::Mesh(const Mesh &copyfrom):
 
 void Mesh::operator=(const Mesh &src)
 {
+    mCCW = src.mCCW;
     mVertices = src.mVertices;
     mTriangles = src.mTriangles;
     mVertexNormals = src.mVertexNormals;
@@ -111,7 +115,8 @@ void Mesh::createNormals()
         set<int>::const_iterator _ti;
         for (_ti=mVertexTriangles[vi].begin(); _ti!=mVertexTriangles[vi].end(); ++_ti)
             normSum.add(mTriangles[*_ti].getNormal());
-        mVertexNormals[vi] = normSum.scale(-1).normalize();
+        double s = (mCCW ? -1.0 : 1.0) / normSum.length();
+        mVertexNormals[vi] = normSum.scale(s);
     }
 }
 

@@ -39,7 +39,7 @@ Simple3DScene::Simple3DScene()
     // Load 3D models.
     const string objDir = getBasePath() + m_settings.getStr("obj_dir");
     const string objFile = getBasePath() +  m_settings.getStr("obj_file");
-    m_icosahedron = Mesh(objDir, objFile, "");
+    m_icosahedron = Mesh(objDir, objFile, "", true);
 }
 
 void Simple3DScene::resize()
@@ -68,7 +68,6 @@ void Simple3DScene::resize()
         }
 
         m_icosahedron.update();
-
     }
 
     FLAG_FIRST_PASS = false;
