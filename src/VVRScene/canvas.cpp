@@ -241,3 +241,38 @@ void drawSphere(double r, int lats, int longs)
         glEnd();
     }
 }
+
+void vvr::draw(C2DPointSet &point_set, Colour &col)
+{
+    /* Draw point cloud */
+    for (int i = 0; i < point_set.size(); i++) {
+        Point2D(
+            point_set.GetAt(i)->x,
+            point_set.GetAt(i)->y,
+            col).draw();
+    }
+}
+
+void vvr::draw(C2DLineSet  &line_set, Colour &col)
+{
+    for (int i = 0; i < line_set.size(); i++) {
+        LineSeg2D(
+            line_set.GetAt(i)->GetPointFrom().x,
+            line_set.GetAt(i)->GetPointFrom().y,
+            line_set.GetAt(i)->GetPointTo().x,
+            line_set.GetAt(i)->GetPointTo().y,
+            col).draw();
+    }
+}
+
+void vvr::draw(C2DPolygon  &polygon, Colour &col)
+{
+    for (int i = 0; i < polygon.GetLines().size(); i++) {
+        LineSeg2D(
+            polygon.GetLines().GetAt(i)->GetPointFrom().x,
+            polygon.GetLines().GetAt(i)->GetPointFrom().y,
+            polygon.GetLines().GetAt(i)->GetPointTo().x,
+            polygon.GetLines().GetAt(i)->GetPointTo().y,
+            col).draw();
+    }
+}
