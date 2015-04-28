@@ -6,7 +6,7 @@
 #include <cmath>
 #include <QtOpenGL>
 
-#define DEF_LINE_WIDTH 2
+#define DEF_LINE_WIDTH 2.1
 
 using namespace vvr;
 using namespace std;
@@ -80,7 +80,7 @@ void LineSeg3D::drawShape() const {
 
 void Circle2D::drawShape() const {
     double x_, y_, theta;
-    unsigned const numOfSegments = 30;
+    unsigned const numOfSegments = 60;
 
     glLineWidth(DEF_LINE_WIDTH);
     glBegin(b_render_solid? GL_POLYGON : GL_LINE_LOOP);

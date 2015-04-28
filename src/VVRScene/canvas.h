@@ -292,11 +292,11 @@ public:
 
 };
 
-void VVRScene_API draw(C2DPointSet &point_set, Colour &col=Colour::black);
+VVRScene_API void draw(C2DPointSet &point_set, Colour &col=Colour::black);
 
-void VVRScene_API draw(C2DLineSet &line_set, Colour &col=Colour::black);
+VVRScene_API void draw(C2DLineSet &line_set, Colour &col=Colour::black);
 
-void VVRScene_API draw(C2DPolygon &polygon, Colour &col=Colour::black);
+VVRScene_API void draw(C2DPolygon &polygon, Colour &col=Colour::black);
 
 }
 
