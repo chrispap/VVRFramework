@@ -46,7 +46,6 @@ private:
     Canvas2D        m_canvas_circles;
     C2DPointSet     m_pts;
     vector<Tri>     m_tris;
-    Tri             m_tri_new[3];
 };
 
 #endif

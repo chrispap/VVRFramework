@@ -72,16 +72,17 @@ void TriangulationScene::handleNewPoint(C2DPoint *p)
     m_tris.erase(m_tris.begin() + i_encl);
 
     // Create 3 new triangles
-    m_tri_new[0] = Tri(p, tri_encl.v1, tri_encl.v2);
-    m_tri_new[1] = Tri(p, tri_encl.v2, tri_encl.v3);
-    m_tri_new[2] = Tri(p, tri_encl.v3, tri_encl.v1);
+    Tri tri_new[3];
+    tri_new[0] = Tri(p, tri_encl.v1, tri_encl.v2);
+    tri_new[1] = Tri(p, tri_encl.v2, tri_encl.v3);
+    tri_new[2] = Tri(p, tri_encl.v3, tri_encl.v1);
 
     // Create new frames in canvas objects.
     m_canvas_tris.newFrame(false); m_canvas_circles.newFrame(false);
 
     for (int i = 0; i < 3; i++) {
-        m_canvas_tris.add(make_tri_C2D(m_tri_new[i]), Colour(255, 50, 50), true);
-        m_canvas_tris.add(make_tri_C2D(m_tri_new[i]), Colour::black, false);
+        m_canvas_tris.add(make_tri_C2D(tri_new[i]), Colour(255, 50, 50), true);
+        m_canvas_tris.add(make_tri_C2D(tri_new[i]), Colour::black, false);
     }
 
     vector<Tri> tris_adj;
@@ -89,7 +90,7 @@ void TriangulationScene::handleNewPoint(C2DPoint *p)
     // Chech new triangles for Delaunay condition
     for (int i = 0; i < 3; i++)
     {
-        C2DTriangle tri_check = make_tri_C2D(m_tri_new[i]);
+        C2DTriangle tri_check = make_tri_C2D(tri_new[i]);
         bool is_Del = IsDelaunay(tri_check, m_pts);
         C2DPoint *v_opposite;
         Tri *tri_adjacent;
@@ -98,17 +99,17 @@ void TriangulationScene::handleNewPoint(C2DPoint *p)
         {
             m_canvas_circles.add(GetCircumCircle(tri_check), Colour::magenta, false);
 
-            C2DPoint *v2 = m_tri_new[i].v2;
-            C2DPoint *v3 = m_tri_new[i].v3;
+            C2DPoint *v2 = tri_new[i].v2;
+            C2DPoint *v3 = tri_new[i].v3;
 
             FindAdjacentTriangle(m_tris, v2, v3, &tri_adjacent, &v_opposite);
             m_canvas_tris.add(make_tri_C2D(*tri_adjacent), Colour::darkOrange, true);
             m_canvas_tris.add(make_tri_C2D(*tri_adjacent), Colour::black, false);
 
             // Flip triangle
-            m_tri_new[i].v1 = p;
-            m_tri_new[i].v2 = v2;
-            m_tri_new[i].v3 = v_opposite;
+            tri_new[i].v1 = p;
+            tri_new[i].v2 = v2;
+            tri_new[i].v3 = v_opposite;
             
             // Flip adjacent triangle
             tri_adjacent->v1 = p;
@@ -122,16 +123,16 @@ void TriangulationScene::handleNewPoint(C2DPoint *p)
 
     unsigned n = tris_adj.size();
     m_canvas_tris.newFrame(false); m_canvas_circles.newFrame(false);
-    for (int i = 0; i < 3; i++) m_canvas_tris.add(make_tri_C2D(m_tri_new[i]), Colour::green, true);
+    for (int i = 0; i < 3; i++) m_canvas_tris.add(make_tri_C2D(tri_new[i]), Colour::green, true);
     for (int i = 0; i < n; i++) m_canvas_tris.add(make_tri_C2D(tris_adj[i]),  Colour::green, true);
-    for (int i = 0; i < 3; i++) m_canvas_tris.add(make_tri_C2D(m_tri_new[i]), Colour::black, false);
+    for (int i = 0; i < 3; i++) m_canvas_tris.add(make_tri_C2D(tri_new[i]), Colour::black, false);
     for (int i = 0; i < n; i++) m_canvas_tris.add(make_tri_C2D(tris_adj[i]),  Colour::black, false);
     m_canvas_tris.prev(); m_canvas_circles.prev();
 
     // Add the new triangles.
-    m_tris.push_back(m_tri_new[0]);
-    m_tris.push_back(m_tri_new[1]);
-    m_tris.push_back(m_tri_new[2]);
+    m_tris.push_back(tri_new[0]);
+    m_tris.push_back(tri_new[1]);
+    m_tris.push_back(tri_new[2]);
 }
 
 void TriangulationScene::draw()
