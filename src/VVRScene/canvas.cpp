@@ -157,7 +157,7 @@ void Canvas2D::add(Shape *shape_ptr) {
 
 void Canvas2D::newFrame(bool show_old_frames) {
     frames.push_back(Frame(show_old_frames));
-    fi++;
+    ff();
 }
 
 void Canvas2D::draw() {
