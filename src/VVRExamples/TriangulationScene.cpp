@@ -5,9 +5,6 @@
 #include <ctime>
 #include <algorithm>
 
-#define BW  450
-#define BH  300
-
 TriangulationScene::TriangulationScene()
 {
     m_bg_col = Colour(0x44, 0x44, 0x44);
@@ -161,8 +158,6 @@ Triangle2D TriangulationScene::make_tri_2D(Tri &tri, Colour col)
         tri.v3->x, tri.v3->y, col);
 }
 
-//! Tasks
-
 C2DCircle GetCircumCircle(C2DTriangle &t)
 {
     C2DCircle circle;
@@ -221,8 +216,6 @@ bool FindAdjacentTriangle(vector<Tri> &tris, C2DPoint *p1, C2DPoint *p2, Tri **t
 
     return false;
 }
-
-//! Main
 
 int main(int argc, char* argv[])
 {

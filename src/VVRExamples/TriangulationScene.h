@@ -30,18 +30,18 @@ public:
     TriangulationScene();
     const char* getName() const override { return APP_TITLE; }
 
-protected: // Overriden methods
+protected:
     void draw() override;
     void reset() override;
     void mousePressed(int x, int y, int modif) override;
     void arrowEvent(ArrowDir dir, int modif) override;
 
-private: // Methods
-    void handleNewPoint(C2DPoint *p);
+private:
     C2DTriangle make_tri_C2D(Tri &tri);
     Triangle2D  make_tri_2D(Tri &tri, Colour col=Colour::black);
+    void handleNewPoint(C2DPoint *p);
 
-private: // Data
+private:
     Canvas2D        m_canvas_tris;
     Canvas2D        m_canvas_circles;
     C2DPointSet     m_pts;
