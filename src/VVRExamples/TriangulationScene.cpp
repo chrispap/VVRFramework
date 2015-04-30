@@ -95,7 +95,7 @@ void TriangulationScene::handleNewPoint(C2DPoint *p)
     new_tris[2] = Tri(p, encl_tri.v3, encl_tri.v1);
 
     for (int i = 0; i < 3; i++) {
-        if (make_tri_C2D(new_tris[i]).Collinear()) 
+        if (make_tri_C2D(new_tris[i]).Collinear())
             return;
     }
 
@@ -128,14 +128,23 @@ void TriangulationScene::handleNewPoint(C2DPoint *p)
             m_canvas.add(make_tri_C2D(*tri_adjacent), Colour::black, false);
 
             // Flip triangle
-            new_tris[i].v1 = p;
-            new_tris[i].v2 = v2;
-            new_tris[i].v3 = v_opposite;
+            Tri nt1 = new_tris[i];
+            Tri nt2 = *tri_adjacent;
 
-            // Flip adjacent triangle
-            tri_adjacent->v1 = p;
-            tri_adjacent->v2 = v3;
-            tri_adjacent->v3 = v_opposite;
+            nt1.v1 = p;
+            nt1.v2 = v2;
+            nt1.v3 = v_opposite;
+            nt2.v1 = p;
+            nt2.v2 = v3;
+            nt2.v3 = v_opposite;
+
+            if (make_tri_C2D(nt1).Collinear() ||
+                make_tri_C2D(nt2).Collinear()) {
+                continue;
+            }
+
+            new_tris[i] = nt1;
+            *tri_adjacent = nt2;
 
             tris_adj.push_back(*tri_adjacent); // Keep in order to add to canvas later.
         }
@@ -160,7 +169,7 @@ void TriangulationScene::handleNewPoint(C2DPoint *p)
     FixViolations(tris_violating, m_pts);
 
     m_canvas.rew();
-    for (int i = 0; i < m_show_step; i++) 
+    for (int i = 0; i < m_show_step; i++)
         m_canvas.next();
 }
 
@@ -258,7 +267,11 @@ void FixViolations(vector<Tri> &tris, C2DPointSet &ptset)
 
     FindViolations(tris, ptset, tris_violating);
 
-    while (tris_violating.empty() == false) {
+
+    while (!tris_violating.empty())
+    {
+        int C = tris_violating.size();
+
         for (int i = 0; i < tris_violating.size(); i++)
         {
             Tri &tri = tris_violating[i];
@@ -283,14 +296,23 @@ void FixViolations(vector<Tri> &tris, C2DPointSet &ptset)
                 if (tri_adjacent == &tris_violating[i]) continue;
 
                 // Flip triangle
-                tris_violating[i].v1 = v1;
-                tris_violating[i].v2 = v2;
-                tris_violating[i].v3 = v_opposite;
+                Tri nt1 = tris_violating[i];
+                Tri nt2 = *tri_adjacent;
 
-                // Flip adjacent triangle
-                tri_adjacent->v1 = v1;
-                tri_adjacent->v2 = v3;
-                tri_adjacent->v3 = v_opposite;
+                nt1.v1 = v1;
+                nt1.v2 = v2;
+                nt1.v3 = v_opposite;
+                nt2.v1 = v1;
+                nt2.v2 = v3;
+                nt2.v3 = v_opposite;
+
+                if (C2DTriangle(*nt1.v1, *nt1.v2, *nt1.v3).Collinear() ||
+                    C2DTriangle(*nt2.v1, *nt2.v2, *nt2.v3).Collinear()) {
+                    continue;
+                }
+
+                tris_violating[i] = nt1;
+                *tri_adjacent = nt2;
 
                 tris_adj.push_back(*tri_adjacent); // Keep in order to add to canvas later.
                 break;
@@ -299,6 +321,9 @@ void FixViolations(vector<Tri> &tris, C2DPointSet &ptset)
 
         tris_violating.clear();
         FindViolations(tris, ptset, tris_violating);
+
+        if (C == tris_violating.size())
+            break;
     }
 
 }
