@@ -37,7 +37,7 @@ protected:
     void draw() override;
     void reset() override;
     void mousePressed(int x, int y, int modif) override;
-    void mouseMoved(int x, int y, int modif) override { mousePressed(x, y, modif); }
+    void mouseMoved(int x, int y, int modif) override;
     void arrowEvent(ArrowDir dir, int modif) override;
 
 private:

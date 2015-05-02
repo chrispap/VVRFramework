@@ -31,6 +31,13 @@ void TriangulationScene::mousePressed(int x, int y, int modif)
     handleNewPoint(new C2DPoint(x, y));
 }
 
+void TriangulationScene::mouseMoved(int x, int y, int modif)
+{
+    Scene::mouseMoved(x, y, modif);
+    if (m_pts.GetLast()->Distance(C2DPoint(x, y)) > 20)
+        handleNewPoint(new C2DPoint(x, y));
+}
+
 void TriangulationScene::arrowEvent(vvr::ArrowDir dir, int modif)
 {
     if (dir == vvr::LEFT)
@@ -65,7 +72,9 @@ void TriangulationScene::handleNewPoint(C2DPoint *p)
     for (size_t i = 0; i < m_pts.size(); i++)
     {
         if (m_pts.GetAt(i)->x == p->x &&
-            m_pts.GetAt(i)->y == p->y) {
+            m_pts.GetAt(i)->y == p->y)
+        {
+            delete p;
             return;
         }
     }
@@ -77,8 +86,10 @@ void TriangulationScene::handleNewPoint(C2DPoint *p)
             break;
     }
 
-    if (i_encl == m_tris.size()) // Did not find enclosing triangle.
+    if (i_encl == m_tris.size()) { // Did not find enclosing triangle.
+        delete p;
         return;
+    }
 
     m_pts.Add(p);
     m_canvas.clear();
@@ -267,10 +278,11 @@ void FixViolations(vector<Tri> &tris, C2DPointSet &ptset)
 
     FindViolations(tris, ptset, tris_violating);
 
+    int attempts = 100;
 
-    while (!tris_violating.empty())
+    while (!tris_violating.empty() && attempts>0)
     {
-        int C = tris_violating.size();
+        int num_viol = tris_violating.size();
 
         for (int i = 0; i < tris_violating.size(); i++)
         {
@@ -322,8 +334,13 @@ void FixViolations(vector<Tri> &tris, C2DPointSet &ptset)
         tris_violating.clear();
         FindViolations(tris, ptset, tris_violating);
 
-        if (C == tris_violating.size())
-            break;
+        if (num_viol == tris_violating.size())
+            --attempts;
+        else {
+            echo(attempts);
+            attempts = 100;
+        }
+
     }
 
 }
