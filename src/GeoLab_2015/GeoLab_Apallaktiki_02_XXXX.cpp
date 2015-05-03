@@ -9,7 +9,7 @@
 #include <string>
 #include <MathGeoLib/MathGeoLib.h>
 
-#define CONFIG_FILE_PATH "../../config/config_apallaktiki_02.txt"
+#define CONFIG_FILE_PATH "config/config_apallaktiki_02.txt"
 
 #define FLAG_SHOW_AXES       1
 #define FLAG_SHOW_AABB       2
@@ -23,7 +23,7 @@ using namespace vvr;
 Simple3DScene::Simple3DScene()
 {
     // Load settings.
-    m_settings          = Settings(getExePath() + CONFIG_FILE_PATH);
+    m_settings          = Settings(getBasePath() + CONFIG_FILE_PATH);
     m_bg_col            = Colour(m_settings.getStr("color_bg"));
     m_obj_col           = Colour(m_settings.getStr("color_obj"));
     m_perspective_proj  = m_settings.getBool("perspective_proj");
@@ -37,8 +37,8 @@ Simple3DScene::Simple3DScene()
     m_globRot = m_globRot_def;
 
     // Load 3D models.
-    const string objDir = getExePath() + m_settings.getStr("obj_dir");
-    const string objFile = getExePath() +  m_settings.getStr("obj_file");
+    const string objDir = getBasePath() + m_settings.getStr("obj_dir");
+    const string objFile = getBasePath() +  m_settings.getStr("obj_file");
     m_icosahedron = Mesh(objDir, objFile, "", true);
 }
 

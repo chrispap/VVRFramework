@@ -1,8 +1,8 @@
 ####################################################################
 ### Directory paths ################################################
 ####################################################################
-obj_dir                     =  ../../resources/obj/
-obj_file                    =  ../../resources/obj/b66_L2.obj
+obj_dir                     =  resources/obj/
+obj_file                    =  resources/obj/b66_L2.obj
 perspective_proj            =  1
 color_bg                    =  768E77
 color_obj                   =  454545

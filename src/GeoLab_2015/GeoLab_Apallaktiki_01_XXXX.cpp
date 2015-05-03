@@ -9,7 +9,7 @@
 #include <cstdlib>
 #include <cmath>
 
-#define CONTOUR_FILENAME  "../../resources/contours/contours.txt"
+#define CONTOUR_FILENAME  "resources/contours/contours.txt"
 #define CONTOUR_DELIMITER "CONTOUR-LINE"
 #define MIN_POINT_DIST_PIXELS 10
 
@@ -27,7 +27,7 @@ ContourEditorScene::ContourEditorScene()
     m_pts.resize(1);
     m_heights.resize(1);
     m_heights[0] = 0.1;
-    loadContoursFromFile(getExePath() + CONTOUR_FILENAME);
+    loadContoursFromFile(getBasePath() + CONTOUR_FILENAME);
 }
 
 void ContourEditorScene::draw()
@@ -175,8 +175,7 @@ void ContourEditorScene::reset()
 
 void ContourEditorScene::saveContoursToFile()
 {
-    string filename = CONTOUR_FILENAME;
-    filename = getExePath() + filename;
+    string filename = getBasePath() + CONTOUR_FILENAME;
     std::cout << "Saving to " << filename << std::endl;
 
     FILE* file = fopen(filename.c_str(), "w");

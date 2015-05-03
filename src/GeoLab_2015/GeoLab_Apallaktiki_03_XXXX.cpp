@@ -9,8 +9,8 @@
 #include <string>
 #include <MathGeoLib/MathGeoLib.h>
 
-#define CONFIG_FILE_PATH "../../config/config_apallaktiki_03.txt"
-#define POLYGON_FILENAME  "../../resources/polygons/polygon.txt"
+#define CONFIG_FILE_PATH "config/config_apallaktiki_03.txt"
+#define POLYGON_FILENAME  "resources/polygons/polygon.txt"
 #define MIN_POINT_DIST_PIXELS 2
 
 #define FLAG_SHOW_AXES       1
@@ -25,7 +25,7 @@ using namespace vvr;
 Simple3DScene::Simple3DScene()
 {
     // Load settings.
-    m_settings          = Settings(getExePath() + CONFIG_FILE_PATH);
+    m_settings          = Settings(getBasePath() + CONFIG_FILE_PATH);
     m_bg_col            = Colour(m_settings.getStr("color_bg"));
     m_obj_col           = Colour(m_settings.getStr("color_obj"));
     m_perspective_proj  = m_settings.getBool("perspective_proj");
@@ -39,15 +39,15 @@ Simple3DScene::Simple3DScene()
     m_globRot = m_globRot_def;
 
     // Load 3D models.
-    const string objDir = getExePath() + m_settings.getStr("obj_dir");
-    const string objFile = getExePath() +  m_settings.getStr("obj_file");
+    const string objDir = getBasePath() + m_settings.getStr("obj_dir");
+    const string objFile = getBasePath() +  m_settings.getStr("obj_file");
     
     // H teleytaia parametros kathorizei an ta trigwna dinontai se CW/CCW fora.
     // An to 3D antikeimenou emfanizetai xwris skies, allakse ayti tin parametro.
     m_model = Mesh(objDir, objFile, "", false); 
 
     // Fortwse to polygwno apo tin mnimi
-    loadPolygonFromFile(getExePath() + POLYGON_FILENAME);
+    loadPolygonFromFile(getBasePath() + POLYGON_FILENAME);
     b_show_pts = false;
 }
 
@@ -175,7 +175,7 @@ void Simple3DScene::mouseMoved(int x, int y, int modif)
 void Simple3DScene::savePolygonToFile()
 {
     string filename = POLYGON_FILENAME;
-    filename = getExePath() + filename;
+    filename = getBasePath() + filename;
     std::cout << "Saving to " << filename << std::endl;
 
     FILE* file = fopen(filename.c_str(), "w");
