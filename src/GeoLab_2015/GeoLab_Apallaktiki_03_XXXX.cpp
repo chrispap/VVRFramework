@@ -9,8 +9,8 @@
 #include <string>
 #include <MathGeoLib/MathGeoLib.h>
 
-#define CONFIG_FILE_PATH "../Apallaktiki_03/config.txt"
-#define POLYGON_FILENAME  "../Apallaktiki_03/polygons/polygon.txt"
+#define CONFIG_FILE_PATH "../../config/config_apallaktiki_03.txt"
+#define POLYGON_FILENAME  "../../resources/polygons/polygon.txt"
 #define MIN_POINT_DIST_PIXELS 2
 
 #define FLAG_SHOW_AXES       1

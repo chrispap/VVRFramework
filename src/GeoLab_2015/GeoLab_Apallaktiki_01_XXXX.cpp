@@ -9,7 +9,7 @@
 #include <cstdlib>
 #include <cmath>
 
-#define CONTOUR_FILENAME  "../Apallaktiki_01/contours/contours.txt"
+#define CONTOUR_FILENAME  "../../resources/contours/contours.txt"
 #define CONTOUR_DELIMITER "CONTOUR-LINE"
 #define MIN_POINT_DIST_PIXELS 10
 
