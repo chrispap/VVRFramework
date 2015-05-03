@@ -31,6 +31,13 @@ void TriangulationScene::mousePressed(int x, int y, int modif)
     handleNewPoint(new C2DPoint(x, y));
 }
 
+void TriangulationScene::mouseMoved(int x, int y, int modif)
+{
+    Scene::mouseMoved(x, y, modif);
+    if (m_pts.GetLast()->Distance(C2DPoint(x, y)) > 20)
+        handleNewPoint(new C2DPoint(x, y));
+}
+
 void TriangulationScene::arrowEvent(vvr::ArrowDir dir, int modif)
 {
     if (dir == vvr::LEFT)
@@ -61,11 +68,13 @@ void TriangulationScene::arrowEvent(vvr::ArrowDir dir, int modif)
 
 void TriangulationScene::handleNewPoint(C2DPoint *p)
 {
-    // Check whether a same point already exists.
+    // Check whether a point already exists in the same coords.
     for (size_t i = 0; i < m_pts.size(); i++)
     {
         if (m_pts.GetAt(i)->x == p->x &&
-            m_pts.GetAt(i)->y == p->y) {
+            m_pts.GetAt(i)->y == p->y)
+        {
+            delete p;
             return;
         }
     }
@@ -77,13 +86,15 @@ void TriangulationScene::handleNewPoint(C2DPoint *p)
             break;
     }
 
-    if (i_encl == m_tris.size()) // Did not find enclosing triangle.
+    // If no enclosing triangle was found.
+    if (i_encl == m_tris.size()) {
+        delete p;
         return;
-
-    m_pts.Add(p);
-    m_canvas.clear();
+    }
 
     Tri encl_tri = m_tris[i_encl];
+    m_pts.Add(p);
+    m_canvas.clear();
 
     // Remove the enclosing triangle. It will be replaced by its subdivision triangles.
     m_tris.erase(m_tris.begin() + i_encl);
@@ -94,11 +105,13 @@ void TriangulationScene::handleNewPoint(C2DPoint *p)
     new_tris[1] = Tri(p, encl_tri.v2, encl_tri.v3);
     new_tris[2] = Tri(p, encl_tri.v3, encl_tri.v1);
 
+    // Check if any of the 3 triangles are colinear.
     for (int i = 0; i < 3; i++) {
         if (make_tri_C2D(new_tris[i]).Collinear())
             return;
     }
 
+    // Display the 3 the triangles.
     for (int i = 0; i < 3; i++) {
         m_canvas.add(make_tri_C2D(new_tris[i]), Colour(255, 50, 50), true);
         m_canvas.add(make_tri_C2D(new_tris[i]), Colour::black, false);
@@ -164,9 +177,14 @@ void TriangulationScene::handleNewPoint(C2DPoint *p)
     m_tris.push_back(new_tris[2]);
 
     vector<Tri> tris_violating;
+
     FindViolations(m_tris, m_pts, tris_violating);
-    ShowViolations(tris_violating, m_canvas);
-    FixViolations(tris_violating, m_pts);
+    ShowViolations(tris_violating, m_canvas, Colour::orange);
+
+    FixViolations(m_tris, m_pts);
+
+    FindViolations(m_tris, m_pts, tris_violating);
+    ShowViolations(tris_violating, m_canvas, Colour::magenta);
 
     m_canvas.rew();
     for (int i = 0; i < m_show_step; i++)
@@ -250,13 +268,13 @@ void FindViolations(vector<Tri> &tris, C2DPointSet &ptset, vector<Tri> &tris_vio
     }
 }
 
-void ShowViolations(vector<Tri> &tris_violating, Canvas2D &canvas)
+void ShowViolations(vector<Tri> &tris_violating, Canvas2D &canvas, Colour &col)
 {
     canvas.newFrame(false);
     for (int i = 0; i < tris_violating.size(); i++) {
         Tri &tri = tris_violating[i];
         C2DTriangle t(*tri.v1, *tri.v2, *tri.v3);
-        canvas.add(GetCircumCircle(t), Colour::magenta, false);
+        canvas.add(GetCircumCircle(t), col, false);
     }
 }
 
@@ -267,10 +285,11 @@ void FixViolations(vector<Tri> &tris, C2DPointSet &ptset)
 
     FindViolations(tris, ptset, tris_violating);
 
+    int attempts = 100;
 
-    while (!tris_violating.empty())
+    while (!tris_violating.empty() && attempts>0)
     {
-        int C = tris_violating.size();
+        int num_viol = tris_violating.size();
 
         for (int i = 0; i < tris_violating.size(); i++)
         {
@@ -322,8 +341,13 @@ void FixViolations(vector<Tri> &tris, C2DPointSet &ptset)
         tris_violating.clear();
         FindViolations(tris, ptset, tris_violating);
 
-        if (C == tris_violating.size())
-            break;
+        if (num_viol == tris_violating.size())
+            --attempts;
+        else {
+            echo(attempts);
+            attempts = 100;
+        }
+
     }
 
 }
