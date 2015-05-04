@@ -176,15 +176,10 @@ void TriangulationScene::handleNewPoint(C2DPoint *p)
     m_tris.push_back(new_tris[1]);
     m_tris.push_back(new_tris[2]);
 
-    vector<Tri> tris_violating;
-
-    FindViolations(m_tris, m_pts, tris_violating);
-    ShowViolations(tris_violating, m_canvas, Colour::orange);
-
+    vector<unsigned> violations;
     FixViolations(m_tris, m_pts);
-
-    FindViolations(m_tris, m_pts, tris_violating);
-    ShowViolations(tris_violating, m_canvas, Colour::magenta);
+    FindViolations(m_tris, m_pts, violations);
+    ShowViolations(m_tris, violations, m_canvas, Colour::magenta);
 
     m_canvas.rew();
     for (int i = 0; i < m_show_step; i++)
@@ -256,23 +251,23 @@ bool FindAdjacentTriangle(vector<Tri> &tris, C2DPoint *p1, C2DPoint *p2, Tri **t
     return false;
 }
 
-void FindViolations(vector<Tri> &tris, C2DPointSet &ptset, vector<Tri> &tris_violating)
+void FindViolations(vector<Tri> &tris, C2DPointSet &ptset, vector<unsigned> &violations)
 {
     for (int i = 0; i < tris.size(); i++)
     {
         Tri &tri = tris[i];
         C2DTriangle t(*tri.v1, *tri.v2, *tri.v3);
         if (!IsDelaunay(t, ptset)) {
-            tris_violating.push_back(tris[i]);
+            violations.push_back(i);
         }
     }
 }
 
-void ShowViolations(vector<Tri> &tris_violating, Canvas2D &canvas, Colour &col)
+void ShowViolations(vector<Tri> &tris, vector<unsigned> &violations, Canvas2D &canvas, Colour &col)
 {
     canvas.newFrame(false);
-    for (int i = 0; i < tris_violating.size(); i++) {
-        Tri &tri = tris_violating[i];
+    for (int i = 0; i < violations.size(); i++) {
+        Tri &tri = tris[violations[i]];
         C2DTriangle t(*tri.v1, *tri.v2, *tri.v3);
         canvas.add(GetCircumCircle(t), col, false);
     }
@@ -280,20 +275,19 @@ void ShowViolations(vector<Tri> &tris_violating, Canvas2D &canvas, Colour &col)
 
 void FixViolations(vector<Tri> &tris, C2DPointSet &ptset)
 {
-    vector<Tri> tris_adj;
-    vector<Tri> tris_violating;
+    vector<unsigned> violations;
 
-    FindViolations(tris, ptset, tris_violating);
+    FindViolations(tris, ptset, violations);
 
     int attempts = 100;
 
-    while (!tris_violating.empty() && attempts>0)
+    while (!violations.empty() && attempts>0)
     {
-        int num_viol = tris_violating.size();
+        int num_viol = violations.size();
 
-        for (int i = 0; i < tris_violating.size(); i++)
+        for (int i = 0; i < violations.size(); i++)
         {
-            Tri &tri = tris_violating[i];
+            Tri &tri = tris[violations[i]];
             C2DTriangle t(*tri.v1, *tri.v2, *tri.v3);
             bool is_Del = IsDelaunay(t, ptset);
             C2DPoint *v_opposite;
@@ -301,21 +295,22 @@ void FixViolations(vector<Tri> &tris, C2DPointSet &ptset)
 
             if (!is_Del)
             {
-                C2DPoint *v1 = tris_violating[i].v1;
-                C2DPoint *v2 = tris_violating[i].v2;
-                C2DPoint *v3 = tris_violating[i].v3;
+                C2DPoint *v1 = tri.v1;
+                C2DPoint *v2 = tri.v2;
+                C2DPoint *v3 = tri.v3;
 
                 if (!FindAdjacentTriangle(tris, v2, v3, &tri_adjacent, &v_opposite)) {
                     C2DPoint *tmp = v2;
                     v2 = v1;
                     v1 = tmp;
-                    FindAdjacentTriangle(tris, v2, v3, &tri_adjacent, &v_opposite);
+                    if (!FindAdjacentTriangle(tris, v2, v3, &tri_adjacent, &v_opposite))
+                        continue;
                 }
 
-                if (tri_adjacent == &tris_violating[i]) continue;
+                if (tri_adjacent == &tri) continue;
 
                 // Flip triangle
-                Tri nt1 = tris_violating[i];
+                Tri nt1 = tri;
                 Tri nt2 = *tri_adjacent;
 
                 nt1.v1 = v1;
@@ -330,18 +325,17 @@ void FixViolations(vector<Tri> &tris, C2DPointSet &ptset)
                     continue;
                 }
 
-                tris_violating[i] = nt1;
+                tri = nt1;
                 *tri_adjacent = nt2;
 
-                tris_adj.push_back(*tri_adjacent); // Keep in order to add to canvas later.
                 break;
             }
         }
 
-        tris_violating.clear();
-        FindViolations(tris, ptset, tris_violating);
+        violations.clear();
+        FindViolations(tris, ptset, violations);
 
-        if (num_viol == tris_violating.size())
+        if (num_viol == violations.size())
             --attempts;
         else {
             echo(attempts);

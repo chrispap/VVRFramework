@@ -146,19 +146,19 @@ void ContourEditorScene::keyEvent(unsigned char key, bool up, int modif)
 
 void ContourEditorScene::arrowEvent(ArrowDir dir, int modif)
 {
-    if (dir==ArrowDir::LEFT) {
+    if (dir==LEFT) {
         m_active_contour = m_active_contour>0? m_active_contour-1: m_active_contour;
         return;
     }
-    if (dir==ArrowDir::RIGHT) {
+    if (dir==RIGHT) {
         m_active_contour = m_active_contour<m_pts.size()-1? m_active_contour+1: m_active_contour;
         return;
     }
-    if (dir==ArrowDir::UP) {
+    if (dir==UP) {
         m_heights[m_active_contour] += 0.1;
         return;
     }
-    if (dir==ArrowDir::DOWN) {
+    if (dir==DOWN) {
         m_heights[m_active_contour] -= 0.1;
         if (m_heights[m_active_contour] < 0)
             m_heights[m_active_contour] = 0;
