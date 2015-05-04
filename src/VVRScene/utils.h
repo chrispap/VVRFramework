@@ -11,6 +11,7 @@
 using namespace std;
 
 #define echo(x) cout<<#x<<" = "<<x<<endl
+#define msg(x) cout<<x<<endl
 #define SQUARE(x) ((x)*(x))
 
 #define VAR_CLASS_DEFS(x)        \

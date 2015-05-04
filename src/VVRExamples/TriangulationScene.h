@@ -11,21 +11,31 @@
 using namespace std;
 using namespace vvr;
 
+//! Struct representing a triangle with its 3 vertices
 struct Tri {
     C2DPoint *v1;
     C2DPoint *v2;
     C2DPoint *v3;
 
     Tri() : v1(NULL), v2(NULL), v3(NULL) {}
+
     Tri(C2DPoint *v1, C2DPoint *v2, C2DPoint *v3) : v1(v1), v2(v2), v3(v3) {}
+
+    C2DTriangle to_C2D() const { return C2DTriangle(*v1, *v2, *v3); }
+
+    Triangle2D to_2D(Colour col = Colour::black) const { return Triangle2D(
+                    v1->x, v1->y,
+                    v2->x, v2->y,
+                    v3->x, v3->y, col);
+    }
 };
 
-C2DCircle GetCircumCircle(C2DTriangle &t);
-bool IsDelaunay(C2DTriangle &t, C2DPointSet &pset);
+C2DCircle GetCircumCircle(const C2DTriangle &t);
+bool IsDelaunay(const C2DTriangle &t, const C2DPointSet &pset);
 bool FindAdjacentTriangle(vector<Tri> &tris, C2DPoint *p1, C2DPoint *p2, Tri **tri_adj, C2DPoint **opposite_vertex);
-void FindViolations(vector<Tri> &tris, C2DPointSet &ptset, vector<unsigned> &violations);
-void ShowViolations(vector<Tri> &tris, vector<unsigned> &violations, Canvas2D &canvas, Colour &col);
-void FixViolations(vector<Tri> &tris, C2DPointSet &ptset);
+void FindViolations(vector<Tri> &tris, const C2DPointSet &ptset, vector<unsigned> &violations);
+void ShowViolations(vector<Tri> &tris, const vector<unsigned> &violations, Canvas2D &canvas, Colour &col);
+void FixViolations(vector<Tri> &tris, const C2DPointSet &ptset);
 
 class TriangulationScene : public vvr::Scene
 {
@@ -42,10 +52,6 @@ protected:
 
 private:
     void handleNewPoint(C2DPoint *p);
-    C2DTriangle make_tri_C2D(const Tri &tri) { return C2DTriangle(*tri.v1, *tri.v2, *tri.v3); }
-    Triangle2D  make_tri_2D(const Tri &tri, Colour col = Colour::black) {
-        return Triangle2D(tri.v1->x, tri.v1->y, tri.v2->x, tri.v2->y, tri.v3->x, tri.v3->y, col);
-    }
 
 private:
     Canvas2D        m_canvas;
