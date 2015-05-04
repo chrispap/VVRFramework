@@ -131,6 +131,7 @@ void Mesh::update()
 {
     updateTriangleData();
     createNormals();
+    mAABB = Box(mVertices);
 }
 
 void Mesh::setBigSize(float size)

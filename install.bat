@@ -22,4 +22,7 @@ copy src\VVRScene\mesh.h %install_location%\VVRFramework\include
 copy src\VVRScene\scene.h %install_location%\VVRFramework\include
 copy src\VVRScene\settings.h %install_location%\VVRFramework\include
 copy src\VVRScene\utils.h %install_location%\VVRFramework\include
+copy src\VVRScene\symmetriceigensolver3x3.h %install_location%\VVRFramework\include
 copy src\VVRScene\vvrscenedll.h %install_location%\VVRFramework\include
+
+pause

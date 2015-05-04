@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <GeoLib.h>
+#include <canvas.h>
 #include <MathGeoLib/MathGeoLib.h>
 
 using namespace vvr;
@@ -35,4 +36,9 @@ private:
     C2DLine         m_line;
     C2DCircle       m_circle;
     Plane           m_plane;
+
+    Vec3d           m_center_mass;
+    Vec3d           m_pca_cen;
+    Vec3d           m_pca_dir;
+    Box3D           m_AABB;
 };

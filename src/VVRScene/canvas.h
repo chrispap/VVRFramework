@@ -70,6 +70,7 @@ protected:
 public:
     virtual ~Shape() {}
     void draw() const override;
+    void setColour(const Colour &col) {colour = col;}
     void setSolidRender(bool render_solid) {b_render_solid = render_solid;}
 };
 

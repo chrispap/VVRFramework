@@ -35,7 +35,6 @@ bool IsDelaunay(const C2DTriangle &t, const C2DPointSet &pset);
 bool FindAdjacentTriangle(vector<Tri> &tris, C2DPoint *p1, C2DPoint *p2, Tri **tri_adj, C2DPoint **opposite_vertex);
 void FindViolations(vector<Tri> &tris, const C2DPointSet &ptset, vector<unsigned> &violations);
 void ShowViolations(vector<Tri> &tris, const vector<unsigned> &violations, Canvas2D &canvas, Colour &col);
-void FixViolations(vector<Tri> &tris, const C2DPointSet &ptset);
 
 class TriangulationScene : public vvr::Scene
 {

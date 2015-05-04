@@ -1,5 +1,4 @@
 #include "TriangulationScene.h"
-#include <symmetriceigensolver.h>
 #include <utils.h>
 #include <algorithm>
 #include <iostream>
@@ -120,48 +119,46 @@ void TriangulationScene::handleNewPoint(C2DPoint *p)
 
     vector<Tri> tris_adj;
 
-    // Chech the new triangles for Delaunay violations.
+    // Chech the 3 new triangles for Delaunay violations.
     for (int i = 0; i < 3; i++)
     {
-        C2DTriangle tri_check = new_tris[i].to_C2D();
-        C2DPoint *v_opposite;
-        Tri *tri_adjacent;
+        new_tris[i];                                    // To trigwno ypo elegxo Delaunay.
+        C2DTriangle tri_check = new_tris[i].to_C2D();  // C2DTriangle anaparastasi tou new_tris[i].
+        Tri *tri_adjacent=NULL;                       // The adjacent triangle
+        C2DPoint *v_opposite=NULL;                   // The opposite vertex of the adjacent triangle
 
         if (!IsDelaunay(tri_check, m_pts))
         {
             m_canvas.add(GetCircumCircle(tri_check), Colour::magenta, false);
-
+            C2DPoint *v1 = new_tris[i].v1;
             C2DPoint *v2 = new_tris[i].v2;
             C2DPoint *v3 = new_tris[i].v3;
 
-            if (!FindAdjacentTriangle(m_tris, v2, v3, &tri_adjacent, &v_opposite))
-                break;
+            // Vreite to geitoniko (adjacent) trigwno tou tri_check.
+            // Kathe trigwnno exei eite 3 geitonika, eite 2 an prokeitai gia trigwno
+            // pou vrisketai sta oria (=> anikei merikws sto Convex Hull)
+            //
+            // HINT:
+            // bool adj_exists = FindAdjacentTriangle(m_tris, xxx, xxx , &tri_adjacent, &v_opposite);
+            //
+            //...
+            //...
+            //...
 
-            m_canvas.add(tri_adjacent->to_C2D(), Colour::darkOrange, true);
-            m_canvas.add(tri_adjacent->to_C2D(), Colour::black, false);
-
-            // Flip triangle
-            Tri nt1 = new_tris[i];
-            Tri nt2 = *tri_adjacent;
-
-            nt1.v1 = p;
-            nt1.v2 = v2;
-            nt1.v3 = v_opposite;
-            nt2.v1 = p;
-            nt2.v2 = v3;
-            nt2.v3 = v_opposite;
-
-            if (nt1.to_C2D().Collinear() ||
-                nt2.to_C2D().Collinear())
-            {
-                msg("Collinear in fix step");
-                continue;
+            if (tri_adjacent) {
+                m_canvas.add(tri_adjacent->to_C2D(), Colour::darkOrange, true);
+                m_canvas.add(tri_adjacent->to_C2D(), Colour::black, false);
             }
 
-            new_tris[i] = nt1;
-            *tri_adjacent = nt2;
+            // Edw pragmatopoiiste to flip
+            //
+            //...
+            //...
+            //...
 
-            tris_adj.push_back(*tri_adjacent); // Keep in order to add to canvas later.
+            if (tri_adjacent) {
+                tris_adj.push_back(*tri_adjacent); // Keep in order to add to canvas later.
+            }
         }
 
     }
@@ -179,7 +176,6 @@ void TriangulationScene::handleNewPoint(C2DPoint *p)
     m_tris.push_back(new_tris[2]);
 
     vector<unsigned> violations;
-    FixViolations(m_tris, m_pts);
     FindViolations(m_tris, m_pts, violations);
     ShowViolations(m_tris, violations, m_canvas, Colour::magenta);
 
@@ -276,77 +272,6 @@ void ShowViolations(vector<Tri> &tris, const vector<unsigned> &violations, Canva
         C2DTriangle t(*tri.v1, *tri.v2, *tri.v3);
         canvas.add(GetCircumCircle(t), col, false);
     }
-}
-
-void FixViolations(vector<Tri> &tris, const C2DPointSet &ptset)
-{
-    vector<unsigned> violations;
-
-    FindViolations(tris, ptset, violations);
-
-    int attempts_remaining = 100;
-
-    while (!violations.empty() && attempts_remaining>0)
-    {
-        int num_viol = violations.size();
-
-        for (int i = 0; i < violations.size(); i++)
-        {
-            Tri &tri = tris[violations[i]];
-            C2DTriangle t(*tri.v1, *tri.v2, *tri.v3);
-            C2DPoint *v_opposite;
-            Tri *tri_adjacent;
-
-            if (!IsDelaunay(t, ptset))
-            {
-                C2DPoint *v1 = tri.v1;
-                C2DPoint *v2 = tri.v2;
-                C2DPoint *v3 = tri.v3;
-
-                if (!FindAdjacentTriangle(tris, v2, v3, &tri_adjacent, &v_opposite)) {
-                    C2DPoint *tmp = v2;
-                    v2 = v1;
-                    v1 = tmp;
-                    if (!FindAdjacentTriangle(tris, v2, v3, &tri_adjacent, &v_opposite))
-                        continue;
-                }
-
-                if (tri_adjacent == &tri) continue;
-
-                // Flip triangle
-                Tri nt1 = tri;
-                Tri nt2 = *tri_adjacent;
-
-                nt1.v1 = v1;
-                nt1.v2 = v2;
-                nt1.v3 = v_opposite;
-                nt2.v1 = v1;
-                nt2.v2 = v3;
-                nt2.v3 = v_opposite;
-
-                if (C2DTriangle(*nt1.v1, *nt1.v2, *nt1.v3).Collinear() ||
-                    C2DTriangle(*nt2.v1, *nt2.v2, *nt2.v3).Collinear()) {
-                    continue;
-                }
-
-                tri = nt1;
-                *tri_adjacent = nt2;
-
-                break;
-            }
-        }
-
-        FindViolations(tris, ptset, violations);
-
-        if (num_viol == violations.size())
-            --attempts_remaining;
-        else {
-            echo(attempts_remaining);
-            attempts_remaining = 100;
-        }
-
-    }
-
 }
 
 //! Main 
