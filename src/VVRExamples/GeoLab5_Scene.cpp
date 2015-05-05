@@ -66,32 +66,8 @@ void Scene3D::resize()
 
     if (FIRST_PASS)
     {
-        m_plane_d = 0;
-        m_plane = Plane (vec(0, 1, 1).Normalized(), m_plane_d);
-
         m_model.setBigSize(getSceneWidth()/3);
-        vector<Vec3d> &vertices = m_model.getVertices();
-        vector<vvr::Triangle> &triangles = m_model.getTriangles();
-        Vec3d cm, offs;
-
-        //! Task 1
-        Task_1_FindCenterMass(vertices, cm);
-
-        //! Task 2
-        offs = cm;
-        Task_2_AlignTo(vertices, offs);
-        m_center_mass = cm.sub(offs);
-
-        //! Task 3
-        Task_3_FindAABB(vertices, m_AABB);
-
-        //! Task 4
-        Task_4_PCA(vertices, m_pca_cen, m_pca_dir);
-
-        //! Task 5
-        m_intersection_indices.clear();
-        Task_5_Intersect(triangles, m_plane, m_intersection_indices);
-
+        Tasks();
         m_model.update();
     }
 
@@ -108,10 +84,10 @@ void Scene3D::draw()
 
     //! Draw PCA line
     {
-        Vec3d e = m_pca_dir;
-        e.normalize().scale(m_model.getBox().getMaxSize()).add(m_pca_cen);
-        LineSeg3D(m_pca_cen.x, m_pca_cen.y, m_pca_cen.z, e.x, e.y, e.z, Colour::magenta).draw();
-        Point3D(m_pca_cen.x, m_pca_cen.y, m_pca_cen.z, Colour::magenta).draw();
+        Vec3d e = m_PCA_dir;
+        e.normalize().scale(m_model.getBox().getMaxSize()).add(m_PCA_cen);
+        LineSeg3D(m_PCA_cen.x, m_PCA_cen.y, m_PCA_cen.z, e.x, e.y, e.z, Colour::magenta).draw();
+        Point3D(m_PCA_cen.x, m_PCA_cen.y, m_PCA_cen.z, Colour::magenta).draw();
     }
 
     // Draw center mass
@@ -129,20 +105,18 @@ void Scene3D::draw()
     }
 
     // Draw AABB
-    m_AABB.setColour(Colour::red);
-    m_AABB.draw();
+    m_aabb.setColour(Colour::red);
+    m_aabb.draw();
 
     // Draw intersecting triangles of model
     vector<vvr::Triangle> &triangles = m_model.getTriangles();
-    for (int i=0; i<m_intersection_indices.size(); i++) {
-        vvr::Triangle &t = triangles[m_intersection_indices[i]];
+    for (int i=0; i<m_intersections.size(); i++) {
+        vvr::Triangle &t = triangles[m_intersections[i]];
         Triangle3D(t.v1().x, t.v1().y, t.v1().z,
                    t.v2().x, t.v2().y, t.v2().z,
                    t.v3().x, t.v3().y, t.v3().z,
                    Colour::green).draw();
     }
-
-
 
 }
 
@@ -159,6 +133,11 @@ void Scene3D::keyEvent(unsigned char key, bool up, int modif)
     case 'n': m_style_flag ^= FLAG_SHOW_NORMALS; break;
     case 'b': m_style_flag ^= FLAG_SHOW_AABB; break;
     case 'p': m_style_flag ^= FLAG_SHOW_PLANE; break;
+    // NUMPAD
+    case '0': setRot(m_globRot_def); break;
+    case '4': setRot(Vec3d(  0,  -90,   0)); break;
+    case '5': setRot(Vec3d(  0,   90,   0)); break;
+    case '6': setRot(Vec3d(  0,  180,   0)); break;
     }
 
 }
@@ -173,10 +152,38 @@ void Scene3D::arrowEvent(ArrowDir dir, int modif)
     else if (dir == RIGHT) n=math::float3x3::RotateY(DegToRad(-1)).Transform(n);
 
     m_plane = Plane (n.Normalized(), m_plane_d);
-    m_intersection_indices.clear();
-    Task_5_Intersect(m_model.getTriangles(), m_plane, m_intersection_indices);
+    m_intersections.clear();
+    Task_5_Intersect(m_model.getTriangles(), m_plane, m_intersections);
 }
 
+//! LAB Tasks
+
+void Scene3D::Tasks()
+{
+    vector<vvr::Triangle>   &triangles = m_model.getTriangles();
+    vector<Vec3d>           &vertices  = m_model.getVertices();
+
+    //! Task 1
+    Vec3d cm;
+    Task_1_FindCenterMass(vertices, cm);
+
+    //! Task 2
+    Vec3d offs = cm;
+    Task_2_AlignTo(vertices, offs);
+    m_center_mass = cm.sub(offs);
+
+    //! Task 3
+    Task_3_FindAABB(vertices, m_aabb);
+
+    //! Task 4
+    Task_4_PCA(vertices, m_PCA_cen, m_PCA_dir);
+
+    //! Task 5
+    m_plane_d = 0;
+    m_plane = Plane (vec(0, 1, 1).Normalized(), m_plane_d); // Define plane
+    m_intersections.clear();
+    Task_5_Intersect(triangles, m_plane, m_intersections);
+}
 
 void Task_1_FindCenterMass(vector<Vec3d> &vertices, Vec3d &cm)
 {

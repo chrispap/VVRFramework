@@ -22,19 +22,19 @@ protected:
     void draw() override;
     void reset() override;
     void resize() override;
+    void Tasks();
 
 private:
+    int             m_style_flag;
+    Canvas2D        m_canvas;
     vvr::Mesh       m_model;
     vvr::Settings   m_settings;
     vvr::Colour     m_obj_col;
-    int             m_style_flag;
-    Canvas2D        m_canvas;
-
     Vec3d           m_center_mass;
-    Vec3d           m_pca_cen;
-    Vec3d           m_pca_dir;
-    Box3D           m_AABB;
+    Vec3d           m_PCA_cen;
+    Vec3d           m_PCA_dir;
+    Box3D           m_aabb;
     Plane           m_plane;
     float           m_plane_d;
-    vector<int>     m_intersection_indices;
+    vector<int>     m_intersections;
 };
