@@ -3,7 +3,7 @@
 ####################################################################
 res_dir                     =  resources/
 obj_dir                     =  resources/obj/
-obj_file                    =  resources/obj/bunny.obj
+obj_file                    =  resources/obj/icosahedron.obj
 perspective_proj            =  1
 color_bg                    =  768E77
 color_obj                   =  454545

@@ -40,7 +40,7 @@ qt5_use_modules(VVRScene Widgets OpenGL)
 ### Link to Libraries ####################################################################
 target_link_libraries(VVRScene LINK_PRIVATE ${OPENGL_LIBRARIES} Qt5::Widgets Qt5::OpenGL)
 target_link_libraries(VVRScene GeoLib)
-if (WIN32)
+if (WIN32 OR APPLE)
     target_link_libraries(VVRScene MathGeoLib)
 endif (WIN32)
 ##########################################################################################
