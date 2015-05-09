@@ -26,13 +26,13 @@ protected:
 
 private:
     int             m_style_flag;
+    Settings        m_settings;
     Canvas2D        m_canvas;
-    vvr::Mesh       m_model;
-    vvr::Settings   m_settings;
-    vvr::Colour     m_obj_col;
+    Colour          m_obj_col;
+    Mesh            m_model, m_model_edited;
     Vec3d           m_center_mass;
-    Vec3d           m_PCA_cen;
-    Vec3d           m_PCA_dir;
+    vec             m_PCA_cen;
+    vec             m_PCA_dir;
     Box3D           m_aabb;
     Plane           m_plane;
     float           m_plane_d;

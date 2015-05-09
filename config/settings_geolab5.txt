@@ -3,10 +3,10 @@
 ####################################################################
 res_dir                     =  resources/
 obj_dir                     =  resources/obj/
-obj_file                    =  resources/obj/icosahedron.obj
+obj_file                    =  resources/obj/bunny.obj
 perspective_proj            =  1
 color_bg                    =  768E77
 color_obj                   =  454545
 def_rot_x                   =  20
-def_rot_y                   =  0
+def_rot_y                   =  89
 def_rot_z                   =  0
