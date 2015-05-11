@@ -6,7 +6,7 @@
 #include <cmath>
 #include <QtOpenGL>
 
-#define DEF_LINE_WIDTH 2
+#define DEF_LINE_WIDTH 2.2
 
 using namespace vvr;
 using namespace std;

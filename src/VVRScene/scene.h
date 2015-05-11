@@ -30,7 +30,7 @@ protected:
 protected:
     virtual void draw() = 0;
     virtual void reset();
-    virtual void resize(){};
+    virtual void resize(){}
 
 protected:
     void drawAxes();
@@ -52,6 +52,7 @@ public:
     virtual void keyEvent(unsigned char key, bool up, int modif);
     virtual void arrowEvent(ArrowDir dir, int modif);
     virtual void mousePressed(int x, int y, int modif);
+    virtual void mouseReleased(int x, int y, int modif);
     virtual void mouseMoved(int x, int y, int modif);
     virtual void mouseWheel(int dir, int modif);
     

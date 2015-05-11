@@ -176,6 +176,11 @@ void Scene::mousePressed(int x, int y, int modif)
     m_mouselastY = y;
 }
 
+void Scene::mouseReleased(int x, int y, int modif)
+{
+
+}
+
 void Scene::mouseMoved(int x, int y, int modif)
 {
     int dx = x - m_mouselastX;

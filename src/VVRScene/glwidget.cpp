@@ -55,6 +55,16 @@ void vvr::GLWidget::mousePressEvent(QMouseEvent *event)
     idle();
 }
 
+void vvr::GLWidget::mouseReleaseEvent(QMouseEvent *event)
+{
+    setFocus();
+    int x = event->x();
+    int y = event->y();
+    mScene->mouse2pix(x,y);
+    mScene->mouseReleased(x, y, mkModif(event));
+    idle();
+}
+
 void vvr::GLWidget::mouseMoveEvent(QMouseEvent *event)
 {
     int x = event->x();
