@@ -15,6 +15,7 @@ public:
 protected:
     void draw() override;
     void resize() override;
+    bool idle() override;
 
 private:
     vvr::Mesh       m_icosahedron;

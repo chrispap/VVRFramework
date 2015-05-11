@@ -82,10 +82,19 @@ void Simple3DScene::draw()
     if (m_style_flag & FLAG_SHOW_AABB)      m_icosahedron.draw(Colour::black, BOUND);
 
     double sphere_z = 0;
-
     vvr::Sphere3D sphere(0, 0, sphere_z, m_sphere_rad, Colour(134, 100, 25));
     sphere.setSolidRender(false);
     sphere.draw();
+}
+
+bool Simple3DScene::idle()
+{
+    float sec = vvr::getSeconds();
+    echo(sec);
+    echo(m_sphere_rad);
+    if (m_sphere_rad > 50) return false;
+    m_sphere_rad *= sec*0.01 + 1;
+    return m_sphere_rad < 50;
 }
 
 void Simple3DScene::keyEvent(unsigned char key, bool up, int modif)

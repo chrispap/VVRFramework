@@ -30,7 +30,7 @@ protected:
 protected:
     virtual void draw() = 0;
     virtual void reset();
-    virtual void resize(){};
+    virtual void resize(){}
 
 protected:
     void drawAxes();
