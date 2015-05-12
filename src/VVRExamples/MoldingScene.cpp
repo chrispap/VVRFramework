@@ -59,11 +59,7 @@ void MoldingScene::draw()
     Colour col1 = Colour(34,45,67);
     C2DPolygon poly(&m_pts[0], m_pts.size(), false);
     poly.Move(m_displacement);
-    C2DPolygonSet poly_set;
-    poly.GetConvexSubAreas(poly_set);
-    for (int i=0; i<poly_set.size(); i++) {
-        vvr::draw(*poly_set.GetAt(i), col1, true);
-    }
+    vvr::draw(poly, col1, true);
 
     Canvas2D l_canvas;
 
@@ -111,7 +107,6 @@ bool MoldingScene::idle()
 
 void MoldingScene::mousePressed(int x, int y, int modif)
 {
-    echo(x); echo(y);
     C2DPoint p(x,y);
 
     if ( altDown(modif) )

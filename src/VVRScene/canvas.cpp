@@ -269,28 +269,35 @@ void vvr::draw(C2DPolygon  &polygon, Colour &col, bool filled)
 {
     if (filled)
     {
-        C2DPoint c = polygon.GetCentroid();
-        for (int i = 0; i < polygon.GetLines().size(); i++) {
-            Triangle2D t(
-                polygon.GetLines().GetAt(i)->GetPointFrom().x,
-                polygon.GetLines().GetAt(i)->GetPointFrom().y,
-                polygon.GetLines().GetAt(i)->GetPointTo().x,
-                polygon.GetLines().GetAt(i)->GetPointTo().y,
-                c.x, c.y);
-            t.setSolidRender(true);
-            t.setColour(col);
-            t.draw();
+        C2DPolygonSet polygon_set;
+        if (!polygon.IsConvex())
+            polygon.CreateConvexSubAreas();
+        polygon.GetConvexSubAreas(polygon_set);
+        for (int i=0; i<polygon_set.size(); i++) {
+            C2DPolygon &pol_conv = *polygon_set.GetAt(i);
+            C2DPoint pol_conv_centroid = pol_conv.GetCentroid();
+            for (int j = 0; j < pol_conv.GetLines().size(); j++) {
+                Triangle2D t(
+                            pol_conv.GetLines().GetAt(j)->GetPointFrom().x,
+                            pol_conv.GetLines().GetAt(j)->GetPointFrom().y,
+                            pol_conv.GetLines().GetAt(j)->GetPointTo().x,
+                            pol_conv.GetLines().GetAt(j)->GetPointTo().y,
+                            pol_conv_centroid.x, pol_conv_centroid.y);
+                t.setSolidRender(true);
+                t.setColour(col);
+                t.draw();
+            }
         }
     }
     else
     {
         for (int i = 0; i < polygon.GetLines().size(); i++) {
             LineSeg2D(
-                polygon.GetLines().GetAt(i)->GetPointFrom().x,
-                polygon.GetLines().GetAt(i)->GetPointFrom().y,
-                polygon.GetLines().GetAt(i)->GetPointTo().x,
-                polygon.GetLines().GetAt(i)->GetPointTo().y,
-                col).draw();
+                        polygon.GetLines().GetAt(i)->GetPointFrom().x,
+                        polygon.GetLines().GetAt(i)->GetPointFrom().y,
+                        polygon.GetLines().GetAt(i)->GetPointTo().x,
+                        polygon.GetLines().GetAt(i)->GetPointTo().y,
+                        col).draw();
         }
     }
 }
