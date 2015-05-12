@@ -7,10 +7,10 @@
 /**
  * @brief The Simple2DScene class
  */
-class CastingScene : public vvr::Scene
+class MoldingScene : public vvr::Scene
 {
 public: 
-    CastingScene();
+    MoldingScene();
     const char* getName() const override;
 
 protected:
@@ -29,6 +29,7 @@ private:
     std::vector<C2DPoint>   m_pts;
     C2DVector               m_displacement;
     C2DVector               m_dv;
+    C2DPoint                m_click_anchor;
     float                   m_last_update_time;
     bool                    m_anim_on;
 };
