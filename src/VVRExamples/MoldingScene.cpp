@@ -13,6 +13,7 @@ using std::cout;
 using std::endl;
 
 #define APP_TITLE "2D Molding Scene"
+#define HARDCODED_MOLD_REMOVABLE 0
 #define MOLD_SIDE_MIN_LEN 70
 #define SPEED_PIXELS_PER_SEC 20
 
@@ -26,17 +27,35 @@ MoldingScene::MoldingScene()
     m_bg_col = Colour::grey;
     reset();
 
-    // A hardcoded mold
-    m_pts.push_back(C2DPoint(-128, -43));
-    m_pts.push_back(C2DPoint(-76, -84));
-    m_pts.push_back(C2DPoint(-90, -147));
-    m_pts.push_back(C2DPoint(-59, -209));
-    m_pts.push_back(C2DPoint(50, -235));
-    m_pts.push_back(C2DPoint(157, -230));
-    m_pts.push_back(C2DPoint(212, -193));
-    m_pts.push_back(C2DPoint(271, -136));
-    m_pts.push_back(C2DPoint(289, -65));
-    m_pts.push_back(C2DPoint(274, 0));
+    // Two hardcoded molds.
+    // One that can be removed and one that cannot
+
+    if ( ! HARDCODED_MOLD_REMOVABLE )
+    {
+        m_pts.push_back(C2DPoint(-128, -43));
+        m_pts.push_back(C2DPoint(-76, -84));
+        m_pts.push_back(C2DPoint(-90, -147));
+        m_pts.push_back(C2DPoint(-59, -209));
+        m_pts.push_back(C2DPoint(50, -235));
+        m_pts.push_back(C2DPoint(157, -230));
+        m_pts.push_back(C2DPoint(212, -193));
+        m_pts.push_back(C2DPoint(271, -136));
+        m_pts.push_back(C2DPoint(289, -65));
+        m_pts.push_back(C2DPoint(274, 0));
+    }
+    else
+    {
+        m_pts.push_back(C2DPoint(-203, -80));
+        m_pts.push_back(C2DPoint(-139, -110));
+        m_pts.push_back(C2DPoint(-90, -147));
+        m_pts.push_back(C2DPoint(-59, -209));
+        m_pts.push_back(C2DPoint(50, -235));
+        m_pts.push_back(C2DPoint(157, -230));
+        m_pts.push_back(C2DPoint(212, -193));
+        m_pts.push_back(C2DPoint(271, -136));
+        m_pts.push_back(C2DPoint(289, -65));
+        m_pts.push_back(C2DPoint(300, -2));
+    }
 }
 
 void MoldingScene::reset()
@@ -121,7 +140,7 @@ bool MoldingScene::isFreeToMove(C2DVector &dv)
         C2DPoint p2 = m_pts[i+1];
         C2DLine side(p1, p2);
 
-        bool intersetcs = poly.Crosses(side);
+        bool intersetcs = poly.Crosses(side) || poly.Contains(side);
 
         Colour col = intersetcs? Colour::red : Colour::green;
         double x = side.GetMidPoint().x;
@@ -137,9 +156,9 @@ bool MoldingScene::isFreeToMove(C2DVector &dv)
             rad_to = rad_tmp;
         }
 
-        Circle2D * c = new Circle2D(x, y, r, col);
-        c->setRange(rad_from, rad_to);
-        m_canvas.add(c);
+        Circle2D * dir_cir = new Circle2D(x, y, r, col);
+        dir_cir->setRange(rad_from, rad_to);
+        m_canvas.add(dir_cir);
 
         if (intersetcs) {
             m_canvas.add(side, Colour::red);
