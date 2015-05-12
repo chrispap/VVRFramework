@@ -111,7 +111,8 @@ bool MoldingScene::isFreeToMove(C2DVector &dx)
     bool free_to_move = true;
 
     C2DPolygon poly(&m_pts[0], m_pts.size(), false);
-    poly.Move(m_displacement+dx);
+    C2DVector new_diplacement = m_displacement+dx;
+    poly.Move(new_diplacement);
 
     for (int i = 0; i < (int) m_pts.size()-1; ++i) {
         C2DPoint p1 = m_pts[i];

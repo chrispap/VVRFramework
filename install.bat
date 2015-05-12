@@ -1,7 +1,7 @@
 @echo off
 
 :: Set install location
-set install_location=C:\Users\Christos\workspace_vs\GeoLab
+set install_location=D:\Dev\workspace_vs\GeoLab
 
 :: Copy libs
 copy build\Release\VVRScene.lib %install_location%\VVRFramework\lib\Release
