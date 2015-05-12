@@ -4,9 +4,6 @@
 #include "canvas.h"
 #include "GeoLib.h"
 
-/**
- * @brief The Simple2DScene class
- */
 class MoldingScene : public vvr::Scene
 {
 public: 
@@ -22,6 +19,9 @@ protected:
     void mouseMoved(int x, int y, int modif) override;
     void keyEvent(unsigned char key, bool up, int modif) override;
     void arrowEvent(vvr::ArrowDir dir, int modif) override;
+
+private:
+    bool isFreeToMove(C2DVector &dx);
 
 private:
     C2DPoint               *m_curr_p;

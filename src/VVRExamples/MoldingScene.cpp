@@ -13,7 +13,7 @@ using std::endl;
 
 #define APP_TITLE "2D Molding Scene"
 #define MOLD_SIDE_MIN_LEN 70
-#define SPEED_PIXELS_PER_SEC 10
+#define SPEED_PIXELS_PER_SEC 20
 
 const char* MoldingScene::getName() const
 {
@@ -95,14 +95,35 @@ void MoldingScene::draw()
 
 bool MoldingScene::idle()
 {
-    if (!m_anim_on || (m_dv.i == 0 && m_dv.j == -1))
-        return false;
-
+    if (!m_anim_on) return false;
     float t = vvr::getSeconds();
     float dt = t - m_last_update_time;
-    m_displacement += m_dv * (dt * SPEED_PIXELS_PER_SEC);
+    C2DVector dx = m_dv * (dt * SPEED_PIXELS_PER_SEC);
+    if (isFreeToMove(dx))
+        m_displacement += dx;
     m_last_update_time = t;
     return true;
+}
+
+bool MoldingScene::isFreeToMove(C2DVector &dx)
+{
+    m_canvas.clear();
+    bool free_to_move = true;
+
+    C2DPolygon poly(&m_pts[0], m_pts.size(), false);
+    poly.Move(m_displacement+dx);
+
+    for (int i = 0; i < (int) m_pts.size()-1; ++i) {
+        C2DPoint p1 = m_pts[i];
+        C2DPoint p2 = m_pts[(i+1)%m_pts.size()];
+        C2DLine side(p1, p2);
+        if (poly.Crosses(side)) {
+            m_canvas.add(side, Colour::red);
+            free_to_move = false;
+        }
+    }
+
+    return free_to_move;
 }
 
 void MoldingScene::mousePressed(int x, int y, int modif)
@@ -137,6 +158,7 @@ void MoldingScene::mouseReleased(int x, int y, int modif)
 {
     m_curr_p = NULL;
     m_anim_on = false;
+    m_canvas.clear();
 }
 
 void MoldingScene::mouseMoved(int x, int y, int modif)
