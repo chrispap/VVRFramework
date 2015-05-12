@@ -79,13 +79,18 @@ void LineSeg3D::drawShape() const {
 }
 
 void Circle2D::drawShape() const {
-    double x_, y_, theta;
+    if (rad_from >= rad_to) {
+        std::cerr << "Trying to render circle with [rad_from >= rad_to]" << std::endl;
+        return;
+    }
+
+    double x_, y_;
     unsigned const numOfSegments = 60;
 
     glLineWidth(DEF_LINE_WIDTH);
-    glBegin(b_render_solid? GL_POLYGON : GL_LINE_LOOP);
-    for(int i = 0; i < numOfSegments; i++) {
-        theta = 2.0f * 3.14159265 * i / numOfSegments;
+    glBegin(b_render_solid? GL_POLYGON : (closed_loop?GL_LINE_LOOP:GL_LINE_STRIP));
+    double d_th = (rad_to - rad_from) / numOfSegments;
+    for(double theta = rad_from; theta <= rad_to; theta+=d_th) {
         x_ = r * cosf(theta);
         y_ = r * sinf(theta);
         glVertex2f(x + x_, y + y_);

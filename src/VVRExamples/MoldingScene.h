@@ -21,7 +21,7 @@ protected:
     void arrowEvent(vvr::ArrowDir dir, int modif) override;
 
 private:
-    bool isFreeToMove(C2DVector &dx);
+    bool isFreeToMove(C2DVector &dv);
 
 private:
     C2DPoint               *m_curr_p;

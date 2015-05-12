@@ -145,14 +145,17 @@ public:
 struct VVRScene_API Circle2D : public Shape
 {
     double x,y,r;
-
+    double rad_from, rad_to;
+    bool closed_loop;
 protected:
     void drawShape() const override;
 
 public:
-    Circle2D(){}
-    Circle2D(double x, double y, double rad, const Colour &rgb=Colour()) :
-        x(x), y(y), r(rad), Shape(rgb) {}
+    Circle2D() : rad_from(0), rad_to(6.28318530718), closed_loop(true) {}
+    Circle2D(double x, double y, double rad, const Colour &rgb=Colour()) : Shape(rgb),
+        x(x), y(y), r(rad), rad_from(0), rad_to(6.28318530718), closed_loop(true) {}
+    void setRange(double Rad_from, double Rad_to) {rad_from = Rad_from;rad_to = Rad_to;}
+    void setClosedLoop(bool Closed_loop) {closed_loop = Closed_loop;}
 };
 
 struct VVRScene_API Sphere3D : public Shape

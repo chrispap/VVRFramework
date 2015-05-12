@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <MathGeoLib/MathGeoLib.h>
 
 using namespace vvr;
 using std::vector;
@@ -42,7 +43,7 @@ void MoldingScene::reset()
 {
     Scene::reset();
     m_displacement.Set(0,0);
-    m_dv.Set(0,-1);
+    m_dv.Set(0,0);
     m_anim_on = false;
     m_curr_p = NULL;
     m_canvas.clear();
@@ -61,20 +62,20 @@ void MoldingScene::draw()
     poly.Move(m_displacement);
     vvr::draw(poly, col1, true);
 
-    Canvas2D l_canvas;
+    Canvas2D canvas;
 
     // Draw mold line
     float x_min_max = getViewportWidth() * 0.4;
-    l_canvas.add(C2DPoint(-x_min_max, 0), m_pts.front(), Colour::black);
+    canvas.add(C2DPoint(-x_min_max, 0), m_pts.front(), Colour::black);
     for (int i = 0; i < (int) m_pts.size()-1; ++i) {
-        l_canvas.add(m_pts[i], m_pts[i+1], Colour::black);
+        canvas.add(m_pts[i], m_pts[i+1], Colour::black);
     }
 
     // Draw mold pts
-    l_canvas.add(C2DPoint(x_min_max, 0), m_pts.back(), Colour::black);
+    canvas.add(C2DPoint(x_min_max, 0), m_pts.back(), Colour::black);
     for (int i = 0; i < (int) m_pts.size(); ++i) {
         Colour point_col = m_curr_p != &m_pts[i] ? Colour::black : Colour::red;
-        l_canvas.add(m_pts[i], point_col);
+        canvas.add(m_pts[i], point_col);
     }
 
     // Draw direction indicator circle
@@ -82,12 +83,12 @@ void MoldingScene::draw()
         C2DPoint arrow_end(m_dv.i*30, m_dv.j*30);
         arrow_end += m_click_anchor;
         Colour arrow_col = Colour::darkOrange;
-        l_canvas.add(C2DCircle(m_click_anchor,30), arrow_col);
-        l_canvas.add(m_click_anchor, arrow_end, arrow_col);
-        l_canvas.add(arrow_end, arrow_col);
+        canvas.add(C2DCircle(m_click_anchor,30), arrow_col);
+        canvas.add(m_click_anchor, arrow_end, arrow_col);
+        canvas.add(arrow_end, arrow_col);
     }
 
-    l_canvas.draw();
+    canvas.draw();
     m_canvas.draw();
 
     returnFromPixelMode();
@@ -98,30 +99,53 @@ bool MoldingScene::idle()
     if (!m_anim_on) return false;
     float t = vvr::getSeconds();
     float dt = t - m_last_update_time;
-    C2DVector dx = m_dv * (dt * SPEED_PIXELS_PER_SEC);
-    if (isFreeToMove(dx))
-        m_displacement += dx;
+    if (isFreeToMove(m_dv))
+        m_displacement += m_dv * (dt * SPEED_PIXELS_PER_SEC);
     m_last_update_time = t;
     return true;
 }
 
-bool MoldingScene::isFreeToMove(C2DVector &dx)
+bool MoldingScene::isFreeToMove(C2DVector &dv)
 {
-    m_canvas.clear();
     bool free_to_move = true;
+    m_canvas.clear();
 
     C2DPolygon poly(&m_pts[0], m_pts.size(), false);
-    C2DVector new_diplacement = m_displacement+dx;
+    C2DVector new_diplacement = m_displacement+dv;
     poly.Move(new_diplacement);
+
+    // Check if the motion is unobstructed
 
     for (int i = 0; i < (int) m_pts.size()-1; ++i) {
         C2DPoint p1 = m_pts[i];
-        C2DPoint p2 = m_pts[(i+1)%m_pts.size()];
+        C2DPoint p2 = m_pts[i+1];
         C2DLine side(p1, p2);
-        if (poly.Crosses(side)) {
+
+        bool intersetcs = poly.Crosses(side);
+
+        Colour col = intersetcs? Colour::red : Colour::green;
+        double x = side.GetMidPoint().x;
+        double y = side.GetMidPoint().y;
+        double r = MOLD_SIDE_MIN_LEN/4;
+        double a = (p2.y-p1.y) / (p2.x-p1.x);
+
+        double rad_from = atanf(a);
+        float rad_to = rad_from + math::DegToRad(180);
+        if (p2.x < p1.x) {
+            float rad_tmp = rad_from;
+            rad_from = rad_to - math::DegToRad(360);
+            rad_to = rad_tmp;
+        }
+
+        Circle2D * c = new Circle2D(x, y, r, col);
+        c->setRange(rad_from, rad_to);
+        m_canvas.add(c);
+
+        if (intersetcs) {
             m_canvas.add(side, Colour::red);
             free_to_move = false;
         }
+
     }
 
     return free_to_move;
