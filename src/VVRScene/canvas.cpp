@@ -5,6 +5,7 @@
 #include <vector>
 #include <cmath>
 #include <QtOpenGL>
+#include <MathGeoLib/MathGeoLib.h>
 
 #define DEF_LINE_WIDTH 2.2
 
@@ -125,6 +126,11 @@ void Triangle2D::drawShape() const {
 void Triangle3D::drawShape() const {
     glLineWidth(DEF_LINE_WIDTH);
     glBegin(GL_TRIANGLES);
+    math::vec n = math::Triangle(
+        math::vec(x1,y1,z1),
+        math::vec(x2,y2,z2),
+        math::vec(x3,y3,z3)).NormalCW();
+    glNormal3fv(n.ptr());
     glVertex3f(x1, y1, z1);
     glVertex3f(x2, y2, z2);
     glVertex3f(x3, y3, z3);

@@ -16,6 +16,7 @@
 #define FLAG_SHOW_WIRE       4
 #define FLAG_SHOW_SOLID      8
 #define FLAG_SHOW_NORMALS   16
+#define FLAG_SHOW_SPHERE    32
 
 using namespace math;
 using namespace vvr;
@@ -27,7 +28,7 @@ Simple3DScene::Simple3DScene()
     m_bg_col            = Colour(m_settings.getStr("color_bg"));
     m_obj_col           = Colour(m_settings.getStr("color_obj"));
     m_perspective_proj  = m_settings.getBool("perspective_proj");
-    m_style_flag        = FLAG_SHOW_SOLID | FLAG_SHOW_WIRE;
+    m_style_flag        = FLAG_SHOW_SOLID | FLAG_SHOW_WIRE | FLAG_SHOW_SPHERE;
 
     // Scene rotation.
     const double def_rot_x = m_settings.getDbl("def_rot_x");
@@ -64,11 +65,9 @@ void Simple3DScene::resize()
             //...
             //...
             //...
-
         }
 
         m_icosahedron.update();
-
     }
 
     FLAG_FIRST_PASS = false;
@@ -82,11 +81,13 @@ void Simple3DScene::draw()
     if (m_style_flag & FLAG_SHOW_AXES)      m_icosahedron.draw(Colour::black, AXES);
     if (m_style_flag & FLAG_SHOW_AABB)      m_icosahedron.draw(Colour::black, BOUND);
 
-    double sphere_z = 0;
-
-    vvr::Sphere3D sphere(0, 0, sphere_z, m_sphere_rad, Colour(134, 100, 25));
-    sphere.setSolidRender(false);
-    sphere.draw();
+    if (m_style_flag & FLAG_SHOW_SPHERE)
+    {
+        double sphere_z = 0;
+        vvr::Sphere3D sphere(0, 0, sphere_z, m_sphere_rad, Colour(134, 100, 25));
+        sphere.setSolidRender(false);
+        sphere.draw();
+    }
 }
 
 void Simple3DScene::keyEvent(unsigned char key, bool up, int modif)
@@ -101,6 +102,7 @@ void Simple3DScene::keyEvent(unsigned char key, bool up, int modif)
     case 's': m_style_flag ^= FLAG_SHOW_SOLID; break;
     case 'n': m_style_flag ^= FLAG_SHOW_NORMALS; break;
     case 'b': m_style_flag ^= FLAG_SHOW_AABB; break;
+    case 'p': m_style_flag ^= FLAG_SHOW_SPHERE; break;
     }
 
 }
