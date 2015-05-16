@@ -1,4 +1,4 @@
-#include "DistancesScene.h"
+#include "Example_Distances.h"
 #include "utils.h"
 #include "canvas.h"
 #include <iostream>

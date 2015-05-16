@@ -1,4 +1,4 @@
-#include "MoldingScene.h"
+#include "Example_Molding.h"
 #include "utils.h"
 #include "canvas.h"
 #include <iostream>

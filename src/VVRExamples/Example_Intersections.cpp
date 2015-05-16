@@ -1,4 +1,4 @@
-#include "IntersectionsScene.h"
+#include "Example_Intersections.h"
 #include <utils.h>
 #include <iostream>
 #include <fstream>

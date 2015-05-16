@@ -1,5 +1,5 @@
 #define  NOMINMAX // Fixes a problem on windows
-#include "Simple3DScene.h"
+#include "Example_Simple3D.h"
 #include "utils.h"
 #include "canvas.h"
 #include <iostream>

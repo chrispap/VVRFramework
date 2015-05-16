@@ -1,4 +1,4 @@
-#include "ContourEditorScene.h"
+#include "Example_ContourEditor.h"
 #include "utils.h"
 #include "canvas.h"
 #include <iostream>

@@ -1,5 +1,5 @@
 #define  NOMINMAX // Fixes a problem on windows
-#include "OrientationViewerScene.h"
+#include "Example_OrientationViewer.h"
 #include "utils.h"
 #include "canvas.h"
 #include <iostream>

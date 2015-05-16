@@ -1,4 +1,4 @@
-#include "TriangulationScene.h"
+#include "Example_Triangulation.h"
 #include <utils.h>
 #include <algorithm>
 #include <iostream>

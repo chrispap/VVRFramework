@@ -1,4 +1,4 @@
-#include "Simple2DScene.h"
+#include "Example_Simple2D.h"
 #include "utils.h"
 #include "canvas.h"
 #include <iostream>

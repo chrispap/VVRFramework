@@ -1,4 +1,4 @@
-#include "ConvexHullScene.h"
+#include "Example_ConvexHull.h"
 #include <utils.h>
 #include <iostream>
 #include <fstream>

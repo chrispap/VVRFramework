@@ -1,5 +1,5 @@
 #define  NOMINMAX // Fixes a problem on windows
-#include "GeoLab4_Scene.h"
+#include "Example_MeshManipulation.h"
 #include "utils.h"
 #include "canvas.h"
 #include <iostream>
