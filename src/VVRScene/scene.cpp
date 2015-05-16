@@ -213,6 +213,7 @@ void Scene::reset()
 /* Helpers */
 void Scene::enterPixelMode()
 {
+    glDisable(GL_LIGHTING);
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
     glLoadIdentity();
@@ -225,6 +226,7 @@ void Scene::enterPixelMode()
 
 void Scene::returnFromPixelMode()
 {
+    glEnable(GL_LIGHTING);
     glEnable(GL_DEPTH_TEST);
     glPopMatrix();
     glMatrixMode(GL_PROJECTION);

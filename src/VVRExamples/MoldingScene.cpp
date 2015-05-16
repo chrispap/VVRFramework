@@ -76,7 +76,7 @@ void MoldingScene::draw()
     enterPixelMode();
 
     // Draw molded object
-    Colour col1 = Colour(34,45,67);
+    Colour col1 = Colour(46,97,162);
     C2DPolygon poly(&m_pts[0], m_pts.size(), false);
     poly.Move(m_displacement);
     vvr::draw(poly, col1, true);
