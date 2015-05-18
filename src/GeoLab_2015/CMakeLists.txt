@@ -8,12 +8,13 @@ link_directories(${MathGeoLib_DIR}/lib)
 file(GLOB APP_SRC_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.cpp)
 foreach( srcFile ${APP_SRC_FILES} )
     string( REPLACE ".cpp" "" appName ${srcFile} )
-    add_executable( _${appName} MACOSX_BUNDLE ${appName}.cpp ${appName}.h )
-    set_property(TARGET _${appName} PROPERTY FOLDER "GeoLab_2015")
+    add_executable( ${appName} MACOSX_BUNDLE ${appName}.cpp ${appName}.h )
+    set_property(TARGET ${appName} PROPERTY FOLDER "GeoLab_2015")
 endforeach( srcFile ${APP_SRC_FILES} )
 ##########################################################################################
 
 ### Set include path #####################################################################
+include_directories(${CMAKE_SOURCE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/GeoLib)
 include_directories(${CMAKE_SOURCE_DIR}/VVRScene)
 ##########################################################################################
@@ -21,7 +22,7 @@ include_directories(${CMAKE_SOURCE_DIR}/VVRScene)
 ### Specify needed libs ##################################################################
 foreach( srcFile ${APP_SRC_FILES} )
     string( REPLACE ".cpp" "" appName ${srcFile} )
-    target_link_libraries(_${appName} VVRScene MathGeoLib GeoLib)
+    target_link_libraries(${appName} VVRScene MathGeoLib GeoLib)
 endforeach( srcFile ${APP_SRC_FILES} )
 ##########################################################################################
 

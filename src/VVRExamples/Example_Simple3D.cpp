@@ -39,7 +39,9 @@ Simple3DScene::Simple3DScene()
     // Load 3D models.
     const string objDir = getBasePath() + m_settings.getStr("obj_dir");
     const string objFile = getBasePath() +  m_settings.getStr("obj_file");
-    m_icosahedron = Mesh(objDir, objFile, "", true);
+    //m_icosahedron = Mesh(objDir, objFile, "", true);
+
+    m_icosahedron_ptr = Mesh::Make(new Mesh(objDir, objFile, "", true));
 }
 
 void Simple3DScene::resize()
@@ -51,10 +53,10 @@ void Simple3DScene::resize()
     if (FLAG_FIRST_PASS)
     {
         m_sphere_rad = getSceneWidth()/10;
-        m_icosahedron.setBigSize(getSceneWidth()/8);
-        m_icosahedron.centerAlign();
+        m_icosahedron_ptr->setBigSize(getSceneWidth()/8);
+        m_icosahedron_ptr->centerAlign();
 
-        vector<Vec3d> &vertices = m_icosahedron.getVertices();
+        vector<Vec3d> &vertices = m_icosahedron_ptr->getVertices();
 
         for (unsigned vi=0 ; vi<vertices.size() ; vi++)
         {
@@ -67,7 +69,7 @@ void Simple3DScene::resize()
 
         }
 
-        m_icosahedron.update();
+        m_icosahedron_ptr->update();
     }
 
     FLAG_FIRST_PASS = false;
@@ -75,11 +77,11 @@ void Simple3DScene::resize()
 
 void Simple3DScene::draw()
 {
-    if (m_style_flag & FLAG_SHOW_SOLID)     m_icosahedron.draw(m_obj_col, SOLID);
-    if (m_style_flag & FLAG_SHOW_WIRE)      m_icosahedron.draw(Colour::black, WIRE);
-    if (m_style_flag & FLAG_SHOW_NORMALS)   m_icosahedron.draw(Colour::black, NORMALS);
-    if (m_style_flag & FLAG_SHOW_AXES)      m_icosahedron.draw(Colour::black, AXES);
-    if (m_style_flag & FLAG_SHOW_AABB)      m_icosahedron.draw(Colour::black, BOUND);
+    if (m_style_flag & FLAG_SHOW_SOLID)     m_icosahedron_ptr->draw(m_obj_col, SOLID);
+    if (m_style_flag & FLAG_SHOW_WIRE)      m_icosahedron_ptr->draw(Colour::black, WIRE);
+    if (m_style_flag & FLAG_SHOW_NORMALS)   m_icosahedron_ptr->draw(Colour::black, NORMALS);
+    if (m_style_flag & FLAG_SHOW_AXES)      m_icosahedron_ptr->draw(Colour::black, AXES);
+    if (m_style_flag & FLAG_SHOW_AABB)      m_icosahedron_ptr->draw(Colour::black, BOUND);
 
     double sphere_z = 0;
     vvr::Sphere3D sphere(0, 0, sphere_z, m_sphere_rad, Colour(134, 100, 25));
@@ -90,8 +92,6 @@ void Simple3DScene::draw()
 bool Simple3DScene::idle()
 {
     float sec = vvr::getSeconds();
-    echo(sec);
-    echo(m_sphere_rad);
     if (m_sphere_rad > 50) return false;
     m_sphere_rad *= sec*0.01 + 1;
     return m_sphere_rad < 50;

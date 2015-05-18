@@ -16,11 +16,18 @@ using namespace tinyobj;
 
 Mesh::Mesh()
 {
+    printf("[Mesh] Creating object in address 0x%x (default ctor) \n", this); fflush(0);
+}
 
+Mesh::~Mesh()
+{
+    printf("[Mesh] Deleting object in address 0x%x \n", this); fflush(0);
 }
 
 Mesh::Mesh(const string &objDir, const string &objFile, const string &texFile, bool ccw)
 {
+    printf("[Mesh] Creating object in address 0x%x \n", this); fflush(0);
+
     mCCW = ccw;
 
     std::vector<shape_t> shapes;
@@ -56,34 +63,38 @@ Mesh::Mesh(const string &objDir, const string &objFile, const string &texFile, b
     mAABB = Box(mVertices);
 }
 
-Mesh::Mesh(const Mesh &copyfrom):
-    mCCW(copyfrom.mCCW),
-    mVertices (copyfrom.mVertices),
-    mTriangles (copyfrom.mTriangles),
-    mVertexNormals (copyfrom.mVertexNormals),
-    mTexCoords (copyfrom.mTexCoords),
-    mAABB (copyfrom.mAABB),
-    mRot (copyfrom.mRot),
-    mPos (copyfrom.mPos),
-    mTexName(copyfrom.mTexName)
+Mesh::Mesh(const Mesh *original):
+    mCCW(original->mCCW),
+    mVertices (original->mVertices),
+    mTriangles (original->mTriangles),
+    mVertexNormals (original->mVertexNormals),
+    mTexCoords (original->mTexCoords),
+    mAABB (original->mAABB),
+    mRot (original->mRot),
+    mPos (original->mPos),
+    mTexName(original->mTexName)
 {
+    printf("[Mesh] Copying object from address 0x%x to 0x%x \n", original, this); fflush(0);
+
     vector<Triangle>::iterator ti;
     for (ti=mTriangles.begin(); ti!= mTriangles.end(); ++ti) {
         ti->vecList = &mVertices;
     }
 }
 
-void Mesh::operator=(const Mesh &src)
+void Mesh::operator=(const Mesh *src)
 {
-    mCCW = src.mCCW;
-    mVertices = src.mVertices;
-    mTriangles = src.mTriangles;
-    mVertexNormals = src.mVertexNormals;
-    mTexCoords = src.mTexCoords;
-    mAABB = src.mAABB;
-    mRot = src.mRot;
-    mPos = src.mPos;
-    mTexName= src.mTexName;
+    printf("[Mesh] Assigning object from address 0x%x to 0x%x \n", &src, this); fflush(0);
+
+    mCCW = src->mCCW;
+    mVertices = src->mVertices;
+    mTriangles = src->mTriangles;
+    mVertexNormals = src->mVertexNormals;
+    mTexCoords = src->mTexCoords;
+    mAABB = src->mAABB;
+    mRot = src->mRot;
+    mPos = src->mPos;
+    mTexName= src->mTexName;
 
     vector<Triangle>::iterator ti;
     for (ti=mTriangles.begin(); ti!= mTriangles.end(); ++ti) {

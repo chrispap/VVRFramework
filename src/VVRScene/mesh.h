@@ -32,6 +32,10 @@ enum VVRScene_API Style {
 */
 class VVRScene_API Mesh
 {
+public:
+    VAR_CLASS_DEFS(Mesh)
+
+private:
     // Data members
     bool                mCCW;
     vector<Vec3d>       mVertices;                  ///< Vertex list
@@ -51,9 +55,10 @@ class VVRScene_API Mesh
 
 public:
     Mesh ();
+    ~Mesh ();
     Mesh (const string &objDir, const string &objFile, const string &texFile, bool ccw=true);
-    Mesh (const Mesh &original);                    ///< Copy constructor
-    void operator=(const Mesh &src);                ///< Assigment operator
+    Mesh (const Mesh *original);                    ///< Copy constructor
+    void operator=(const Mesh *src);                ///< Assigment operator
 
     void draw (Colour col, Style style);            ///< Draw the mesh with the specified style
     void move   (const Vec3d &p);                   ///< Move the mesh in the world.

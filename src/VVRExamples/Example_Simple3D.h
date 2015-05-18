@@ -18,7 +18,8 @@ protected:
     bool idle() override;
 
 private:
-    vvr::Mesh       m_icosahedron;
+    //vvr::Mesh       m_icosahedron;
+    vvr::Mesh::Ptr  m_icosahedron_ptr;
     vvr::Settings   m_settings;
     vvr::Colour     m_obj_col;
     float           m_sphere_rad;

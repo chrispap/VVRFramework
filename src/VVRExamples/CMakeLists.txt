@@ -14,6 +14,7 @@ endforeach( srcFile ${APP_SRC_FILES} )
 ##########################################################################################
 
 ### Set include path #####################################################################
+include_directories(${CMAKE_SOURCE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/GeoLib)
 include_directories(${CMAKE_SOURCE_DIR}/VVRScene)
 include_directories(${CMAKE_SOURCE_DIR}/VVRPhysics)

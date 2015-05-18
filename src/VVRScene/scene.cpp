@@ -14,6 +14,17 @@ using namespace vvr;
 using namespace std;
 using namespace math;
 
+static void GL_Info ()
+{
+    /* PRINT OpenGL INFO */
+    printf("\n=== VVR Framework ================\n");
+    printf(" %s\n", glGetString(GL_VERSION ));
+    printf(" %s\n", glGetString(GL_VENDOR  ));
+    printf(" %s\n", glGetString(GL_RENDERER));
+    printf("==================================\n\n");
+    fflush(0);
+}
+
 Scene::Scene()
 {
     m_globRot_def = Vec3d(0,0,0);
@@ -87,12 +98,7 @@ void Scene::GL_Init()
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    /* PRINT OpenGL INFO */
-    printf("=== VVR Framework ================\n");
-    printf(" %s\n", glGetString(GL_VERSION ));
-    printf(" %s\n", glGetString(GL_VENDOR  ));
-    printf(" %s\n", glGetString(GL_RENDERER));
-    printf("==================================\n");
+    GL_Info();
 }
 
 void Scene::GL_Resize(int w, int h)
