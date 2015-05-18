@@ -16,17 +16,20 @@ using namespace tinyobj;
 
 Mesh::Mesh()
 {
-    printf("[Mesh] Creating object in address 0x%x (default ctor) \n", this); fflush(0);
+    printf("[Mesh] Creating object in address 0x%x (default ctor) \n", this);
+    fflush(0);
 }
 
 Mesh::~Mesh()
 {
-    printf("[Mesh] Deleting object in address 0x%x \n", this); fflush(0);
+    printf("[Mesh] Deleting object in address 0x%x \n", this);
+    fflush(0);
 }
 
 Mesh::Mesh(const string &objDir, const string &objFile, const string &texFile, bool ccw)
 {
-    printf("[Mesh] Creating object in address 0x%x \n", this); fflush(0);
+    printf("[Mesh] Creating object in address 0x%x \n", this);
+    fflush(0);
 
     mCCW = ccw;
 
@@ -74,7 +77,28 @@ Mesh::Mesh(const Mesh *original):
     mPos (original->mPos),
     mTexName(original->mTexName)
 {
-    printf("[Mesh] Copying object from address 0x%x to 0x%x \n", original, this); fflush(0);
+    printf("[Mesh] Copying object from address 0x%x to 0x%x \n", original, this);
+    fflush(0);
+
+    vector<Triangle>::iterator ti;
+    for (ti=mTriangles.begin(); ti!= mTriangles.end(); ++ti) {
+        ti->vecList = &mVertices;
+    }
+}
+
+Mesh::Mesh(const Mesh &original):
+    mCCW(original.mCCW),
+    mVertices (original.mVertices),
+    mTriangles (original.mTriangles),
+    mVertexNormals (original.mVertexNormals),
+    mTexCoords (original.mTexCoords),
+    mAABB (original.mAABB),
+    mRot (original.mRot),
+    mPos (original.mPos),
+    mTexName(original.mTexName)
+{
+    printf("[Mesh] Copying object from address 0x%x to 0x%x \n", &original, this);
+    fflush(0);
 
     vector<Triangle>::iterator ti;
     for (ti=mTriangles.begin(); ti!= mTriangles.end(); ++ti) {
@@ -84,7 +108,7 @@ Mesh::Mesh(const Mesh *original):
 
 void Mesh::operator=(const Mesh *src)
 {
-    printf("[Mesh] Assigning object from address 0x%x to 0x%x \n", &src, this); fflush(0);
+    printf("[Mesh] Assigning object from address 0x%x to 0x%x \n", src, this); fflush(0);
 
     mCCW = src->mCCW;
     mVertices = src->mVertices;
@@ -95,6 +119,26 @@ void Mesh::operator=(const Mesh *src)
     mRot = src->mRot;
     mPos = src->mPos;
     mTexName= src->mTexName;
+
+    vector<Triangle>::iterator ti;
+    for (ti=mTriangles.begin(); ti!= mTriangles.end(); ++ti) {
+        ti->vecList = &mVertices;
+    }
+}
+
+void Mesh::operator=(const Mesh &src)
+{
+    printf("[Mesh] Assigning object from address 0x%x to 0x%x \n", &src, this); fflush(0);
+
+    mCCW = src.mCCW;
+    mVertices = src.mVertices;
+    mTriangles = src.mTriangles;
+    mVertexNormals = src.mVertexNormals;
+    mTexCoords = src.mTexCoords;
+    mAABB = src.mAABB;
+    mRot = src.mRot;
+    mPos = src.mPos;
+    mTexName= src.mTexName;
 
     vector<Triangle>::iterator ti;
     for (ti=mTriangles.begin(); ti!= mTriangles.end(); ++ti) {

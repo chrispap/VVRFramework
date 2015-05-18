@@ -11,7 +11,7 @@
 #include <symmetriceigensolver3x3.h>
 #include <MathGeoLib/MathGeoLib.h>
 
-#define CONFIG_FILE_PATH "config/settings_geolab5.txt"
+#define CONFIG_FILE_PATH "config/settings_meshManipulation.txt"
 
 #define FLAG_SHOW_AXES       1
 #define FLAG_SHOW_AABB       2
