@@ -66,10 +66,13 @@ void Simple3DScene::resize()
             //...
             //...
             //...
-
         }
 
         m_icosahedron_ptr->update();
+        m_icosahedron_ptr2 = Mesh::Make(new Mesh(m_icosahedron_ptr.get()));
+        m_icosahedron_ptr2->setBigSize(getSceneWidth()/4);
+        m_icosahedron_ptr2->move(Vec3d(getSceneWidth()/4, 0, 0));
+        m_icosahedron_ptr2->update();
     }
 
     FLAG_FIRST_PASS = false;
@@ -77,12 +80,21 @@ void Simple3DScene::resize()
 
 void Simple3DScene::draw()
 {
+    // Draw object 1
     if (m_style_flag & FLAG_SHOW_SOLID)     m_icosahedron_ptr->draw(m_obj_col, SOLID);
     if (m_style_flag & FLAG_SHOW_WIRE)      m_icosahedron_ptr->draw(Colour::black, WIRE);
     if (m_style_flag & FLAG_SHOW_NORMALS)   m_icosahedron_ptr->draw(Colour::black, NORMALS);
     if (m_style_flag & FLAG_SHOW_AXES)      m_icosahedron_ptr->draw(Colour::black, AXES);
     if (m_style_flag & FLAG_SHOW_AABB)      m_icosahedron_ptr->draw(Colour::black, BOUND);
 
+    // Draw object 2
+    if (m_style_flag & FLAG_SHOW_SOLID)     m_icosahedron_ptr2->draw(m_obj_col, SOLID);
+    if (m_style_flag & FLAG_SHOW_WIRE)      m_icosahedron_ptr2->draw(Colour::black, WIRE);
+    if (m_style_flag & FLAG_SHOW_NORMALS)   m_icosahedron_ptr2->draw(Colour::black, NORMALS);
+    if (m_style_flag & FLAG_SHOW_AXES)      m_icosahedron_ptr2->draw(Colour::black, AXES);
+    if (m_style_flag & FLAG_SHOW_AABB)      m_icosahedron_ptr2->draw(Colour::black, BOUND);
+
+    // Draw a sphere
     double sphere_z = 0;
     vvr::Sphere3D sphere(0, 0, sphere_z, m_sphere_rad, Colour(134, 100, 25));
     sphere.setSolidRender(false);
@@ -109,6 +121,8 @@ void Simple3DScene::keyEvent(unsigned char key, bool up, int modif)
     case 's': m_style_flag ^= FLAG_SHOW_SOLID; break;
     case 'n': m_style_flag ^= FLAG_SHOW_NORMALS; break;
     case 'b': m_style_flag ^= FLAG_SHOW_AABB; break;
+    case 'd': m_icosahedron_ptr->getTriangles().erase(m_icosahedron_ptr->getTriangles().begin()); break;
+    case 'f': m_icosahedron_ptr2->getTriangles().erase(m_icosahedron_ptr2->getTriangles().begin()); break;
     }
 
 }
