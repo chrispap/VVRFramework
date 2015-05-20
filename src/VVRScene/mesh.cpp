@@ -150,8 +150,6 @@ void Mesh::createNormals()
 {
     // List of lists of the triangles that are connected to each vertex
     vector<set<int> > mVertexTriangles;
-
-    mVertexTriangles.clear();
     mVertexTriangles.resize(mVertices.size());
 
     int i=0;
