@@ -36,8 +36,8 @@ private:
     Canvas2D    canvas0, canvas1, canvas2, canvas3;
     C2DLine     boundary1, boundary2;
     C2DTriangle triangle;
-    C2DPoint    A, B, C;
     C2DPointSet points;
+    C2DPoint    A, B, C;
     double      path_width;
 };
 
