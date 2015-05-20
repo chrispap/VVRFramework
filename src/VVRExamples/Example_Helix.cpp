@@ -53,27 +53,27 @@ void HelixScene::draw()
     if (m_style_flag & FLAG_SHOW_AXES)
         drawAxes();
 
-    float x1, y1, z1, x2, y2, z2;
+    vec p[2];
     const float degs_from = 360 * 2;
 
     for (float degs = -degs_from; degs < degs_from; degs += 10) {
         const float t = DegToRad(degs);
 
-        x1 = m_r * Cos(t);
-        z1 = m_r * Sin(t);
-        y1 = m_c * t;
-        Sphere3D s1(x1, y1, z1, m_r / 8, Colour::darkRed);
+        p[0].x = m_r * Cos(t);
+        p[0].z = m_r * Sin(t);
+        p[0].y = m_c * t;
+        Sphere3D s1(p[0].x, p[0].y, p[0].z, m_r / 8, Colour::darkRed);
         s1.setSolidRender(1);
         s1.draw();
 
-        x2 = m_r * Cos(t + DegToRad(90*2));
-        z2 = m_r * Sin(t + DegToRad(90*2));
-        y2 = m_c * t;
-        Sphere3D s2(x2, y2, z2, m_r / 8, Colour::darkGreen);
+        p[1].x = m_r * Cos(t + DegToRad(90 * 2));
+        p[1].z = m_r * Sin(t + DegToRad(90 * 2));
+        p[1].y = m_c * t;
+        Sphere3D s2(p[1].x, p[1].y, p[1].z, m_r / 8, Colour::darkGreen);
         s2.setSolidRender(1);
         s2.draw();
 
-        LineSeg3D(x1, y1, z1, x2, y2, z2, Colour(34, 34, 34)).draw();
+        LineSeg3D(p[0].x, p[0].y, p[0].z, p[1].x, p[1].y, p[1].z, Colour(34, 34, 34)).draw();
     }
 
 }
@@ -84,14 +84,14 @@ bool HelixScene::idle()
     const float V = 10;
     const float T = 20;
 
-    if (0) 
+    if (0)
     {
         double c = cos(2.0 * pi * t / T);
         m_c = getSceneWidth() / 150;
         m_c *= (c*c*0.3 + 0.7);
     }
 
-    if (1) 
+    if (1)
     {
         Vec3d rot = m_globRot;
         rot.y = t * V;
