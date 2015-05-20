@@ -41,8 +41,8 @@ void HelixScene::resize()
 
     if (FIRST_PASS)
     {
-        m_r = getSceneWidth() / 30;
-        m_c = getSceneWidth() / 130;
+        m_r = getSceneWidth() / 20;
+        m_c = getSceneWidth() / 40;
     }
 
     FIRST_PASS = false;
@@ -57,19 +57,19 @@ void HelixScene::draw()
     const float degs_from = 360 * 2;
 
     for (float degs = -degs_from; degs < degs_from; degs += 10) {
-        const float t = math::DegToRad(degs);
+        const float t = DegToRad(degs);
 
-        x1 = m_r * math::Cos(t);
-        z1 = m_r * math::Sin(t);
+        x1 = m_r * Cos(t);
+        z1 = m_r * Sin(t);
         y1 = m_c * t;
-        Sphere3D s1(x1, y1, z1, m_r / 10, Colour::darkRed);
+        Sphere3D s1(x1, y1, z1, m_r / 8, Colour::darkRed);
         s1.setSolidRender(1);
         s1.draw();
 
-        x2 = m_r * math::Cos(t + math::DegToRad(180));
-        z2 = m_r * math::Sin(t + math::DegToRad(180));
+        x2 = m_r * Cos(t + DegToRad(90*2));
+        z2 = m_r * Sin(t + DegToRad(90*2));
         y2 = m_c * t;
-        Sphere3D s2(x2, y2, z2, m_r / 10, Colour::darkGreen);
+        Sphere3D s2(x2, y2, z2, m_r / 8, Colour::darkGreen);
         s2.setSolidRender(1);
         s2.draw();
 
@@ -81,15 +81,22 @@ void HelixScene::draw()
 bool HelixScene::idle()
 {
     const float t = vvr::getSeconds();
-    const float T = 5;
+    const float V = 10;
+    const float T = 20;
 
-    double c = cos(2.0 * math::pi * t / T);
-    m_c = getSceneWidth() / 150;
-    m_c *= (c*c*0.3 + 0.7);
+    if (0) 
+    {
+        double c = cos(2.0 * pi * t / T);
+        m_c = getSceneWidth() / 150;
+        m_c *= (c*c*0.3 + 0.7);
+    }
 
-    Vec3d rot = m_globRot;
-    rot.y = t * 20;
-    m_globRot = rot;
+    if (1) 
+    {
+        Vec3d rot = m_globRot;
+        rot.y = t * V;
+        m_globRot = rot;
+    }
 
     return true;
 }
