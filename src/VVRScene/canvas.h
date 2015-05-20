@@ -46,6 +46,8 @@ struct VVRScene_API Colour
     static Colour magenta;
     static Colour darkOrange;
     static Colour darkRed;
+    static Colour darkGreen;
+    static Colour yellowGreen;
 };
 
 /* Renderables */

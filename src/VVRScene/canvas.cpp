@@ -25,6 +25,8 @@ Colour Colour::orange       (0xFF, 0x66, 0x00);
 Colour Colour::magenta      (0xFF, 0x00, 0xFF);
 Colour Colour::darkRed      (0x8B, 0x00, 0x00);
 Colour Colour::darkOrange   (0xFF, 0x8C, 0x00);
+Colour Colour::darkGreen    (0x00, 0x64, 0x00);
+Colour Colour::yellowGreen  (0x9A, 0xCD, 0x32);
 
 /* Shape drawing */
 void Shape::draw() const {
@@ -104,7 +106,7 @@ void Sphere3D::drawShape() const {
     glPushMatrix();
     glTranslated(x, y, z);
     glScaled(rad, rad, rad);
-    drawSphere(rad, 60, 60);
+    drawSphere(rad, 12, 15);
     glPopMatrix();
 }
 

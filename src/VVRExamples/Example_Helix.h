@@ -20,6 +20,6 @@ protected:
 private:
     vvr::Settings   m_settings;
     vvr::Colour     m_obj_col;
-    float           m_rad, m_c;
+    float           m_r, m_c;
     int             m_style_flag;
 };
