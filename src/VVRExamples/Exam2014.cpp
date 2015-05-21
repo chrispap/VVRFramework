@@ -1,4 +1,4 @@
-#include "Example_Exam2014.h"
+#include "Exam2014.h"
 #include <utils.h>
 #include <iostream>
 #include <fstream>

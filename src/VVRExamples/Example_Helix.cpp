@@ -33,6 +33,7 @@ HelixScene::HelixScene()
     const double def_rot_z = m_settings.getDbl("def_rot_z");
     m_globRot_def = Vec3d(def_rot_x, def_rot_y, def_rot_z);
     m_globRot = m_globRot_def;
+    m_anim_on = true;
 }
 
 void HelixScene::resize()
@@ -80,6 +81,9 @@ void HelixScene::draw()
 
 bool HelixScene::idle()
 {
+    if (!m_anim_on)
+        return false;
+
     const float t = vvr::getSeconds();
     const float V = 10;
     const float T = 20;
@@ -98,7 +102,7 @@ bool HelixScene::idle()
         m_globRot = rot;
     }
 
-    return true;
+    return m_anim_on;
 }
 
 void HelixScene::keyEvent(unsigned char key, bool up, int modif)
@@ -113,6 +117,7 @@ void HelixScene::keyEvent(unsigned char key, bool up, int modif)
     case 's': m_style_flag ^= FLAG_SHOW_SOLID; break;
     case 'n': m_style_flag ^= FLAG_SHOW_NORMALS; break;
     case 'b': m_style_flag ^= FLAG_SHOW_AABB; break;
+    case ' ': m_anim_on    ^= 1; break;
     }
 
 }

@@ -22,4 +22,5 @@ private:
     vvr::Colour     m_obj_col;
     float           m_r, m_c;
     int             m_style_flag;
+    bool            m_anim_on;
 };
