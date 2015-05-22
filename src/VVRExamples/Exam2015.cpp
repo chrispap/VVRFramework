@@ -10,6 +10,8 @@
 #define FLAG_SHOW_SOLID      8
 #define FLAG_SHOW_NORMALS   16
 
+//! Helpers
+
 void CreateRandomPoints(C2DPointSet &ptset, int ptnum, int W0, int W1, int H0, int H1)
 {
     ptset.DeleteAll();
@@ -35,9 +37,41 @@ void CreateRandomPoints(C2DPointSet &ptset, int ptnum, int W0, int W1, int H0, i
     }
 }
 
+void ConvexHull(C2DPointSet &pset_in, C2DPointSet &pset_hull)
+{
+    //    C2DPolygon convex_hull;
+    //    C2DPoint *pts = new C2DPoint[other.size()];
+    //    for (int i = 0; i < other.size(); i++)
+    //        pts[i] = *other.GetAt(i);
+    //    C2DPolygon pt_polygon;
+    //    pt_polygon.Create(pts, other.size());
+    //    convex_hull.CreateConvexHull(pt_polygon);
+
+    //    delete[] pts;
+    //    return convex_hull_points;
+
+    pset_hull.DeleteAll();
+    pset_hull.ExtractConvexHull(pset_in);
+}
+
+int main(int argc, char* argv[])
+{
+    try
+    {
+        return vvr::mainLoop(argc, argv, new Exam2015Scene);
+    }
+    catch (std::string exc)
+    {
+        std::cerr << exc << std::endl;
+        return 1;
+    }
+}
+
+//! Scene Class
+
 Exam2015Scene::Exam2015Scene()
 {
-    // Setup
+    // Setup [Scene Params]
     {
         m_perspective_proj = false;
         m_globRot_def = Vec3d();
@@ -47,14 +81,14 @@ Exam2015Scene::Exam2015Scene()
         m_bg_col = Colour(0x76, 0x8E, 0x77);
     }
 
-    // Setup: [Task Par Lines]
+    // Setup Task [Lines]
     {
         CreateRandomPoints(m_point_set, 18, 80, 300, -80, -300);
         m_line1.Set(C2DPoint( 15, -5), C2DPoint( 15, -400));
         m_line2.Set(C2DPoint(410, -5), C2DPoint(410, -400));
     }
 
-    // Setup: [Task Path]
+    // Setup Task [Path]
     {
         m_path_width = 80;
         A = C2DPoint(-270, 118);
@@ -122,23 +156,28 @@ Exam2015Scene::Exam2015Scene()
         m_path_canvas.add(C2DTriangle(S[3], S[2], S[4]), Colour::grey, 1);
         m_path_canvas.add(C2DCircle(A, m_path_width), Colour::grey, true);
         m_path_canvas.add(C2DCircle(C, m_path_width), Colour::grey, true);
+
         for (int i = 0; i < 19; i++)
             m_path_canvas.add(C2DLine(A + l1*i, A + l1*(i + 1) + g1), Colour::white);
+
         for (int i = 0; i < 15; i++)
             m_path_canvas.add(C2DLine(B + l2*i, B + l2*(i + 1) + g2), Colour::white);
+
         m_path_canvas.add(C2DLine(AB.GetMidPoint(), AB.GetMidPoint() + vw1), Colour::blue);
         m_path_canvas.add(A, Colour::cyan);
         m_path_canvas.add(C, Colour::cyan);
         m_path_canvas.add(B, Colour::cyan);
     }
 
-    // Setup: [Task 3D]
+    // Setup Task [3D]
     {
         const string objDir = getExePath() + "../../resources/obj/";
         const string objFile = getExePath() + "../../resources/obj/buddha_low_low.obj";
-        m_mesh = Mesh::Make(objDir, objFile, "", true);
+        m_mesh = Mesh(objDir, objFile, "", true);
     }
-    Task_ParallelLines();
+
+    // Execute Tasks
+    Task_Parallel_Lines();
     Task_3D();
 }
 
@@ -148,10 +187,10 @@ void Exam2015Scene::resize()
 
     if (FIRST_PASS)
     {
-        m_mesh->setBigSize(getSceneWidth() / 5);
-        m_mesh->centerAlign();
-        m_mesh->setPos(Vec3d(-getSceneWidth() / 4, -getSceneHeight() / 4, 0));
-        m_mesh->update();
+        m_mesh.setBigSize(getSceneWidth() / 5);
+        m_mesh.centerAlign();
+        m_mesh.setPos(Vec3d(-getSceneWidth() / 4, -getSceneHeight() / 4, 0));
+        m_mesh.update();
     }
 
     FIRST_PASS = false;
@@ -189,7 +228,7 @@ void Exam2015Scene::mouseMoved(int x, int y, int modif)
         int dx = x - m_mouse_last_x;
         int dy = y - m_mouse_last_y;
 
-        Vec3d rot = m_mesh->getRot();
+        Vec3d rot = m_mesh.getRot();
 
         rot.x -= dy;
         rot.y += dx;
@@ -203,7 +242,7 @@ void Exam2015Scene::mouseMoved(int x, int y, int modif)
         m_mouse_last_x = x;
         m_mouse_last_y = y;
 
-        m_mesh->setRot(rot);
+        m_mesh.setRot(rot);
     }
 }
 
@@ -226,11 +265,11 @@ void Exam2015Scene::keyEvent(unsigned char key, bool up, int modif)
 void Exam2015Scene::draw()
 {
     // Draw mesh
-    if (m_style_flag & FLAG_SHOW_SOLID)     m_mesh->draw(m_obj_col, SOLID);
-    if (m_style_flag & FLAG_SHOW_WIRE)      m_mesh->draw(Colour::black, WIRE);
-    if (m_style_flag & FLAG_SHOW_NORMALS)   m_mesh->draw(Colour::black, NORMALS);
-    if (m_style_flag & FLAG_SHOW_AXES)      m_mesh->draw(Colour::black, AXES);
-    if (m_style_flag & FLAG_SHOW_AABB)      m_mesh->draw(Colour::black, BOUND);
+    if (m_style_flag & FLAG_SHOW_SOLID)     m_mesh.draw(m_obj_col, SOLID);
+    if (m_style_flag & FLAG_SHOW_WIRE)      m_mesh.draw(Colour::black, WIRE);
+    if (m_style_flag & FLAG_SHOW_NORMALS)   m_mesh.draw(Colour::black, NORMALS);
+    if (m_style_flag & FLAG_SHOW_AXES)      m_mesh.draw(Colour::black, AXES);
+    if (m_style_flag & FLAG_SHOW_AABB)      m_mesh.draw(Colour::black, BOUND);
 
     enterPixelMode();
     m_path_canvas.draw();
@@ -243,44 +282,29 @@ void Exam2015Scene::draw()
     Line2D(0, 0, 1, 0).draw();
     LineSeg2D(0, 0, 0, -100000).draw();
 
-    vvr::draw(m_convex_hull);
-    echo(m_convex_hull.size());
+    vvr::draw(m_convex_hull, Colour::darkRed);
     returnFromPixelMode();
 }
 
-void ConvexHull(C2DPointSet &pset_in, C2DPointSet &pset_out)
-{
-//    C2DPolygon convex_hull;
-//    C2DPoint *pts = new C2DPoint[other.size()];
-//    for (int i = 0; i < other.size(); i++)
-//        pts[i] = *other.GetAt(i);
-//    C2DPolygon pt_polygon;
-//    pt_polygon.Create(pts, other.size());
-//    convex_hull.CreateConvexHull(pt_polygon);
+//! Tasks
 
-//    delete[] pts;
-//    return convex_hull_points;
-
-    pset_out.DeleteAll();
-    pset_out.ExtractConvexHull(pset_in);
-}
-
-//! TASKS
-
-void Exam2015Scene::Task_ParallelLines()
+void Exam2015Scene::Task_Parallel_Lines()
 {
     // DESCRIPTION:
     //  Breite tis eutheies elaxistis apostasis pou perikleioun ola ta simeia.
     //
     // DEDOMENA:
-    //  C2DPointSet point_set;
+    //  C2DPointSet m_point_set;
+    //  C2DPointSet m_convex_hull;
     //
     // RESULT:
-    //  Tis grammes apothikeystese se aytes tis metavlites.
+    //  Tis grammes apothikeystese tis stis:
+    //   `m_line1`
+    //   `m_line2`
     //
     // YPENTHIMIZOUME:
-    //  line1.Set(C2DPoint(l1_x1, l1_y1), C2DPoint(l1_x2, l1_y2));
-    //  line2.Set(C2DPoint(l2_x1, l2_y1), C2DPoint(l2_x2, l2_y2));
+    //  m_line1.Set(C2DPoint(l1_x1, l1_y1), C2DPoint(l1_x2, l1_y2));
+    //  m_line1.Set(C2DPoint(l2_x1, l2_y1), C2DPoint(l2_x2, l2_y2));
     //
 
     ConvexHull(m_point_set, m_convex_hull);
@@ -311,6 +335,7 @@ void Exam2015Scene::Task_ParallelLines()
             l2=ltemp;
         }
     }
+
     C2DPoint to2 = m_convex_hull[l2]+ m_convex_hull[l1+1] - m_convex_hull[l1];
     m_line1.Set(m_convex_hull[l1],m_convex_hull[l1+1]);
     m_line2.Set(m_convex_hull[l2],to2);
@@ -324,13 +349,14 @@ bool Exam2015Scene::Task_Path(const C2DPoint &p)
     //  kai epistrepste true h false an to shmeio afto brisketai entos h ektos tou dromou.
     //
     // DEDOMENA:
-    //  float     path_width : To paxos tou dromou opws fainetai me thn mple gramh sto sxhma.
-    //  C2DPoint  A, B, C;   : Ta 3 simeia pou orizoun ton dromo. (Left-to-right)
-    //  C2DPoint  p          : To shmeio pou kaneis click me to pontiki.
+    //  float     m_path_width : To paxos tou dromou. (Mple gramh sto sxhma)
+    //  C2DPoint  A, B, C;     : Ta 3 simeia pou orizoun ton dromo. (Left-to-right)
+    //  C2DPoint  p            : To shmeio pou kaneis click me to pontiki.
     //
     // RETURN:
-    //  Prepei na epistrepsete: [true/false]  ==>  [Entos/Ektos] Dromou antistoixa.
+    //  Prepei na epistrepsete: [true / false]  ==>  [Entos / Ektos] dromou antistoixa.
     //
+
     C2DVector AB(B-A);
     C2DVector PA(p-A);
     C2DVector PB(p-B);
@@ -353,64 +379,60 @@ bool Exam2015Scene::Task_Path(const C2DPoint &p)
     if(pToL2 > A.Distance(B))
         proj2 = C;
 
-    if(p.Distance(proj2) > m_path_width && p.Distance(proj1) > m_path_width)
-        return false;
-
-    return true;
-
+    return !(p.Distance(proj2) > m_path_width && p.Distance(proj1) > m_path_width);
 }
 
 void Exam2015Scene::Task_3D()
 {
-    // Find coverage percentage of `mesh`.
+    // DESCRIPTION:
+    //  Breite to pososto ogkou tou AABB pou kalyptei to 3D montelo `m_mesh`;
+    //
+    // DEDOMENA:
+    //  vertices  : Koryfes montelou
+    //  triangles : Trigwnna montelou
+    //  aabb      : Axis Aligned Bounding Box montelou
+    //
+    // RESULTS:
+    //  To pososto kalypsis apothikeste to stin:
+    //   - `coverage_rate`
+    //
 
-    vector<Vec3d>           &verts = m_mesh->getVertices();
-    vector<vvr::Triangle>  &tris  = m_mesh->getTriangles();
+    vector<Vec3d>           &vertices = m_mesh.getVertices();
+    vector<vvr::Triangle>   &triangles  = m_mesh.getTriangles();
+    double                  coverage_rate = 100;
+    vvr::Box                aabb = m_mesh.getBox();
 
-
-    vvr::Box AABB = m_mesh->getBox();
-    //random dist
-    double dist = (AABB.max.x - AABB.min.x) / 10.0;
-    int on = 0, off = 0;
-    Vec3d toRay = AABB.max;
+    // Random dist
+    double dist = (aabb.max.x - aabb.min.x) / 10.0;
+    int inside = 0, outside = 0;
+    Vec3d toRay = aabb.max;
     vec to(toRay.x,toRay.y,toRay.z);
-    for(double i= AABB.min.x + dist/2.0 ; i < AABB.max.x - dist; i +=dist)
-        for(double j=AABB.min.y+dist/2.0 ; j < AABB.max.y - dist; j +=dist)
-            for(double k=AABB.min.z + dist/2.0 ; k < AABB.max.z - dist; k +=dist)
-            {
-                bool isOn = false;
+
+    for(double i= aabb.min.x + dist/2.0 ; i < aabb.max.x - dist; i +=dist) {
+        for(double j=aabb.min.y+dist/2.0 ; j < aabb.max.y - dist; j +=dist) {
+            for(double k=aabb.min.z + dist/2.0 ; k < aabb.max.z - dist; k +=dist) {
                 int count=0;
-                Vec3d point(i,j,k);
                 vec from(i,j,k);
 
-                for(int it = 0 ; it < tris.size(); it++)
-                {
-                    vec myV1(tris[it].v1().x,tris[it].v1().y,tris[it].v1().z);
-                    vec myV2(tris[it].v2().x,tris[it].v2().y,tris[it].v2().z);
-                    vec myV3(tris[it].v3().x,tris[it].v3().y,tris[it].v3().z);
+                for(int it = 0 ; it < triangles.size(); it++) {
+                    vec myV1(triangles[it].v1().x,triangles[it].v1().y,triangles[it].v1().z);
+                    vec myV2(triangles[it].v2().x,triangles[it].v2().y,triangles[it].v2().z);
+                    vec myV3(triangles[it].v3().x,triangles[it].v3().y,triangles[it].v3().z);
                     math::Triangle tempTris(myV1,myV2,myV3);
-                    if(tempTris.Intersects(math::Ray(from, vec(from-to).Normalized())))
-                    {
+                    if(tempTris.Intersects(math::Ray(from, vec(from-to).Normalized()))) {
                         count++;
                     }
                 }
-                if(count%2==1)
-                    on++;
-                else
-                    off++;
-            }
-    std::cout << "percentage: " << 100.0*on/(double(on+off)) << "%" << std::endl;
-}
 
-int main(int argc, char* argv[])
-{
-    try
-    {
-        return vvr::mainLoop(argc, argv, new Exam2015Scene);
+                if(count%2==1)
+                    inside++;
+                else
+                    outside++;
+            }
+        }
     }
-    catch (std::string exc)
-    {
-        std::cerr << exc << std::endl;
-        return 1;
-    }
+
+    coverage_rate = 100.0 * inside / (inside + outside);
+
+    cout << "AABB Coverage: " <<  coverage_rate << "%" << endl;
 }

@@ -24,21 +24,22 @@ protected:
 private:
     // Task methods
     bool Task_Path(const C2DPoint &p);
-    void Task_ParallelLines();
+    void Task_Parallel_Lines();
     void Task_3D();
 
-    // Task Lines
-    C2DPointSet     m_point_set, m_convex_hull;
+    // Task [Lines]
+    C2DPointSet     m_point_set;
+    C2DPointSet     m_convex_hull;
     C2DLine         m_line1;
     C2DLine         m_line2;
 
-    // Task Path
+    // Task [Path]
     float           m_path_width;
     Canvas2D        m_path_canvas;
     C2DPoint        A, B, C;
 
-    // Task 3D
-    Mesh::Ptr       m_mesh;
+    // Task [3D]
+    Mesh            m_mesh;
     Colour          m_obj_col;
     int             m_style_flag;
     int             m_mouse_last_x;
