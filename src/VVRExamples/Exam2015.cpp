@@ -337,8 +337,15 @@ void Exam2015Scene::Task_Parallel_Lines()
     }
 
     C2DPoint to2 = m_convex_hull[l2]+ m_convex_hull[l1+1] - m_convex_hull[l1];
-    m_line1.Set(m_convex_hull[l1],m_convex_hull[l1+1]);
-    m_line2.Set(m_convex_hull[l2],to2);
+    
+    C2DLine r1 (m_convex_hull[l1], m_convex_hull[l1 + 1]);
+    C2DLine r2 (m_convex_hull[l2], to2);
+    
+    r1.Grow(2, r1.GetMidPoint());
+    r2.Grow(2, r2.GetMidPoint());
+
+    m_line1 = r1;
+    m_line2 = r2;
 }
 
 bool Exam2015Scene::Task_Path(const C2DPoint &p)
