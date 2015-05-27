@@ -78,6 +78,8 @@ public:
     void update();                                  ///< Call after making changes to the vertices
     vector<Vec3d> &getVertices() { return mVertices; }
     vector<Triangle> &getTriangles() { return mTriangles; }
+    const vector<Vec3d> &getVertices() const { return mVertices; }
+    const vector<Triangle> &getTriangles() const { return mTriangles; }
 };
 
 }

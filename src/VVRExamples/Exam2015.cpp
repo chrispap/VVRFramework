@@ -37,21 +37,11 @@ void CreateRandomPoints(C2DPointSet &ptset, int ptnum, int W0, int W1, int H0, i
     }
 }
 
-void ConvexHull(C2DPointSet &pset_in, C2DPointSet &pset_hull)
+void ConvexHull(const C2DPointSet &pset_in, C2DPointSet &pset_hull)
 {
-    //    C2DPolygon convex_hull;
-    //    C2DPoint *pts = new C2DPoint[other.size()];
-    //    for (int i = 0; i < other.size(); i++)
-    //        pts[i] = *other.GetAt(i);
-    //    C2DPolygon pt_polygon;
-    //    pt_polygon.Create(pts, other.size());
-    //    convex_hull.CreateConvexHull(pt_polygon);
-
-    //    delete[] pts;
-    //    return convex_hull_points;
-
-    pset_hull.DeleteAll();
-    pset_hull.ExtractConvexHull(pset_in);
+    C2DPointSet tmp_set;
+    tmp_set.AddCopy(pset_in);
+    pset_hull.ExtractConvexHull(tmp_set);
 }
 
 int main(int argc, char* argv[])
@@ -74,8 +64,8 @@ Exam2015Scene::Exam2015Scene()
     // Setup [Scene Params]
     {
         m_perspective_proj = false;
-        m_globRot_def = Vec3d();
-        m_style_flag = FLAG_SHOW_SOLID;
+        m_globRot_def = Vec3d(10, 10, 0);
+        m_style_flag = FLAG_SHOW_SOLID | FLAG_SHOW_AABB;
         m_obj_col = Colour(0x45, 0x45, 0x45);
         m_globRot = m_globRot_def;
         m_bg_col = Colour(0x76, 0x8E, 0x77);
@@ -84,7 +74,8 @@ Exam2015Scene::Exam2015Scene()
     // Setup Task [Lines]
     {
         CreateRandomPoints(m_point_set, 18, 80, 300, -80, -300);
-        m_line1.Set(C2DPoint( 15, -5), C2DPoint( 15, -400));
+        ConvexHull(m_point_set, m_convex_hull);
+        m_line1.Set(C2DPoint(15, -5), C2DPoint(15, -400));
         m_line2.Set(C2DPoint(410, -5), C2DPoint(410, -400));
     }
 
@@ -172,7 +163,7 @@ Exam2015Scene::Exam2015Scene()
     // Setup Task [3D]
     {
         const string objDir = getExePath() + "../../resources/obj/";
-        const string objFile = getExePath() + "../../resources/obj/buddha_low_low.obj";
+        const string objFile = getExePath() + "../../resources/obj/dolphin.obj";
         m_mesh = Mesh(objDir, objFile, "", true);
     }
 
@@ -278,11 +269,8 @@ void Exam2015Scene::draw()
     tmp_canvas.add(m_line2, Colour::yellowGreen);
     tmp_canvas.draw();
     vvr::draw(m_point_set);
-
     Line2D(0, 0, 1, 0).draw();
     LineSeg2D(0, 0, 0, -100000).draw();
-
-    vvr::draw(m_convex_hull, Colour::darkRed);
     returnFromPixelMode();
 }
 
@@ -307,40 +295,40 @@ void Exam2015Scene::Task_Parallel_Lines()
     //  m_line1.Set(C2DPoint(l2_x1, l2_y1), C2DPoint(l2_x2, l2_y2));
     //
 
-    ConvexHull(m_point_set, m_convex_hull);
-    
+    m_line1.Set(m_convex_hull[0], m_convex_hull[1]);
+
     double dist = std::numeric_limits<double>::max();
-    int l1,l2;
-    for(int i = 0 ; i < m_convex_hull.size()-1; i++)
+    int l1, l2;
+    for (int i = 0; i < m_convex_hull.size() - 1; i++)
     {
-        double tempDist=std::numeric_limits<double>::min();
+        double tempDist = std::numeric_limits<double>::min();
         int ltemp;
-        for(int j = 0; j< m_convex_hull.size(); j++)
+        for (int j = 0; j < m_convex_hull.size(); j++)
         {
             double temp;
-            if(j!=i && j!= i+1)
+            if (j != i && j != i + 1)
             {
-                temp = C2DLine(m_convex_hull[i], m_convex_hull[i+1]).DistanceAsRay(m_convex_hull[j]);
-                if(temp > tempDist)
+                temp = C2DLine(m_convex_hull[i], m_convex_hull[i + 1]).DistanceAsRay(m_convex_hull[j]);
+                if (temp > tempDist)
                 {
                     tempDist = temp;
                     ltemp = j;
                 }
             }
         }
-        if(tempDist< dist)
+        if (tempDist < dist)
         {
             dist = tempDist;
             l1 = i;
-            l2=ltemp;
+            l2 = ltemp;
         }
     }
 
-    C2DPoint to2 = m_convex_hull[l2]+ m_convex_hull[l1+1] - m_convex_hull[l1];
-    
-    C2DLine r1 (m_convex_hull[l1], m_convex_hull[l1 + 1]);
-    C2DLine r2 (m_convex_hull[l2], to2);
-    
+    C2DPoint to2 = m_convex_hull[l2] + m_convex_hull[l1 + 1] - m_convex_hull[l1];
+
+    C2DLine r1(m_convex_hull[l1], m_convex_hull[l1 + 1]);
+    C2DLine r2(m_convex_hull[l2], to2);
+
     r1.Grow(2, r1.GetMidPoint());
     r2.Grow(2, r2.GetMidPoint());
 
@@ -364,10 +352,28 @@ bool Exam2015Scene::Task_Path(const C2DPoint &p)
     //  Prepei na epistrepsete: [true / false]  ==>  [Entos / Ektos] dromou antistoixa.
     //
 
-    C2DVector AB(B-A);
-    C2DVector PA(p-A);
-    C2DVector PB(p-B);
-    C2DVector BC(C-B);
+    const bool quick_solution = true;
+
+    if (quick_solution)
+    {
+        C2DLine AB(B, A);
+        C2DLine BC(B, C);
+
+        double d1, d2, d1_, d2_;
+        C2DPoint np1, np2;
+        d1 = AB.Distance(p);
+        d2 = BC.Distance(p);
+        d1_ = AB.DistanceAsRay(p);
+        d2_ = BC.DistanceAsRay(p);
+
+        return (d1 == d2) ? (d1_ < m_path_width && d2_ < m_path_width) :
+            (min(d1, d2) < m_path_width);
+    }
+
+    C2DVector AB(B - A);
+    C2DVector PA(p - A);
+    C2DVector PB(p - B);
+    C2DVector BC(C - B);
 
     AB.MakeUnit();
     double pToL1 = AB.Dot(PA);
@@ -377,13 +383,13 @@ bool Exam2015Scene::Task_Path(const C2DPoint &p)
     double pToL2 = BC.Dot(PB);
     C2DVector proj2 = BC*pToL2 + C2DVector(B);
 
-    if(pToL1 < 0)
+    if (pToL1 < 0)
         proj1 = A;
-    if(pToL1 > A.Distance(B))
+    if (pToL1 > A.Distance(B))
         proj1 = B;
-    if(pToL2 < 0)
+    if (pToL2 < 0)
         proj2 = B;
-    if(pToL2 > A.Distance(B))
+    if (pToL2 > A.Distance(B))
         proj2 = C;
 
     return !(p.Distance(proj2) > m_path_width && p.Distance(proj1) > m_path_width);
@@ -405,7 +411,7 @@ void Exam2015Scene::Task_3D()
     //
 
     vector<Vec3d>           &vertices = m_mesh.getVertices();
-    vector<vvr::Triangle>   &triangles  = m_mesh.getTriangles();
+    vector<vvr::Triangle>   &triangles = m_mesh.getTriangles();
     double                  coverage_rate = 100;
     vvr::Box                aabb = m_mesh.getBox();
 
@@ -413,25 +419,25 @@ void Exam2015Scene::Task_3D()
     double dist = (aabb.max.x - aabb.min.x) / 10.0;
     int inside = 0, outside = 0;
     Vec3d toRay = aabb.max;
-    vec to(toRay.x,toRay.y,toRay.z);
+    vec to(toRay.x, toRay.y, toRay.z);
 
-    for(double i= aabb.min.x + dist/2.0 ; i < aabb.max.x - dist; i +=dist) {
-        for(double j=aabb.min.y+dist/2.0 ; j < aabb.max.y - dist; j +=dist) {
-            for(double k=aabb.min.z + dist/2.0 ; k < aabb.max.z - dist; k +=dist) {
-                int count=0;
-                vec from(i,j,k);
+    for (double i = aabb.min.x + dist / 2.0; i < aabb.max.x - dist; i += dist) {
+        for (double j = aabb.min.y + dist / 2.0; j < aabb.max.y - dist; j += dist) {
+            for (double k = aabb.min.z + dist / 2.0; k < aabb.max.z - dist; k += dist) {
+                int count = 0;
+                vec from(i, j, k);
 
-                for(int it = 0 ; it < triangles.size(); it++) {
-                    vec myV1(triangles[it].v1().x,triangles[it].v1().y,triangles[it].v1().z);
-                    vec myV2(triangles[it].v2().x,triangles[it].v2().y,triangles[it].v2().z);
-                    vec myV3(triangles[it].v3().x,triangles[it].v3().y,triangles[it].v3().z);
-                    math::Triangle tempTris(myV1,myV2,myV3);
-                    if(tempTris.Intersects(math::Ray(from, vec(from-to).Normalized()))) {
+                for (int it = 0; it < triangles.size(); it++) {
+                    vec myV1(triangles[it].v1().x, triangles[it].v1().y, triangles[it].v1().z);
+                    vec myV2(triangles[it].v2().x, triangles[it].v2().y, triangles[it].v2().z);
+                    vec myV3(triangles[it].v3().x, triangles[it].v3().y, triangles[it].v3().z);
+                    math::Triangle tempTris(myV1, myV2, myV3);
+                    if (tempTris.Intersects(math::Ray(from, vec(from - to).Normalized()))) {
                         count++;
                     }
                 }
 
-                if(count%2==1)
+                if (count % 2 == 1)
                     inside++;
                 else
                     outside++;
@@ -441,5 +447,5 @@ void Exam2015Scene::Task_3D()
 
     coverage_rate = 100.0 * inside / (inside + outside);
 
-    cout << "AABB Coverage: " <<  coverage_rate << "%" << endl;
+    cout << "AABB Coverage: " << coverage_rate << "%" << endl;
 }
