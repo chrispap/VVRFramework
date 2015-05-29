@@ -3,7 +3,7 @@
 ####################################################################
 res_dir                     =  resources/
 obj_dir                     =  resources/obj/
-obj_file                    =  resources/obj/ironman.obj
+obj_file                    =  resources/obj/buddha_low_low.obj
 perspective_proj            =  1
 color_bg                    =  768E77
 color_obj                   =  454545

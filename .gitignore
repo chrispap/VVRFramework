@@ -2,4 +2,4 @@ build*
 *.txt.user*
 .settings/
 resources/obj/
-GeoLab_2015/
+GeoLab*/

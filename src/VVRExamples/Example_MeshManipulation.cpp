@@ -189,7 +189,7 @@ void Scene3D::Tasks()
     m_plane_d = 0;
     m_plane = Plane (vec(0, 1, 1).Normalized(), m_plane_d); // Define plane
     m_intersections.clear();
-    //Task_5_Intersect(triangles, m_plane, m_intersections);
+    Task_5_Intersect(triangles, m_plane, m_intersections);
     m_model_edited = Mesh(m_model);
     Task_5_Split(m_model_edited, m_plane);
 }
