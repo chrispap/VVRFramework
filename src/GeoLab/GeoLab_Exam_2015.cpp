@@ -162,8 +162,8 @@ Exam2015Scene::Exam2015Scene()
 
     // Setup Task [3D]
     {
-        const string objDir = getExePath() + "../../resources/obj/";
-        const string objFile = getExePath() + "../../resources/obj/dolphin.obj";
+        const string objDir = getBasePath() + "resources/obj/";
+        const string objFile = getBasePath() + "resources/obj/dolphin.obj";
         m_mesh = Mesh(objDir, objFile, "", true);
     }
 
