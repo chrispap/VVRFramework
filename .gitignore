@@ -1,5 +1,4 @@
 build*
 *.txt.user*
 .settings/
-resources/obj/
 GeoLab_*/
