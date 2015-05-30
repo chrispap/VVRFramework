@@ -5,7 +5,6 @@
 #include <string>
 #include <ctime>
 #include <algorithm>
-#include <Windows.h>
 
 #define MAX_NUM_PTS 50
 #define ConvexHull ConvexHull_Slow // "_Slow"  =>  "_Fast"  for reference implementation

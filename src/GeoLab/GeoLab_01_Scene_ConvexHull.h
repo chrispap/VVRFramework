@@ -3,7 +3,7 @@
 
 #include <scene.h>
 #include <canvas.h>
-#include <GeoLib\GeoLib.h>
+#include <GeoLib/GeoLib.h>
 
 #define APP_TITLE "VVR GeoLab - Convex Hull"
 
