@@ -3,7 +3,7 @@
 #include "mesh.h"
 #include <vector>
 #include <string>
-#include <MathGeoLib/MathGeoLib.h>
+#include <MathGeoLib.h>
 
 struct Bone {
     std::string         name;

@@ -7,7 +7,7 @@
 #include <iostream>
 #include <cstring>
 #include <string>
-#include <MathGeoLib/MathGeoLib.h>
+#include <MathGeoLib.h>
 
 #define CONFIG_FILE_PATH "config/config_apallaktiki_03.txt"
 #define POLYGON_FILENAME  "resources/polygons/polygon.txt"

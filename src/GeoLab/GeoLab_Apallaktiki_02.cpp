@@ -7,7 +7,7 @@
 #include <iostream>
 #include <cstring>
 #include <string>
-#include <MathGeoLib/MathGeoLib.h>
+#include <MathGeoLib.h>
 
 #define CONFIG_FILE_PATH "config/config_apallaktiki_02.txt"
 

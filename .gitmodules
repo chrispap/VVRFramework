@@ -1,0 +1,3 @@
+[submodule "src/MathGeoLib"]
+	path = src/MathGeoLib
+	url = https://github.com/juj/MathGeoLib.git

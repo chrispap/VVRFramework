@@ -4,7 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <MathGeoLib/MathGeoLib.h>
+#include <MathGeoLib.h>
 
 using namespace vvr;
 using std::vector;

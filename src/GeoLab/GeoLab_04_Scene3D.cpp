@@ -9,7 +9,7 @@
 #include <string>
 #include <set>
 #include <symmetriceigensolver3x3.h>
-#include <MathGeoLib/MathGeoLib.h>
+#include <MathGeoLib.h>
 
 #define CONFIG_FILE_PATH "config/settings_meshManipulation.txt"
 

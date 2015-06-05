@@ -8,7 +8,7 @@
 #include <locale>
 #include <cmath>
 #include <QtOpenGL>
-#include <MathGeoLib/MathGeoLib.h>
+#include <MathGeoLib.h>
 
 using namespace vvr;
 using namespace std;

@@ -5,7 +5,7 @@
 #include <vector>
 #include <cmath>
 #include <QtOpenGL>
-#include <MathGeoLib/MathGeoLib.h>
+#include <MathGeoLib.h>
 
 #define DEF_LINE_WIDTH 2.2
 
