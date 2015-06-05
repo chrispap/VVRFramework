@@ -5,7 +5,9 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 file(GLOB SOURCE_FILES *.h *.cpp)
 set(SOURCE ${SOURCE_FILES})
+set(QRCS Icons/icons.qrc)
 qt5_wrap_ui(UI_FILES window.ui)
+qt5_add_resources(RCS ${QRCS})
 #########################################################################################
 
 ##########################################################################################
@@ -17,7 +19,7 @@ include_directories(${CMAKE_SOURCE_DIR}/MathGeoLib/src)
 #########################################################################################
 
 ##########################################################################################
-add_library(VVRScene SHARED ${SOURCE} ${UI_FILES})
+add_library(VVRScene SHARED ${SOURCE} ${RCS} ${UI_FILES})
 
 ### QT Used modules ######################################################################
 qt5_use_modules(VVRScene Widgets OpenGL)

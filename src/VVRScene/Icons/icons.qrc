@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/Icons">
+        <file>vvr-group-splash.png</file>
+    </qresource>
+</RCC>

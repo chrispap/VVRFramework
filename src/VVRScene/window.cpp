@@ -77,8 +77,15 @@ int vvr::mainLoop(int argc, char* argv[], vvr::Scene *scene)
 {
     try {
         QApplication app(argc, argv);
+
+        QPixmap pixmap(":/Icons/vvr-group-splash.png");
+        QSplashScreen splash(pixmap);
+        splash.show();
+        app.processEvents();
+
         Window window(scene);
         window.show();
+        splash.close();
         app.exec();
     }
     catch (string exc) {
