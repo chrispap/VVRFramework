@@ -4,7 +4,7 @@
  - Deps: Qt5
 
 ### Who do I talk to?
-- Chris Papapavlou](mailto:chrispapapaulou@ece.upatras.gr)
+- [Chris Papapavlou](mailto:chrispapapaulou@ece.upatras.gr)
 
 ### Get it 
 - git clone --recursive https://bitbucket.org/vvr/vvrframework.git VVRFramework
