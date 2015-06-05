@@ -2,7 +2,7 @@
 #include <utils.h>
 #include <canvas.h>
 #include <iostream>
-#include <MathGeoLib/MathGeoLib.h>
+#include <MathGeoLib.h>
 
 #define FLAG_SHOW_AXES       1
 #define FLAG_SHOW_AABB       2

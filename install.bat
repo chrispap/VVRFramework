@@ -4,16 +4,18 @@
 set install_location=D:\Dev\workspace_vs\GeoLab
 
 :: Copy libs
-copy build\Release\VVRScene.lib %install_location%\VVRFramework\lib\Release
-copy build\Debug\VVRScene.lib %install_location%\VVRFramework\lib\Debug
-copy build\Release\GeoLib.lib %install_location%\VVRFramework\lib\Release
-copy build\Debug\GeoLib.lib %install_location%\VVRFramework\lib\Debug
+copy build-vs\Release\VVRScene.lib %install_location%\VVRFramework\lib\Release
+copy build-vs\Debug\VVRScene.lib %install_location%\VVRFramework\lib\Debug
+copy build-vs\Release\GeoLib.lib %install_location%\VVRFramework\lib\Release
+copy build-vs\Debug\GeoLib.lib %install_location%\VVRFramework\lib\Debug
+copy build-vs\Release\MathGeoLib.lib %install_location%\VVRFramework\lib\Release
+copy build-vs\Debug\MathGeoLib.lib %install_location%\VVRFramework\lib\Debug
 
 :: Copy dlls
-copy build\Release\VVRScene.dll %install_location%\Release
-copy build\Debug\VVRScene.dll %install_location%\Debug
-copy build\Release\GeoLib.dll %install_location%\Release
-copy build\Debug\GeoLib.dll %install_location%\Debug
+copy build-vs\Release\VVRScene.dll %install_location%\Release
+copy build-vs\Debug\VVRScene.dll %install_location%\Debug
+copy build-vs\Release\GeoLib.dll %install_location%\Release
+copy build-vs\Debug\GeoLib.dll %install_location%\Debug
 
 :: Copy headers
 copy src\VVRScene\canvas.h %install_location%\VVRFramework\include

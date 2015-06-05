@@ -5,7 +5,7 @@
 #include <string>
 #include <GeoLib.h>
 #include <canvas.h>
-#include <MathGeoLib/MathGeoLib.h>
+#include <MathGeoLib.h>
 
 using namespace vvr;
 using namespace math;

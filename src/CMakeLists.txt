@@ -1,8 +1,22 @@
 cmake_minimum_required(VERSION 2.8.11)
 
-set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-
 project(VVRFramework)
+
+### Build subdirs #######################################################################
+add_subdirectory(GeoLib)
+add_subdirectory(MathGeoLib)
+add_subdirectory(VVRScene)
+add_subdirectory(VVRPhysics)
+add_subdirectory(VVRExamples)
+add_subdirectory(GeoLab)
+add_subdirectory(GeoLab_2015_Students_Askiseis)
+add_subdirectory(GeoLab_2015_Students_Exam)
+add_subdirectory(GeoLab_2015_Students_Apallaktikes)
+#########################################################################################
+
+### Organize targets into folders #######################################################
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+#########################################################################################
 
 ### Warning options #####################################################################
 option(DISABLE_WARNINGS "Disable Warnings MSVC/GCC" ON)
@@ -23,15 +37,4 @@ elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
   # Update if necessary
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${GCC_WARN_LEVEL}")
 endif()
-#########################################################################################
-
-### Build subdirs #######################################################################
-add_subdirectory(GeoLib)
-add_subdirectory(VVRScene)
-add_subdirectory(VVRPhysics)
-add_subdirectory(VVRExamples)
-add_subdirectory(GeoLab)
-add_subdirectory(GeoLab_2015_Students_Askiseis)
-add_subdirectory(GeoLab_2015_Students_Exam)
-add_subdirectory(GeoLab_2015_Students_Apallaktikes)
 #########################################################################################

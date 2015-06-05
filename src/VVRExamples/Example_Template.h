@@ -2,7 +2,7 @@
 #include <mesh.h>
 #include <vector>
 #include <string>
-#include <MathGeoLib/MathGeoLib.h>
+#include <MathGeoLib.h>
 
 using namespace std;
 using namespace vvr;

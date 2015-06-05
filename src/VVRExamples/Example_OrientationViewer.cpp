@@ -7,7 +7,7 @@
 #include <iostream>
 #include <cstring>
 #include <string>
-#include <MathGeoLib/MathGeoLib.h>
+#include <MathGeoLib.h>
 
 #define CONFIG_FILE_PATH "config/settings_orientationViewer.txt"
 #define FLAG_SHOW_AXES      1
