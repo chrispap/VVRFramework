@@ -156,6 +156,8 @@ void ConvexHullScene::draw()
     draw(m_point_cloud, Colour::black);
     m_canvas_algo_steps.draw();
     m_canvas.draw();
+
+    returnFromPixelMode();
 }
 
 void ConvexHullScene::draw(C2DPointSet &point_set, Colour &col)

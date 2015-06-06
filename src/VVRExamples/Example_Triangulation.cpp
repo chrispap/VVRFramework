@@ -194,6 +194,8 @@ void TriangulationScene::draw()
         m_tris[i].to_2D(Colour::cyan).draw();           // Draw triangles
     m_canvas.draw();                                    // Draw current step violations
     vvr::draw(m_pts, Colour::red);                      // Draw points
+
+    returnFromPixelMode();
 }
 
 //! Task Functions

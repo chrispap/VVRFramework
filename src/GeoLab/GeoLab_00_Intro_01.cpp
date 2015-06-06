@@ -52,6 +52,8 @@ void Scene01::draw()
     // Draw a line segment.
     LineSeg2D line(300, -200, m_x, m_y, Colour::white);
     line.draw();
+
+    returnFromPixelMode();
 }
 
 void Scene01::mousePressed(int x, int y, int modif)

@@ -183,6 +183,8 @@ void IntersectionsScene::draw()
     m_canvas_1.draw();
     m_canvas_2.draw();
     m_canvas_3.draw();
+
+    returnFromPixelMode();
 }
 
 /* Application Entry Point */

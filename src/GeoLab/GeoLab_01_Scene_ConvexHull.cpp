@@ -86,6 +86,8 @@ void Scene_ConvexHull::draw()
     // Do any drawing here.
     draw(m_convex_hull_polygon, Colour::green);
     draw(m_point_cloud, Colour::black);
+
+    returnFromPixelMode();
 }
 
 void Scene_ConvexHull::draw(C2DPointSet &point_set, Colour &col)

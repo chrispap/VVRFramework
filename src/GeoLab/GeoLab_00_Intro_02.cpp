@@ -36,6 +36,7 @@ void Scene02::draw()
         }
     }
 
+    returnFromPixelMode();
 }
 
 void Scene02::mousePressed(int x, int y, int modif)

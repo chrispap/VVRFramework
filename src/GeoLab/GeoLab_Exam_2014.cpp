@@ -286,6 +286,8 @@ void Exam2014Scene::draw()
     canvas1.draw();
     canvas2.draw();
     canvas3.draw();
+
+    returnFromPixelMode();
 }
 
 /* Application Entry Point */
