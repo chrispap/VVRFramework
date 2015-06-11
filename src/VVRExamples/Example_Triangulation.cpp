@@ -266,7 +266,7 @@ void FindViolations(vector<Tri> &tris, const C2DPointSet &ptset, vector<unsigned
     }
 }
 
-void ShowViolations(vector<Tri> &tris, const vector<unsigned> &violations, Canvas2D &canvas, Colour &col)
+void ShowViolations(vector<Tri> &tris, const vector<unsigned> &violations, Canvas2D &canvas, const Colour &col)
 {
     canvas.newFrame(false);
     for (int i = 0; i < violations.size(); i++) {
