@@ -34,20 +34,20 @@ struct VVRScene_API Colour
         b = strtol(hex_str.substr(4,2).c_str(), 0, 16);
     }
 
-    static Colour white;
-    static Colour red;
-    static Colour green;
-    static Colour blue;
-    static Colour black;
-    static Colour yellow;
-    static Colour grey;
-    static Colour orange;
-    static Colour cyan;
-    static Colour magenta;
-    static Colour darkOrange;
-    static Colour darkRed;
-    static Colour darkGreen;
-    static Colour yellowGreen;
+    static const Colour white;
+    static const Colour red;
+    static const Colour green;
+    static const Colour blue;
+    static const Colour black;
+    static const Colour yellow;
+    static const Colour grey;
+    static const Colour orange;
+    static const Colour cyan;
+    static const Colour magenta;
+    static const Colour darkOrange;
+    static const Colour darkRed;
+    static const Colour darkGreen;
+    static const Colour yellowGreen;
 };
 
 /* Renderables */
@@ -298,11 +298,11 @@ public:
 
 };
 
-VVRScene_API void draw(C2DPointSet &point_set, Colour &col=Colour::black);
+VVRScene_API void draw(C2DPointSet &point_set, const Colour &col=Colour::black);
 
-VVRScene_API void draw(C2DLineSet &line_set, Colour &col=Colour::black);
+VVRScene_API void draw(C2DLineSet &line_set, const Colour &col = Colour::black);
 
-VVRScene_API void draw(C2DPolygon &polygon, Colour &col=Colour::black, bool filled=false);
+VVRScene_API void draw(C2DPolygon &polygon, const Colour &col = Colour::black, bool filled = false);
 
 }
 

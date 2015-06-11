@@ -13,20 +13,20 @@ using namespace vvr;
 using namespace std;
 
 /* Common Color Definitions */
-Colour Colour::red          (0xFF, 0x00, 0x00);
-Colour Colour::blue         (0x00, 0x00, 0xFF);
-Colour Colour::grey         (0x66, 0x66, 0x66);
-Colour Colour::cyan         (0x00, 0xFF, 0xFF);
-Colour Colour::white        (0xFF, 0xFF, 0xFF);
-Colour Colour::green        (0x00, 0xFF, 0x00);
-Colour Colour::black        (0x00, 0x00, 0x00);
-Colour Colour::yellow       (0xFF, 0xFF, 0x00);
-Colour Colour::orange       (0xFF, 0x66, 0x00);
-Colour Colour::magenta      (0xFF, 0x00, 0xFF);
-Colour Colour::darkRed      (0x8B, 0x00, 0x00);
-Colour Colour::darkOrange   (0xFF, 0x8C, 0x00);
-Colour Colour::darkGreen    (0x00, 0x64, 0x00);
-Colour Colour::yellowGreen  (0x9A, 0xCD, 0x32);
+const Colour Colour::red            (0xFF, 0x00, 0x00);
+const Colour Colour::blue           (0x00, 0x00, 0xFF);
+const Colour Colour::grey           (0x66, 0x66, 0x66);
+const Colour Colour::cyan           (0x00, 0xFF, 0xFF);
+const Colour Colour::white          (0xFF, 0xFF, 0xFF);
+const Colour Colour::green          (0x00, 0xFF, 0x00);
+const Colour Colour::black          (0x00, 0x00, 0x00);
+const Colour Colour::yellow         (0xFF, 0xFF, 0x00);
+const Colour Colour::orange         (0xFF, 0x66, 0x00);
+const Colour Colour::magenta        (0xFF, 0x00, 0xFF);
+const Colour Colour::darkRed        (0x8B, 0x00, 0x00);
+const Colour Colour::darkOrange     (0xFF, 0x8C, 0x00);
+const Colour Colour::darkGreen      (0x00, 0x64, 0x00);
+const Colour Colour::yellowGreen    (0x9A, 0xCD, 0x32);
 
 /* Shape drawing */
 void Shape::draw() const {
@@ -255,7 +255,7 @@ void drawSphere(double r, int lats, int longs)
     }
 }
 
-void vvr::draw(C2DPointSet &point_set, Colour &col)
+void vvr::draw(C2DPointSet &point_set, const Colour &col)
 {
     /* Draw point cloud */
     for (int i = 0; i < point_set.size(); i++) {
@@ -266,7 +266,7 @@ void vvr::draw(C2DPointSet &point_set, Colour &col)
     }
 }
 
-void vvr::draw(C2DLineSet  &line_set, Colour &col)
+void vvr::draw(C2DLineSet  &line_set, const Colour &col)
 {
     for (int i = 0; i < line_set.size(); i++) {
         LineSeg2D(
@@ -278,7 +278,7 @@ void vvr::draw(C2DLineSet  &line_set, Colour &col)
     }
 }
 
-void vvr::draw(C2DPolygon  &polygon, Colour &col, bool filled)
+void vvr::draw(C2DPolygon  &polygon, const Colour &col, bool filled)
 {
     if (filled)
     {
