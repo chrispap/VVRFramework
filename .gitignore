@@ -2,3 +2,4 @@ build*
 *.txt.user*
 .settings/
 GeoLab_*/
+TestProject

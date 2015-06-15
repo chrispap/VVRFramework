@@ -12,6 +12,7 @@ add_subdirectory(GeoLab)
 add_subdirectory(GeoLab_2015_Students_Askiseis)
 add_subdirectory(GeoLab_2015_Students_Exam)
 add_subdirectory(GeoLab_2015_Students_Apallaktikes)
+add_subdirectory(TestProject)
 #########################################################################################
 
 ### Organize targets into folders #######################################################

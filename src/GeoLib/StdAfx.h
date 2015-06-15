@@ -27,6 +27,7 @@ any modified versions of this cannot be resold to any other party.
 #include <cmath>
 #include <vector>
 #include <cstdlib>
+#include <algorithm>
 #include "Constants.h"
 
 using namespace std;
