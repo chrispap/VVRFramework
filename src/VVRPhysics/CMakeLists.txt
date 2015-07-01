@@ -10,6 +10,7 @@ add_library(VVRPhysics SHARED ${SOURCE} ${UI_FILES})
 include_directories(${OPENGL_INCLUDE_DIRS}  ${GLUT_INCLUDE_DIRS} )
 include_directories(${CMAKE_SOURCE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/GeoLib)
+include_directories(${Boost_INCLUDE_DIRS})
 #########################################################################################
 
 #########################################################################################

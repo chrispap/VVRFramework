@@ -30,6 +30,8 @@ Scene::Scene()
     m_globRot_def = Vec3d(0,0,0);
     m_globRot = m_globRot_def;
     m_perspective_proj = false;
+    m_fullscreen = false;
+    m_create_menus = true;
     m_camera_dist = 100;
 }
 

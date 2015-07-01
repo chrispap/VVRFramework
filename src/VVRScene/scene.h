@@ -26,6 +26,7 @@ protected:
     Vec3d m_globRot_def;
     Vec3d m_globRot;
     Colour m_bg_col;
+    bool m_fullscreen, m_create_menus;
 
 protected:
     virtual void draw() = 0;
@@ -62,6 +63,8 @@ public:
     int getViewportHeight() { return m_screen_height;} // In pixels
     float getSceneWidth() { return m_scene_width;} 
     float getSceneHeight() { return m_scene_height;}
+    bool fullScreen() { return m_fullscreen; }
+    bool createMenus() { return m_create_menus; }
 
     // Setters
     void setRot(const Vec3d& rot) { m_globRot = rot;}

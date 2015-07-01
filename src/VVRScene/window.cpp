@@ -32,10 +32,18 @@ vvr::Window::Window(vvr::Scene *scene)
 
     // Create actions, menus, etc.
     createActions();
-    createMenus();
+
+    if (scene->createMenus()) 
+        createMenus();
+
     setWindowTitle(tr(scene->getName()));
+
+    if (scene->fullScreen())
+        showFullScreen();
+    else
+        showMaximized();
+
     glWidget->setFocus();
-    showMaximized();
 }
 
 void vvr::Window::createActions()
