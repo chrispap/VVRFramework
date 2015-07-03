@@ -18,6 +18,7 @@ include_directories(${CMAKE_SOURCE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/GeoLib)
 include_directories(${CMAKE_SOURCE_DIR}/MathGeoLib/src)
 include_directories(${CMAKE_SOURCE_DIR}/VVRScene)
+include_directories(${Boost_INCLUDE_DIRS})
 ##########################################################################################
 
 ### Specify needed libs ##################################################################
