@@ -30,6 +30,7 @@ private:
     void startEyeTracker();
     void stopEyeTracker();
     void on_gaze_data(gtl::GazeData const & gaze_data);
+    void setActiveTarget(int index);
     void randomTargetJump();
 
 private:
@@ -40,6 +41,12 @@ private:
     gtl::GazeApi m_api;
     vvr::Canvas2D m_canvas, m_canvas_bg;
     vvr::Circle2D m_target_circle, m_gaze_circle, m_mouse_circle;
+
+private: 
+    static vvr::Colour COL_BG;
+    static vvr::Colour COL_TARGET;
+    static vvr::Colour COL_TARGET_ACTIVE;
+    static vvr::Colour COL_GAZE_FILL, COL_GAZE_LINE;
 };
 
 #endif

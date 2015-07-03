@@ -6,10 +6,25 @@
 #include <MathGeoLib.h>
 #include <simpleLogger.h>
 
-#define RAD_SMALL 15
-#define RAD_LARGE 22
-#define PIXEL_INTERVAL 150
-#define TIME_INTERVAL 1500
+/////////////////////////////////////////////////////////////////////////////////////////
+//! Definitions
+/////////////////////////////////////////////////////////////////////////////////////////
+
+#define RAD_SMALL           15
+#define RAD_LARGE           22
+#define PIXEL_INTERVAL      400
+#define TIME_INTERVAL       1500
+#define AUTO_TARGET_MOVE    0
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//! Static data
+/////////////////////////////////////////////////////////////////////////////////////////
+
+vvr::Colour EyeTrackingScene::COL_BG = vvr::Colour::grey;
+vvr::Colour EyeTrackingScene::COL_TARGET = vvr::Colour::darkRed;
+vvr::Colour EyeTrackingScene::COL_TARGET_ACTIVE = vvr::Colour::magenta;
+vvr::Colour EyeTrackingScene::COL_GAZE_FILL = vvr::Colour::yellowGreen;
+vvr::Colour EyeTrackingScene::COL_GAZE_LINE = vvr::Colour::black;
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //! Setup
@@ -20,14 +35,14 @@ EyeTrackingScene::EyeTrackingScene()
     startEyeTracker();
 
     // Init members
-    m_bg_col = vvr::Colour::grey;
+    m_bg_col = COL_BG;
     m_fullscreen = true;
     m_create_menus = false;
-    m_pause = false;
+    m_pause = !AUTO_TARGET_MOVE;
     m_active_target_index = 0;
 
     // Create targets
-    const vvr::Colour col(vvr::Colour::yellow);
+    const vvr::Colour col(COL_TARGET);
     const int W = 0.85 / 2 * m_W;
     const int H = 0.85 / 2 * m_H;
 
@@ -42,6 +57,7 @@ EyeTrackingScene::EyeTrackingScene()
         }
     }
 
+    setActiveTarget(0);
 }
 
 EyeTrackingScene::~EyeTrackingScene()
@@ -63,6 +79,8 @@ void EyeTrackingScene::startEyeTracker()
         m_api.get_screen(screen);
         m_W = screen.screenresw;
         m_H = screen.screenresh;
+
+        vvr::logi("msec, pixel_x, pixel_y");
     }
 
 }
@@ -77,7 +95,7 @@ void EyeTrackingScene::on_gaze_data(gtl::GazeData const &gaze_data)
 {
     if (gaze_data.state & gtl::GazeData::GD_STATE_TRACKING_GAZE)
     {
-        gtl::Point2D const & coords = gaze_data.lefteye.avg;
+        gtl::Point2D const & coords = gaze_data.avg;
         gtl::Screen screen;
         m_api.get_screen(screen);
         const float w = screen.screenresw;
@@ -85,25 +103,37 @@ void EyeTrackingScene::on_gaze_data(gtl::GazeData const &gaze_data)
         const float x = coords.x - w / 2;
         const float y = -(coords.y - h / 2);
 
-        m_gaze_circle = vvr::Circle2D(x, y, RAD_SMALL/2, vvr::Colour::yellowGreen);
-        // m_canvas.add(new vvr::Circle2D(m_gaze_circle));
+        m_gaze_circle = vvr::Circle2D(x, y, RAD_SMALL/2, COL_GAZE_FILL);
+        //m_canvas.add(new vvr::Circle2D(m_gaze_circle));
+       
+        // Log new gaze data
+        vvr::logi(std::string(" ") + 
+            std::to_string(gaze_data.time) + "," + 
+            std::to_string(x) + "," + 
+            std::to_string(y));
 
     }
 
 }
 
-void EyeTrackingScene::randomTargetJump()
+void EyeTrackingScene::setActiveTarget(int index)
 {
     m_circles.at(m_active_target_index)->setSolidRender(false);
-    m_circles.at(m_active_target_index)->setColour(vvr::Colour::yellow);
+    m_circles.at(m_active_target_index)->setColour(COL_TARGET);
     m_circles.at(m_active_target_index)->r = RAD_LARGE;
 
-    // m_active_target_index = (m_active_target_index + 1) % m_circles.size();
-    m_active_target_index = rand() % m_circles.size();
+    m_active_target_index = index;
 
     m_circles.at(m_active_target_index)->setSolidRender(true);
-    m_circles.at(m_active_target_index)->setColour(vvr::Colour::magenta);
+    m_circles.at(m_active_target_index)->setColour(COL_TARGET_ACTIVE);
     m_circles.at(m_active_target_index)->r = RAD_LARGE * 1;
+}
+
+void EyeTrackingScene::randomTargetJump()
+{
+    // int index = rand() % m_circles.size();
+    int index = (m_active_target_index+1) % m_circles.size();
+    setActiveTarget(index);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -121,7 +151,7 @@ void EyeTrackingScene::draw()
     m_gaze_circle.setSolidRender(true);
     m_gaze_circle.draw();
     m_gaze_circle.setSolidRender(false);
-    m_gaze_circle.setColour(vvr::Colour::black);
+    m_gaze_circle.setColour(COL_GAZE_LINE);
     m_gaze_circle.draw();
     m_gaze_circle.setColour(oldcol);
    
@@ -170,6 +200,17 @@ bool EyeTrackingScene::idle()
 
 void EyeTrackingScene::mousePressed(int x, int y, int modif)
 {
+    int i=0;
+    for (auto c : m_circles) {
+        if (C2DCircle(C2DPoint(c->x, c->y), c->r).Contains(C2DPoint(x,y))) {
+            setActiveTarget(i);
+            return;
+        }
+        ++i;
+    }
+
+    return;
+
     m_mouse_circle = vvr::Circle2D(x, y, RAD_SMALL, vvr::Colour::black);
     m_mouse_circle.setSolidRender(true);
     m_canvas.add(new vvr::Circle2D(m_mouse_circle));
@@ -223,6 +264,5 @@ void EyeTrackingScene::reset()
 int main(int argc, char* argv[])
 {
     vvr::Scene *s = new EyeTrackingScene();
-    vvr::logi("Program starting...");
     return vvr::mainLoop(argc, argv, s);
 }
