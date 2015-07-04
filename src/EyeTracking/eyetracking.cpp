@@ -103,14 +103,19 @@ void EyeTrackingScene::on_gaze_data(gtl::GazeData const &gaze_data)
         const float x = coords.x - w / 2;
         const float y = -(coords.y - h / 2);
 
+		echo(x);
+		echo(y);
+		echo(w);
+		echo(h);
+
         m_gaze_circle = vvr::Circle2D(x, y, RAD_SMALL/2, COL_GAZE_FILL);
         //m_canvas.add(new vvr::Circle2D(m_gaze_circle));
        
-        // Log new gaze data
-        vvr::logi(std::string(" ") + 
-            std::to_string(gaze_data.time) + "," + 
-            std::to_string(x) + "," + 
-            std::to_string(y));
+        //// Log new gaze data
+        //vvr::logi(std::string(" ") + 
+        //    std::to_string(gaze_data.time) + "," + 
+        //    std::to_string(x) + "," + 
+        //    std::to_string(y));
 
     }
 
@@ -201,13 +206,13 @@ bool EyeTrackingScene::idle()
 void EyeTrackingScene::mousePressed(int x, int y, int modif)
 {
     int i=0;
-    for (auto c : m_circles) {
-        if (C2DCircle(C2DPoint(c->x, c->y), c->r).Contains(C2DPoint(x,y))) {
-            setActiveTarget(i);
-            return;
-        }
-        ++i;
-    }
+    //for (auto c : m_circles) {
+    //    if (C2DCircle(C2DPoint(c->x, c->y), c->r).Contains(C2DPoint(x,y))) {
+    //        setActiveTarget(i);
+    //        return;
+    //    }
+    //    ++i;
+    //}
 
     return;
 
