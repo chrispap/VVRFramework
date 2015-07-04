@@ -1,8 +1,6 @@
 #ifndef VVR_EYE_TRACKING_H
 #define VVR_EYE_TRACKING_H
 
-//#define BOOST_ALL_NO_LIB
-
 #include "settings.h"
 #include <scene.h>
 #include <mesh.h>
@@ -10,7 +8,7 @@
 #include <vector>
 #include <gazeapi.h>
 
-class EyeTrackingScene : public vvr::Scene, public gtl::IGazeListener
+class EyeTrackingScene : public vvr::Scene , public gtl::IGazeListener
 {
 public:
     EyeTrackingScene();
@@ -20,7 +18,7 @@ public:
 protected:
     void draw() override;
     void reset() override;
-	void resize() override;
+    void resize() override;
     bool idle() override;
     void mousePressed(int x, int y, int modif) override;
     void mouseMoved(int x, int y, int modif) override;
@@ -28,6 +26,7 @@ protected:
     void arrowEvent(vvr::ArrowDir dir, int modif) override;
 
 private:
+    void createScene();
     void startEyeTracker();
     void stopEyeTracker();
     void on_gaze_data(gtl::GazeData const & gaze_data);

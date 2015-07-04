@@ -13,7 +13,7 @@
 #define RAD_SMALL           15
 #define RAD_LARGE           22
 #define PIXEL_INTERVAL      300
-#define TIME_INTERVAL       1888
+#define TIME_INTERVAL       488
 #define AUTO_TARGET_MOVE    1
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -38,9 +38,7 @@ EyeTrackingScene::EyeTrackingScene()
     m_create_menus = false;
     m_pause = !AUTO_TARGET_MOVE;
     m_active_target_index = 0;
-
-	// Init Eye Tracker
-    startEyeTracker();
+    createScene();
 }
 
 EyeTrackingScene::~EyeTrackingScene()
@@ -48,28 +46,38 @@ EyeTrackingScene::~EyeTrackingScene()
     stopEyeTracker();
 }
 
+void EyeTrackingScene::createScene()
+{
+    m_canvas_bg.clear();
+    m_circles.clear();
+
+	// Init Eye Tracker
+    startEyeTracker();
+
+    // Create targets
+    const vvr::Colour col(COL_TARGET);
+    const int W = 0.85 / 2 * m_W;
+    const int H = 0.85 / 2 * m_H;
+
+    vvr::Circle2D * c;
+
+    // Create grid
+    for (int h = H; h >= -H; h -= PIXEL_INTERVAL) {
+        for (int w = -W; w <= W; w += PIXEL_INTERVAL) {
+            c = new vvr::Circle2D(w, h, RAD_LARGE, col);
+            m_canvas_bg.add(c);
+            m_circles.push_back(c);
+        }
+    }
+
+}
+
 void EyeTrackingScene::resize()
 {
-	// Get size
-	m_W = getViewportWidth();
-	m_H = getViewportHeight();
-
-	// Create targets
-	const vvr::Colour col(COL_TARGET);
-	const int W = 0.85 / 2 * m_W;
-	const int H = 0.85 / 2 * m_H;
-	vvr::Circle2D * c;
-
-	// Create grid
-	for (int h = H; h >= -H; h -= PIXEL_INTERVAL) {
-		for (int w = -W; w <= W; w += PIXEL_INTERVAL) {
-			c = new vvr::Circle2D(w, h, RAD_LARGE, col);
-			m_canvas_bg.add(c);
-			m_circles.push_back(c);
-		}
-	}
-
-	setActiveTarget(0);
+    m_W = getViewportWidth();
+    m_H = getViewportHeight();
+    createScene();
+    setActiveTarget(0);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -86,8 +94,8 @@ void EyeTrackingScene::startEyeTracker()
 
 void EyeTrackingScene::stopEyeTracker()
 {
-    m_api.remove_listener(*this);
-    m_api.disconnect();
+//    m_api.remove_listener(*this);
+//    m_api.disconnect();
 }
 
 void EyeTrackingScene::on_gaze_data(gtl::GazeData const &gaze_data)
