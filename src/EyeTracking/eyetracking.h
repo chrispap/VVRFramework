@@ -20,6 +20,7 @@ public:
 protected:
     void draw() override;
     void reset() override;
+	void resize() override;
     bool idle() override;
     void mousePressed(int x, int y, int modif) override;
     void mouseMoved(int x, int y, int modif) override;

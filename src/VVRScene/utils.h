@@ -15,6 +15,8 @@ using namespace std;
 #define echo(x) cout<<#x<<" = "<<x<<endl
 #define msg(x) cout<<x<<endl
 #define SQUARE(x) ((x)*(x))
+#define SSTR( x ) dynamic_cast< std::ostringstream & >( \
+        ( std::ostringstream() << std::dec << x ) ).str()
 
 #define VAR_CLASS_DEFS(x)        \
 typedef boost::shared_ptr< x > Ptr;      \

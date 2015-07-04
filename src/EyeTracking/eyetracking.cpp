@@ -12,9 +12,9 @@
 
 #define RAD_SMALL           15
 #define RAD_LARGE           22
-#define PIXEL_INTERVAL      400
-#define TIME_INTERVAL       1500
-#define AUTO_TARGET_MOVE    0
+#define PIXEL_INTERVAL      300
+#define TIME_INTERVAL       1888
+#define AUTO_TARGET_MOVE    1
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //! Static data
@@ -32,8 +32,6 @@ vvr::Colour EyeTrackingScene::COL_GAZE_LINE = vvr::Colour::black;
 
 EyeTrackingScene::EyeTrackingScene()
 {
-    startEyeTracker();
-
     // Init members
     m_bg_col = COL_BG;
     m_fullscreen = true;
@@ -41,28 +39,37 @@ EyeTrackingScene::EyeTrackingScene()
     m_pause = !AUTO_TARGET_MOVE;
     m_active_target_index = 0;
 
-    // Create targets
-    const vvr::Colour col(COL_TARGET);
-    const int W = 0.85 / 2 * m_W;
-    const int H = 0.85 / 2 * m_H;
-
-    vvr::Circle2D * c;
-    
-    // Create grid
-    for (int h = H; h >= -H; h -= PIXEL_INTERVAL) {
-        for (int w = -W; w <= W; w += PIXEL_INTERVAL) {
-            c = new vvr::Circle2D(w, h, RAD_LARGE, col);
-            m_canvas_bg.add(c);
-            m_circles.push_back(c);
-        }
-    }
-
-    setActiveTarget(0);
+	// Init Eye Tracker
+    startEyeTracker();
 }
 
 EyeTrackingScene::~EyeTrackingScene()
 {
     stopEyeTracker();
+}
+
+void EyeTrackingScene::resize()
+{
+	// Get size
+	m_W = getViewportWidth();
+	m_H = getViewportHeight();
+
+	// Create targets
+	const vvr::Colour col(COL_TARGET);
+	const int W = 0.85 / 2 * m_W;
+	const int H = 0.85 / 2 * m_H;
+	vvr::Circle2D * c;
+
+	// Create grid
+	for (int h = H; h >= -H; h -= PIXEL_INTERVAL) {
+		for (int w = -W; w <= W; w += PIXEL_INTERVAL) {
+			c = new vvr::Circle2D(w, h, RAD_LARGE, col);
+			m_canvas_bg.add(c);
+			m_circles.push_back(c);
+		}
+	}
+
+	setActiveTarget(0);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -71,18 +78,10 @@ EyeTrackingScene::~EyeTrackingScene()
 
 void EyeTrackingScene::startEyeTracker()
 {
-    // Init EyeTribe
     if (m_api.connect(true)) 
     {
         m_api.add_listener(*this);
-        gtl::Screen screen;
-        m_api.get_screen(screen);
-        m_W = screen.screenresw;
-        m_H = screen.screenresh;
-
-        vvr::logi("msec, pixel_x, pixel_y");
     }
-
 }
 
 void EyeTrackingScene::stopEyeTracker()
@@ -95,28 +94,17 @@ void EyeTrackingScene::on_gaze_data(gtl::GazeData const &gaze_data)
 {
     if (gaze_data.state & gtl::GazeData::GD_STATE_TRACKING_GAZE)
     {
-        gtl::Point2D const & coords = gaze_data.avg;
-        gtl::Screen screen;
-        m_api.get_screen(screen);
-        const float w = screen.screenresw;
-        const float h = screen.screenresh;
-        const float x = coords.x - w / 2;
+		const float w = getViewportWidth();
+		const float h = getViewportHeight();
+        gtl::Point2D const &coords = gaze_data.avg;
+		const float x = coords.x - w / 2;
         const float y = -(coords.y - h / 2);
-
-		echo(x);
-		echo(y);
-		echo(w);
-		echo(h);
 
         m_gaze_circle = vvr::Circle2D(x, y, RAD_SMALL/2, COL_GAZE_FILL);
         //m_canvas.add(new vvr::Circle2D(m_gaze_circle));
        
-        //// Log new gaze data
-        //vvr::logi(std::string(" ") + 
-        //    std::to_string(gaze_data.time) + "," + 
-        //    std::to_string(x) + "," + 
-        //    std::to_string(y));
-
+		// Log gaze data
+		//vvr::logi(std::string(" ") + SSTR(gaze_data.time) + "," + SSTR(x) + "," + SSTR(y));
     }
 
 }
@@ -206,13 +194,14 @@ bool EyeTrackingScene::idle()
 void EyeTrackingScene::mousePressed(int x, int y, int modif)
 {
     int i=0;
-    //for (auto c : m_circles) {
-    //    if (C2DCircle(C2DPoint(c->x, c->y), c->r).Contains(C2DPoint(x,y))) {
-    //        setActiveTarget(i);
-    //        return;
-    //    }
-    //    ++i;
-    //}
+	for (auto ci = m_circles.begin(); ci!=m_circles.end(); ++ci) {
+		auto c = *ci;
+        if (C2DCircle(C2DPoint(c->x, c->y), c->r).Contains(C2DPoint(x,y))) {
+            setActiveTarget(i);
+            return;
+        }
+        ++i;
+    }
 
     return;
 
