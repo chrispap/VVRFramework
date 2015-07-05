@@ -15,3 +15,8 @@ include_directories(${Boost_INCLUDE_DIRS})
 #########################################################################################
 target_link_libraries(VVRPhysics VVRScene)
 #########################################################################################
+
+### INSTALL #############################################################################
+install (TARGETS VVRPhysics DESTINATION "lib")
+install (DIRECTORY "./" DESTINATION "include/VVRPhysics" FILES_MATCHING PATTERN "*.h")
+#########################################################################################

@@ -1,0 +1,6 @@
+[submodule "MathGeoLib"]
+	path = MathGeoLib
+	url = https://github.com/juj/MathGeoLib.git
+[submodule "EyeTribe"]
+	path = EyeTribe
+	url = https://github.com/EyeTribe/tet-cpp-client.git

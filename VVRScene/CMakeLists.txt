@@ -5,7 +5,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 file(GLOB SOURCE_FILES *.h *.cpp)
 set(SOURCE ${SOURCE_FILES})
-set(QRCS Icons/icons.qrc)
+set(QRCS icons.qrc)
 qt5_wrap_ui(UI_FILES window.ui)
 qt5_add_resources(RCS ${QRCS})
 #########################################################################################
@@ -30,7 +30,7 @@ target_link_libraries(VVRScene
     ${OPENGL_LIBRARIES} Qt5::Widgets Qt5::OpenGL GeoLib MathGeoLib ${Boost_LIBRARIES})
 #########################################################################################
 
-### Link to Libraries ###################################################################
+### INSTALL #############################################################################
 install (TARGETS VVRScene DESTINATION "lib")
-install (DESTINATION "include/VVRScene" FILES_MATCHING PATTERN "*.h")
+install (DIRECTORY "./" DESTINATION "include/VVRScene" FILES_MATCHING PATTERN "*.h")
 #########################################################################################

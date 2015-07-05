@@ -14,11 +14,9 @@ find_package(Boost 1.57.0 COMPONENTS
 ### Build subdirs #######################################################################
 add_subdirectory(GeoLib)
 add_subdirectory(MathGeoLib)
-add_subdirectory(tet-cpp-client)
+add_subdirectory(EyeTribe)
 add_subdirectory(VVRScene)
 add_subdirectory(VVRPhysics)
-add_subdirectory(VVRExamples)
-add_subdirectory(EyeTracking)
 #########################################################################################
 
 set_property(TARGET VVRScene PROPERTY FOLDER "VVRLibraries")
