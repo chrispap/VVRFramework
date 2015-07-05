@@ -1,5 +1,2 @@
-build*
-*.txt.user*
-.settings/
-GeoLab_*/
-TestProject
+*build*
+*user*
