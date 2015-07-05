@@ -21,6 +21,12 @@ add_subdirectory(VVRExamples)
 add_subdirectory(EyeTracking)
 #########################################################################################
 
+set_property(TARGET VVRScene PROPERTY FOLDER "VVRLibraries")
+set_property(TARGET VVRPhysics PROPERTY FOLDER "VVRLibraries")
+set_property(TARGET GeoLib PROPERTY FOLDER "VVRLibraries")
+set_property(TARGET MathGeoLib PROPERTY FOLDER "VVRLibraries")
+set_property(TARGET GazeApiLib PROPERTY FOLDER "VVRLibraries")
+
 ### Organize targets into folders #######################################################
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 #########################################################################################

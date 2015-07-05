@@ -3,8 +3,7 @@ file(GLOB SOURCE_FILES *.h *.cpp)
 find_package(OpenGL REQUIRED)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(SOURCE ${SOURCE_FILES})
-add_library(VVRPhysics SHARED ${SOURCE} ${UI_FILES})
-#########################################################################################
+add_library(VVRPhysics SHARED ${SOURCE} ${UI_FILES})#########################################################################################
 
 #########################################################################################
 include_directories(${OPENGL_INCLUDE_DIRS}  ${GLUT_INCLUDE_DIRS} )

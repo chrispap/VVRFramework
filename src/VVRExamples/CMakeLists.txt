@@ -3,7 +3,7 @@ file(GLOB APP_SRC_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.cpp)
 foreach( srcFile ${APP_SRC_FILES} )
     string( REPLACE ".cpp" "" appName ${srcFile} )
     add_executable( ${appName} MACOSX_BUNDLE ${appName}.cpp ${appName}.h )
-    set_property(TARGET ${appName} PROPERTY FOLDER "Applications")
+    set_property(TARGET ${appName} PROPERTY FOLDER "VVRExamples")
 endforeach( srcFile ${APP_SRC_FILES} )
 #########################################################################################
 
