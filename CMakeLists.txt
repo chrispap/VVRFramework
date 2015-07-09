@@ -25,3 +25,5 @@ set_property(TARGET VVRPhysics PROPERTY FOLDER "VVRLibraries")
 set_property(TARGET GeoLib PROPERTY FOLDER "VVRLibraries")
 set_property(TARGET MathGeoLib PROPERTY FOLDER "VVRLibraries")
 #########################################################################################
+
+INCLUDE(CPack)
