@@ -1,4 +1,4 @@
-### QT STUFF ############################################################################
+### QT ##################################################################################
 find_package(Qt5Widgets REQUIRED)
 find_package(Qt5OpenGL REQUIRED)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -20,15 +20,9 @@ include_directories(${Boost_INCLUDE_DIRS})
 #########################################################################################
 
 add_library(VVRScene SHARED ${SOURCE} ${RCS} ${UI_FILES})
-
-### QT Used modules #####################################################################
 qt5_use_modules(VVRScene Widgets OpenGL)
-#########################################################################################
-
-### Link to Libraries ###################################################################
-target_link_libraries(VVRScene 
-    ${OPENGL_LIBRARIES} Qt5::Widgets Qt5::OpenGL GeoLib MathGeoLib ${Boost_LIBRARIES})
-#########################################################################################
+target_link_libraries(VVRScene ${OPENGL_LIBRARIES} Qt5::Widgets Qt5::OpenGL)
+target_link_libraries(VVRScene GeoLib MathGeoLib ${Boost_LIBRARIES})
 
 ### INSTALL #############################################################################
 install (TARGETS VVRScene DESTINATION "lib")
