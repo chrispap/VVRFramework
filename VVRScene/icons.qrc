@@ -1,5 +1,5 @@
 <RCC>
     <qresource prefix="/Icons">
-        <file>splash.png</file>
+        <file>vvrframework-splash.png</file>
     </qresource>
 </RCC>
