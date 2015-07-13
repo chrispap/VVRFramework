@@ -86,7 +86,7 @@ int vvr::mainLoop(int argc, char* argv[], vvr::Scene *scene)
     try {
         QApplication app(argc, argv);
 
-        QPixmap pixmap(":/Icons/splash.png");
+        QPixmap pixmap(":/Icons/vvrframework-splash.png");
         QSplashScreen splash(pixmap);
         splash.show();
         app.processEvents();
