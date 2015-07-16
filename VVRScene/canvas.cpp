@@ -131,11 +131,20 @@ void Triangle3D::drawShape() const {
     math::vec n = math::Triangle(
         math::vec(x1,y1,z1),
         math::vec(x2,y2,z2),
-        math::vec(x3,y3,z3)).NormalCW();
+        math::vec(x3,y3,z3)
+    ).NormalCW();
+    
     glNormal3fv(n.ptr());
+
+    glColor3ubv(vc[0].data);
     glVertex3f(x1, y1, z1);
+    
+    glColor3ubv(vc[1].data);
     glVertex3f(x2, y2, z2);
+
+    glColor3ubv(vc[2].data);
     glVertex3f(x3, y3, z3);
+
     glEnd();
 }
 

@@ -211,12 +211,20 @@ struct VVRScene_API Triangle3D : public Shape
     double x1,y1,z1;
     double x2,y2,z2;
     double x3,y3,z3;
+    Colour vc[3]; // vertex colour
 
 protected:
     void drawShape() const override;
 
 public:
-    Triangle3D(){b_render_solid = true;}
+    Triangle3D()
+    {
+        b_render_solid = true; 
+        vc[0] = colour;
+        vc[1] = colour;
+        vc[2] = colour;
+    }
+
     Triangle3D(double x1, double y1, double z1,
                double x2, double y2, double z2,
                double x3, double y3, double z3,
@@ -224,7 +232,18 @@ public:
         x1(x1), y1(y1), z1(z1),
         x2(x2), y2(y2), z2(z2),
         x3(x3), y3(y3), z3(z3),
-        Shape(rgb) {b_render_solid = true;}
+        Shape(rgb) 
+    {
+        b_render_solid = true;
+        vc[0] = colour;
+        vc[1] = colour;
+        vc[2] = colour;
+    }
+
+    void setColourPerVertex(const Colour &c1, const Colour &c2, const Colour &c3) 
+    {
+        vc[0] = c1; vc[1] = c2; vc[2] = c3;
+    }
 };
 
 /* Canvas */
