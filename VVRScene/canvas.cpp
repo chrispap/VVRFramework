@@ -136,13 +136,13 @@ void Triangle3D::drawShape() const {
     
     glNormal3fv(n.ptr());
 
-    glColor3ubv(vc[0].data);
+    glColor3ubv(vertex_col[0].data);
     glVertex3f(x1, y1, z1);
     
-    glColor3ubv(vc[1].data);
+    glColor3ubv(vertex_col[1].data);
     glVertex3f(x2, y2, z2);
 
-    glColor3ubv(vc[2].data);
+    glColor3ubv(vertex_col[2].data);
     glVertex3f(x3, y3, z3);
 
     glEnd();
