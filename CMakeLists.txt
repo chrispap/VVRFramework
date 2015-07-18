@@ -12,6 +12,7 @@ find_package(Boost 1.57.0 COMPONENTS ${Boost_NEEDED_LIBS})
 #########################################################################################
 
 ### Build subdirs #######################################################################
+add_subdirectory(GLFW)
 add_subdirectory(GeoLib)
 add_subdirectory(MathGeoLib)
 add_subdirectory(VVRScene)
