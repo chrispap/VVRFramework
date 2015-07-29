@@ -29,7 +29,7 @@ BOOST_LOG_GLOBAL_LOGGER_INIT(logger, src::severity_logger_mt) {
     src::severity_logger_mt<boost::log::trivial::severity_level> logger;
 
     // add attributes
-    
+
     // lines are sequentially numbered
     logger.add_attribute("LineID", attrs::counter<unsigned int>(1));
 
@@ -48,10 +48,10 @@ BOOST_LOG_GLOBAL_LOGGER_INIT(logger, src::severity_logger_mt) {
 
     // specify the format of the log message
     logging::formatter formatter = expr::stream
-        //<< std::setw(7) << std::setfill('0') << line_id << std::setfill(' ') << " | "
-        //<< expr::format_date_time(timestamp, "%Y-%m-%d, %H:%M:%S.%f") << " "
-        //<< "[" << logging::trivial::severity << "]"
-        //<< " - " 
+        << std::setw(7) << std::setfill('0') << line_id << std::setfill(' ') << " | "
+        << expr::format_date_time(timestamp, "%Y-%m-%d, %H:%M:%S.%f") << " "
+        << "[" << logging::trivial::severity << "]"
+        << " - "
         << expr::smessage;
     sink->set_formatter(formatter);
 
