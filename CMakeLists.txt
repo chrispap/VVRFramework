@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 2.8.11)
-
 project(VVRFramework)
+
+#########################################################################################
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+#########################################################################################
 
 ### Find Boost ##########################################################################
 set(Boost_NO_BOOST_CMAKE ON)
@@ -16,15 +19,20 @@ add_subdirectory(GLFW)
 add_subdirectory(GeoLib)
 add_subdirectory(MathGeoLib)
 add_subdirectory(VVRScene)
-add_subdirectory(VVRPhysics)
 #########################################################################################
 
 #########################################################################################
-set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(TARGET VVRScene PROPERTY FOLDER "VVRLibraries")
-set_property(TARGET VVRPhysics PROPERTY FOLDER "VVRLibraries")
 set_property(TARGET GeoLib PROPERTY FOLDER "VVRLibraries")
 set_property(TARGET MathGeoLib PROPERTY FOLDER "VVRLibraries")
+set_property(TARGET glfw PROPERTY FOLDER "VVRLibraries")
+#########################################################################################
+
+#########################################################################################
+set_target_properties(VVRScene PROPERTIES DEBUG_POSTFIX _d)
+set_target_properties(MathGeoLib PROPERTIES DEBUG_POSTFIX _d)
+set_target_properties(GeoLib PROPERTIES DEBUG_POSTFIX _d)
+set_target_properties(glfw PROPERTIES DEBUG_POSTFIX _d)
 #########################################################################################
 
 INCLUDE(CPack)
