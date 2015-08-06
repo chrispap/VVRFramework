@@ -49,8 +49,8 @@ IF(${COPY_BOOST_HEADERS})
 ENDIF()
 
 #Install headers
-install (DIRECTORY "GeoLib" DESTINATION "include/GeoLib" FILES_MATCHING PATTERN "*.h")
-install (DIRECTORY "VVRScene" DESTINATION "include/VVRScene" FILES_MATCHING PATTERN "*.h")
+install (DIRECTORY "GeoLib" DESTINATION "include" FILES_MATCHING PATTERN "*.h")
+install (DIRECTORY "VVRScene" DESTINATION "include" FILES_MATCHING PATTERN "*.h")
 install (FILES ${deps} DESTINATION "lib")
 
 INCLUDE(CPack)
