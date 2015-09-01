@@ -83,23 +83,15 @@ void vvr::Window::keyPressEvent(QKeyEvent* event)
 
 int vvr::mainLoop(int argc, char* argv[], vvr::Scene *scene)
 {
-    try {
-        QApplication app(argc, argv);
-
-        QPixmap pixmap(":/Icons/vvrframework-splash.png");
-        QSplashScreen splash(pixmap);
-        splash.show();
-        app.processEvents();
-
-        Window window(scene);
-        window.show();
-        splash.close();
-        app.exec();
-    }
-    catch (string exc) {
-        cerr << exc << endl;
-        return 1;
-    }
-
+    QApplication app(argc, argv);
+    QPixmap pixmap(":/Icons/vvrframework-splash.png");
+    QSplashScreen splash(pixmap);
+    splash.show();
+    app.processEvents();
+    Window window(scene);
+    window.show();
+    QThread::sleep(1);
+    splash.close();
+    app.exec();
     return 0;
 }
