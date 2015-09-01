@@ -23,7 +23,7 @@ include_directories(${Boost_INCLUDE_DIRS})
 add_library(VVRScene SHARED ${SOURCE} ${RCS} ${UI_FILES})
 qt5_use_modules(VVRScene Widgets OpenGL)
 target_link_libraries(VVRScene ${OPENGL_LIBRARIES} Qt5::Widgets Qt5::OpenGL)
-target_link_libraries(VVRScene GeoLib MathGeoLib ${Boost_LIBRARIES})
+target_link_libraries(VVRScene GeoLib ${Boost_LIBRARIES})
 #########################################################################################
 
 #########################################################################################
