@@ -6,14 +6,15 @@
 #include <QTimer>
 #include <math.h>
 #include "scene.h"
+#include "simpleLogger.h"
 
 #define ANIM_INTERVAL 10
 
 vvr::GLWidget::GLWidget(vvr::Scene *scene, QWidget *parent) : QGLWidget(parent)
 {
-     mScene = scene;
-     connect(&timer, SIGNAL(timeout()), this, SLOT(idle()));
-     timer.start(ANIM_INTERVAL);
+    mScene = scene;
+    connect(&timer, SIGNAL(timeout()), this, SLOT(idle()));
+    timer.start(ANIM_INTERVAL);
 }
 
 vvr::GLWidget::~GLWidget()
@@ -42,7 +43,7 @@ void vvr::GLWidget::idle()
         timer.stop();
     else if (!timer.isActive())
         timer.start(ANIM_INTERVAL);
-    updateGL();
+    update();
 }
 
 void vvr::GLWidget::mousePressEvent(QMouseEvent *event)
@@ -71,7 +72,7 @@ void vvr::GLWidget::mouseMoveEvent(QMouseEvent *event)
     int y = event->y();
     mScene->mouse2pix(x,y);
     mScene->mouseMoved(x, y, mkModif(event));
-    idle();
+    update();
 }
 
 void vvr::GLWidget::wheelEvent(QWheelEvent *event)
