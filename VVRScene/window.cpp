@@ -90,7 +90,6 @@ int vvr::mainLoop(int argc, char* argv[], vvr::Scene *scene)
     app.processEvents();
     Window window(scene);
     window.show();
-    QThread::sleep(1);
     splash.close();
     app.exec();
     return 0;
