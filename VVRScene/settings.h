@@ -20,8 +20,10 @@ public:
     Settings (string file);
 
     void getKeys(vector<string> &keys) const;
+    void write(const string &filename) const;
+    void set(const string &Key, const string &newVal, bool create_if_not_exist=false);
 
-    string  getStr(const string &Key) const;
+    string  getStr(const string &key) const;
     double  getDbl(const string &key) const;
     int     getInt(const string &key) const;
     bool    getBool(const string &key) const;

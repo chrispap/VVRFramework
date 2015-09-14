@@ -29,10 +29,32 @@ Settings::Settings(string filename)
     fclose(file);
 }
 
+void Settings::set(const string &Key, const string &newVal, bool create_if_not_exist)
+{
+    string key(Key);
+    transform(key.begin(), key.end(), key.begin(), ::tolower);
+    if (sMap.find(key) == sMap.end() && create_if_not_exist == false)
+        throw string("Setting <") + key + "> not in map.";
+
+    sMap.at(key) = newVal;
+}
+
 void Settings::getKeys(vector<string> &keys) const {
     for(map<string,string>::const_iterator it = sMap.begin(); it != sMap.end(); ++it) {
       keys.push_back(it->first);
     }
+}
+
+void Settings::write(const string &filename) const
+{
+    FILE *file;
+    file = fopen(filename.c_str(), "w");
+
+    for(map<string,string>::const_iterator it = sMap.begin(); it != sMap.end(); ++it) {
+        fprintf(file, "%s = %s \n", it->first.c_str(), it->second.c_str());
+    }
+
+    fclose(file);
 }
 
 string Settings::getStr(const string &Key) const {
