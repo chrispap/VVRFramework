@@ -63,12 +63,13 @@ return boost::make_shared<x>(t0, t1, t2, t3, t4, t5, t6);\
 
 namespace vvr {
 
-float VVRScene_API getSeconds();
-double VVRScene_API  normalizeAngle(double angle);
-string VVRScene_API getExePath();
-string VVRScene_API getBasePath();
-vector<string> &split(const string &s, char delim, vector<string> &elems);
-vector<string> split(const string &s, char delim);
+    float           VVRScene_API getSeconds();
+    double          VVRScene_API normalizeAngle(double angle);
+    string          VVRScene_API getExePath();
+    string          VVRScene_API getBasePath();
+    bool            VVRScene_API mkdir(const std::string &path);
+    void            VVRScene_API split(const string &s, char delim, vector<string> &elems);
+    vector<string>  VVRScene_API split(const string &s, char delim);
 
 }
 
