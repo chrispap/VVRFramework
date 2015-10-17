@@ -3,7 +3,8 @@
 #include <ctime>
 #include <iostream>
 #include <qdatetime.h>
-#include <qdir.h>
+#include <QDir>
+#include <QFileInfo>
 
 #ifdef _WIN32
 #	include <Windows.h>
@@ -108,4 +109,16 @@ bool vvr::mkdir(const std::string &path)
 {
     QDir dir(QString::fromStdString(string(path)));
     return dir.mkpath(".");
+}
+
+bool vvr::fileExists(const std::string &path)
+{
+    QFileInfo checkFile(QString::fromStdString(path));
+    return (checkFile.exists() && checkFile.isFile());
+}
+
+bool vvr::dirExists(const std::string &path)
+{
+    QFileInfo checkFile(QString::fromStdString(path));
+    return (checkFile.exists() && checkFile.isDir());
 }

@@ -68,6 +68,8 @@ namespace vvr {
     string          VVRScene_API getExePath();
     string          VVRScene_API getBasePath();
     bool            VVRScene_API mkdir(const std::string &path);
+    bool            VVRScene_API fileExists(const std::string &filename);
+    bool            VVRScene_API dirExists(const std::string &dirname);
     void            VVRScene_API split(const string &s, char delim, vector<string> &elems);
     vector<string>  VVRScene_API split(const string &s, char delim);
 
