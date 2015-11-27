@@ -1,5 +1,5 @@
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef VVR_UTILS_H
+#define VVR_UTILS_H
 
 #include "vvrscenedll.h"
 
@@ -75,4 +75,4 @@ namespace vvr {
 
 }
 
-#endif
+#endif // VVR_UTILS_H

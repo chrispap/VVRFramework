@@ -1,5 +1,5 @@
-#ifndef GEOM_H
-#define GEOM_H
+#ifndef VVR_GEOM_H
+#define VVR_GEOM_H
 
 #include "vvrscenedll.h"
 #include "canvas.h"
@@ -216,4 +216,4 @@ struct VVRScene_API Triangle
 
 }
 
-#endif
+#endif // VVR_GEOM_H

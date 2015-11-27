@@ -1,5 +1,5 @@
-#ifndef __SHAPE2D_H__
-#define __SHAPE2D_H__
+#ifndef VVR_CANVAS_H
+#define VVR_CANVAS_H
 
 #include "vvrscenedll.h"
 #include "utils.h"
@@ -325,4 +325,4 @@ VVRScene_API void draw(C2DPolygon &polygon, const Colour &col = Colour::black, b
 
 }
 
-#endif
+#endif // VVR_CANVAS_H

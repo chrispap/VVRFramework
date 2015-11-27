@@ -16,21 +16,14 @@ using namespace tinyobj;
 
 Mesh::Mesh()
 {
-    printf("[Mesh] Creating object in address 0x%p (default ctor) \n", this);
-    fflush(0);
 }
 
 Mesh::~Mesh()
 {
-    printf("[Mesh] Deleting object in address 0x%p \n", this);
-    fflush(0);
 }
 
 Mesh::Mesh(const string &objDir, const string &objFile, const string &texFile, bool ccw)
 {
-    printf("[Mesh] Creating object in address 0x%p \n", this);
-    fflush(0);
-
     mCCW = ccw;
 
     std::vector<shape_t> shapes;
@@ -77,7 +70,6 @@ Mesh::Mesh(const Mesh *original):
     mPos (original->mPos),
     mTexName(original->mTexName)
 {
-    printf("[Mesh] Copying object from address 0x%p to 0x%p \n", original, this);
     fflush(0);
 
     vector<Triangle>::iterator ti;
@@ -97,7 +89,6 @@ Mesh::Mesh(const Mesh &original):
     mPos (original.mPos),
     mTexName(original.mTexName)
 {
-    printf("[Mesh] Copying object from address 0x%p to 0x%p \n", &original, this);
     fflush(0);
 
     vector<Triangle>::iterator ti;
@@ -108,8 +99,6 @@ Mesh::Mesh(const Mesh &original):
 
 void Mesh::operator=(const Mesh *src)
 {
-    printf("[Mesh] Assigning object from address 0x%p to 0x%p \n", src, this); fflush(0);
-
     mCCW = src->mCCW;
     mVertices = src->mVertices;
     mTriangles = src->mTriangles;
@@ -128,8 +117,6 @@ void Mesh::operator=(const Mesh *src)
 
 void Mesh::operator=(const Mesh &src)
 {
-    printf("[Mesh] Assigning object from address 0x%p to 0x%p \n", &src, this); fflush(0);
-
     mCCW = src.mCCW;
     mVertices = src.mVertices;
     mTriangles = src.mTriangles;

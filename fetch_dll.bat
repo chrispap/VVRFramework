@@ -1,6 +1,6 @@
 @echo off
 
-set "QT_DIR=D:\Qt\5.4\msvc2013_opengl"
+set "QT_DIR=D:\Qt\5.5\msvc2013"
 set "BOOST_DIR=D:\libs\boost_1_57_0\stage\lib"
 
 %QT_DIR%\bin\windeployqt lib\VVRScene.dll

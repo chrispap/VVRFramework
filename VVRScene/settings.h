@@ -1,5 +1,5 @@
-#ifndef SETTINGS_H
-#define SETTINGS_H
+#ifndef VVR_SETTINGS_H
+#define VVR_SETTINGS_H
 
 #include "vvrscenedll.h"
 
@@ -31,4 +31,4 @@ public:
 
 }
 
-#endif // SETTINGS_H
+#endif // VVR_SETTINGS_H

@@ -1,5 +1,5 @@
-#ifndef VVRWINDOW_H
-#define VVRWINDOW_H
+#ifndef VVR_WINDOW_H
+#define VVR_WINDOW_H
 
 #include "scene.h"
 #include "ui_window.h"
@@ -37,4 +37,4 @@ private:
 
 }
 
-#endif
+#endif // VVR_WINDOW_H

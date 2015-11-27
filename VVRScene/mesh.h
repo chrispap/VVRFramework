@@ -1,5 +1,5 @@
-#ifndef __MESH_H__
-#define __MESH_H__
+#ifndef VVR_MESH_H
+#define VVR_MESH_H
 
 #include "vvrscenedll.h"
 #include "geom.h"
@@ -84,4 +84,4 @@ public:
 
 }
 
-#endif
+#endif // VVR_MESH_H

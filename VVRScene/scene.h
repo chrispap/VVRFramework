@@ -1,5 +1,5 @@
-#ifndef __SCENE_H__
-#define __SCENE_H__
+#ifndef VVR_SCENE_H
+#define VVR_SCENE_H
 
 #include "vvrscenedll.h"
 #include "geom.h"
@@ -82,4 +82,4 @@ int VVRScene_API mainLoop(int argc, char* argv[], Scene *scene);
 
 }
 
-#endif
+#endif // VVR_SCENE_H

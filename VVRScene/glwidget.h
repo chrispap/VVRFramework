@@ -1,5 +1,5 @@
-#ifndef GLWIDGET_H
-#define GLWIDGET_H
+#ifndef VVR_GLWIDGET_H
+#define VVR_GLWIDGET_H
 
 #include "scene.h"
 #include <QtOpenGL>
@@ -43,4 +43,4 @@ private:
 
 }
 
-#endif // GLWIDGET_H
+#endif // VVR_GLWIDGET_H
