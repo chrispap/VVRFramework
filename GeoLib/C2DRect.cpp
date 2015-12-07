@@ -19,6 +19,8 @@ vertical sides. C2DPoints represent the top left and bottom right.
 #include "C2DLine.h"
 #include "Interval.h"
 
+using namespace std;
+
 _MEMORY_POOL_IMPLEMENATION(C2DRect)
 
 /**--------------------------------------------------------------------------<BR>

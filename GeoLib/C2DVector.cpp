@@ -15,6 +15,7 @@ origin with doubles for i and j.
 #include "C2DVector.h"
 #include "C2DPoint.h"
 
+using namespace std;
 
 _MEMORY_POOL_IMPLEMENATION(C2DVector)
 

@@ -15,6 +15,7 @@ class for all lines.
 #include "StdAfx.h"
 #include "C2DLineBase.h"
 
+using namespace std;
 
 
 /**--------------------------------------------------------------------------<BR>

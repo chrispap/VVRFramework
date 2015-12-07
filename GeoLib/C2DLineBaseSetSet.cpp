@@ -17,6 +17,8 @@ Implementation file for C2DLineBaseSetSet, a collection of lines sets.
 #include "C2DLineBaseSetSet.h"
 #include "C2DLineBaseSet.h"
 
+using namespace std;
+
 _MEMORY_POOL_IMPLEMENATION(C2DLineBaseSetSet)
 
 /**--------------------------------------------------------------------------<BR>

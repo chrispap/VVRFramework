@@ -16,6 +16,8 @@ Implementation file for CInterval, a class for managing an interval between
 #include "StdAfx.h"
 #include "Interval.h"
 
+using namespace std;
+
 _MEMORY_POOL_IMPLEMENATION(CInterval)
 
 /**--------------------------------------------------------------------------<BR>

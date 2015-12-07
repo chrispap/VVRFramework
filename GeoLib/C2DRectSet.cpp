@@ -16,6 +16,8 @@ Implementation file for C2DRectSet
 #include "StdAfx.h"
 #include "C2DRectSet.h"
 
+using namespace std;
+
 _MEMORY_POOL_IMPLEMENATION(C2DRectSet)
 
 /**--------------------------------------------------------------------------<BR>
@@ -94,4 +96,3 @@ void C2DRectSet::AddCopy(const C2DRect& NewItem)
 {
 	Add(new C2DRect(NewItem));
 }
-

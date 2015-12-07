@@ -28,6 +28,8 @@ convex or concave but doesn't contain holes.
 #include "Interval.h"
 #include "C2DLine.h"
 
+using namespace std;
+
 _MEMORY_POOL_IMPLEMENATION(C2DPolygon)
 
 /**--------------------------------------------------------------------------<BR>

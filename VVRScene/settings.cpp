@@ -9,6 +9,7 @@
 #define MAX_LINE_LEN 1024
 
 using namespace vvr;
+using namespace std;
 
 Settings::Settings(string filename)
 {

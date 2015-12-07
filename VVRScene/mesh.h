@@ -9,11 +9,6 @@
 #include <list>
 #include <set>
 
-using std::vector;
-using std::string;
-using std::list;
-using std::set;
-
 namespace vvr {
 
 /**
@@ -35,7 +30,10 @@ class VVRScene_API Mesh
 public:
     Mesh ();
     ~Mesh ();
-    Mesh (const string &objDir, const string &objFile, const string &texFile, bool ccw=true);
+    Mesh (const std::string &objDir,
+          const std::string &objFile,
+          const std::string &texFile,
+          bool ccw=true);
     Mesh (const Mesh *original);                    ///< Copy constructor
     Mesh (const Mesh &original);                    ///< Copy constructor
     void operator=(const Mesh *src);                ///< Assigment operator
@@ -45,20 +43,20 @@ public:
 
 private:
     // Data members
-    bool                mCCW;
-    vector<Vec3d>       mVertices;                  ///< Vertex list
-    vector<Triangle>    mTriangles;                 ///< Triangle list | contains indices to the Vertex list
-    vector<Vec3d>       mVertexNormals;             ///< Normals per vertex
-    vector<float>       mTexCoords;
-    Box                 mAABB;                      ///< The bounding box of the model
-    Vec3d               mRot;                       ///< Model rotation around its local axis
-    Vec3d               mPos;                       ///< Model position in the scene
-    unsigned            mTexName;
+    bool                    mCCW;
+    std::vector<Vec3d>      mVertices;              ///< Vertex list
+    std::vector<Triangle>   mTriangles;             ///< Triangle list | contains indices to the Vertex list
+    std::vector<Vec3d>      mVertexNormals;         ///< Normals per vertex
+    std::vector<float>      mTexCoords;
+    Box                     mAABB;                  ///< The bounding box of the model
+    Vec3d                   mRot;                   ///< Model rotation around its local axis
+    Vec3d                   mPos;                   ///< Model position in the scene
+    unsigned                mTexName;
 
     void updateTriangleData ();                     ///< Recalculates the plane equations of the triangles
     void createNormals ();                          ///< Create a normal for each vertex
     void drawTriangles (Colour col,bool wire=0);    ///< Draw the triangles. This is the actual model drawing.
-    void drawNormals (Colour col);                  ///< Draw the normal vectors of each vertex
+    void drawNormals (Colour col);                  ///< Draw the normals of each vertex
     void drawAxes ();
 
 public:
@@ -76,10 +74,10 @@ public:
     Box   getBox() const {return mAABB;}
 
     void update();                                  ///< Call after making changes to the vertices
-    vector<Vec3d> &getVertices() { return mVertices; }
-    vector<Triangle> &getTriangles() { return mTriangles; }
-    const vector<Vec3d> &getVertices() const { return mVertices; }
-    const vector<Triangle> &getTriangles() const { return mTriangles; }
+    std::vector<Vec3d> &getVertices() { return mVertices; }
+    std::vector<Triangle> &getTriangles() { return mTriangles; }
+    const std::vector<Vec3d> &getVertices() const { return mVertices; }
+    const std::vector<Triangle> &getTriangles() const { return mTriangles; }
 };
 
 }

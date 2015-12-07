@@ -7,26 +7,24 @@
 #include <map>
 #include <vector>
 
-using namespace std;
-
 namespace vvr {
 
 class VVRScene_API Settings
 {
-    map<string, string> sMap;
+    std::map<std::string, std::string> sMap;
 
 public:
     Settings () {}
-    Settings (string file);
+    Settings (std::string file);
 
-    void getKeys(vector<string> &keys) const;
-    void write(const string &filename) const;
-    void set(const string &Key, const string &newVal, bool create_if_not_exist=false);
+    void getKeys(std::vector<std::string> &keys) const;
+    void write(const std::string &filename) const;
+    void set(const std::string &Key, const std::string &newVal, bool create_if_not_exist=false);
 
-    string  getStr(const string &key) const;
-    double  getDbl(const string &key) const;
-    int     getInt(const string &key) const;
-    bool    getBool(const string &key) const;
+    std::string  getStr(const std::string &key) const;
+    double  getDbl(const std::string &key) const;
+    int     getInt(const std::string &key) const;
+    bool    getBool(const std::string &key) const;
 };
 
 }

@@ -14,6 +14,8 @@ any modified versions of this cannot be resold to any other party.
 #include "IndexSet.h"
 #include "StdAfx.h"
 
+using namespace std;
+
 /**--------------------------------------------------------------------------<BR>
 \class CSetData
 \brief Class to hold the index set data.

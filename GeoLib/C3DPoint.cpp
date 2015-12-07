@@ -15,6 +15,8 @@ Implementation file for a simple 3D point class.
 #include "StdAfx.h"
 #include "C3DPoint.h"
 
+using namespace std;
+
 _MEMORY_POOL_IMPLEMENATION(C3DPoint)
 
 /**--------------------------------------------------------------------------<BR>

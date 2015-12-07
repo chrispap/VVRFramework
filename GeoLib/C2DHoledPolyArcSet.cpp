@@ -14,6 +14,7 @@ any modified versions of this cannot be resold to any other party.
 #include "C2DHoledPolyArcSet.h"
 #include "C2DHoledPolyBaseSet.h"
 
+using namespace std;
 
 _MEMORY_POOL_IMPLEMENATION(C2DHoledPolyArcSet)
 

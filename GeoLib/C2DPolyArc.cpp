@@ -26,9 +26,9 @@ After creation the temporary stores are deleted.
 #include "RandomNumber.h"
 #include "C2DHoledPolyArc.h"
 
+using namespace std;
 
 _MEMORY_POOL_IMPLEMENATION(C2DPolyArc)
-
 
 /**--------------------------------------------------------------------------<BR>
 C2DPolyArc::C2DPolyArc <BR>
@@ -390,4 +390,3 @@ void C2DPolyArc::GetOverlaps(const C2DPolyArc& Other, C2DHoledPolyBaseSet& Polyg
 {
 	C2DPolyBase::GetOverlaps( Other, Polygons, eDegen);
 }
-

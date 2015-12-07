@@ -8,9 +8,6 @@
 #include <cstdlib>
 #include <GeoLib.h>
 
-using std::string;
-using std::vector;
-
 static void drawSphere(double r, int lats, int longs);
 
 namespace vvr {
@@ -28,7 +25,7 @@ struct VVRScene_API Colour
     Colour (unsigned char red, unsigned char green, unsigned char blue) :
         r(red), g(green), b(blue) {}
 
-    Colour(string hex_str) {
+    Colour(std::string hex_str) {
         r = strtol(hex_str.substr(0,2).c_str(), 0, 16);
         g = strtol(hex_str.substr(2,2).c_str(), 0, 16);
         b = strtol(hex_str.substr(4,2).c_str(), 0, 16);
@@ -248,14 +245,14 @@ public:
 
 /* Canvas */
 struct VVRScene_API Frame {
-    vector<Shape*> shapes;
+    std::vector<Shape*> shapes;
     bool show_old;
     Frame ();
     Frame (bool show_old);
 };
 
 class VVRScene_API Canvas2D {
-    vector<Frame> frames;
+    std::vector<Frame> frames;
     unsigned fi;
 
 public:
