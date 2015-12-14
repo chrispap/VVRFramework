@@ -30,8 +30,6 @@ any modified versions of this cannot be resold to any other party.
 #include <algorithm>
 #include "Constants.h"
 
-using namespace std;
-
 class C2DBase;
 typedef std::vector<C2DBase*> C2DBaseData;
 

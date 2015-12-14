@@ -20,6 +20,8 @@ with holes.
 #include "C2DPolygon.h"
 #include "C2DVector.h"
 
+using namespace std;
+
 _MEMORY_POOL_IMPLEMENATION(C2DHoledPolygon)
 
 /**--------------------------------------------------------------------------<BR>

@@ -22,6 +22,7 @@ Implementation file for C2DPoint, a class which represents a cartesian point.
 #include "Interval.h"
 #include "C2DRect.h"
 
+using namespace std;
 
 //_MEMORY_POOL_IMPLEMENATION(C2DPoint)
 

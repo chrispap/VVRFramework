@@ -23,6 +23,7 @@ finite line.
 #include "C2DPointSet.h"
 #include "Transformation.h"
 
+using namespace std;
 
 _MEMORY_POOL_IMPLEMENATION(C2DLine)
 

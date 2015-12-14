@@ -20,6 +20,7 @@ Implementation file for C2DPointSet, a class which represents a set of points.
 #include "C2DRect.h"
 #include "C2DCircle.h"
 
+using namespace std;
 
 _MEMORY_POOL_IMPLEMENATION(C2DPointSet)
 

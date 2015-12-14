@@ -28,6 +28,7 @@ is a closed set of lines of some sort.
 #include "C2DSegment.h"
 #include "Sort.h"
 
+using namespace std;
 
 _MEMORY_POOL_IMPLEMENATION(C2DPolyBase)
 

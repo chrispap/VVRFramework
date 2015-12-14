@@ -16,6 +16,8 @@ for generating random numbers.
 #include "StdAfx.h"
 #include "RandomNumber.h"
 
+using namespace std;
+
 _MEMORY_POOL_IMPLEMENATION(CRandomNumber)
 
 /**--------------------------------------------------------------------------<BR>

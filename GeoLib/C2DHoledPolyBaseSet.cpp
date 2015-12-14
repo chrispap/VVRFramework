@@ -19,6 +19,7 @@ Implementation file for C2DHoledPolyBaseSet, a collection of holed polygons.
 #include "C2DPolyBase.h"
 #include "C2DLineBase.h"
 
+using namespace std;
 
 _MEMORY_POOL_IMPLEMENATION(C2DHoledPolyBaseSet)
 

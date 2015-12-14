@@ -20,6 +20,7 @@ polygon with holes.
 #include "C2DPolyArc.h"
 #include "C2DVector.h"
 
+using namespace std;
 
 _MEMORY_POOL_IMPLEMENATION(C2DHoledPolyArc)
 
@@ -338,6 +339,3 @@ void C2DHoledPolyArc::GetUnion(const C2DHoledPolyArc& Other, C2DHoledPolyBaseSet
 {
 	C2DHoledPolyBase::GetUnion( Other, HoledPolys, eDegen);
 }
-
-
-

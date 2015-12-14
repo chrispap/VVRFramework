@@ -19,6 +19,7 @@ Implementation file for C2DTriangle, a class which represents a triangle.
 #include "Interval.h"
 #include "C2DRect.h"
 
+using namespace std;
 
 _MEMORY_POOL_IMPLEMENATION(C2DTriangle)
 

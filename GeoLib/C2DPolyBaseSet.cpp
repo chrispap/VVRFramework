@@ -18,6 +18,7 @@ Implementation file for C2DPolyBaseSet
 #include "C2DBase.h"
 #include "C2DPolyBase.h"
 
+using namespace std;
 
 _MEMORY_POOL_IMPLEMENATION(C2DPolyBaseSet)
 
@@ -102,6 +103,3 @@ void C2DPolyBaseSet::operator<<(C2DBaseSet& Other)
 		Other << Temp.ExtractLast();
 	}
 }
-
-
-

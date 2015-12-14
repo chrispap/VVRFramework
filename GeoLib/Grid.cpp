@@ -10,12 +10,12 @@ any modified versions of this cannot be resold to any other party.
 \brief Implementation file for the CGrid class.
 <P>---------------------------------------------------------------------------*/
 
-
 #include "StdAfx.h"
 
 #include "Grid.h"
 #include "C2DRect.h"
 
+using namespace std;
 
 static double ms_dGridSize = 0.0001;
 static unsigned int ms_nDegenerateErrors = 0;
@@ -83,7 +83,7 @@ double CGrid::GetMinGridSize(const C2DRect& cRect,
 	// Find the furthest possible linear distance from the origin.
 	C2DPoint pt = cRect.GetPointFurthestFromOrigin();
 
-	double dRes = fabs(max(pt.x ,  pt.y));
+    double dRes = fabs(max(pt.x ,  pt.y));
 	// Now multiply this by the eq tol. Now, 2 points which are this far apart from each other
 	// (in x and y) and at the edge of the rect would be considered only just not equal.
 	dRes *= conEqualityTolerance;

@@ -17,6 +17,7 @@ Implementation file for C2DSegment which is a segment of a circle.
 #include "C2DCircle.h"
 #include "Interval.h"
 
+using namespace std;
 
 _MEMORY_POOL_IMPLEMENATION(C2DSegment)
 

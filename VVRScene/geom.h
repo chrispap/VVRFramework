@@ -7,8 +7,6 @@
 #include <vector>
 #include <cstdio>
 
-using std::vector;
-
 namespace vvr {
 
 struct VVRScene_API Vec3d
@@ -37,33 +35,33 @@ struct VVRScene_API Vec3d
     bool operator!= (const Vec3d &p);
 
     /**
-     * Returns the length of this vector.
+     * Returns the length of this std::vector.
      */
     double length();
 
     /**
-     * Normalize the vector so that its length is 1.
+     * Normalize the std::vector so that its length is 1.
      */
     Vec3d &normalize();
 
     /**
-     * Adds a vector to this vector.
-     * @param [in] v The vector that is added to the original vector.
-     * @return referrence to original vector.
+     * Adds a std::vector to this std::vector.
+     * @param [in] v The std::vector that is added to the original std::vector.
+     * @return referrence to original std::vector.
      */
     Vec3d &add(const Vec3d &v);
 
     /**
-     * Subs a vector from this vector.
-     * @param [in] v The vector that is subtracted from the original vector.
-     * @return referrence to original vector.
+     * Subs a std::vector from this std::vector.
+     * @param [in] v The std::vector that is subtracted from the original std::vector.
+     * @return referrence to original std::vector.
      */
     Vec3d &sub(const Vec3d &v);
 
     /**
-     * Multiplies the vector with a scalar double value
+     * Multiplies the std::vector with a scalar double value
      * @param [in] s The double value with which all dimensions are multiplied
-     * @return referrence to original vector.
+     * @return referrence to original std::vector.
      */
     Vec3d &scale(const double s);
 };
@@ -83,11 +81,11 @@ struct VVRScene_API Box
     Box(const Vec3d &v1, const Vec3d &v2, const Vec3d &v3);
 
     /**
-     * Construct the smallest box that contains all the Vector3fs of a vector.
+     * Construct the smallest box that contains all the Vector3fs of a std::vector.
      * (Bounding Box of the Vector3fs)
      * @param [in] vertices Vector that contains all the Vector3fs to be tested.
      */
-    Box(const vector<Vec3d> &vertices);
+    Box(const std::vector<Vec3d> &vertices);
 
     /**
      * Crops a box.
@@ -148,8 +146,8 @@ struct VVRScene_API Box
  * Struct that contains a triangle.
  *
  * Doesn't contain the actual data for the 3 vertices.
- * Instead, contains indices to a vector and a Vector3fer
- * to that vector.
+ * Instead, contains indices to a std::vector and a Vector3fer
+ * to that std::vector.
  *
  * Also, it contains A,B,C,D coefficients of the plane equation of
  * the triangles plane. This is done in order to calculate fast the
@@ -167,9 +165,9 @@ struct VVRScene_API Triangle
     };
 
     /**
-     * Vector3fer to the vector containing the vertices
+     * Vector3fer to the std::vector containing the vertices
      */
-    vector<Vec3d> *vecList;
+    std::vector<Vec3d> *vecList;
 
     /**
      * Plane equation coefficients
@@ -181,7 +179,7 @@ struct VVRScene_API Triangle
      */
     Box box;
 
-    Triangle(vector<Vec3d> *vecList, int v1 = 0, int v2 = 0, int v3 = 0) :
+    Triangle(std::vector<Vec3d> *vecList, int v1 = 0, int v2 = 0, int v3 = 0) :
         vi1(v1), vi2(v2), vi3(v3), vecList(vecList)
     {
         update();

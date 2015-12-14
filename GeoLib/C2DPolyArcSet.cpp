@@ -17,6 +17,7 @@ Implementation file for C2DPolyArcSet
 #include "C2DBaseSet.h"
 #include "C2DPolyArc.h"
 
+using namespace std;
 
 _MEMORY_POOL_IMPLEMENATION(C2DPolyArcSet)
 
@@ -98,7 +99,3 @@ void C2DPolyArcSet::operator<<(C2DBaseSet& Other)
 		Other << Temp.ExtractLast();
 	}
 }
-
-
-
-

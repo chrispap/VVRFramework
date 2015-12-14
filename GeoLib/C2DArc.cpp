@@ -21,6 +21,7 @@ Implementation file for C2DArc, a class which represents a curved line.
 #include "C2DRect.h"
 #include "C2DPointSet.h"
 
+using namespace std;
 
 _MEMORY_POOL_IMPLEMENATION(C2DArc)
 

@@ -22,9 +22,9 @@ Implementation file for C2DCircle, a class representing a circle.
 #include "Interval.h"
 #include "C2DRect.h"
 
+using namespace std;
 
 _MEMORY_POOL_IMPLEMENATION(C2DCircle)
-
 
 
 /**--------------------------------------------------------------------------<BR>

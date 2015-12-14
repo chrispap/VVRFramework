@@ -12,6 +12,7 @@
 #include <QtOpenGL>
 
 using namespace vvr;
+using namespace std;
 using namespace tinyobj;
 
 Mesh::Mesh()

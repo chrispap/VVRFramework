@@ -20,6 +20,7 @@ to help minimise routes between points. Used by the polygon for reordering point
 #include "C2DPointSet.h"
 #include <list>
 
+using namespace std;
 
 const unsigned int conRefineProximity = 10;
 const unsigned int conMaxIterations = 5;

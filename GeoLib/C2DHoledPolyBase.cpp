@@ -27,6 +27,8 @@ holes. The Rim and Holes are pointers to C2DPolyBase classes.
 #include "C2DPointSet.h"
 #include "IndexSet.h"
 
+using namespace std;
+
 _MEMORY_POOL_IMPLEMENATION(C2DHoledPolyBase)
 
 /**--------------------------------------------------------------------------<BR>

@@ -19,6 +19,8 @@ Implementation file for C2DLineSet, a set of pointer to C2DLine.
 #include "C2DBaseSet.h"
 #include "C2DLine.h"
 
+using namespace std;
+
 _MEMORY_POOL_IMPLEMENATION(C2DLineSet)
 
 

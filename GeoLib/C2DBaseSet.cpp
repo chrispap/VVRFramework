@@ -29,6 +29,7 @@ Declaration file for C2DBaseSet, a set of geometric entities of different types.
 #include "Interval.h"
 #include "Sort.h"
 
+using namespace std;
 
 _MEMORY_POOL_IMPLEMENATION(C2DBaseSet)
 

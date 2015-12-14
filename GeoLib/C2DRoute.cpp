@@ -18,8 +18,9 @@ do not necassarily join.
 #include "Interval.h"
 #include "C2DLine.h"
 
-_MEMORY_POOL_IMPLEMENATION(C2DRoute)
+using namespace std;
 
+_MEMORY_POOL_IMPLEMENATION(C2DRoute)
 
 /**--------------------------------------------------------------------------<BR>
 C2DRoute::C2DRoute
