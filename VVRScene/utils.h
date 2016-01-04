@@ -70,6 +70,7 @@ bool VVRScene_API fileExists(const std::string &filename);
 bool VVRScene_API dirExists(const std::string &dirname);
 void VVRScene_API split(const std::string &s, char delim, std::vector<std::string> &elems);
 std::vector<std::string> VVRScene_API split(const std::string &s, char delim);
+std::string VVRScene_API zpn(int num, int len);
 }
 
 #endif // VVR_UTILS_H

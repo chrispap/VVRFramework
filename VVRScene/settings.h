@@ -11,7 +11,7 @@ namespace vvr {
 
 class VVRScene_API Settings
 {
-    std::map<std::string, std::string> sMap;
+    std::map<std::string, std::string> m_map;
 
 public:
     Settings () {}
@@ -20,6 +20,7 @@ public:
     void getKeys(std::vector<std::string> &keys) const;
     void write(const std::string &filename) const;
     void set(const std::string &Key, const std::string &newVal, bool create_if_not_exist=false);
+    bool exists(const std::string &key) const;
 
     std::string  getStr(const std::string &key) const;
     double  getDbl(const std::string &key) const;

@@ -2,6 +2,7 @@
 
 #include <ctime>
 #include <iostream>
+#include <iomanip>
 #include <qdatetime.h>
 #include <QDir>
 #include <QFileInfo>
@@ -121,4 +122,11 @@ bool vvr::dirExists(const std::string &path)
 {
     QFileInfo checkFile(QString::fromStdString(path));
     return (checkFile.exists() && checkFile.isDir());
+}
+
+std::string vvr::zpn(int num, int len)
+{
+    std::ostringstream ss;
+    ss << std::setw(len) << std::setfill('0') << num;
+    return ss.str();
 }
