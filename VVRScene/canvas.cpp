@@ -243,7 +243,11 @@ void Canvas2D::clear()
 
 void Canvas2D::clearFrame()
 {
-    frames.at(fi).shapes.clear();
+    for (int si = 0; si<frames[fi].shapes.size(); si++) {
+        delete frames[fi].shapes[si];
+    }
+
+    frames[fi].shapes.clear();
 }
 
 void drawSphere(double r, int lats, int longs)
