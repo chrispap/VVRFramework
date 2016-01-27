@@ -1,18 +1,19 @@
 #include "canvas.h"
 #include "geom.h"
-
 #include <iostream>
 #include <vector>
 #include <cmath>
 #include <QtOpenGL>
 #include <MathGeoLib.h>
 
-#define DEF_LINE_WIDTH 2.2
-
 using namespace vvr;
 using namespace std;
 
+float Shape::DEF_LINE_WIDTH = 2.2f;
+float Shape::DEF_POINT_SIZE = 5.0f;
+
 /* Common Color Definitions */
+
 const Colour Colour::red            (0xFF, 0x00, 0x00);
 const Colour Colour::blue           (0x00, 0x00, 0xFF);
 const Colour Colour::grey           (0x66, 0x66, 0x66);
@@ -29,6 +30,7 @@ const Colour Colour::darkGreen      (0x00, 0x64, 0x00);
 const Colour Colour::yellowGreen    (0x9A, 0xCD, 0x32);
 
 /* Shape drawing */
+
 void Shape::draw() const {
     glPolygonMode(GL_FRONT_AND_BACK, b_render_solid ? GL_FILL : GL_LINE);
     glColor3ubv(colour.data);
@@ -36,7 +38,7 @@ void Shape::draw() const {
 }
 
 void Point2D::drawShape() const {
-    glPointSize(7);
+    glPointSize(DEF_POINT_SIZE);
     glEnable(GL_POINT_SMOOTH);
     glBegin(GL_POINTS);
     glVertex2f(x,y);
@@ -44,7 +46,7 @@ void Point2D::drawShape() const {
 }
 
 void Point3D::drawShape() const {
-    glPointSize(7);
+    glPointSize(DEF_POINT_SIZE);
     glEnable(GL_POINT_SMOOTH);
     glBegin(GL_POINTS);
     glVertex3f(x,y,z);
@@ -149,6 +151,7 @@ void Triangle3D::drawShape() const {
 }
 
 /* Canvas */
+
 Frame::Frame() : show_old(true)
 {
 

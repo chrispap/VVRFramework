@@ -71,6 +71,9 @@ public:
     void draw() const override;
     void setColour(const Colour &col) {colour = col;}
     void setSolidRender(bool render_solid) {b_render_solid = render_solid;}
+
+    static float DEF_LINE_WIDTH;
+    static float DEF_POINT_SIZE;
 };
 
 struct VVRScene_API Point2D : public Shape
@@ -244,6 +247,7 @@ public:
 };
 
 /* Canvas */
+
 struct VVRScene_API Frame {
     std::vector<Shape*> shapes;
     bool show_old;
