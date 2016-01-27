@@ -195,7 +195,6 @@ void Canvas2D::draw() {
             frames[fi_].shapes[i]->draw();
         fi_++;
     }
-
 }
 
 void Canvas2D::next() {
@@ -240,6 +239,11 @@ void Canvas2D::clear()
     frames.clear();
     frames.push_back(Frame(false));
     fi=0;
+}
+
+void Canvas2D::clearFrame()
+{
+    frames.at(fi).shapes.clear();
 }
 
 void drawSphere(double r, int lats, int longs)

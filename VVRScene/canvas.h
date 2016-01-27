@@ -267,6 +267,7 @@ public:
     unsigned frameIndex() { return fi; }
     bool isAtStart() { return fi == 0; }
     bool isAtEnd() { return fi == frames.size()-1; }
+    std::vector<Frame>& getFrames() { return frames; }
 
     void newFrame(bool show_old_frames=true);
     void add(Shape *shape_ptr);
@@ -277,6 +278,7 @@ public:
     void ff();
     void resize(int i);
     void clear();
+    void clearFrame();
 
     /* Utilities to directly add GeoLib objects to canvas */
 

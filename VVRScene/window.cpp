@@ -38,10 +38,12 @@ vvr::Window::Window(vvr::Scene *scene)
 
     setWindowTitle(tr(scene->getName()));
 
-    if (scene->fullScreen())
+    if (scene->fullScreen()){
         showFullScreen();
-    else
-        showMaximized();
+    }
+    else {
+        show();
+    }
 
     glWidget->setFocus();
 }
