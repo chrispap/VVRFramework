@@ -10,7 +10,7 @@ using namespace vvr;
 using namespace std;
 
 float Shape::DEF_LINE_WIDTH = 2.2f;
-float Shape::DEF_POINT_SIZE = 5.0f;
+float Shape::DEF_POINT_SIZE = 7.0f;
 
 /* Common Color Definitions */
 
