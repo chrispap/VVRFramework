@@ -31,7 +31,29 @@
      <number>0</number>
     </property>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_0" stretch="5">
+     <layout class="QHBoxLayout" name="horizontalLayout_0" stretch="0,5">
+      <item>
+       <widget class="QPlainTextEdit" name="plain_text_log">
+        <property name="styleSheet">
+         <string notr="true">QPlainTextEdit { 
+    border: 1px solid grey;
+    border-radius: 4px;
+    margin: 0.2em;
+    font: Ubuntu mono;
+    font-size: 12px;
+	background-color: #333;
+    color: #00aa33;
+}
+</string>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+        <property name="textInteractionFlags">
+         <set>Qt::NoTextInteraction</set>
+        </property>
+       </widget>
+      </item>
       <item>
        <widget class="QScrollArea" name="scrollArea">
         <property name="widgetResizable">
@@ -42,7 +64,7 @@
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>808</width>
+           <width>546</width>
            <height>464</height>
           </rect>
          </property>

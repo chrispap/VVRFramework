@@ -4,6 +4,7 @@
 #include "scene.h"
 #include "ui_window.h"
 #include "glwidget.h"
+#include "stdredirector.h"
 
 namespace vvr {
 
@@ -33,6 +34,12 @@ private:
     QAction *exitAct, *aboutAct;
     GLWidget *glWidget;
     Scene *scene;
+    StdRedirector<> *m_std_cout_logger;
+    StdRedirector<> *m_std_cerr_logger;
+
+private:
+    static void log_cout(const char* ptr, std::streamsize count, void*);
+    static void log_cerr(const char* ptr, std::streamsize count, void*);
 };
 
 }

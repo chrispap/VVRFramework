@@ -1,6 +1,7 @@
 #include "window.h"
 #include "glwidget.h"
 #include "scene.h"
+#include "logger.h"
 
 #include <QtOpenGL>
 #include <QtWidgets>
@@ -19,6 +20,10 @@ vvr::Window::Window(vvr::Scene *scene)
 {
     setupUi(this);
     this->scene = scene;
+
+    // Redirect std::cout to our custom logging widget
+    m_std_cout_logger = new StdRedirector<>(std::cout, &Window::log_cout, plain_text_log);
+    m_std_cerr_logger = new StdRedirector<>(std::cerr, &Window::log_cerr, plain_text_log);
 
     // Init glwidget
     glWidget = new vvr::GLWidget(scene);
@@ -46,6 +51,48 @@ vvr::Window::Window(vvr::Scene *scene)
     }
 
     glWidget->setFocus();
+}
+
+void vvr::Window::log_cout(const char* ptr, std::streamsize count, void* pte)
+{
+    QString str = QString::fromLocal8Bit(ptr, count);
+    QPlainTextEdit* te = static_cast<QPlainTextEdit*>(pte);
+    QScrollBar *vScrollBar = te->verticalScrollBar();
+    bool keep_on_bottom = vScrollBar->value() == vScrollBar->maximum();
+
+    //te->appendHtml("<font color=\"Red\">" + str + "</font>");
+
+    te->moveCursor(QTextCursor::End);
+    te->textCursor().insertHtml("<font color=\"White\">" + str + "</font>");
+    te->moveCursor(QTextCursor::End);
+    if (ptr[(int)count - 1] == '\n') te->appendPlainText("");
+
+    if (keep_on_bottom) {
+        vScrollBar->triggerAction(QScrollBar::SliderToMaximum);
+    }
+    printf("%.*s", (int) count, ptr);
+    // vvr::logi(str.toStdString());
+}
+
+void vvr::Window::log_cerr(const char* ptr, std::streamsize count, void* pte)
+{
+    QString str = QString::fromLocal8Bit(ptr, count);
+    QPlainTextEdit* te = static_cast<QPlainTextEdit*>(pte);
+    QScrollBar *vScrollBar = te->verticalScrollBar();
+    bool keep_on_bottom = vScrollBar->value() == vScrollBar->maximum();
+    
+    //te->appendHtml("<font color=\"Red\">" + str + "</font>");
+    
+    te->moveCursor(QTextCursor::End); 
+    te->textCursor().insertHtml("<font color=\"Red\">" + str + "</font>");
+    te->moveCursor(QTextCursor::End);
+    if (ptr[(int)count - 1] == '\n') te->appendPlainText("");
+    
+    if (keep_on_bottom) {
+        vScrollBar->triggerAction(QScrollBar::SliderToMaximum);
+    }
+    fprintf(stderr, "%.*s", (int)count, ptr);
+    //vvr::loge(str.toStdString());
 }
 
 void vvr::Window::createActions()
