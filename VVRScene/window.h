@@ -8,39 +8,37 @@
 
 namespace vvr {
 
-class Window : public QMainWindow, private Ui::MainWindow
-{
-    Q_OBJECT
+    class Window : public QMainWindow, private Ui::MainWindow
+    {
+        Q_OBJECT
 
-public:
-    Window(vvr::Scene *scene);
+    public:
+        Window(vvr::Scene *scene);
 
-private slots:
-    void about();
+    private slots:
+        void about();
+        void sliderMoved(int val);
 
-signals:
-    void keyPressed(QKeyEvent *event);
+    signals:
+        void keyPressed(QKeyEvent *event);
 
-protected:
-     virtual void keyPressEvent(QKeyEvent* event);
+    private:
+        virtual void keyPressEvent(QKeyEvent* event);
+        void createActions();
+        void createMenus();
+    private:
+        static void log_cout(const char* ptr, std::streamsize count, void*);
+        static void log_cerr(const char* ptr, std::streamsize count, void*);
 
-private:
-    void createActions();
-    void createMenus();
-
-private:
-    static QString aboutMessage;
-    QMenu *fileMenu, *helpMenu;
-    QAction *exitAct, *aboutAct;
-    GLWidget *glWidget;
-    Scene *scene;
-    StdRedirector<> *m_std_cout_logger;
-    StdRedirector<> *m_std_cerr_logger;
-
-private:
-    static void log_cout(const char* ptr, std::streamsize count, void*);
-    static void log_cerr(const char* ptr, std::streamsize count, void*);
-};
+    private:
+        static QString aboutMessage;
+        QMenu *fileMenu, *helpMenu;
+        QAction *exitAct, *aboutAct;
+        GLWidget *glWidget;
+        Scene *scene;
+        StdRedirector<> *m_std_cout_logger;
+        StdRedirector<> *m_std_cerr_logger;
+    };
 
 }
 

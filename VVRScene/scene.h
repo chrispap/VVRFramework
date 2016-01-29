@@ -26,7 +26,10 @@ protected:
     Vec3d m_globRot_def;
     Vec3d m_globRot;
     Colour m_bg_col;
-    bool m_fullscreen, m_create_menus;
+    bool m_fullscreen;
+    bool m_create_menus;
+    bool m_hide_log;
+    bool m_hide_sliders;
 
 protected:
     virtual void draw() = 0;
@@ -56,6 +59,7 @@ public:
     virtual void mouseReleased(int x, int y, int modif);
     virtual void mouseMoved(int x, int y, int modif);
     virtual void mouseWheel(int dir, int modif);
+    virtual void sliderChanged(int slider_id, float val) { std::cout << slider_id << "-" << val << std::endl; }
     
     // Getters
     const Vec3d& getRot() const { return m_globRot;}
@@ -65,6 +69,8 @@ public:
     float getSceneHeight() { return m_scene_height;}
     bool fullScreen() { return m_fullscreen; }
     bool createMenus() { return m_create_menus; }
+    bool hideLog() { return m_hide_log; }
+    bool hideSliders() { return m_hide_sliders; }
 
     // Setters
     void setRot(const Vec3d& rot) { m_globRot = rot;}

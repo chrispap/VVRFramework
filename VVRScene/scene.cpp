@@ -32,6 +32,8 @@ Scene::Scene()
     m_perspective_proj = false;
     m_fullscreen = false;
     m_create_menus = true;
+    m_hide_log = true;
+    m_hide_sliders = true;
     m_camera_dist = 100;
 }
 

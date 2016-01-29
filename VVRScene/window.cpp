@@ -16,10 +16,11 @@ using std::endl;
 
 QString vvr::Window::aboutMessage = QString("VVR LAB 2014") + QString(QChar(0xA9));
 
-vvr::Window::Window(vvr::Scene *scene)
+vvr::Window::Window(vvr::Scene *scene) :
+    scene(scene)
 {
     setupUi(this);
-    this->scene = scene;
+    setWindowTitle(tr(scene->getName()));
 
     // Redirect std::cout to our custom logging widget
     m_std_cout_logger = new StdRedirector<>(std::cout, &Window::log_cout, plain_text_log);
@@ -32,24 +33,41 @@ vvr::Window::Window(vvr::Scene *scene)
     scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-    // Make connections
     connect(this, SIGNAL(keyPressed(QKeyEvent*)), glWidget, SLOT(onKeyPressed(QKeyEvent*)));
-
-    // Create actions, menus, etc.
+    connect(horizontalSlider_0, SIGNAL(valueChanged(int)), this, SLOT(sliderMoved(int)));
+    connect(horizontalSlider_1, SIGNAL(valueChanged(int)), this, SLOT(sliderMoved(int)));
+    connect(horizontalSlider_2, SIGNAL(valueChanged(int)), this, SLOT(sliderMoved(int)));
+    connect(horizontalSlider_3, SIGNAL(valueChanged(int)), this, SLOT(sliderMoved(int)));
+    connect(horizontalSlider_4, SIGNAL(valueChanged(int)), this, SLOT(sliderMoved(int)));
+    connect(horizontalSlider_5, SIGNAL(valueChanged(int)), this, SLOT(sliderMoved(int)));
     createActions();
 
-    if (scene->createMenus()) 
+    if (scene->createMenus()) {
         createMenus();
+    }
+    if (scene->hideLog()) {
+        plain_text_log->hide();
+    }
+    if (scene->hideSliders()) {
 
-    setWindowTitle(tr(scene->getName()));
-
+        QLayout * layout = slider_groupbox->layout();
+        QLayoutItem * item;
+        QLayout * sublayout;
+        QWidget * widget;
+        while ((item = layout->takeAt(0))) {
+            if ((sublayout = item->layout()) != 0) {/* do the same for sublayout*/ }
+            else if ((widget = item->widget()) != 0) { widget->hide(); delete widget; }
+            else { delete item; }
+        }
+        delete layout;
+        delete slider_groupbox;
+    }
     if (scene->fullScreen()){
         showFullScreen();
     }
     else {
-        show();
+        showNormal();
     }
-
     glWidget->setFocus();
 }
 
@@ -122,6 +140,12 @@ void vvr::Window::createMenus()
 void vvr::Window::about()
 {
     QMessageBox::about(this, scene->getName(), aboutMessage);
+}
+
+void vvr::Window::sliderMoved(int val)
+{
+    const int id = std::stoi(vvr::split(sender()->objectName().toStdString(), '_').back());
+    scene->sliderChanged(id, val / 100.0f);
 }
 
 void vvr::Window::keyPressEvent(QKeyEvent* event)
