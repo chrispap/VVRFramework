@@ -63,7 +63,7 @@ vvr::Window::Window(vvr::Scene *scene) :
         delete slider_groupbox;
     }
     if (scene->fullScreen()){
-        showFullScreen();
+        QTimer::singleShot(150, this, SLOT(showFullScreen()));
     }
     else {
         showNormal();
