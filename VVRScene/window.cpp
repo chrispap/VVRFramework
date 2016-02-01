@@ -89,7 +89,7 @@ void vvr::Window::log_cout(const char* ptr, std::streamsize count, void* pte)
         vScrollBar->triggerAction(QScrollBar::SliderToMaximum);
     }
     printf("%.*s", (int) count, ptr);
-    // vvr::logi(str.toStdString());
+    //vvr::logi(str.toStdString());
 }
 
 void vvr::Window::log_cerr(const char* ptr, std::streamsize count, void* pte)
