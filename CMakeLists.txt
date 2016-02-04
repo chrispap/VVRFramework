@@ -69,13 +69,18 @@ IF(${COPY_BOOST_LIBS})
 ENDIF()
 
 IF(${COPY_BOOST_HEADERS}) 
-	install (DIRECTORY ${Boost_INCLUDE_DIR}/boost DESTINATION "include/")
+    install (DIRECTORY ${Boost_INCLUDE_DIR}/boost DESTINATION "include/")
 ENDIF()
 
-#Install headers
+### Install headers
 install (DIRECTORY "GeoLib" DESTINATION "include" FILES_MATCHING PATTERN "*.h")
 install (DIRECTORY "VVRScene" DESTINATION "include" FILES_MATCHING PATTERN "*.h")
 install (FILES ${deps} DESTINATION "lib")
+
+### msvc runtime 
+set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP TRUE)
+include(InstallRequiredSystemLibraries)
+install(PROGRAMS ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS} DESTINATION bin/Release)
 
 INCLUDE(CPack)
 #########################################################################################

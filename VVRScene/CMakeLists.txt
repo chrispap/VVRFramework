@@ -8,6 +8,8 @@ set(SOURCE ${SOURCE_FILES})
 set(QRCS icons.qrc)
 qt5_wrap_ui(UI_FILES window.ui)
 qt5_add_resources(RCS ${QRCS})
+GET_PROPERTY(prop TARGET Qt5::Core PROPERTY LOCATION)
+GET_FILENAME_COMPONENT(QT_BIN_DIR ${prop} DIRECTORY)
 #########################################################################################
 
 #########################################################################################
@@ -32,4 +34,9 @@ endif ()
 
 #########################################################################################
 install (TARGETS VVRScene DESTINATION "lib")
+
+ADD_CUSTOM_COMMAND(TARGET VVRScene POST_BUILD COMMAND  
+  ${QT_BIN_DIR}/windeployqt.exe $<TARGET_FILE:VVRScene> -dir ${CMAKE_CURRENT_BINARY_DIR}/lib)
+
+INSTALL (DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib DESTINATION .)
 #########################################################################################
