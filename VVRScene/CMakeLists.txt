@@ -35,8 +35,11 @@ endif ()
 #########################################################################################
 install (TARGETS VVRScene DESTINATION "lib")
 
-ADD_CUSTOM_COMMAND(TARGET VVRScene POST_BUILD COMMAND  
-  ${QT_BIN_DIR}/windeployqt.exe $<TARGET_FILE:VVRScene> -dir ${CMAKE_CURRENT_BINARY_DIR}/lib)
+if(MSVC)
+  ADD_CUSTOM_COMMAND(TARGET VVRScene POST_BUILD COMMAND
+    ${QT_BIN_DIR}/windeployqt.exe $<TARGET_FILE:VVRScene> -dir ${CMAKE_CURRENT_BINARY_DIR}/lib)
 
-INSTALL (DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib DESTINATION .)
+  INSTALL (DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib DESTINATION .)
+endif(MSVC)
+
 #########################################################################################
