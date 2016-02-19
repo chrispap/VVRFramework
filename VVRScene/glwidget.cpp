@@ -91,7 +91,7 @@ void vvr::GLWidget::onKeyPressed(QKeyEvent *event)
     int modif = mkModif(event);
     QString c = event->text();
 
-    if (event->key() == Qt::Key_Escape) QApplication::exit(0);
+    if (event->key() == Qt::Key_Escape) QApplication::quit();
     else if (c.length()>0) mScene->keyEvent(c.toLatin1()[0],false, modif);
     else if (event->key() == Qt::Key_Left) mScene->arrowEvent(vvr::LEFT, modif);
     else if (event->key() == Qt::Key_Right) mScene->arrowEvent(vvr::RIGHT, modif);
