@@ -282,30 +282,30 @@ public:
 
     /* Utilities to directly add GeoLib objects to canvas */
 
-    void add(const C2DPoint &p, const Colour &col) {
+    void add(const C2DPoint &p, const Colour &col=Colour::black) {
         add(new Point2D(p.x, p.y, col));
     }
 
-    void add(const C2DPoint &p1, const C2DPoint &p2, const Colour &col, bool inf_line=false) {
+    void add(const C2DPoint &p1, const C2DPoint &p2, const Colour &col=Colour::black, bool inf_line=false) {
         if (inf_line)
             add(new Line2D(p1.x, p1.y, p2.x, p2.y, col));
         else
             add(new LineSeg2D(p1.x, p1.y, p2.x, p2.y, col));
     }
 
-    void add(const C2DLine &line, const Colour &col, bool inf_line=false) {
+    void add(const C2DLine &line, const Colour &col=Colour::black, bool inf_line=false) {
         const C2DPoint &p1 = line.GetPointFrom();
         const C2DPoint &p2 = line.GetPointTo();
         add(p1, p2, col, inf_line);
     }
 
-    void add(const C2DCircle &circle, const Colour &col, bool solid=false) {
+    void add(const C2DCircle &circle, const Colour &col=Colour::black, bool solid=false) {
         Shape * s = new Circle2D(circle.GetCentre().x, circle.GetCentre().y, circle.GetRadius(), col);
         s->setSolidRender(solid);
         add(s);
     }
 
-    void add(const C2DTriangle &tri, const Colour &col, bool solid=false) {
+    void add(const C2DTriangle &tri, const Colour &col=Colour::black, bool solid=false) {
         Shape *s = new Triangle2D(
                     tri.GetPoint1().x,
                     tri.GetPoint1().y,
