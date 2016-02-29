@@ -37,7 +37,7 @@ void Settings::set(const string &Key, const string &newVal, bool create_if_not_e
     if (m_map.find(key) == m_map.end() && create_if_not_exist == false)
         throw string("Setting <") + key + "> not in map.";
 
-    m_map.at(key) = newVal;
+    m_map[key] = newVal;
 }
 
 bool Settings::exists(const string &key) const {
