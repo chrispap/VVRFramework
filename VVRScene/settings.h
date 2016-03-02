@@ -2,7 +2,6 @@
 #define VVR_SETTINGS_H
 
 #include "vvrscenedll.h"
-
 #include <string>
 #include <map>
 #include <vector>

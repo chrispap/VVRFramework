@@ -6,7 +6,6 @@
 #include <QTimer>
 #include <math.h>
 #include "scene.h"
-#include "logger.h"
 
 #define ANIM_INTERVAL 10
 

@@ -1,5 +1,8 @@
+#ifdef VVR_USE_BOOST
+
 #ifndef VVR_LOGGER_H
 #define VVR_LOGGER_H
+
 
 #define BOOST_ALL_NO_LIB
 #define BOOST_LOG_DYN_LINK 1 // necessary when linking the boost_log library dynamically
@@ -35,3 +38,4 @@ namespace vvr {
 }
 
 #endif // VVR_LOGGER_H
+#endif // VVR_USE_BOOST

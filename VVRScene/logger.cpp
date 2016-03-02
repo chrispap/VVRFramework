@@ -1,3 +1,5 @@
+#ifdef VVR_USE_BOOST
+
 #include "logger.h"
 
 #include <boost/log/core/core.hpp>
@@ -67,3 +69,5 @@ BOOST_LOG_GLOBAL_LOGGER_INIT(logger, src::severity_logger_mt) {
 void vvr::loge(const std::string &msg) { LOG_ERROR << msg; }
 void vvr::logw(const std::string &msg) { LOG_WARNING << msg; }
 void vvr::logi(const std::string &msg) { LOG_INFO << msg; }
+
+#endif

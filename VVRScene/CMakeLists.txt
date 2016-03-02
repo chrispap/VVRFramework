@@ -18,7 +18,9 @@ include_directories(${OPENGL_INCLUDE_DIR})
 include_directories(${CMAKE_SOURCE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/GeoLib)
 include_directories(${CMAKE_SOURCE_DIR}/MathGeoLib/src)
-include_directories(${Boost_INCLUDE_DIRS})
+if(${VVR_USE_BOOST})
+  include_directories(${Boost_INCLUDE_DIRS})
+endif()
 #########################################################################################
 
 #########################################################################################
@@ -26,20 +28,24 @@ add_library(VVRScene SHARED ${SOURCE} ${RCS} ${UI_FILES})
 qt5_use_modules(VVRScene Widgets OpenGL)
 target_link_libraries(VVRScene ${OPENGL_LIBRARIES} Qt5::Widgets Qt5::OpenGL)
 if (WIN32)
-  target_link_libraries(VVRScene GeoLib MathGeoLib ${Boost_LIBRARIES})
+  target_link_libraries(VVRScene GeoLib MathGeoLib)
+  if(${VVR_USE_BOOST})
+    target_link_libraries(VVRScene ${Boost_LIBRARIES})
+  endif()
 else ()
-  target_link_libraries(VVRScene GeoLib ${Boost_LIBRARIES})
+  target_link_libraries(VVRScene GeoLib)
+  if(${VVR_USE_BOOST})
+    target_link_libraries(VVRScene ${Boost_LIBRARIES})
+  endif()
 endif ()
 #########################################################################################
 
 #########################################################################################
 install (TARGETS VVRScene DESTINATION "lib")
-
 if(MSVC)
   ADD_CUSTOM_COMMAND(TARGET VVRScene POST_BUILD COMMAND
     ${QT_BIN_DIR}/windeployqt.exe $<TARGET_FILE:VVRScene> -dir ${CMAKE_CURRENT_BINARY_DIR}/lib)
 
   INSTALL (DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib DESTINATION .)
 endif(MSVC)
-
 #########################################################################################

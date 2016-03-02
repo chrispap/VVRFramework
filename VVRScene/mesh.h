@@ -39,7 +39,9 @@ public:
     void operator=(const Mesh *src);                ///< Assigment operator
     void operator=(const Mesh &src);                ///< Assigment operator
 
+#ifdef VVR_USE_BOOST
     VAR_CLASS_DEFS(Mesh)
+#endif
 
 private:
     // Data members

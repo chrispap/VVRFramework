@@ -3,7 +3,6 @@
 
 #include "vvrscenedll.h"
 #include "canvas.h"
-
 #include <vector>
 #include <cstdio>
 
