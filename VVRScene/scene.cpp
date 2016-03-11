@@ -25,16 +25,20 @@ static void GL_Info ()
     fflush(0);
 }
 
+#define VVR_FOV_MAX 120
+#define VVR_FOV_MIN 10
+
 Scene::Scene()
 {
-    m_globRot_def = Vec3d(0,0,0);
-    m_globRot = m_globRot_def;
+    m_world_rot_def = Vec3d(0,0,0);
+    m_world_rot = m_world_rot_def;
     m_perspective_proj = false;
     m_fullscreen = false;
     m_create_menus = true;
     m_hide_log = true;
     m_hide_sliders = true;
     m_camera_dist = 100;
+    m_fov = 30;
 }
 
 const char* Scene::getName() const
@@ -80,7 +84,6 @@ void Scene::GL_Init()
     glLightfv(GL_LIGHT0, GL_DIFFUSE,  diffuseLight);
     glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight);
     
-    // glEnable(...)
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
     glEnable(GL_LINE_SMOOTH);
@@ -106,34 +109,41 @@ void Scene::GL_Init()
 
 void Scene::GL_Resize(int w, int h)
 {
+    const float ar = (float)w / h;
     m_screen_width = w;
     m_screen_height = h;
 
-    glViewport(0,0, m_screen_width, m_screen_height);
+    const vec pos(0, 0, m_camera_dist);
+    const vec front(0, 0, -1);
+    const vec up(0, 1, 0);
+    m_frustum.SetKind(FrustumSpaceGL, FrustumRightHanded);
+    m_frustum.SetFrame(pos, front, up);
+
+    if (m_perspective_proj)
+    {
+        const float n = m_camera_dist * 0.01;
+        const float f = m_camera_dist * 100;
+        m_scene_width = 1.5f * (m_camera_dist * 2 * tanf(DegToRad(m_fov / 2)));
+        m_scene_height = m_scene_width / ar;
+        m_frustum.SetVerticalFovAndAspectRatio(DegToRad(m_fov), ar);
+        m_frustum.SetViewPlaneDistances(n, f);
+    }
+    else
+    {
+        const float n = -m_camera_dist * 2;
+        const float f = m_camera_dist * 2;
+        m_scene_width = m_camera_dist / 2;
+        m_scene_height = m_scene_width / ar;
+        m_frustum.SetOrthographic(m_scene_width, m_scene_height);
+        m_frustum.SetViewPlaneDistances(n, f);
+    }
+
+    //! Set OpenGL Projection Matrix
+    glViewport(0, 0, m_screen_width, m_screen_height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-
-    if (m_perspective_proj) 
-    {
-        const float FOV = 60;
-        // The quantity inside the parenthesis is the vissible width
-        // of the plane which lies on depth with (Z = -m_camera_dist)
-        m_scene_width = 1.5f * (m_camera_dist * 2 * tanf(DegToRad(FOV/2)));
-        m_scene_height = m_scene_width * h/w;
-        const float near_ = m_camera_dist * 0.01;
-        const float far_  = m_camera_dist * 100;
-        const float vh    = tanf(DegToRad(FOV/2)) * 2 * near_;
-        const float vv    = vh * h/w;
-        m_proj_mat = float4x4::OpenGLPerspProjRH(near_, far_, vh, vv);
-    }
-    else 
-    {
-        m_scene_width = m_camera_dist/2;
-        m_scene_height = m_scene_width * h/w;
-        m_proj_mat = float4x4::OpenGLOrthoProjRH(-m_camera_dist * 2, m_camera_dist * 2,
-            m_scene_width, m_scene_height);
-    }
-
+    m_proj_mat = m_frustum.ProjectionMatrix();
+    m_proj_mat.Transpose(); // Covert to colunm major for OpenGL
     glMultMatrixf(m_proj_mat.ptr());
     resize();
 }
@@ -144,14 +154,9 @@ void Scene::GL_Render()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-
-    // Push the scene to the back (far from camera)
-    glTranslatef(0,0, -m_camera_dist);
-
-    // Apply global rotation & draw
-    glRotatef(m_globRot.x, 1, 0, 0);
-    glRotatef(m_globRot.y, 0, 1, 0);
-    glRotatef(m_globRot.z, 0, 0, 1);
+    float4x4 mvm = modelViewMatrix();
+    mvm.Transpose(); // Covert to colunm major for OpenGL
+    glMultMatrixf((GLfloat*)mvm.v);
     draw();
 }
 
@@ -163,7 +168,7 @@ void Scene::keyEvent (unsigned char key,  bool up, int modif)
     int shift =  modif & 0x02;
 
     switch (isprint(key)? tolower(key): key) {
-    case '0' : m_globRot = m_globRot_def; break;
+    case '0' : m_world_rot = m_world_rot_def; break;
     case 'r' : this->reset();
     }
 
@@ -192,14 +197,14 @@ void Scene::mouseMoved(int x, int y, int modif)
     int dx = x - m_mouselastX;
     int dy = y - m_mouselastY;
 
-    m_globRot.x -= dy;
-    m_globRot.y += dx;
+    m_world_rot.x -= dy;
+    m_world_rot.y += dx;
 
-    m_globRot.x = fmod(m_globRot.x, 360.0);
-    while (m_globRot.x < 0) m_globRot.x += 360;
+    m_world_rot.x = fmod(m_world_rot.x, 360.0);
+    while (m_world_rot.x < 0) m_world_rot.x += 360;
 
-    m_globRot.y = fmod(m_globRot.y, 360.0);
-    while (m_globRot.y < 0) m_globRot.y += 360;
+    m_world_rot.y = fmod(m_world_rot.y, 360.0);
+    while (m_world_rot.y < 0) m_world_rot.y += 360;
 
     m_mouselastX = x;
     m_mouselastY = y;
@@ -207,8 +212,10 @@ void Scene::mouseMoved(int x, int y, int modif)
 
 void Scene::mouseWheel(int dir, int modif)
 {
-    m_camera_dist += -2.0 * dir;
-    if (m_camera_dist < 0.01) m_camera_dist = 0.01;
+    m_fov += -4.0 * dir;
+    if (m_fov < VVR_FOV_MIN) m_fov = VVR_FOV_MIN;
+    else if (m_fov > VVR_FOV_MAX) m_fov = VVR_FOV_MAX;
+    GL_Resize(m_screen_width, m_screen_height);
 }
 
 void Scene::sliderChanged(int slider_id, float val) 
@@ -227,7 +234,7 @@ void Scene::setSliderVal(int slider_id, float val)
 
 void Scene::reset()
 {
-    m_globRot = m_globRot_def;
+    m_world_rot = m_world_rot_def;
 }
 
 void Scene::enterPixelMode()
@@ -260,9 +267,17 @@ void Scene::mouse2pix(int &x, int &y)
     y = -y; 
 }
 
-vec Scene::unproject(int x, int y)
+float4x4 Scene::modelViewMatrix()
 {
-    //TODO: Implement
-    vec v;
-    return v;
+    float4x4 M = float4x4::Translate(vec(0, 0, -m_camera_dist)) *
+        float4x4::RotateX(math::DegToRad(m_world_rot.x)) *
+        float4x4::RotateY(math::DegToRad(m_world_rot.y)) *
+        float4x4::RotateZ(math::DegToRad(m_world_rot.z));
+    return M;
+}
+
+Ray Scene::unproject(float x, float y)
+{
+    Ray ray = m_frustum.UnProject(x, y);
+    return ray;
 }

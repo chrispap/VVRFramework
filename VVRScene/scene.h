@@ -22,11 +22,16 @@ private:
     int m_screen_width, m_screen_height;
     int m_mouselastX, m_mouselastY;
     float4x4 m_proj_mat;
+    float m_fov;
+    Frustum m_frustum;
+
+private:
+    float4x4 modelViewMatrix();
 
 protected:
     bool m_perspective_proj;
-    Vec3d m_globRot_def;
-    Vec3d m_globRot;
+    Vec3d m_world_rot_def;
+    Vec3d m_world_rot;
     Colour m_bg_col;
     bool m_fullscreen;
     bool m_create_menus;
@@ -67,7 +72,7 @@ public:
     
     //! Getters
 
-    const Vec3d& getRot() const { return m_globRot;}
+    const Vec3d& getRot() const { return m_world_rot;}
     int getViewportWidth() { return m_screen_width;} // In pixels
     int getViewportHeight() { return m_screen_height;} // In pixels
     float getSceneWidth() { return m_scene_width;} 
@@ -79,7 +84,7 @@ public:
 
     //! Setters
 
-    void setRot(const Vec3d& rot) { m_globRot = rot;}
+    void setRot(const Vec3d& rot) { m_world_rot = rot;}
     void setCol(const Colour& col) { m_bg_col = col;}
     void setSliderVal(int slider_id, float val);
 
@@ -87,7 +92,7 @@ public:
 
 public: 
     void mouse2pix(int &x, int &y);
-    vec unproject(int x, int y);
+    Ray unproject(float x, float y);
     bool ctrlDown (int modif) { return modif & (1<<0);}
     bool shiftDown(int modif) { return modif & (1<<1);}
     bool altDown  (int modif) { return modif & (1<<2);}
