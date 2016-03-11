@@ -238,16 +238,26 @@ void Scene::mouseMoved(int x, int y, int modif)
     const int dx = m_mouselastX - x;
     const int dy = m_mouselastY - y;
 
-
     m_mouselastX = x;
     m_mouselastY = y;
 
-    //! Set camera pos
+    //! Move camera 
+
+    float3x3 M = 
+        float3x3::RotateX(-math::DegToRad(0.1f * dy)) *
+        float3x3::RotateY(math::DegToRad(0.1f * dx));
+    
     vec pos = m_frustum.Pos();
-    float4x4 M = float4x4::RotateX(-math::DegToRad(0.1f * dy)) *
-        float4x4::RotateY(math::DegToRad(0.1f * dx));
-    pos = M.TransformPos(pos);
+    pos = M.Transform(pos);
     m_frustum.SetPos(pos);
+
+    vec front = m_frustum.Front();
+    front = M.Transform(front);
+    m_frustum.SetFront(front);
+
+    vec up = m_frustum.Up();
+    up = M.Transform(up);
+    m_frustum.SetUp(up);
 }
 
 void Scene::mouseWheel(int dir, int modif)
