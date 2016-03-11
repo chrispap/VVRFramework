@@ -45,7 +45,10 @@ protected:
 public:
     Scene();
     virtual ~Scene(){}
-    virtual const char* getName() const;
+    
+    virtual const char* getName() const {
+        return "VVR Framework Scene";
+    }
 
     //! OpenGL Callbacks
 

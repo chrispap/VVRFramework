@@ -35,11 +35,6 @@ Scene::Scene()
     m_frustum.SetFrame(pos, front, up);
 }
 
-const char* Scene::getName() const
-{
-    return "VVR Framework Scene";
-}
-
 /////////////////////////////////////////////////////////////////////////////////////////
 //! OpenGL Callbacks
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -139,6 +134,30 @@ void Scene::GL_Render()
     draw();
 }
 
+void Scene::drawAxes()
+{
+    GLfloat len = 2.0 * getSceneWidth();
+
+    glBegin(GL_LINES);
+
+    // X
+    glColor3ub(0xFF, 0, 0);
+    glVertex3f(0, 0, 0);
+    glVertex3f(len, 0, 0);
+
+    // Y
+    glColor3f(0, 0xFF, 0);
+    glVertex3f(0, 0, 0);
+    glVertex3f(0, len, 0);
+
+    // Z
+    glColor3f(0, 0, 0xFF);
+    glVertex3f(0, 0, 0);
+    glVertex3f(0, 0, len);
+
+    glEnd();
+}
+
 void Scene::enterPixelMode()
 {
     glDisable(GL_LIGHTING);
@@ -171,38 +190,7 @@ void Scene::mouse2pix(int &x, int &y)
 
 Ray Scene::unproject(float x, float y)
 {
-    /*float4x4 mvm = m_frustum.ViewMatrix();
-    float4x4 mvmi(mvm); mvmi.InverseOrthonormal();
-    Frustum fru(m_frustum);
-    fru.Transform(mvm);
-    ray.Transform(mvmi);
-    */
-    Ray ray = m_frustum.UnProject(x, y);
-    return ray;
-}
-
-void Scene::drawAxes()
-{
-    GLfloat len = 2.0 * getSceneWidth();
-
-    glBegin(GL_LINES);
-
-    // X
-    glColor3ub(0xFF, 0, 0);
-    glVertex3f(0, 0, 0);
-    glVertex3f(len, 0, 0);
-
-    // Y
-    glColor3f(0, 0xFF, 0);
-    glVertex3f(0, 0, 0);
-    glVertex3f(0, len, 0);
-
-    // Z
-    glColor3f(0, 0, 0xFF);
-    glVertex3f(0, 0, 0);
-    glVertex3f(0, 0, len);
-
-    glEnd();
+    return m_frustum.UnProject(x, y);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -247,8 +235,8 @@ void Scene::mouseReleased(int x, int y, int modif)
 
 void Scene::mouseMoved(int x, int y, int modif)
 {
-    const int dx = x - m_mouselastX;
-    const int dy = y - m_mouselastY;
+    const int dx = m_mouselastX - x;
+    const int dy = m_mouselastY - y;
 
 
     m_mouselastX = x;
@@ -256,7 +244,7 @@ void Scene::mouseMoved(int x, int y, int modif)
 
     //! Set camera pos
     vec pos = m_frustum.Pos();
-    float4x4 M = float4x4::RotateX(math::DegToRad(0.1f * dy)) *
+    float4x4 M = float4x4::RotateX(-math::DegToRad(0.1f * dy)) *
         float4x4::RotateY(math::DegToRad(0.1f * dx));
     pos = M.TransformPos(pos);
     m_frustum.SetPos(pos);
