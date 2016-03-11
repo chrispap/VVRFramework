@@ -66,7 +66,6 @@ void Scene::drawAxes()
     glEnd();
 }
 
-/* OpenGL Callbacks */
 void Scene::GL_Init()
 {
     // Light setup
@@ -114,8 +113,6 @@ void Scene::GL_Resize(int w, int h)
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
 
-    float4x4 proj_mat;
-
     if (m_perspective_proj) 
     {
         const float FOV = 60;
@@ -127,17 +124,17 @@ void Scene::GL_Resize(int w, int h)
         const float far_  = m_camera_dist * 100;
         const float vh    = tanf(DegToRad(FOV/2)) * 2 * near_;
         const float vv    = vh * h/w;
-        proj_mat = float4x4::OpenGLPerspProjRH(near_, far_, vh, vv);
+        m_proj_mat = float4x4::OpenGLPerspProjRH(near_, far_, vh, vv);
     }
     else 
     {
         m_scene_width = m_camera_dist/2;
         m_scene_height = m_scene_width * h/w;
-        proj_mat = float4x4::OpenGLOrthoProjRH(-m_camera_dist*2, m_camera_dist*2, 
+        m_proj_mat = float4x4::OpenGLOrthoProjRH(-m_camera_dist * 2, m_camera_dist * 2,
             m_scene_width, m_scene_height);
     }
 
-    glMultMatrixf(proj_mat.ptr());
+    glMultMatrixf(m_proj_mat.ptr());
     resize();
 }
 
@@ -158,7 +155,6 @@ void Scene::GL_Render()
     draw();
 }
 
-/* UI Callbacks */
 void Scene::keyEvent (unsigned char key,  bool up, int modif)
 {
     if (up) return;
@@ -215,12 +211,25 @@ void Scene::mouseWheel(int dir, int modif)
     if (m_camera_dist < 0.01) m_camera_dist = 0.01;
 }
 
+void Scene::sliderChanged(int slider_id, float val) 
+{
+
+}
+
+void Scene::setSliderVal(int slider_id, float val)
+{
+    if (slider_id > 5 || slider_id < 0) return;
+    if (val > 1) val = 1;
+    else if (val < 0) val = 0;
+    //TODO: Connect scene object backwards to window in order to be able to change 
+    //      slider values from the scene.
+}
+
 void Scene::reset()
 {
     m_globRot = m_globRot_def;
 }
 
-/* Helpers */
 void Scene::enterPixelMode()
 {
     glDisable(GL_LIGHTING);
@@ -249,4 +258,11 @@ void Scene::mouse2pix(int &x, int &y)
     y -= m_screen_height/2;
     // Reverse the default window coordinate system so that y grows upwards.
     y = -y; 
+}
+
+vec Scene::unproject(int x, int y)
+{
+    //TODO: Implement
+    vec v;
+    return v;
 }

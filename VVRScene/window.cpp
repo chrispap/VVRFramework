@@ -2,7 +2,6 @@
 #include "glwidget.h"
 #include "scene.h"
 #include "logger.h"
-
 #include <QtOpenGL>
 #include <QtWidgets>
 #include <QPushButton>
@@ -14,10 +13,9 @@
 using std::cerr;
 using std::endl;
 
-QString vvr::Window::aboutMessage = QString("VVR LAB 2014") + QString(QChar(0xA9));
+QString vvr::Window::aboutMessage = QString("VVR LAB 2016") + QString(QChar(0xA9));
 
-vvr::Window::Window(vvr::Scene *scene) :
-    scene(scene)
+vvr::Window::Window(vvr::Scene *scene) : scene(scene)
 {
     setupUi(this);
     setWindowTitle(tr(scene->getName()));
@@ -55,19 +53,22 @@ vvr::Window::Window(vvr::Scene *scene) :
         QLayout * sublayout;
         QWidget * widget;
         while ((item = layout->takeAt(0))) {
-            if ((sublayout = item->layout()) != 0) {/* do the same for sublayout*/ }
+            if ((sublayout = item->layout()) != 0) {/* do the same for sublayout*/}
             else if ((widget = item->widget()) != 0) { widget->hide(); delete widget; }
             else { delete item; }
         }
         delete layout;
         delete slider_groupbox;
     }
-    if (scene->fullScreen()){
+
+    if (scene->fullScreen())
+    {
         QTimer::singleShot(150, this, SLOT(showFullScreen()));
     }
     else {
         showNormal();
     }
+
     glWidget->setFocus();
 }
 
@@ -77,19 +78,16 @@ void vvr::Window::log_cout(const char* ptr, std::streamsize count, void* pte)
     QPlainTextEdit* te = static_cast<QPlainTextEdit*>(pte);
     QScrollBar *vScrollBar = te->verticalScrollBar();
     bool keep_on_bottom = vScrollBar->value() == vScrollBar->maximum();
-
-    //te->appendHtml("<font color=\"Red\">" + str + "</font>");
-
     te->moveCursor(QTextCursor::End);
     te->textCursor().insertHtml("<font color=\"White\">" + str + "</font>");
     te->moveCursor(QTextCursor::End);
     if (ptr[(int)count - 1] == '\n') te->appendPlainText("");
-
-    if (keep_on_bottom) {
+    if (keep_on_bottom)
         vScrollBar->triggerAction(QScrollBar::SliderToMaximum);
-    }
-    printf("%.*s", (int) count, ptr);
-    //vvr::logi(str.toStdString());
+    printf("%.*s", (int)count, ptr);
+#ifdef VVR_USE_BOOST
+    vvr::logi(str.toStdString());
+#endif
 }
 
 void vvr::Window::log_cerr(const char* ptr, std::streamsize count, void* pte)
@@ -98,19 +96,16 @@ void vvr::Window::log_cerr(const char* ptr, std::streamsize count, void* pte)
     QPlainTextEdit* te = static_cast<QPlainTextEdit*>(pte);
     QScrollBar *vScrollBar = te->verticalScrollBar();
     bool keep_on_bottom = vScrollBar->value() == vScrollBar->maximum();
-    
-    //te->appendHtml("<font color=\"Red\">" + str + "</font>");
-    
-    te->moveCursor(QTextCursor::End); 
+    te->moveCursor(QTextCursor::End);
     te->textCursor().insertHtml("<font color=\"Red\">" + str + "</font>");
     te->moveCursor(QTextCursor::End);
     if (ptr[(int)count - 1] == '\n') te->appendPlainText("");
-    
-    if (keep_on_bottom) {
+    if (keep_on_bottom)
         vScrollBar->triggerAction(QScrollBar::SliderToMaximum);
-    }
     fprintf(stderr, "%.*s", (int)count, ptr);
-    //vvr::loge(str.toStdString());
+#ifdef VVR_USE_BOOST
+    vvr::loge(str.toStdString());
+#endif
 }
 
 void vvr::Window::createActions()
@@ -146,12 +141,13 @@ void vvr::Window::sliderMoved(int val)
 {
     const int id = std::stoi(vvr::split(sender()->objectName().toStdString(), '_').back());
     scene->sliderChanged(id, val / 100.0f);
+    glWidget->update();
 }
 
 void vvr::Window::keyPressEvent(QKeyEvent* event)
 {
     std::string str = event->text().toStdString();
-    if (str.length()>0) emit keyPressed(event);
+    if (str.length() > 0) emit keyPressed(event);
 }
 
 int vvr::mainLoop(int argc, char* argv[], vvr::Scene *scene)

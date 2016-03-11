@@ -3,6 +3,7 @@
 
 #include "vvrscenedll.h"
 #include "geom.h"
+#include <MathGeoLib.h>
 
 namespace vvr {
 
@@ -20,6 +21,7 @@ private:
     float m_scene_width, m_scene_height;
     int m_screen_width, m_screen_height;
     int m_mouselastX, m_mouselastY;
+    float4x4 m_proj_mat;
 
 protected:
     bool m_perspective_proj;
@@ -46,12 +48,14 @@ public:
     virtual ~Scene(){}
     virtual const char* getName() const;
     
-    // OpenGL Callbacks
+    //! OpenGL Callbacks
+
     void GL_Render();
     void GL_Init();
     void GL_Resize(int width, int height);
 
-    // Events
+    //! Events
+
     virtual bool idle(){return false;}
     virtual void keyEvent(unsigned char key, bool up, int modif);
     virtual void arrowEvent(ArrowDir dir, int modif);
@@ -59,9 +63,10 @@ public:
     virtual void mouseReleased(int x, int y, int modif);
     virtual void mouseMoved(int x, int y, int modif);
     virtual void mouseWheel(int dir, int modif);
-    virtual void sliderChanged(int slider_id, float val) { std::cout << slider_id << "-" << val << std::endl; }
+    virtual void sliderChanged(int slider_id, float val);
     
-    // Getters
+    //! Getters
+
     const Vec3d& getRot() const { return m_globRot;}
     int getViewportWidth() { return m_screen_width;} // In pixels
     int getViewportHeight() { return m_screen_height;} // In pixels
@@ -72,18 +77,22 @@ public:
     bool hideLog() { return m_hide_log; }
     bool hideSliders() { return m_hide_sliders; }
 
-    // Setters
+    //! Setters
+
     void setRot(const Vec3d& rot) { m_globRot = rot;}
     void setCol(const Colour& col) { m_bg_col = col;}
+    void setSliderVal(int slider_id, float val);
 
-public: // Helpers
+    //! Helpers
+
+public: 
     void mouse2pix(int &x, int &y);
+    vec unproject(int x, int y);
     bool ctrlDown (int modif) { return modif & (1<<0);}
     bool shiftDown(int modif) { return modif & (1<<1);}
     bool altDown  (int modif) { return modif & (1<<2);}
 };
 
-/* This will be the entry point of client applications. */
 int VVRScene_API mainLoop(int argc, char* argv[], Scene *scene);
 
 }
