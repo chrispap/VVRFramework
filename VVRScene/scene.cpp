@@ -26,11 +26,24 @@ Scene::Scene()
     m_hide_sliders = true;
     m_camera_dist = 100;
     m_fov = 30;
+    setCameraPos(vec(0, 0.1*m_camera_dist, m_camera_dist));
+}
 
-    //! Set view frustum
-    const vec pos(0, 0, m_camera_dist);
-    const vec front(0, 0, -1);
-    const vec up(0, 1, 0);
+void Scene::reset()
+{
+    setCameraPos(vec(0, 0.1*m_camera_dist, m_camera_dist));
+}
+
+void Scene::setCameraPos(vec pos)
+{
+    vec front0 = vec(0, 0, -1);
+    vec front = pos.Neg().Normalized();
+    vec up(0, 1, 0);
+    if (!front0.Equals(front)) {
+        float3x3 cam_rot = float3x3::RotateFromTo(front0, front);
+        up = cam_rot * up;
+    }
+
     m_frustum.SetKind(FrustumSpaceGL, FrustumRightHanded);
     m_frustum.SetFrame(pos, front, up);
 }
@@ -197,11 +210,6 @@ Ray Scene::unproject(float x, float y)
 //! UI
 /////////////////////////////////////////////////////////////////////////////////////////
 
-void Scene::reset()
-{
-    //TODO: Reset camera
-}
-
 void Scene::keyEvent(unsigned char key, bool up, int modif)
 {
     if (up) return;
@@ -241,23 +249,13 @@ void Scene::mouseMoved(int x, int y, int modif)
     m_mouselastX = x;
     m_mouselastY = y;
 
-    //! Move camera 
-
-    float3x3 M = 
+    //! Rotate camera 
+    float3x3 cam_rot =
         float3x3::RotateX(-math::DegToRad(0.1f * dy)) *
         float3x3::RotateY(math::DegToRad(0.1f * dx));
-    
     vec pos = m_frustum.Pos();
-    pos = M.Transform(pos);
-    m_frustum.SetPos(pos);
-
-    vec front = m_frustum.Front();
-    front = M.Transform(front);
-    m_frustum.SetFront(front);
-
-    vec up = m_frustum.Up();
-    up = M.Transform(up);
-    m_frustum.SetUp(up);
+    pos = cam_rot.Transform(pos);
+    setCameraPos(pos);
 }
 
 void Scene::mouseWheel(int dir, int modif)

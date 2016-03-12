@@ -79,7 +79,8 @@ public:
     bool hideSliders() { return m_hide_sliders; }
 
     //! Setters
-
+    
+    void setCameraPos(vec pos);
     void setCol(const Colour& col) { m_bg_col = col; }
     void setSliderVal(int slider_id, float val);
 
