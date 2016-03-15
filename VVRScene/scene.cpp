@@ -34,11 +34,12 @@ void Scene::reset()
     setCameraPos(vec(0, 0.1*m_camera_dist, m_camera_dist));
 }
 
-void Scene::setCameraPos(vec pos)
+void Scene::setCameraPos(const vec &pos)
 {
     vec front0 = vec(0, 0, -1);
     vec front = pos.Neg().Normalized();
     vec up(0, 1, 0);
+
     if (!front0.Equals(front)) {
         float3x3 cam_rot = float3x3::RotateFromTo(front0, front);
         up = cam_rot * up;
@@ -236,26 +237,32 @@ void Scene::mousePressed(int x, int y, int modif)
     m_mouselastY = y;
 }
 
-void Scene::mouseReleased(int x, int y, int modif)
-{
-
-}
-
 void Scene::mouseMoved(int x, int y, int modif)
 {
-    const int dx = m_mouselastX - x;
-    const int dy = m_mouselastY - y;
-
+    const int dx = x - m_mouselastX;
+    const int dy = y - m_mouselastY;
     m_mouselastX = x;
     m_mouselastY = y;
 
-    //! Rotate camera 
-    float3x3 cam_rot =
-        float3x3::RotateX(-math::DegToRad(0.1f * dy)) *
-        float3x3::RotateY(math::DegToRad(0.1f * dx));
-    vec pos = m_frustum.Pos();
-    pos = cam_rot.Transform(pos);
-    setCameraPos(pos);
+    const math::vec up = m_frustum.Up();
+    const math::vec right = m_frustum.WorldRight();
+
+    float angleYaw = math::DegToRad(-vvr::normalizeAngle((float)dx / 2));
+    float anglePitch = math::DegToRad(vvr::normalizeAngle((float)dy / 2));
+
+    math::float3x3 transform = float3x3::RotateAxisAngle(right, anglePitch) *
+        float3x3::RotateAxisAngle(up, angleYaw);
+
+    m_frustum.Transform(transform);
+    math::vec newpos = m_frustum.Pos();
+    math::vec newfront = m_frustum.Front();
+    math::vec newup = m_frustum.Up();
+    m_frustum.SetFrame(newpos, newfront, newup);
+}
+
+void Scene::mouseReleased(int x, int y, int modif)
+{
+
 }
 
 void Scene::mouseWheel(int dir, int modif)

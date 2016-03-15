@@ -73,6 +73,7 @@ public:
     int getViewportHeight() { return m_screen_height; } // In pixels
     float getSceneWidth() { return m_scene_width; }
     float getSceneHeight() { return m_scene_height; }
+    Frustum getFrustum() { return m_frustum; };
     bool fullScreen() { return m_fullscreen; }
     bool createMenus() { return m_create_menus; }
     bool hideLog() { return m_hide_log; }
@@ -80,9 +81,13 @@ public:
 
     //! Setters
     
-    void setCameraPos(vec pos);
+    void setFrustum(const Frustum &frustum) { m_frustum = frustum; }
     void setCol(const Colour& col) { m_bg_col = col; }
     void setSliderVal(int slider_id, float val);
+
+private:
+    
+    void setCameraPos(const vec &pos);
 
     //! Helpers
 
