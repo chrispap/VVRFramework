@@ -202,9 +202,11 @@ void Scene::mouse2pix(int &x, int &y)
     y = -y;
 }
 
-Ray Scene::unproject(float x, float y)
+Ray Scene::unproject(int x, int y)
 {
-    return m_frustum.UnProject(x, y);
+    return m_frustum.UnProject(
+        (float)x / getViewportWidth() * 2,
+        (float)y / getViewportHeight() * 2);
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////

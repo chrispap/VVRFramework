@@ -93,7 +93,7 @@ private:
 
 public:
     void mouse2pix(int &x, int &y);
-    Ray unproject(float x, float y);
+    Ray unproject(int x, int y);
     bool ctrlDown(int modif) { return modif & (1 << 0); }
     bool shiftDown(int modif) { return modif & (1 << 1); }
     bool altDown(int modif) { return modif & (1 << 2); }
