@@ -26,12 +26,12 @@ Scene::Scene()
     m_hide_sliders = true;
     m_camera_dist = 100;
     m_fov = 30;
-    setCameraPos(vec(0, 0.1*m_camera_dist, m_camera_dist));
+    setCameraPos(vec(0, 0, m_camera_dist));
 }
 
 void Scene::reset()
 {
-    setCameraPos(vec(0, 0.1*m_camera_dist, m_camera_dist));
+    setCameraPos(vec(0, 0, m_camera_dist));
 }
 
 void Scene::setCameraPos(const vec &pos)
@@ -221,9 +221,13 @@ void Scene::keyEvent(unsigned char key, bool up, int modif)
     int shift = modif & 0x02;
 
     switch (isprint(key) ? tolower(key) : key) {
-    case 'r': this->reset();
+    case 'r': this->reset(); break;
+    case '2': setCameraPos(vec(0, -m_camera_dist, 0)); break;
+    case '4': setCameraPos(vec(-m_camera_dist, 0, 0)); break;
+    case '6': setCameraPos(vec(m_camera_dist, 0, 0)); break;
+    case '8': setCameraPos(vec(0, m_camera_dist, 0)); break;
+    case '5': setCameraPos(vec(0, 0, m_camera_dist)); break;
     }
-
 }
 
 void Scene::arrowEvent(ArrowDir dir, int modif)

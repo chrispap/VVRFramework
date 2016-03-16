@@ -85,7 +85,7 @@ public:
     void setCol(const Colour& col) { m_bg_col = col; }
     void setSliderVal(int slider_id, float val);
 
-private:
+public:
     
     void setCameraPos(const vec &pos);
 
