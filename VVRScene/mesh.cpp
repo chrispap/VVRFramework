@@ -60,25 +60,6 @@ Mesh::Mesh(const string &objDir, const string &objFile, const string &texFile, b
     mAABB = Box(mVertices);
 }
 
-Mesh::Mesh(const Mesh *original):
-    mCCW(original->mCCW),
-    mVertices (original->mVertices),
-    mTriangles (original->mTriangles),
-    mVertexNormals (original->mVertexNormals),
-    mTexCoords (original->mTexCoords),
-    mAABB (original->mAABB),
-    mRot (original->mRot),
-    mPos (original->mPos),
-    mTexName(original->mTexName)
-{
-    fflush(0);
-
-    vector<Triangle>::iterator ti;
-    for (ti=mTriangles.begin(); ti!= mTriangles.end(); ++ti) {
-        ti->vecList = &mVertices;
-    }
-}
-
 Mesh::Mesh(const Mesh &original):
     mCCW(original.mCCW),
     mVertices (original.mVertices),
@@ -90,8 +71,6 @@ Mesh::Mesh(const Mesh &original):
     mPos (original.mPos),
     mTexName(original.mTexName)
 {
-    fflush(0);
-
     vector<Triangle>::iterator ti;
     for (ti=mTriangles.begin(); ti!= mTriangles.end(); ++ti) {
         ti->vecList = &mVertices;
@@ -172,7 +151,6 @@ void Mesh::update()
 {
     updateTriangleData();
     createNormals();
-    mAABB = Box(mVertices);
 }
 
 void Mesh::setBigSize(float size)

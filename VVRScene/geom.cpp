@@ -91,9 +91,8 @@ Box::Box(const Vec3d &v1, const Vec3d &v2, const Vec3d &v3)
 
 Box::Box(const vector<Vec3d> &vertices) 
 {
-    Vec3d min, max;
-    min.x = min.y = min.z = FLT_MAX;
-    max.x = max.y = max.z = FLT_MIN;
+    min.x = min.y = min.z = DBL_MAX;
+    max.x = max.y = max.z = -DBL_MAX;
     vector<Vec3d>::const_iterator vi;
     for (vi = vertices.begin(); vi != vertices.end(); ++vi) {
         if (vi->x > max.x) max.x = vi->x;
@@ -103,8 +102,6 @@ Box::Box(const vector<Vec3d> &vertices)
         if (vi->z > max.z) max.z = vi->z;
         else if (vi->z < min.z) min.z = vi->z;
     }
-    this->min = min;
-    this->max = max;
 }
 
 Box& Box::cropBox(Box &cropBox) 

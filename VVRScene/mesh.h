@@ -34,7 +34,6 @@ public:
           const std::string &objFile,
           const std::string &texFile,
           bool ccw=true);
-    Mesh (const Mesh *original);                    ///< Copy constructor
     Mesh (const Mesh &original);                    ///< Copy constructor
     void operator=(const Mesh *src);                ///< Assigment operator
     void operator=(const Mesh &src);                ///< Assigment operator
