@@ -14,8 +14,8 @@ using namespace vvr;
 using namespace std;
 using namespace math;
 
-#define VVR_FOV_MAX 120
-#define VVR_FOV_MIN 10
+#define VVR_FOV_MAX 160
+#define VVR_FOV_MIN 2
 
 Scene::Scene()
 {
@@ -109,12 +109,12 @@ void Scene::GL_Resize(int w, int h)
 
     if (m_perspective_proj)
     {
-        const float n = m_camera_dist * 0.8;
-        const float f = -m_camera_dist * 2;
+        const float n = m_camera_dist * 0.1;
+        const float f = -m_camera_dist * 2.1;
         m_frustum.SetVerticalFovAndAspectRatio(DegToRad(m_fov), ar);
         m_frustum.SetViewPlaneDistances(n, f);
-        m_scene_width = m_frustum.NearPlaneWidth();
-        m_scene_height = m_frustum.NearPlaneHeight();
+        m_scene_width = m_frustum.NearPlaneWidth() / 0.1;
+        m_scene_height = m_frustum.NearPlaneHeight() / 0.1;
     }
     else
     {

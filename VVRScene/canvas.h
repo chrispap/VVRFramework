@@ -7,6 +7,7 @@
 #include <vector>
 #include <cstdlib>
 #include <GeoLib.h>
+#include <MathGeoLib.h>
 
 static void drawSphere(double r, int lats, int longs);
 
@@ -320,11 +321,27 @@ public:
 
 };
 
-VVRScene_API void draw(C2DPointSet &point_set, const Colour &col=Colour::black);
+/////////////////////////////////////////////////////////////////////////////////////////
+//! Drawing Utilities for 3rd party lib objects
+/////////////////////////////////////////////////////////////////////////////////////////
+
+VVRScene_API void draw(C2DPointSet &point_set, const Colour &col = Colour::black);
 
 VVRScene_API void draw(C2DLineSet &line_set, const Colour &col = Colour::black);
 
 VVRScene_API void draw(C2DPolygon &polygon, const Colour &col = Colour::black, bool filled = false);
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//! Geometric struct converters from 3rd party lib objects
+/////////////////////////////////////////////////////////////////////////////////////////
+
+VVRScene_API vvr::Triangle3D math2vvr(const math::Triangle &t, const vvr::Colour &col);
+
+VVRScene_API vvr::LineSeg3D math2vvr(const math::LineSegment &l, const vvr::Colour &col);
+
+VVRScene_API vvr::LineSeg3D math2vvr(const math::Line &l, const vvr::Colour &col);
+
+VVRScene_API vvr::Point3D math2vvr(const math::vec &v, const vvr::Colour &col);
 
 }
 

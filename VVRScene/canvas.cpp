@@ -334,3 +334,31 @@ void vvr::draw(C2DPolygon  &polygon, const Colour &col, bool filled)
         }
     }
 }
+
+vvr::Triangle3D vvr::math2vvr(const math::Triangle &t, const vvr::Colour &col)
+{
+    return vvr::Triangle3D(
+        t.a.x, t.a.y, t.a.z,
+        t.c.x, t.c.y, t.c.z,
+        t.b.x, t.b.y, t.b.z,
+        col);
+}
+
+vvr::LineSeg3D vvr::math2vvr(const math::LineSegment &l, const vvr::Colour &col)
+{
+    return vvr::LineSeg3D(
+        l.a.x, l.a.y, l.a.z,
+        l.b.x, l.b.y, l.b.z,
+        col);
+}
+
+vvr::LineSeg3D vvr::math2vvr(const math::Line &l, const vvr::Colour &col)
+{
+    const auto &lseg(l.ToLineSegment(1000));
+    return math2vvr(lseg, col);
+}
+
+vvr::Point3D vvr::math2vvr(const math::vec &v, const vvr::Colour &col)
+{
+    return vvr::Point3D(v.x, v.y, v.z, col);
+}

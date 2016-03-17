@@ -225,7 +225,7 @@ void Box::draw(const Colour &col, unsigned char a) const
     glEnd();
 }
 
-void Triangle::update()
+void vvr::Triangle::update()
 {
     box = Box(v1(), v2(), v3());
     A = v1().y*(v2().z - v3().z) + v2().y*(v3().z - v1().z) + v3().y*(v1().z - v2().z);
@@ -234,37 +234,37 @@ void Triangle::update()
     D = -v1().x*(v2().y*v3().z - v3().y*v2().z) - v2().x*(v3().y*v1().z - v1().y*v3().z) - v3().x*(v1().y*v2().z - v2().y*v1().z);
 }
 
-const Vec3d& Triangle::v1() const
+const Vec3d& vvr::Triangle::v1() const
 {
     return (*vecList)[vi1];
 }
 
-const Vec3d& Triangle::v2() const
+const Vec3d& vvr::Triangle::v2() const
 {
     return (*vecList)[vi2];
 }
 
-const Vec3d& Triangle::v3() const
+const Vec3d& vvr::Triangle::v3() const
 {
     return (*vecList)[vi3];
 }
 
-const Box& Triangle::getBox() const
+const Box& vvr::Triangle::getBox() const
 {
     return box;
 }
 
-const Vec3d Triangle::getNormal() const
+const Vec3d vvr::Triangle::getNormal() const
 {
     return Vec3d(A, B, C).normalize();
 }
 
-const Vec3d Triangle::getCenter() const
+const Vec3d vvr::Triangle::getCenter() const
 {
     return Vec3d(v1()).add(v2()).add(v3()).scale(1.0f / 3);
 }
 
-double Triangle::planeEquation(const Vec3d &r) const
+double vvr::Triangle::planeEquation(const Vec3d &r) const
 {
     return A*r.x + B*r.y + C*r.z + D;
 }
