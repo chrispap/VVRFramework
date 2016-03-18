@@ -88,15 +88,14 @@ void vvr::GLWidget::keyPressEvent(QKeyEvent *event)
 void vvr::GLWidget::onKeyPressed(QKeyEvent *event)
 {
     int modif = mkModif(event);
-    QString c = event->text();
-
+    QString txt = event->text();
     if (event->key() == Qt::Key_Escape) QApplication::quit();
-    else if (c.length()>0) mScene->keyEvent(c.toLatin1()[0],false, modif);
+    else if (event->key() >= Qt::Key_A && event->key() <= Qt::Key_Z) mScene->keyEvent(tolower(event->key()), false, modif);
+    else if (txt.length()>0) mScene->keyEvent(txt.toStdString()[0],false, modif);
     else if (event->key() == Qt::Key_Left) mScene->arrowEvent(vvr::LEFT, modif);
     else if (event->key() == Qt::Key_Right) mScene->arrowEvent(vvr::RIGHT, modif);
     else if (event->key() == Qt::Key_Up) mScene->arrowEvent(vvr::UP, modif);
     else if (event->key() == Qt::Key_Down) mScene->arrowEvent(vvr::DOWN, modif);
-
     idle();
 }
 
