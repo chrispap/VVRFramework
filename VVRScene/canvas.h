@@ -9,7 +9,6 @@
 #include <GeoLib.h>
 #include <MathGeoLib.h>
 
-static void drawSphere(double r, int lats, int longs);
 
 namespace vvr {
 
@@ -178,17 +177,21 @@ struct VVRScene_API Box3D : public Shape
 {
     double x1, y1, z1;
     double x2, y2, z2;
+    float transparency;
 
 protected:
     void drawShape() const override;
 
 public:
-    Box3D() {}
+    Box3D() : transparency(0) {}
     Box3D(double xmin, double ymin, double zmin,
-          double xmax, double ymax, double zmax,
-          const Colour &col = Colour()) :
-        x1(xmin), y1(ymin), z1(zmin),
-        x2(xmax), y2(ymax), z2(zmax), Shape(col) {}
+        double xmax, double ymax, double zmax,
+        const Colour &col = Colour())
+        : x1(xmin), y1(ymin), z1(zmin)
+        , x2(xmax), y2(ymax), z2(zmax)
+        , Shape(col), transparency(0) {}
+
+    void setTransparency(float a) { transparency = a; }
 };
 
 struct VVRScene_API Triangle2D : public Shape
@@ -246,8 +249,6 @@ public:
         vertex_col[0] = c1; vertex_col[1] = c2; vertex_col[2] = c3;
     }
 };
-
-/* Canvas */
 
 struct VVRScene_API Frame {
     std::vector<Shape*> shapes;
@@ -342,6 +343,14 @@ VVRScene_API vvr::LineSeg3D math2vvr(const math::LineSegment &l, const vvr::Colo
 VVRScene_API vvr::LineSeg3D math2vvr(const math::Line &l, const vvr::Colour &col);
 
 VVRScene_API vvr::Point3D math2vvr(const math::vec &v, const vvr::Colour &col);
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//! Private drawing utils
+/////////////////////////////////////////////////////////////////////////////////////////
+
+static void drawSphere(double r, int lats, int longs);
+
+static void drawBox(double x1, double y1, double z1, double x2, double y2, double z2, Colour col, char alpha);
 
 }
 

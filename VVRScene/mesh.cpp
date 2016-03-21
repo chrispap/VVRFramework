@@ -1,7 +1,5 @@
 #include "mesh.h"
-#include "geom.h"
 #include "tiny_obj_loader.h"
-
 #include <cstdio>
 #include <ctime>
 #include <cfloat>
@@ -9,27 +7,78 @@
 #include <vector>
 #include <list>
 #include <set>
+#include <MathGeoLib.h>
 #include <QtOpenGL>
 
-using namespace vvr;
 using namespace std;
+using namespace vvr;
+using namespace math;
 using namespace tinyobj;
 
-Mesh::Mesh()
+AABB aabbFromVertices(const vector<vec> &vertices)
 {
+    vec min, max;
+    min.x = min.y = min.z = FLT_MAX;
+    max.x = max.y = max.z = -FLT_MAX;
+    vector<vec>::const_iterator vi;
+    for (vi = vertices.begin(); vi != vertices.end(); ++vi) {
+        if (vi->x > max.x) max.x = vi->x;
+        else if (vi->x < min.x) min.x = vi->x;
+        if (vi->y > max.y) max.y = vi->y;
+        else if (vi->y < min.y) min.y = vi->y;
+        if (vi->z > max.z) max.z = vi->z;
+        else if (vi->z < min.z) min.z = vi->z;
+    }
+
+    return AABB(min, max);
 }
 
-Mesh::~Mesh()
+void vvr::Triangle::update()
 {
+    A = v1().y*(v2().z - v3().z) + v2().y*(v3().z - v1().z) + v3().y*(v1().z - v2().z);
+    B = v1().z*(v2().x - v3().x) + v2().z*(v3().x - v1().x) + v3().z*(v1().x - v2().x);
+    C = v1().x*(v2().y - v3().y) + v2().x*(v3().y - v1().y) + v3().x*(v1().y - v2().y);
+    D = -v1().x*(v2().y*v3().z - v3().y*v2().z) - v2().x*(v3().y*v1().z - v1().y*v3().z) - v3().x*(v1().y*v2().z - v2().y*v1().z);
 }
 
-Mesh::Mesh(const string &objDir, const string &objFile, const string &texFile, bool ccw)
+const vec& vvr::Triangle::v1() const
+{
+    return (*vecList)[vi1];
+}
+
+const vec& vvr::Triangle::v2() const
+{
+    return (*vecList)[vi2];
+}
+
+const vec& vvr::Triangle::v3() const
+{
+    return (*vecList)[vi3];
+}
+
+const vec vvr::Triangle::getNormal() const
+{
+    return vec(A, B, C).Normalized();
+}
+
+const vec vvr::Triangle::getCenter() const
+{
+    return (v1() + v2() + v3()) / 3.0;
+}
+
+double vvr::Triangle::planeEquation(const vec &r) const
+{
+    return A*r.x + B*r.y + C*r.z + D;
+}
+
+Mesh::Mesh(const string &objFile, const string &texFile, bool ccw)
 {
     mCCW = ccw;
+    mTransform.SetIdentity();
 
     std::vector<shape_t> shapes;
     std::vector<material_t> materials;
-    string err = LoadObj(shapes, materials, objFile.c_str(), objDir.c_str());
+    string err = LoadObj(shapes, materials, objFile.c_str(), "");
     if (!err.empty()) throw err;
 
     vector<float> &positions = shapes[0].mesh.positions;
@@ -38,7 +87,7 @@ Mesh::Mesh(const string &objDir, const string &objFile, const string &texFile, b
 
     // Store vertices.
     for (unsigned i=0; i<positions.size() ; i+=3)
-        mVertices.push_back(Vec3d(positions[i], positions[i+1], positions[i+2]));
+        mVertices.push_back(vec(positions[i], positions[i+1], positions[i+2]));
     
     // Store faces (triangles).
     for (unsigned i=0; i<indices.size() ; i+=3)
@@ -53,11 +102,11 @@ Mesh::Mesh(const string &objDir, const string &objFile, const string &texFile, b
     if (!normals.empty()) {
         const int n = normals.size();
         for (unsigned i=0; i<n ; i+=3)
-            mVertexNormals.push_back(Vec3d(normals[i], normals[i+1], normals[i+2]));
+            mVertexNormals.push_back(vec(normals[i], normals[i+1], normals[i+2]));
     }
     else createNormals();
 
-    mAABB = Box(mVertices);
+    mAABB = aabbFromVertices(mVertices);
 }
 
 Mesh::Mesh(const Mesh &original):
@@ -67,28 +116,9 @@ Mesh::Mesh(const Mesh &original):
     mVertexNormals (original.mVertexNormals),
     mTexCoords (original.mTexCoords),
     mAABB (original.mAABB),
-    mRot (original.mRot),
-    mPos (original.mPos),
+    mTransform(original.mTransform),
     mTexName(original.mTexName)
 {
-    vector<Triangle>::iterator ti;
-    for (ti=mTriangles.begin(); ti!= mTriangles.end(); ++ti) {
-        ti->vecList = &mVertices;
-    }
-}
-
-void Mesh::operator=(const Mesh *src)
-{
-    mCCW = src->mCCW;
-    mVertices = src->mVertices;
-    mTriangles = src->mTriangles;
-    mVertexNormals = src->mVertexNormals;
-    mTexCoords = src->mTexCoords;
-    mAABB = src->mAABB;
-    mRot = src->mRot;
-    mPos = src->mPos;
-    mTexName= src->mTexName;
-
     vector<Triangle>::iterator ti;
     for (ti=mTriangles.begin(); ti!= mTriangles.end(); ++ti) {
         ti->vecList = &mVertices;
@@ -103,8 +133,7 @@ void Mesh::operator=(const Mesh &src)
     mVertexNormals = src.mVertexNormals;
     mTexCoords = src.mTexCoords;
     mAABB = src.mAABB;
-    mRot = src.mRot;
-    mPos = src.mPos;
+    mTransform = src.mTransform;
     mTexName= src.mTexName;
 
     vector<Triangle>::iterator ti;
@@ -129,14 +158,14 @@ void Mesh::createNormals()
 
     mVertexNormals.clear();
     mVertexNormals.resize(mVertices.size());
-    Vec3d normSum;
+    vec normSum;
     for (unsigned vi=0; vi< mVertices.size(); ++vi) {
-        normSum = Vec3d(0);
+        normSum = vec::zero;
         set<int>::const_iterator _ti;
         for (_ti=mVertexTriangles[vi].begin(); _ti!=mVertexTriangles[vi].end(); ++_ti)
-            normSum.add(mTriangles[*_ti].getNormal());
-        double s = (mCCW ? -1.0 : 1.0) / normSum.length();
-        mVertexNormals[vi] = normSum.scale(s);
+            normSum += (mTriangles[*_ti].getNormal());
+        double s = (mCCW ? -1.0 : 1.0) / normSum.Length();
+        mVertexNormals[vi] = normSum.Mul(s);
     }
 }
 
@@ -153,51 +182,54 @@ void Mesh::update()
     createNormals();
 }
 
+float Mesh::getMaxSize() const
+{
+    const vec sz = mAABB.Size();
+    return Max(sz.x, sz.y, sz.z);
+}
+
 void Mesh::setBigSize(float size)
 {
-    float s = size / mAABB.getMaxSize();
+    float s = size / getMaxSize();
 
-    vector<Vec3d>::iterator vi;
+    vector<vec>::iterator vi;
     for (vi = mVertices.begin(); vi != mVertices.end(); ++vi)
-        vi->scale(s);
+        *vi *= s;
 
-    mAABB.scale(s);
+    mAABB.Scale(vec::zero, s);
 
     updateTriangleData();
 }
 
 void Mesh::cornerAlign()
 {
-    Vec3d offs(mAABB.min);
-    offs.scale(-1.0);
+    vec offs = mAABB.minPoint * -1;
+
     move(offs);
 }
 
 void Mesh::centerAlign()
 {
-    Vec3d offs(mAABB.max);
-    offs.add(mAABB.min);
-    offs.scale(-0.5);
+    vec offs = (mAABB.maxPoint + mAABB.minPoint) / -2.0;
     move(offs);
 }
 
-void Mesh::move(const Vec3d &p)
+void Mesh::move(const vec &p)
 {
-    std::vector<Vec3d>::iterator vi;
-    for (vi=mVertices.begin(); vi!= mVertices.end(); ++vi)
-        vi->add(p);
+    std::vector<vec>::iterator vi;
+    for (vi = mVertices.begin(); vi != mVertices.end(); ++vi)
+        *vi += p;
 
-    mAABB.add(p);
+    mAABB.Translate(p);
 
     updateTriangleData();
 }
 
-void Mesh::rotate(const Vec3d &p)
+void Mesh::rotate(const vec &p)
 {
 
 }
 
-/* Drawing */
 void Mesh::drawTriangles(Colour col, bool wire)
 {
     bool normExist = !mVertexNormals.empty();
@@ -218,36 +250,37 @@ void Mesh::drawTriangles(Colour col, bool wire)
 
     glBegin(GL_TRIANGLES);
     for(ti=mTriangles.begin(); ti!=mTriangles.end(); ++ti) {
-        if (normExist) glNormal3dv(mVertexNormals[ti->vi1].data);
+        if (normExist) glNormal3fv(mVertexNormals[ti->vi1].ptr());
         if (texExists) glTexCoord2f(mTexCoords[2*ti->vi1], mTexCoords[2*ti->vi1+1]);
-        glVertex3dv(ti->v1().data);
+        glVertex3fv(ti->v1().ptr());
 
-        if (normExist) glNormal3dv(mVertexNormals[ti->vi2].data);
+        if (normExist) glNormal3fv(mVertexNormals[ti->vi2].ptr());
         if (texExists) glTexCoord2f(mTexCoords[2*ti->vi2], mTexCoords[2*ti->vi2+1]);
-        glVertex3dv(ti->v2().data);
+        glVertex3fv(ti->v2().ptr());
 
-        if (normExist) glNormal3dv(mVertexNormals[ti->vi3].data);
+        if (normExist) glNormal3fv(mVertexNormals[ti->vi3].ptr());
         if (texExists) glTexCoord2f(mTexCoords[2*ti->vi3], mTexCoords[2*ti->vi3+1]);
-        glVertex3dv(ti->v3().data);
+        glVertex3fv(ti->v3().ptr());
     }
     glEnd();
 }
 
 void Mesh::drawNormals(Colour col)
 {
-    const float len = mAABB.getMaxSize() / 50;
+    const float disp_length = getMaxSize() / 50;
     
     glBegin(GL_LINES);
 
-    for(int i=0; i<mVertices.size(); i++) {
-        Vec3d n = mVertices[i];
+    for(int i=0; i<mVertices.size(); i++) 
+    {
+        vec n = mVertices[i];
         glColor3ubv(Colour(0x00,0,0).data);
-        glVertex3dv(n.data);
-        Vec3d norm = mVertexNormals[i];
-        norm.scale(len);
-        n.add(norm);
+        glVertex3fv(n.ptr());
+        vec norm = mVertexNormals[i];
+        norm.ScaleToLength(disp_length);
+        n += norm;
         glColor3ubv(Colour(0xFF,0,0).data);
-        glVertex3dv(n.data);
+        glVertex3fv(n.ptr());
     }
 
     glEnd();
@@ -260,15 +293,15 @@ void Mesh::drawAxes()
     //[X]
     glColor3ub(0xFF, 0, 0);
     glVertex3f(0,0,0);
-    glVertex3f(mAABB.getMaxSize(), 0, 0);
+    glVertex3f(getMaxSize(), 0, 0);
     //[Y]
     glColor3f(0, 0xFF, 0);
     glVertex3f(0,0,0);
-    glVertex3f(0, mAABB.getMaxSize(), 0);
+    glVertex3f(0, getMaxSize(), 0);
     //[Z]
     glColor3f(0, 0, 0xFF);
     glVertex3f(0,0,0);
-    glVertex3f(0, 0, mAABB.getMaxSize());
+    glVertex3f(0, 0, getMaxSize());
 
     glEnd();
 }
@@ -277,16 +310,18 @@ void Mesh::draw(Colour col, Style x)
 {
     glPushMatrix();
 
-    glTranslatef(mPos.x, mPos.y, mPos.z);
-    
-    glRotatef( mRot.x,  1, 0, 0);
-    glRotatef( mRot.y,  0, 1, 0);
-    glRotatef( mRot.z,  0, 0, 1);
+    float4x4 M(mTransform);
+    M.Transpose();
+    glMultMatrixf(M.ptr());
 
     if (x & SOLID) drawTriangles(col, false);
     if (x & WIRE) drawTriangles(col, true);
     if (x & NORMALS) drawNormals(col);
-    if (x & BOUND) mAABB.draw(col);
+    if (x & BOUND) {
+        vvr::Box3D aabb(mAABB.MinX(), mAABB.MinY(), mAABB.MinZ(), mAABB.MaxX(), mAABB.MaxY(), mAABB.MaxZ(), col);
+        aabb.setTransparency(0.88);
+        aabb.draw();
+    }
     if (x & AXES) drawAxes();
 
     glPopMatrix();

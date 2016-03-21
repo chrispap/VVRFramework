@@ -2,7 +2,7 @@
 #define VVR_SCENE_H
 
 #include "vvrscenedll.h"
-#include "geom.h"
+#include "canvas.h"
 #include <MathGeoLib.h>
 
 namespace vvr {

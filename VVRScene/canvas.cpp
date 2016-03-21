@@ -1,5 +1,4 @@
 #include "canvas.h"
-#include "geom.h"
 #include <iostream>
 #include <vector>
 #include <cmath>
@@ -9,10 +8,16 @@
 using namespace vvr;
 using namespace std;
 
+/////////////////////////////////////////////////////////////////////////////////////////
+//! Global constants
+/////////////////////////////////////////////////////////////////////////////////////////
+
 float Shape::DEF_LINE_WIDTH = 2.2f;
 float Shape::DEF_POINT_SIZE = 7.0f;
 
-/* Common Color Definitions */
+/////////////////////////////////////////////////////////////////////////////////////////
+//! Common Color Definitions
+/////////////////////////////////////////////////////////////////////////////////////////
 
 const Colour Colour::red            (0xFF, 0x00, 0x00);
 const Colour Colour::blue           (0x00, 0x00, 0xFF);
@@ -29,7 +34,9 @@ const Colour Colour::darkOrange     (0xFF, 0x8C, 0x00);
 const Colour Colour::darkGreen      (0x00, 0x64, 0x00);
 const Colour Colour::yellowGreen    (0x9A, 0xCD, 0x32);
 
-/* Shape drawing */
+/////////////////////////////////////////////////////////////////////////////////////////
+//! vvr::Shape and childs
+/////////////////////////////////////////////////////////////////////////////////////////
 
 void Shape::draw() const {
     glPolygonMode(GL_FRONT_AND_BACK, b_render_solid ? GL_FILL : GL_LINE);
@@ -113,9 +120,8 @@ void Sphere3D::drawShape() const {
 }
 
 void Box3D::drawShape() const {
-    Box box(Vec3d(x1, y1, z1), Vec3d(x2, y2, z2));
-    box.draw(colour, 0x100);
-    box.draw(colour, 0);
+    drawBox(x1, y1, z1, x2, y2, z2, colour, 0);
+    drawBox(x1, y1, z1, x2, y2, z2, colour, 255 - transparency * 255);
 }
 
 void Triangle2D::drawShape() const {
@@ -150,7 +156,9 @@ void Triangle3D::drawShape() const {
     glEnd();
 }
 
-/* Canvas */
+/////////////////////////////////////////////////////////////////////////////////////////
+//! vvr::Frame vvr::Canvas
+/////////////////////////////////////////////////////////////////////////////////////////
 
 Frame::Frame() : show_old(true)
 {
@@ -250,30 +258,9 @@ void Canvas2D::clearFrame()
     frames[fi].shapes.clear();
 }
 
-void drawSphere(double r, int lats, int longs)
-{
-    int i, j;
-    for (i = 0; i <= lats; i++) {
-        double lat0 = M_PI * (-0.5 + (double)(i - 1) / lats);
-        double z0 = sin(lat0);
-        double zr0 = cos(lat0);
-
-        double lat1 = M_PI * (-0.5 + (double)i / lats);
-        double z1 = sin(lat1);
-        double zr1 = cos(lat1);
-        glBegin(GL_QUAD_STRIP);
-        for (j = 0; j <= longs; j++) {
-            double lng = 2 * M_PI * (double)(j - 1) / longs;
-            double x = cos(lng);
-            double y = sin(lng);
-            glNormal3f(x * zr0, y * zr0, z0);
-            glVertex3f(x * zr0, y * zr0, z0);
-            glNormal3f(x * zr1, y * zr1, z1);
-            glVertex3f(x * zr1, y * zr1, z1);
-        }
-        glEnd();
-    }
-}
+/////////////////////////////////////////////////////////////////////////////////////////
+//! Drawing Utilities for 3rd party lib objects
+/////////////////////////////////////////////////////////////////////////////////////////
 
 void vvr::draw(C2DPointSet &point_set, const Colour &col)
 {
@@ -335,6 +322,10 @@ void vvr::draw(C2DPolygon  &polygon, const Colour &col, bool filled)
     }
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////
+//! Geometric struct converters from 3rd party lib objects
+/////////////////////////////////////////////////////////////////////////////////////////
+
 vvr::Triangle3D vvr::math2vvr(const math::Triangle &t, const vvr::Colour &col)
 {
     return vvr::Triangle3D(
@@ -361,4 +352,90 @@ vvr::LineSeg3D vvr::math2vvr(const math::Line &l, const vvr::Colour &col)
 vvr::Point3D vvr::math2vvr(const math::vec &v, const vvr::Colour &col)
 {
     return vvr::Point3D(v.x, v.y, v.z, col);
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////
+//! Private drawing utils
+/////////////////////////////////////////////////////////////////////////////////////////
+
+void vvr::drawSphere(double r, int lats, int longs)
+{
+    int i, j;
+    for (i = 0; i <= lats; i++) {
+        double lat0 = M_PI * (-0.5 + (double)(i - 1) / lats);
+        double z0 = sin(lat0);
+        double zr0 = cos(lat0);
+
+        double lat1 = M_PI * (-0.5 + (double)i / lats);
+        double z1 = sin(lat1);
+        double zr1 = cos(lat1);
+        glBegin(GL_QUAD_STRIP);
+        for (j = 0; j <= longs; j++) {
+            double lng = 2 * M_PI * (double)(j - 1) / longs;
+            double x = cos(lng);
+            double y = sin(lng);
+            glNormal3f(x * zr0, y * zr0, z0);
+            glVertex3f(x * zr0, y * zr0, z0);
+            glNormal3f(x * zr1, y * zr1, z1);
+            glVertex3f(x * zr1, y * zr1, z1);
+        }
+        glEnd();
+    }
+}
+
+void vvr::drawBox(double x1, double y1, double z1, double x2, double y2, double z2, Colour col, char a)
+{
+    static vec p[8];
+    vec *v = p;
+
+    *v++ = vec(x1, y1, z1); //0
+    *v++ = vec(x1, y2, z1); //1
+    *v++ = vec(x1, y2, z2); //2
+    *v++ = vec(x1, y1, z2); //3
+    *v++ = vec(x2, y1, z1); //4
+    *v++ = vec(x2, y2, z1); //5
+    *v++ = vec(x2, y2, z2); //6
+    *v++ = vec(x2, y1, z2); //7
+
+    glPolygonMode(GL_FRONT_AND_BACK, a ? GL_FILL : GL_LINE);
+    glBegin(GL_QUADS);
+
+    if (a) {
+        glColor4ub(col.r, col.g, col.b, a);
+    }
+    else {
+        glColor3ubv(col.data);
+    }
+
+    glVertex3fv(p[0].ptr());
+    glVertex3fv(p[1].ptr());
+    glVertex3fv(p[2].ptr());
+    glVertex3fv(p[3].ptr());
+
+    glVertex3fv(p[1].ptr());
+    glVertex3fv(p[2].ptr());
+    glVertex3fv(p[6].ptr());
+    glVertex3fv(p[5].ptr());
+
+    glVertex3fv(p[4].ptr());
+    glVertex3fv(p[5].ptr());
+    glVertex3fv(p[6].ptr());
+    glVertex3fv(p[7].ptr());
+
+    glVertex3fv(p[0].ptr());
+    glVertex3fv(p[4].ptr());
+    glVertex3fv(p[7].ptr());
+    glVertex3fv(p[3].ptr());
+
+    glVertex3fv(p[2].ptr());
+    glVertex3fv(p[3].ptr());
+    glVertex3fv(p[7].ptr());
+    glVertex3fv(p[6].ptr());
+
+    glVertex3fv(p[0].ptr());
+    glVertex3fv(p[1].ptr());
+    glVertex3fv(p[5].ptr());
+    glVertex3fv(p[4].ptr());
+
+    glEnd();
 }
