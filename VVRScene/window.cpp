@@ -47,7 +47,6 @@ vvr::Window::Window(vvr::Scene *scene) : scene(scene)
         plain_text_log->hide();
     }
     if (scene->hideSliders()) {
-
         QLayout * layout = slider_groupbox->layout();
         QLayoutItem * item;
         QLayout * sublayout;
@@ -61,8 +60,7 @@ vvr::Window::Window(vvr::Scene *scene) : scene(scene)
         delete slider_groupbox;
     }
 
-    if (scene->fullScreen())
-    {
+    if (scene->fullScreen()) {
         QTimer::singleShot(150, this, SLOT(showFullScreen()));
     }
     else {
@@ -85,6 +83,7 @@ void vvr::Window::log_cout(const char* ptr, std::streamsize count, void* pte)
     if (keep_on_bottom)
         vScrollBar->triggerAction(QScrollBar::SliderToMaximum);
     printf("%.*s", (int)count, ptr);
+
 #ifdef VVR_USE_BOOST
     vvr::logi(str.toStdString());
 #endif
@@ -103,6 +102,7 @@ void vvr::Window::log_cerr(const char* ptr, std::streamsize count, void* pte)
     if (keep_on_bottom)
         vScrollBar->triggerAction(QScrollBar::SliderToMaximum);
     fprintf(stderr, "%.*s", (int)count, ptr);
+
 #ifdef VVR_USE_BOOST
     vvr::loge(str.toStdString());
 #endif

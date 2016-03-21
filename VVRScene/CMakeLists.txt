@@ -46,7 +46,6 @@ install (TARGETS VVRScene DESTINATION "lib")
 if(MSVC AND RUN_WINDEPLOYQT)
   ADD_CUSTOM_COMMAND(TARGET VVRScene POST_BUILD COMMAND
     ${QT_BIN_DIR}/windeployqt.exe $<TARGET_FILE:VVRScene> -dir ${CMAKE_CURRENT_BINARY_DIR}/lib)
-
   INSTALL (DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib DESTINATION .)
-endif(MSVC)
+endif(MSVC AND RUN_WINDEPLOYQT)
 #########################################################################################

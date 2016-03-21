@@ -1,11 +1,10 @@
 #include "glwidget.h"
-
+#include "scene.h"
 #include <iostream>
 #include <QtOpenGL>
 #include <QMouseEvent>
 #include <QTimer>
 #include <math.h>
-#include "scene.h"
 
 #define ANIM_INTERVAL 10
 
