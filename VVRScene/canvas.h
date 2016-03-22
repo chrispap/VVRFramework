@@ -184,12 +184,16 @@ protected:
 
 public:
     Box3D() : transparency(0) {}
+
+    Box3D(const std::vector<vec> vertices, const Colour &col = Colour());
+
     Box3D(double xmin, double ymin, double zmin,
         double xmax, double ymax, double zmax,
         const Colour &col = Colour())
         : x1(xmin), y1(ymin), z1(zmin)
         , x2(xmax), y2(ymax), z2(zmax)
         , Shape(col), transparency(0) {}
+
 
     void setTransparency(float a) { transparency = a; }
 };

@@ -15,7 +15,7 @@ using namespace vvr;
 using namespace math;
 using namespace tinyobj;
 
-AABB aabbFromVertices(const vector<vec> &vertices)
+math::AABB vvr::aabbFromVertices(const vector<vec> &vertices)
 {
     vec min, max;
     min.x = min.y = min.z = FLT_MAX;
@@ -318,7 +318,7 @@ void Mesh::draw(Colour col, Style x)
     if (x & WIRE) drawTriangles(col, true);
     if (x & NORMALS) drawNormals(col);
     if (x & BOUND) {
-        vvr::Box3D aabb(mAABB.MinX(), mAABB.MinY(), mAABB.MinZ(), mAABB.MaxX(), mAABB.MaxY(), mAABB.MaxZ(), col);
+        Box3D aabb(mAABB.MinX(), mAABB.MinY(), mAABB.MinZ(), mAABB.MaxX(), mAABB.MaxY(), mAABB.MaxZ(), col);
         aabb.setTransparency(0.88);
         aabb.draw();
     }

@@ -1,12 +1,13 @@
 #include "canvas.h"
+#include "mesh.h"
 #include <iostream>
 #include <vector>
 #include <cmath>
 #include <QtOpenGL>
 #include <MathGeoLib.h>
 
-using namespace vvr;
 using namespace std;
+using namespace vvr;
 
 /////////////////////////////////////////////////////////////////////////////////////////
 //! Global constants
@@ -38,13 +39,15 @@ const Colour Colour::yellowGreen    (0x9A, 0xCD, 0x32);
 //! vvr::Shape and childs
 /////////////////////////////////////////////////////////////////////////////////////////
 
-void Shape::draw() const {
+void Shape::draw() const 
+{
     glPolygonMode(GL_FRONT_AND_BACK, b_render_solid ? GL_FILL : GL_LINE);
     glColor3ubv(colour.data);
     drawShape();
 }
 
-void Point2D::drawShape() const {
+void Point2D::drawShape() const 
+{
     glPointSize(DEF_POINT_SIZE);
     glEnable(GL_POINT_SMOOTH);
     glBegin(GL_POINTS);
@@ -52,7 +55,8 @@ void Point2D::drawShape() const {
     glEnd();
 }
 
-void Point3D::drawShape() const {
+void Point3D::drawShape() const 
+{
     glPointSize(DEF_POINT_SIZE);
     glEnable(GL_POINT_SMOOTH);
     glBegin(GL_POINTS);
@@ -60,7 +64,8 @@ void Point3D::drawShape() const {
     glEnd();
 }
 
-void LineSeg2D::drawShape() const {
+void LineSeg2D::drawShape() const
+{
     glLineWidth(DEF_LINE_WIDTH);
     glBegin(GL_LINES);
     glVertex2f(x1, y1);
@@ -68,7 +73,8 @@ void LineSeg2D::drawShape() const {
     glEnd();
 }
 
-void Line2D::drawShape() const {
+void Line2D::drawShape() const 
+{
     double dx = x2-x1;
     double dy = y2-y1;
 
@@ -79,7 +85,8 @@ void Line2D::drawShape() const {
     glEnd();
 }
 
-void LineSeg3D::drawShape() const {
+void LineSeg3D::drawShape() const 
+{
     double dx = x2-x1;
     double dy = y2-y1;
 
@@ -90,7 +97,8 @@ void LineSeg3D::drawShape() const {
     glEnd();
 }
 
-void Circle2D::drawShape() const {
+void Circle2D::drawShape() const 
+{
     if (rad_from >= rad_to) {
         std::cerr << "Trying to render circle with [rad_from >= rad_to]" << std::endl;
         return;
@@ -111,7 +119,8 @@ void Circle2D::drawShape() const {
 
 }
 
-void Sphere3D::drawShape() const {
+void Sphere3D::drawShape() const 
+{
     glPushMatrix();
     glTranslated(x, y, z);
     glScaled(rad, rad, rad);
@@ -119,12 +128,29 @@ void Sphere3D::drawShape() const {
     glPopMatrix();
 }
 
-void Box3D::drawShape() const {
+Box3D::Box3D(const std::vector<vec> vertices, const Colour &col)
+    : Shape(col)
+    , transparency(0)
+{
+    math::AABB aabb = aabbFromVertices(vertices);
+
+    x1 = aabb.minPoint.x;
+    y1 = aabb.minPoint.y;
+    z1 = aabb.minPoint.z;
+
+    x2 = aabb.maxPoint.x;
+    y2 = aabb.maxPoint.y;
+    z2 = aabb.maxPoint.z;
+}
+
+void Box3D::drawShape() const 
+{
     drawBox(x1, y1, z1, x2, y2, z2, colour, 0);
     drawBox(x1, y1, z1, x2, y2, z2, colour, 255 - transparency * 255);
 }
 
-void Triangle2D::drawShape() const {
+void Triangle2D::drawShape() const 
+{
     glLineWidth(DEF_LINE_WIDTH);
     glBegin(GL_TRIANGLES);
     glVertex2f(x1, y1);
@@ -133,7 +159,8 @@ void Triangle2D::drawShape() const {
     glEnd();
 }
 
-void Triangle3D::drawShape() const {
+void Triangle3D::drawShape() const 
+{
     glLineWidth(DEF_LINE_WIDTH);
     glBegin(GL_TRIANGLES);
     math::vec n = math::Triangle(
@@ -184,16 +211,19 @@ Canvas2D::~Canvas2D()
     }
 }
 
-void Canvas2D::add(Shape *shape_ptr) {
+void Canvas2D::add(Shape *shape_ptr) 
+{
     frames[fi].shapes.push_back(shape_ptr);
 }
 
-void Canvas2D::newFrame(bool show_old_frames) {
+void Canvas2D::newFrame(bool show_old_frames) 
+{
     frames.push_back(Frame(show_old_frames));
     ff();
 }
 
-void Canvas2D::draw() {
+void Canvas2D::draw() 
+{
     Frame *frame;
     int fi_ = (int) fi;
     while (frames[fi_].show_old && --fi_>=0);
@@ -205,23 +235,28 @@ void Canvas2D::draw() {
     }
 }
 
-void Canvas2D::next() {
+void Canvas2D::next() 
+{
     if (fi<frames.size()-1) fi++;
 }
 
-void Canvas2D::prev() {
+void Canvas2D::prev() 
+{
     if (fi>0) fi--;
 }
 
-void Canvas2D::rew() {
+void Canvas2D::rew() 
+{
     fi = 0;
 }
 
-void Canvas2D::ff() {
+void Canvas2D::ff() 
+{
     fi = frames.size()-1;
 }
 
-void Canvas2D::resize(int i) {
+void Canvas2D::resize(int i) 
+{
     if (i<1 || i > size()-1) return;
 
     // Delete shapes of frames that will be discarded
