@@ -31,7 +31,7 @@ if(${VVR_USE_BOOST})
   set(Boost_USE_MULTITHREADED ON)
   set(Boost_USE_STATIC_RUNTIME OFF)
   set(Boost_NEEDED_LIBS log log_setup system filesystem date_time thread chrono regex)
-  find_package(Boost 1.57.0 COMPONENTS ${Boost_NEEDED_LIBS})
+  find_package(Boost 1.55.0 COMPONENTS ${Boost_NEEDED_LIBS} REQUIRED)
   add_definitions(-DVVR_USE_BOOST)
 endif()
 #########################################################################################
