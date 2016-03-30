@@ -7,7 +7,39 @@
 
 namespace vvr {
 
-enum ArrowDir {
+struct IAnimatable 
+{
+    virtual bool animate(float time) = 0;
+};
+
+struct Animation
+{
+    bool paused;
+    float time;
+    float speed;
+    float last_update;
+    float end_time;
+
+    Animation()
+    {
+        const float sec = getSeconds();
+        paused = true;
+        time = 0;
+        speed = 0.01;
+        last_update = sec;
+        end_time = 0;
+    }
+
+    void updateTime()
+    {
+        const float sec = getSeconds();
+        time += ((sec - last_update) * speed);
+        last_update = sec;
+    }
+};
+
+enum ArrowDir 
+{
     UP = 0,
     DOWN,
     RIGHT,

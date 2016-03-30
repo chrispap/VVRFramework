@@ -18,6 +18,7 @@ public:
 
 public slots:
     void onKeyPressed(QKeyEvent *event);
+    void idle();
 
 protected:
     void initializeGL();
@@ -28,9 +29,6 @@ protected:
     void mouseMoveEvent(QMouseEvent *event);
     void wheelEvent(QWheelEvent *event);
     void keyPressEvent(QKeyEvent *event);
-
-private slots:
-    void idle();
 
 private: //data
     vvr::Scene *mScene;
