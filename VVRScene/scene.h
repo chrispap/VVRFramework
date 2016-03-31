@@ -10,6 +10,7 @@ namespace vvr {
 struct IAnimatable 
 {
     virtual bool animate(float time) = 0;
+    virtual float getTotalDuration() { return 0; }
 };
 
 class Animation
@@ -37,6 +38,13 @@ public:
         if (m_paused) if (force_resume) m_last_update = sec; else return;
         m_paused = false;
         m_time += ((sec - m_last_update) * m_speed);
+        m_last_update = sec;
+    }
+
+    void setTime(float time) 
+    {
+        const float sec = getSeconds();
+        m_time = time;
         m_last_update = sec;
     }
 
