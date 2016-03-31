@@ -34,16 +34,16 @@ QGroupBox::title {
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <property name="leftMargin">
-     <number>0</number>
+     <number>2</number>
     </property>
     <property name="topMargin">
-     <number>0</number>
+     <number>2</number>
     </property>
     <property name="rightMargin">
-     <number>0</number>
+     <number>2</number>
     </property>
     <property name="bottomMargin">
-     <number>0</number>
+     <number>2</number>
     </property>
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,5">
@@ -53,7 +53,7 @@ QGroupBox::title {
          <number>3</number>
         </property>
         <property name="bottomMargin">
-         <number>3</number>
+         <number>0</number>
         </property>
         <item>
          <widget class="QPlainTextEdit" name="plain_text_log">
@@ -168,9 +168,6 @@ QGroupBox::title {
             </spacer>
            </item>
           </layout>
-          <zorder>verticalLayoutWidget</zorder>
-          <zorder>verticalLayoutWidget</zorder>
-          <zorder>verticalLayoutWidget</zorder>
           <zorder>horizontalSlider_4</zorder>
           <zorder>horizontalSlider_2</zorder>
           <zorder>horizontalSlider_5</zorder>
@@ -192,13 +189,10 @@ QGroupBox::title {
           <rect>
            <x>0</x>
            <y>0</y>
-           <width>542</width>
-           <height>464</height>
+           <width>538</width>
+           <height>460</height>
           </rect>
          </property>
-         <zorder>horizontalSlider_1</zorder>
-         <zorder>horizontalSlider_1</zorder>
-         <zorder>verticalSpacer</zorder>
         </widget>
        </widget>
       </item>

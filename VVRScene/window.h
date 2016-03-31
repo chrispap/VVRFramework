@@ -8,7 +8,7 @@
 
 namespace vvr {
 
-class Window : public QMainWindow, private Ui::MainWindow
+class VVRScene_API Window : public QMainWindow, private Ui::MainWindow
 {
     Q_OBJECT
 
@@ -35,14 +35,16 @@ private:
     static QString aboutMessage;
 
 private:
-    Scene *scene;
-    GLWidget *glWidget;
     QMenu *fileMenu;
     QMenu *helpMenu;
     QAction *exitAct;
     QAction *aboutAct;
     StdRedirector<> *m_std_cout_logger;
     StdRedirector<> *m_std_cerr_logger;
+
+protected:
+    Scene *scene;
+    GLWidget *glWidget;
 };
 
 }

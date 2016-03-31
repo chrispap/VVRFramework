@@ -45,6 +45,7 @@ endif()
 #########################################################################################
 option(RUN_WINDEPLOYQT "Invoke the Qt provided script to gather all qt deps in the lib binary" ON)
 install (TARGETS VVRScene DESTINATION "lib")
+install (FILES ${UI_FILES} DESTINATION "include/VVRScene" )
 if(MSVC AND RUN_WINDEPLOYQT)
   ADD_CUSTOM_COMMAND(TARGET VVRScene POST_BUILD COMMAND
     ${QT_BIN_DIR}/windeployqt.exe $<TARGET_FILE:VVRScene> -dir ${CMAKE_CURRENT_BINARY_DIR}/lib)

@@ -12,30 +12,40 @@ struct IAnimatable
     virtual bool animate(float time) = 0;
 };
 
-struct Animation
+class Animation
 {
-    bool paused;
-    float time;
-    float speed;
-    float last_update;
-    float end_time;
+public:
+    const float &t;
 
     Animation()
+        : t(m_time)
+        , m_time(0)
+        , m_speed(1)
+        , m_paused(true)
     {
-        const float sec = getSeconds();
-        paused = true;
-        time = 0;
-        speed = 0.01;
-        last_update = sec;
-        end_time = 0;
+
     }
 
-    void updateTime()
+    void pause() { m_paused = true; }
+    bool paused() const { return m_paused; }
+    void setSpeed(float speed) { m_speed = speed; }
+    float speed() { return m_speed; }
+
+    void update(bool force_resume = false)
     {
         const float sec = getSeconds();
-        time += ((sec - last_update) * speed);
-        last_update = sec;
+        if (m_paused) if (force_resume) m_last_update = sec; else return;
+        m_paused = false;
+        m_time += ((sec - m_last_update) * m_speed);
+        m_last_update = sec;
     }
+
+private:
+    bool m_paused;
+    float m_time;
+    float m_last_update;
+    float m_end_time;
+    float m_speed;
 };
 
 enum ArrowDir 
