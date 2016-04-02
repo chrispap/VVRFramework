@@ -7,8 +7,8 @@
 #include <sstream>
 #include <vector>
 
-#define echo(x) cout<<#x<<" = "<<x<<endl
-#define msg(x) cout<<x<<endl
+#define echo(x) std::cout<<#x<<" = "<<x<<std::endl
+#define msg(x) std::cout<<x<<std::endl
 #define SQUARE(x) ((x)*(x))
 #define SSTR(x) dynamic_cast< std::ostringstream & >(( std::ostringstream() << std::dec << x ) ).str()
 
