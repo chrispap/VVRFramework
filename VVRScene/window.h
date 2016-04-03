@@ -23,7 +23,7 @@ signals:
     void keyPressed(QKeyEvent *event);
 
 private:
-    virtual void keyPressEvent(QKeyEvent* event);
+    void keyPressEvent(QKeyEvent* event) override;
     void createActions();
     void createMenus();
 
