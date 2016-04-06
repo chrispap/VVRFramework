@@ -71,6 +71,12 @@ double vvr::Triangle::planeEquation(const vec &r) const
     return A*r.x + B*r.y + C*r.z + D;
 }
 
+Mesh::Mesh()
+{
+    mCCW = false;
+    mTransform.SetIdentity();
+}
+
 Mesh::Mesh(const string &objFile, const string &texFile, bool ccw)
 {
     mCCW = ccw;
@@ -176,10 +182,11 @@ void Mesh::updateTriangleData()
         ti->update();
 }
 
-void Mesh::update()
+void Mesh::update(const bool recomputeAABB)
 {
     updateTriangleData();
     createNormals();
+    if (recomputeAABB) mAABB = aabbFromVertices(mVertices);
 }
 
 float Mesh::getMaxSize() const

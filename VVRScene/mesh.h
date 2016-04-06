@@ -88,7 +88,7 @@ struct VVRScene_API Triangle
 class VVRScene_API Mesh
 {
 public:
-    Mesh(){};
+    Mesh();
     Mesh(const std::string &objFile, const std::string &texFile=std::string(), bool ccw = true);
     Mesh(const Mesh &original);
     void operator=(const Mesh &src);
@@ -120,7 +120,7 @@ public:
     void setBigSize(float size);                    ///< Set the meshes size according to the max size of three (x|y|z)
     void cornerAlign();                             ///< Align the mesh to the corner of each local axis
     void centerAlign();                             ///< Align the mesh to the center of each local axis
-    void update();                                  ///< Call after making changes to the vertices
+    void update(const bool recomputeAABB=false);    ///< Call after making changes to the vertices
     void setTransform(const math::float3x4 &transform) { mTransform = transform; }
 
     std::vector<vec> &getVertices() { return mVertices; }
