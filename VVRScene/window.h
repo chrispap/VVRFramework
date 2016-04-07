@@ -27,9 +27,17 @@ private:
     void createActions();
     void createMenus();
 
-private:
-    static void log_cout(const char* ptr, std::streamsize count, void*);
-    static void log_cerr(const char* ptr, std::streamsize count, void*);
+private: // Static callbacks for StdRedirector
+    static void s_log_cout(const char* ptr, std::streamsize count, void*);
+    static void s_log_cerr(const char* ptr, std::streamsize count, void*);
+
+signals: // signals emmited from statuc callbacks
+    void log_cout(const QString &str);
+    void log_cerr(const QString &str);
+
+private slots: // Slots that actually show the text
+    void do_log_cout(const QString &str);
+    void do_log_cerr(const QString &str);
 
 private:
     static QString aboutMessage;

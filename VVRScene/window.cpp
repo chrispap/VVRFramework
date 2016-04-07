@@ -21,8 +21,10 @@ vvr::Window::Window(vvr::Scene *scene) : scene(scene)
     setWindowTitle(tr(scene->getName()));
 
     // Redirect std::cout to our custom logging widget
-    m_std_cout_logger = new StdRedirector<>(std::cout, &Window::log_cout, plain_text_log);
-    m_std_cerr_logger = new StdRedirector<>(std::cerr, &Window::log_cerr, plain_text_log);
+    m_std_cout_logger = new StdRedirector<>(std::cout, &Window::s_log_cout, this);
+    m_std_cerr_logger = new StdRedirector<>(std::cerr, &Window::s_log_cerr, this);
+    connect(this, SIGNAL(log_cout(const QString&)), this, SLOT(do_log_cout(const QString&)));
+    connect(this, SIGNAL(log_cerr(const QString&)), this, SLOT(do_log_cerr(const QString&)));
 
     // Init glwidget
     glWidget = new vvr::GLWidget(scene);
@@ -70,44 +72,6 @@ vvr::Window::Window(vvr::Scene *scene) : scene(scene)
     glWidget->setFocus();
 }
 
-void vvr::Window::log_cout(const char* ptr, std::streamsize count, void* pte)
-{
-    QString str = QString::fromLocal8Bit(ptr, count);
-    QPlainTextEdit* te = static_cast<QPlainTextEdit*>(pte);
-    QScrollBar *vScrollBar = te->verticalScrollBar();
-    bool keep_on_bottom = vScrollBar->value() == vScrollBar->maximum();
-    te->moveCursor(QTextCursor::End);
-    te->textCursor().insertHtml("<font color=\"White\">" + str + "</font>");
-    te->moveCursor(QTextCursor::End);
-    if (ptr[(int)count - 1] == '\n') te->appendPlainText("");
-    if (keep_on_bottom)
-        vScrollBar->triggerAction(QScrollBar::SliderToMaximum);
-    printf("%.*s", (int)count, ptr);
-
-#ifdef VVR_USE_BOOST
-    vvr::logi(str.toStdString());
-#endif
-}
-
-void vvr::Window::log_cerr(const char* ptr, std::streamsize count, void* pte)
-{
-    QString str = QString::fromLocal8Bit(ptr, count);
-    QPlainTextEdit* te = static_cast<QPlainTextEdit*>(pte);
-    QScrollBar *vScrollBar = te->verticalScrollBar();
-    bool keep_on_bottom = vScrollBar->value() == vScrollBar->maximum();
-    te->moveCursor(QTextCursor::End);
-    te->textCursor().insertHtml("<font color=\"Red\">" + str + "</font>");
-    te->moveCursor(QTextCursor::End);
-    if (ptr[(int)count - 1] == '\n') te->appendPlainText("");
-    if (keep_on_bottom)
-        vScrollBar->triggerAction(QScrollBar::SliderToMaximum);
-    fprintf(stderr, "%.*s", (int)count, ptr);
-
-#ifdef VVR_USE_BOOST
-    vvr::loge(str.toStdString());
-#endif
-}
-
 void vvr::Window::createActions()
 {
     // exit action
@@ -148,6 +112,78 @@ void vvr::Window::keyPressEvent(QKeyEvent* event)
 {
     std::string str = event->text().toStdString();
     if (str.length() > 0) emit keyPressed(event);
+}
+
+//! Console output redirecting
+
+void vvr::Window::s_log_cout(const char* ptr, std::streamsize count, void* pte)
+{
+    printf("%.*s", (int)count, ptr);
+    vvr::Window *window = static_cast<vvr::Window*>(pte);
+    const QString str = QString::fromLocal8Bit(ptr, count);
+    window->log_cout(str);
+}
+
+void vvr::Window::s_log_cerr(const char* ptr, std::streamsize count, void* pte)
+{
+    fprintf(stderr, "%.*s", (int)count, ptr);
+    vvr::Window *window = static_cast<vvr::Window*>(pte);
+    const QString str = QString::fromLocal8Bit(ptr, count);
+    window->log_cerr(str);
+}
+
+void vvr::Window::do_log_cout(const QString &str)
+{
+    QScrollBar *vScrollBar = plain_text_log->verticalScrollBar();
+    const bool keep_on_bottom = vScrollBar->value() == vScrollBar->maximum();
+
+    //! Print text
+    plain_text_log->moveCursor(QTextCursor::End);
+    QString html = str.toHtmlEscaped();
+    html.replace(QChar(' '), QString("&nbsp;"), Qt::CaseInsensitive);
+    plain_text_log->textCursor().insertHtml("<font color=\"White\">" + html + "</font>");
+    plain_text_log->moveCursor(QTextCursor::End);
+
+    //! New line
+    if (str.at(str.length() - 1) == '\n') {
+        plain_text_log->appendPlainText("");
+    }
+
+    if (keep_on_bottom) {
+        vScrollBar->triggerAction(QScrollBar::SliderToMaximum);
+    }
+
+    //! Optionally log
+#ifdef VVR_USE_BOOST
+    vvr::logi(str.toStdString());
+#endif
+}
+
+void vvr::Window::do_log_cerr(const QString &str)
+{
+    QScrollBar *vScrollBar = plain_text_log->verticalScrollBar();
+    const bool keep_on_bottom = vScrollBar->value() == vScrollBar->maximum();
+
+    //! Print text
+    QString html = str.toHtmlEscaped();
+    html.replace(QChar(' '), QString("&nbsp;"), Qt::CaseInsensitive);
+    plain_text_log->moveCursor(QTextCursor::End);
+    plain_text_log->textCursor().insertHtml("<font color=\"Red\">" + html + "</font>");
+    plain_text_log->moveCursor(QTextCursor::End);
+
+    //! New line
+    if (str.at(str.length() - 1) == '\n') {
+        plain_text_log->appendPlainText("");
+    }
+
+    if (keep_on_bottom) {
+        vScrollBar->triggerAction(QScrollBar::SliderToMaximum);
+    }
+
+    //! Optionally log
+#ifdef VVR_USE_BOOST
+    vvr::loge(str.toStdString());
+#endif
 }
 
 int vvr::mainLoop(int argc, char* argv[], vvr::Scene *scene)
