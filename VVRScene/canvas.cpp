@@ -326,24 +326,23 @@ void vvr::draw(C2DPolygon  &polygon, const Colour &col, bool filled)
 
     if (filled)
     {
-        C2DPolygonSet polygon_set;
         if (!polygon.IsConvex()) {
-            if (!polygon.CreateConvexSubAreas()) {
-                err = true;
-            }
+            err = !polygon.CreateConvexSubAreas();
         }
-        if (!err) {
-            polygon.GetConvexSubAreas(polygon_set);
-            for (int i = 0; i < polygon_set.size(); i++) {
-                C2DPolygon &pol_conv = *polygon_set.GetAt(i);
-                C2DPoint pol_conv_centroid = pol_conv.GetCentroid();
-                for (int j = 0; j < pol_conv.GetLines().size(); j++) {
+        if (!err) 
+        {
+            C2DPolygonSet polyset;
+            polygon.GetConvexSubAreas(polyset);
+            for (int i = 0; i < polyset.size(); i++) {
+                C2DPolygon &convpoly = *polyset.GetAt(i);
+                C2DPoint convpoly_centroid = convpoly.GetCentroid();
+                for (int j = 0; j < convpoly.GetLines().size(); j++) {
                     Triangle2D t(
-                        pol_conv.GetLines().GetAt(j)->GetPointFrom().x,
-                        pol_conv.GetLines().GetAt(j)->GetPointFrom().y,
-                        pol_conv.GetLines().GetAt(j)->GetPointTo().x,
-                        pol_conv.GetLines().GetAt(j)->GetPointTo().y,
-                        pol_conv_centroid.x, pol_conv_centroid.y);
+                        convpoly.GetLines().GetAt(j)->GetPointFrom().x,
+                        convpoly.GetLines().GetAt(j)->GetPointFrom().y,
+                        convpoly.GetLines().GetAt(j)->GetPointTo().x,
+                        convpoly.GetLines().GetAt(j)->GetPointTo().y,
+                        convpoly_centroid.x, convpoly_centroid.y);
                     t.setSolidRender(true);
                     t.setColour(col);
                     t.draw();
