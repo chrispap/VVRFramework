@@ -199,15 +199,15 @@ void Mesh::operator=(const Mesh &src)
 void Mesh::createNormals()
 {
     // List of lists of the triangles that are connected to each vertex
-    vector<set<int> > mVertexTriangles;
-    mVertexTriangles.resize(mVertices.size());
+    vector<set<int> > vtris;
+    vtris.resize(mVertices.size());
 
     int i = 0;
     vector<Triangle>::iterator ti;
     for (ti = mTriangles.begin(); ti != mTriangles.end(); ++ti) {
-        mVertexTriangles[ti->vi1].insert(i);
-        mVertexTriangles[ti->vi2].insert(i);
-        mVertexTriangles[ti->vi3].insert(i++);
+        vtris[ti->vi1].insert(i);
+        vtris[ti->vi2].insert(i);
+        vtris[ti->vi3].insert(i++);
     }
 
     mVertexNormals.clear();
@@ -216,7 +216,7 @@ void Mesh::createNormals()
     for (unsigned vi = 0; vi < mVertices.size(); ++vi) {
         normSum = vec::zero;
         set<int>::const_iterator _ti;
-        for (_ti = mVertexTriangles[vi].begin(); _ti != mVertexTriangles[vi].end(); ++_ti)
+        for (_ti = vtris[vi].begin(); _ti != vtris[vi].end(); ++_ti)
             normSum += (mTriangles[*_ti].getNormal());
         double s = (mCCW ? -1.0 : 1.0) / normSum.Length();
         mVertexNormals[vi] = normSum.Mul(s);
