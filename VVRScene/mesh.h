@@ -28,8 +28,8 @@ enum VVRScene_API Style {
 struct VVRScene_API Triangle
 {
     /**
-    * Indices to the veclist
-    */
+     * Indices to the veclist
+     */
     union
     {
         struct { int vi1, vi2, vi3; };
@@ -37,13 +37,13 @@ struct VVRScene_API Triangle
     };
 
     /**
-    * Vector3fer to the std::vector containing the vertices
-    */
+     * Vector3fer to the std::vector containing the vertices
+     */
     std::vector<vec> *vecList;
 
     /**
-    * Plane equation coefficients
-    */
+     * Plane equation coefficients
+     */
     double A, B, C, D;
 
     Triangle(std::vector<vec> *vecList, int v1 = 0, int v2 = 0, int v3 = 0) :
@@ -53,8 +53,8 @@ struct VVRScene_API Triangle
     }
 
     /**
-    * Calculate the coefficients of the plane from the vertices.
-    */
+     * Calculate the coefficients of the plane from the vertices.
+     */
     void update();
 
     const vec &v1() const;
@@ -64,21 +64,21 @@ struct VVRScene_API Triangle
     const vec &v3() const;
 
     /**
-    * Returns the normal of this triangle
-    */
+     * Returns the normal of this triangle
+     */
     const vec getNormal() const;
 
     /**
-    * Returns the center Vector3f of this triangle
-    */
+     * Returns the center Vector3f of this triangle
+     */
     const vec getCenter() const;
 
     /**
-    * Evaluates the plane equation of this triangle's plane
-    * for the given Vector3f.
-    * @param r The Vector3f at which we find the value of the plane equation.
-    * @return The value of the plane equation at the given Vector3f.
-    */
+     * Evaluates the plane equation of this triangle's plane
+     * for the given Vector3f.
+     * @param r The Vector3f at which we find the value of the plane equation.
+     * @return The value of the plane equation at the given Vector3f.
+     */
     double planeEquation(const vec &r) const;
 };
 
@@ -92,21 +92,21 @@ public:
     Mesh(const std::string &objFile, const std::string &texFile=std::string(), bool ccw = true);
     Mesh(const Mesh &original);
     void operator=(const Mesh &src);
+    void exportToObj(const std::string &filename);
 
 #ifdef VVR_USE_BOOST
     VAR_CLASS_DEFS(Mesh)
 #endif
 
 private:
-    bool                    mCCW;
     std::vector<vec>        mVertices;              ///< Vertex list
     std::vector<Triangle>   mTriangles;             ///< Triangle list | contains indices to the Vertex list
     std::vector<vec>        mVertexNormals;         ///< Normals per vertex
-    std::vector<float>      mTexCoords;             ///< Texture coordinates
-    math::AABB              mAABB;                  ///< The bounding box of the model
     math::float3x4          mTransform;             ///< Model rotation around its local axis
-    unsigned                mTexName;               ///< id of texture buffer
+    math::AABB              mAABB;                  ///< The bounding box of the model
+    bool                    mCCW;                   ///< Clockwise-ness
 
+private:
     void updateTriangleData();                      ///< Recalculates the plane equations of the triangles
     void createNormals();                           ///< Create a normal for each vertex
     void drawTriangles(Colour col, bool wire = 0);  ///< Draw the triangles. This is the actual model drawing.
