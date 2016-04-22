@@ -3,8 +3,8 @@
 
 //! MACROS used for toggling and testing bitwise flags.
 #define VVR_FLAG(x) (1<<(x))
-#define VVR_FLAG_ON(v,f) (v & FLAG(f))
-#define VVR_FLAG_CASE_TOGGLE(v,c,f) case c: v ^= FLAG(f); std::cout \
+#define VVR_FLAG_ON(v,f) (v & VVR_FLAG(f))
+#define VVR_FLAG_CASE_TOGGLE(v,c,f) case c: v ^= VVR_FLAG(f); std::cout \
     << #f << " = " << (VVR_FLAG_ON(v,f) ? "ON" : "OFF") \
     << std::endl; break
 
