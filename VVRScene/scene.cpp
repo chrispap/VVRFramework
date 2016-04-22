@@ -17,6 +17,8 @@ using namespace math;
 #define VVR_FOV_MAX 160
 #define VVR_FOV_MIN 2
 
+//! Scene::
+
 Scene::Scene()
 {
     m_perspective_proj = false;
@@ -291,4 +293,32 @@ void Scene::setSliderVal(int slider_id, float val)
     else if (val < 0) val = 0;
     //TODO: Connect scene object backwards to window in order to be able to change 
     //      slider values from the scene.
+}
+
+//! Ground::
+
+Ground::Ground(const float W, const float D, const float B, const float T, const vvr::Colour &colour)
+    : m_col(colour)
+{
+    const vec vA(-W / 2, B, -D / 2);
+    const vec vB(+W / 2, B, -D / 2);
+    const vec vC(+W / 2, B, +D / 2);
+    const vec vD(-W / 2, B, +D / 2);
+    const vec vE(-W / 2, T, -D / 2);
+    const vec vF(+W / 2, T, -D / 2);
+
+    m_floor_tris.push_back(math::Triangle(vB, vA, vD));
+    m_floor_tris.push_back(math::Triangle(vB, vD, vC));
+    m_floor_tris.push_back(math::Triangle(vF, vE, vA));
+    m_floor_tris.push_back(math::Triangle(vF, vA, vB));
+}
+
+void Ground::draw() const
+{
+    for (int i = 0; i < m_floor_tris.size(); i++)
+    {
+        vvr::Triangle3D floor_tri = vvr::math2vvr(m_floor_tris.at(i), m_col);
+        floor_tri.setSolidRender(true);
+        floor_tri.draw();
+    }
 }
