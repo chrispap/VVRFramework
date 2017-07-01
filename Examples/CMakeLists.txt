@@ -5,8 +5,8 @@ file(GLOB APP_SRC_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} *.cpp)
 
 ### Specify Executables #################################################################
 foreach(srcFile ${APP_SRC_FILES})
-  string( REPLACE ".cpp" "" appName ${srcFile})
-  add_executable( ${appName} MACOSX_BUNDLE ${appName}.cpp ${appName}.h)
+  string(REPLACE ".cpp" "" appName ${srcFile})
+  add_executable(${appName} MACOSX_BUNDLE ${appName}.cpp)
   target_link_libraries(${appName} 
     optimized vvrframework debug vvrframework_d
     optimized GeoLib debug GeoLib_d
@@ -19,7 +19,7 @@ endforeach(srcFile ${APP_SRC_FILES})
 #########################################################################################
 
 ### Set include path ####################################################################
-include_directories(${CMAKE_SOURCE_DIR}/Src)
+include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rdParty/GeoLib)
 include_directories(${CMAKE_SOURCE_DIR}/3rdParty//MathGeoLib/src)
 #########################################################################################

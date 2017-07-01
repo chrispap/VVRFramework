@@ -4,7 +4,7 @@ project(VVRFramework)
 ### Build subdirs #######################################################################
 add_subdirectory(3rdParty/GeoLib)
 add_subdirectory(3rdParty/MathGeoLib)
-add_subdirectory(Src/vvr)
+add_subdirectory(src)
 add_subdirectory(Examples)
 #########################################################################################
 
