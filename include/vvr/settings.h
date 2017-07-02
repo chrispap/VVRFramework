@@ -29,4 +29,4 @@ public:
 
 }
 
-#endif // VVR_SETTINGS_H
+#endif

@@ -46,16 +46,14 @@ struct vvrframework_API Colour
     static const Colour yellowGreen;
 };
 
-/* Renderables */
-
-class vvrframework_API IRenderable {
+class vvrframework_API IDrawable {
 public:
-    virtual ~IRenderable() {}
+    virtual ~IDrawable() {}
 
     virtual void draw() const = 0;
 };
 
-struct vvrframework_API Shape : public IRenderable
+struct vvrframework_API Shape : public IDrawable
 {
     Colour colour;
     bool b_render_solid;
@@ -71,8 +69,8 @@ public:
     void setColour(const Colour &col) {colour = col;}
     void setSolidRender(bool render_solid) {b_render_solid = render_solid;}
 
-    static float DEF_LINE_WIDTH;
-    static float DEF_POINT_SIZE;
+    static float LineWidth;
+    static float PointSize;
 };
 
 struct vvrframework_API Point2D : public Shape
@@ -325,19 +323,11 @@ public:
 
 };
 
-/////////////////////////////////////////////////////////////////////////////////////////
-//! Drawing Utilities for 3rd party lib objects
-/////////////////////////////////////////////////////////////////////////////////////////
-
 vvrframework_API void draw(C2DPointSet &point_set, const Colour &col = Colour::black);
 
 vvrframework_API void draw(C2DLineSet &line_set, const Colour &col = Colour::black);
 
 vvrframework_API void draw(C2DPolygon &polygon, const Colour &col = Colour::black, bool filled = false);
-
-/////////////////////////////////////////////////////////////////////////////////////////
-//! Geometric struct converters from 3rd party lib objects
-/////////////////////////////////////////////////////////////////////////////////////////
 
 vvrframework_API vvr::Triangle3D math2vvr(const math::Triangle &t, const vvr::Colour &col);
 
@@ -347,14 +337,10 @@ vvrframework_API vvr::LineSeg3D math2vvr(const math::Line &l, const vvr::Colour 
 
 vvrframework_API vvr::Point3D math2vvr(const math::vec &v, const vvr::Colour &col);
 
-/////////////////////////////////////////////////////////////////////////////////////////
-//! Private drawing utils
-/////////////////////////////////////////////////////////////////////////////////////////
-
 static void drawSphere(double r, int lats, int longs);
 
 static void drawBox(double x1, double y1, double z1, double x2, double y2, double z2, Colour col, char alpha);
 
 }
 
-#endif // VVR_CANVAS_H
+#endif

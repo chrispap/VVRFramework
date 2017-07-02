@@ -1,6 +1,6 @@
 #include <vvr/scene.h>
 #include <vvr/utils.h>
-#include <vvr/canvas.h>
+#include <vvr/drawing.h>
 #include <MathGeoLib.h>
 #include <iostream>
 #include <fstream>
@@ -59,7 +59,6 @@ private:
     unsigned m_ongoing_slicing_count;
     int m_style_flag;
 };
-
 
 using namespace std;
 
@@ -245,7 +244,7 @@ void OrigamiScene::mouseWheel(int dir, int modif)
         Scene::mouseWheel(dir, modif);
     }
     else {
-        vvr::Shape::DEF_LINE_WIDTH += 0.2f*dir;
+        vvr::Shape::LineWidth += 0.2f*dir;
     }
 }
 

@@ -2,7 +2,7 @@
 #define VVR_SCENE_H
 
 #include "vvrframework_DLL.h"
-#include <vvr/canvas.h>
+#include <vvr/drawing.h>
 #include <MathGeoLib.h>
 
 namespace vvr {
@@ -72,7 +72,7 @@ namespace vvr {
     /**
      * Class Representing scene floor and background wall.
      */
-    class vvrframework_API Ground : public vvr::IRenderable
+    class vvrframework_API Ground : public vvr::IDrawable
     {
     public:
         Ground(const float W, const float D, const float B, const float T, const vvr::Colour &colour);
@@ -172,4 +172,4 @@ namespace vvr {
 
 }
 
-#endif // VVR_SCENE_H
+#endif

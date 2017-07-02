@@ -1,5 +1,6 @@
 #include <vvr/kdtree.h>
 #include <vvr/utils.h>
+#include <vvr/macros.h>
 #include <algorithm>
 
 using namespace vvr;
@@ -14,8 +15,8 @@ KDTree::KDTree(VecArray &pts, int dimensions)
     m_root = new KDNode();
     m_depth = makeNode(m_root, pts, 0);
     const float KDTree_construction_time = vvr::getSeconds() - t;
-    echo(KDTree_construction_time);
-    echo(m_depth);
+    vvr_echo(KDTree_construction_time);
+    vvr_echo(m_depth);
 }
 
 KDTree::~KDTree()
@@ -23,7 +24,7 @@ KDTree::~KDTree()
     const float t = vvr::getSeconds();
     delete m_root;
     const float KDTree_destruction_time = vvr::getSeconds() - t;
-    echo(KDTree_destruction_time);
+    vvr_echo(KDTree_destruction_time);
 }
 
 int KDTree::makeNode(KDNode *node, VecArray &pts, const int level)

@@ -1,9 +1,8 @@
 #include <vvr/utils.h>
-#include <vvr/canvas.h>
+#include <vvr/drawing.h>
 #include <vvr/settings.h>
 #include <vvr/scene.h>
 #include <vvr/mesh.h>
-#include <vvr/kdtree.h>
 #include <iostream>
 #include <fstream>
 #include <iostream>
@@ -13,9 +12,9 @@
 #include <vector>
 #include <MathGeoLib.h>
 
-struct CuttingPlane : public math::Plane, vvr::IRenderable
+struct CuttingPlane : public math::Plane, vvr::IDrawable
 {
-    DECL_SHARED_PTR(CuttingPlane);
+    VVR_DECL_SHARED_PTR(CuttingPlane);
 
     math::vec pos;
     math::vec X, Y, Z;
@@ -45,14 +44,10 @@ struct CuttingPlane : public math::Plane, vvr::IRenderable
         t2 = math2vvr(math::Triangle(v3, v4, v1), col);
         t1.setSolidRender(!wire);
         t2.setSolidRender(!wire);
-        std::cout << "Cutting Plane - Contructed [" << this << "]" << std::endl;
     }
 
 private:
-    ~CuttingPlane()
-    {
-        std::cout << "Cutting Plane - Destructed [" << this << "]" << std::endl;
-    }
+    ~CuttingPlane() {}
 };
 
 class Simple3DScene : public vvr::Scene
@@ -130,10 +125,6 @@ Simple3DScene::Simple3DScene()
     m_floor_tris.push_back(math::Triangle(B, D, C));
     m_floor_tris.push_back(math::Triangle(F, E, A));
     m_floor_tris.push_back(math::Triangle(F, A, B));
-
-    VecArray pts;
-    pts.push_back(vec());
-    vvr::KDTree kd(pts, 3);
 }
 
 void Simple3DScene::reset()
@@ -245,7 +236,7 @@ void Simple3DScene::playWithMathGeoLibPolygon()
         poly.f.push_back(f);
     }
 
-    echo(poly.IsConvex());
+    //echo(poly.IsConvex());
 }
 
 void Simple3DScene::draw()

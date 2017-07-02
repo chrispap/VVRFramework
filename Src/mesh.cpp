@@ -73,12 +73,16 @@ double vvr::Triangle::planeEquation(const vec &r) const
 
 Mesh::Mesh()
 {
+    cout << "Mesh: Ctor [" << this <<  "]" << endl;
+
     mCCW = false;
     mTransform.SetIdentity();
 }
 
 Mesh::Mesh(const string &objFile, const string &texFile, bool ccw)
 {
+    cout << "Mesh: Ctor [" << this << "]" << endl;
+
     mCCW = ccw;
     mTransform.SetIdentity();
 
@@ -111,18 +115,42 @@ Mesh::Mesh(const string &objFile, const string &texFile, bool ccw)
     mAABB = aabbFromVertices(mVertices);
 }
 
-Mesh::Mesh(const Mesh &original)
-    : mVertices(original.mVertices)
-    , mTriangles(original.mTriangles)
-    , mVertexNormals(original.mVertexNormals)
-    , mTransform(original.mTransform)
-    , mAABB(original.mAABB)
-    , mCCW(original.mCCW)
+Mesh::Mesh(const Mesh &src)
+    : mVertices(src.mVertices)
+    , mTriangles(src.mTriangles)
+    , mVertexNormals(src.mVertexNormals)
+    , mTransform(src.mTransform)
+    , mAABB(src.mAABB)
+    , mCCW(src.mCCW)
 {
+    cout << "Mesh: Copy [" << this << "] from [" << &src << "]" << endl;
+
     vector<Triangle>::iterator ti;
     for (ti = mTriangles.begin(); ti != mTriangles.end(); ++ti) {
         ti->vecList = &mVertices;
     }
+}
+
+void Mesh::operator=(const Mesh &src)
+{
+    cout << "Mesh: Assigment [" << this << "] from [" << &src << "]" << endl;
+
+    mVertices = src.mVertices;
+    mTriangles = src.mTriangles;
+    mVertexNormals = src.mVertexNormals;
+    mTransform = src.mTransform;
+    mAABB = src.mAABB;
+    mCCW = src.mCCW;
+
+    vector<Triangle>::iterator ti;
+    for (ti = mTriangles.begin(); ti != mTriangles.end(); ++ti) {
+        ti->vecList = &mVertices;
+    }
+}
+
+Mesh::~Mesh()
+{
+    cout << "Mesh: Dtor [" << this << "]" << endl;
 }
 
 void Mesh::exportToObj(const string &filename)
@@ -178,21 +206,6 @@ void Mesh::exportToObj(const string &filename)
         }
 
         file.close();
-    }
-}
-
-void Mesh::operator=(const Mesh &src)
-{
-    mVertices = src.mVertices;
-    mTriangles = src.mTriangles;
-    mVertexNormals = src.mVertexNormals;
-    mTransform = src.mTransform;
-    mAABB = src.mAABB;
-    mCCW = src.mCCW;
-
-    vector<Triangle>::iterator ti;
-    for (ti = mTriangles.begin(); ti != mTriangles.end(); ++ti) {
-        ti->vecList = &mVertices;
     }
 }
 

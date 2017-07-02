@@ -22,13 +22,10 @@ set_target_properties(GeoLib PROPERTIES DEBUG_POSTFIX _d)
 #########################################################################################
 
 ### INSTALL #############################################################################
-install (DIRECTORY "GeoLib" DESTINATION "include" FILES_MATCHING PATTERN "*.h")
-install (DIRECTORY "src" DESTINATION "include" FILES_MATCHING PATTERN "*.h")
-
-### msvc runtime 
+install (DIRECTORY "3rdParty/GeoLib" DESTINATION "include" FILES_MATCHING PATTERN "*.h")
+install (DIRECTORY "include" DESTINATION "./" FILES_MATCHING PATTERN "*.h")
 set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP TRUE)
 include(InstallRequiredSystemLibraries)
 install(PROGRAMS ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS} DESTINATION "lib")
-
 INCLUDE(CPack)
 #########################################################################################

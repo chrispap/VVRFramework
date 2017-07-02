@@ -1,5 +1,5 @@
 #include <vvr/utils.h>
-#include <vvr/canvas.h>
+#include <vvr/drawing.h>
 #include <vvr/settings.h>
 #include <vvr/scene.h>
 #include <vvr/mesh.h>

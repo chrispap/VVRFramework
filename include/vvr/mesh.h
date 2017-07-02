@@ -2,6 +2,7 @@
 #define VVR_MESH_H
 
 #include "vvrframework_DLL.h"
+#include "macros.h"
 #include "utils.h"
 #include "scene.h"
 #include <MathGeoLib.h>
@@ -88,13 +89,16 @@ struct vvrframework_API Triangle
 class vvrframework_API Mesh
 {
 public:
+    VVR_DECL_SHARED_PTR(Mesh)
+private:
+    ~Mesh();
+
+public:
     Mesh();
     Mesh(const std::string &objFile, const std::string &texFile=std::string(), bool ccw = true);
     Mesh(const Mesh &original);
     void operator=(const Mesh &src);
     void exportToObj(const std::string &filename);
-
-    DECL_SHARED_PTR(Mesh)
 
 private:
     std::vector<vec>        mVertices;              ///< Vertex list
@@ -132,4 +136,4 @@ public:
 
 }
 
-#endif // VVR_MESH_H
+#endif 

@@ -2,7 +2,7 @@
 #include <vvr/scene.h>
 #include <vvr/mesh.h>
 #include <vvr/utils.h>
-#include <vvr/canvas.h>
+#include <vvr/drawing.h>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -184,7 +184,7 @@ void ContourEditorScene::mouseMoved(int x, int y, int modif)
         if (!m_pts.empty() && !m_pts.back().empty()) {
             double lx = m_pts.back().back().x;
             double ly = m_pts.back().back().y;
-            d = sqrt((double)(SQUARE(lx - xf) + SQUARE(ly - yf)));
+            d = sqrt((double)(Sqrt(lx - xf) + Sqrt(ly - yf)));
         }
         else {
             d = 10000;

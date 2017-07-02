@@ -41,4 +41,4 @@ private:
 
 }
 
-#endif // VVR_GLWIDGET_H
+#endif

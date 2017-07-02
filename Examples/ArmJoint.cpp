@@ -2,7 +2,7 @@
 #include <vvr/scene.h>
 #include <vvr/mesh.h>
 #include <vvr/utils.h>
-#include <vvr/canvas.h>
+#include <vvr/drawing.h>
 #include <iostream>
 #include <fstream>
 #include <iostream>
@@ -18,14 +18,14 @@ using namespace math;
 
 struct Bone
 {
+    Bone();
     std::string name;
     vector<math::Quat> rots;
     vector<double> times;
-    vvr::Mesh mesh;
+    vvr::Mesh::Ptr mesh;
     math::Quat calib_quat;
     bool anim_on;
     double length;
-    Bone();
     void animate(float t, float speed = 1);
 };
 
@@ -98,7 +98,7 @@ Bone::Bone() : calib_quat(Quat::identity)
 
 void Bone::animate(float t, float speed)
 {
-    mesh.setTransform(rots.front().ToFloat3x4());
+    mesh->setTransform(rots.front().ToFloat3x4());
 
     anim_on = true;
 
@@ -110,7 +110,7 @@ void Bone::animate(float t, float speed)
     {
         if (t >= times.back() / speed)
         {
-            mesh.setTransform(rots.back().ToFloat3x4());
+            mesh->setTransform(rots.back().ToFloat3x4());
             anim_on = false;
         }
         else
@@ -118,7 +118,7 @@ void Bone::animate(float t, float speed)
             for (unsigned i = times.size() - 1; i > 0; i--) {
                 if (t >= times[i] / speed) {
                     if (i < rots.size()) {
-                        mesh.setTransform(rots.at(i).ToFloat3x4());
+                        mesh->setTransform(rots.at(i).ToFloat3x4());
                     }
                     break;
                 }
@@ -147,8 +147,8 @@ void ArmJointScene::load()
     const string objFileBone = getBasePath() + "resources/obj/bone.obj";
 
     // Load 3D models Humerus
-    m_humerus.mesh = Mesh(objFileBone);
-    m_radius.mesh = Mesh(m_humerus.mesh);
+    m_humerus.mesh = Mesh::Make(objFileBone);
+    m_radius.mesh = Mesh::Make(*m_humerus.mesh);
 
     // Switch mode of execution: {Live Streaming, Playback}
     loadRecordedMotion(getBasePath() + FILE_RADIUS, m_radius);
@@ -158,17 +158,17 @@ void ArmJointScene::load()
 void ArmJointScene::resize()
 {
     m_humerus.length = getSceneWidth() / 5;
-    m_humerus.mesh.setBigSize(m_humerus.length);
-    m_humerus.mesh.cornerAlign();
-    AABB aabb = m_humerus.mesh.getAABB();
-    m_humerus.mesh.move(vec(-aabb.Size().y * 0.3, -aabb.Size().y / 2, -aabb.Size().z / 2));
+    m_humerus.mesh->setBigSize(m_humerus.length);
+    m_humerus.mesh->cornerAlign();
+    AABB aabb = m_humerus.mesh->getAABB();
+    m_humerus.mesh->move(vec(-aabb.Size().y * 0.3, -aabb.Size().y / 2, -aabb.Size().z / 2));
     m_radius.length = getSceneWidth() / 5;
-    m_radius.mesh.setBigSize(m_radius.length);
-    m_radius.mesh.cornerAlign();
-    m_radius.mesh.move(vec(-aabb.Size().y * 0.3, -aabb.Size().y / 2, -aabb.Size().z / 2));
-    float3x4 transform = m_radius.mesh.getTransform();
+    m_radius.mesh->setBigSize(m_radius.length);
+    m_radius.mesh->cornerAlign();
+    m_radius.mesh->move(vec(-aabb.Size().y * 0.3, -aabb.Size().y / 2, -aabb.Size().z / 2));
+    float3x4 transform = m_radius.mesh->getTransform();
     transform.SetTranslatePart(getRadiusOrigin());
-    m_radius.mesh.setTransform(transform);
+    m_radius.mesh->setTransform(transform);
 }
 
 void ArmJointScene::draw()
@@ -182,8 +182,8 @@ void ArmJointScene::draw()
     if (m_style_flag & FLAG_SHOW_AXES) s |= AXES;
 
     // Draw objects
-    m_radius.mesh.draw(m_bone_col, (Style)s);
-    m_humerus.mesh.draw(m_bone_col, (Style)s);
+    m_radius.mesh->draw(m_bone_col, (Style)s);
+    m_humerus.mesh->draw(m_bone_col, (Style)s);
 }
 
 bool ArmJointScene::idle()
@@ -198,9 +198,9 @@ bool ArmJointScene::idle()
     // Animate objects
     m_humerus.animate(m_anim_time, m_anim_speed);
     m_radius.animate(m_anim_time, m_anim_speed);
-    float3x4 transform = m_radius.mesh.getTransform();
+    float3x4 transform = m_radius.mesh->getTransform();
     transform.SetTranslatePart(getRadiusOrigin());
-    m_radius.mesh.setTransform(transform);
+    m_radius.mesh->setTransform(transform);
 
     return m_radius.anim_on || m_humerus.anim_on;
 }
@@ -290,7 +290,7 @@ Quat ArmJointScene::getBoneQuaternion(const vec &rot)
 vec ArmJointScene::getRadiusOrigin() const
 {
     float3 humerus_end = float3(m_humerus.length, 0, 0); // asuming x the largest dimension
-    return m_humerus.mesh.getTransform().TransformPos(humerus_end);
+    return m_humerus.mesh->getTransform().TransformPos(humerus_end);
 }
 
 int main(int argc, char* argv[])

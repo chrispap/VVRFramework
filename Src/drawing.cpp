@@ -1,4 +1,4 @@
-#include <vvr/canvas.h>
+#include <vvr/drawing.h>
 #include <vvr/mesh.h>
 #include <iostream>
 #include <vector>
@@ -9,16 +9,8 @@
 using namespace std;
 using namespace vvr;
 
-/////////////////////////////////////////////////////////////////////////////////////////
-//! Global constants
-/////////////////////////////////////////////////////////////////////////////////////////
-
-float Shape::DEF_LINE_WIDTH = 2.2f;
-float Shape::DEF_POINT_SIZE = 7.0f;
-
-/////////////////////////////////////////////////////////////////////////////////////////
-//! Common Color Definitions
-/////////////////////////////////////////////////////////////////////////////////////////
+float Shape::LineWidth = 2.2f;
+float Shape::PointSize = 7.0f;
 
 const Colour Colour::red            (0xFF, 0x00, 0x00);
 const Colour Colour::blue           (0x00, 0x00, 0xFF);
@@ -35,10 +27,6 @@ const Colour Colour::darkOrange     (0xFF, 0x8C, 0x00);
 const Colour Colour::darkGreen      (0x00, 0x64, 0x00);
 const Colour Colour::yellowGreen    (0x9A, 0xCD, 0x32);
 
-/////////////////////////////////////////////////////////////////////////////////////////
-//! vvr::Shape and childs
-/////////////////////////////////////////////////////////////////////////////////////////
-
 void Shape::draw() const 
 {
     glPolygonMode(GL_FRONT_AND_BACK, b_render_solid ? GL_FILL : GL_LINE);
@@ -48,7 +36,7 @@ void Shape::draw() const
 
 void Point2D::drawShape() const 
 {
-    glPointSize(DEF_POINT_SIZE);
+    glPointSize(PointSize);
     glEnable(GL_POINT_SMOOTH);
     glBegin(GL_POINTS);
     glVertex2f(x,y);
@@ -57,7 +45,7 @@ void Point2D::drawShape() const
 
 void Point3D::drawShape() const 
 {
-    glPointSize(DEF_POINT_SIZE);
+    glPointSize(PointSize);
     glEnable(GL_POINT_SMOOTH);
     glBegin(GL_POINTS);
     glVertex3f(x,y,z);
@@ -66,7 +54,7 @@ void Point3D::drawShape() const
 
 void LineSeg2D::drawShape() const
 {
-    glLineWidth(DEF_LINE_WIDTH);
+    glLineWidth(LineWidth);
     glBegin(GL_LINES);
     glVertex2f(x1, y1);
     glVertex2f(x2, y2);
@@ -78,7 +66,7 @@ void Line2D::drawShape() const
     double dx = x2-x1;
     double dy = y2-y1;
 
-    glLineWidth(DEF_LINE_WIDTH);
+    glLineWidth(LineWidth);
     glBegin(GL_LINES);
     glVertex2f(x1 - 1000*dx, y1 - 1000*dy);
     glVertex2f(x2 + 1000*dx, y2 + 1000*dy);
@@ -90,7 +78,7 @@ void LineSeg3D::drawShape() const
     double dx = x2-x1;
     double dy = y2-y1;
 
-    glLineWidth(DEF_LINE_WIDTH);
+    glLineWidth(LineWidth);
     glBegin(GL_LINES);
     glVertex3f(x1, y1, z1);
     glVertex3f(x2, y2, z2);
@@ -107,7 +95,7 @@ void Circle2D::drawShape() const
     double x_, y_;
     unsigned const numOfSegments = 60;
 
-    glLineWidth(DEF_LINE_WIDTH);
+    glLineWidth(LineWidth);
     glBegin(b_render_solid? GL_POLYGON : (closed_loop?GL_LINE_LOOP:GL_LINE_STRIP));
     double d_th = (rad_to - rad_from) / numOfSegments;
     for(double theta = rad_from; theta <= rad_to; theta+=d_th) {
@@ -151,7 +139,7 @@ void Box3D::drawShape() const
 
 void Triangle2D::drawShape() const 
 {
-    glLineWidth(DEF_LINE_WIDTH);
+    glLineWidth(LineWidth);
     glBegin(GL_TRIANGLES);
     glVertex2f(x1, y1);
     glVertex2f(x2, y2);
@@ -161,7 +149,7 @@ void Triangle2D::drawShape() const
 
 void Triangle3D::drawShape() const 
 {
-    glLineWidth(DEF_LINE_WIDTH);
+    glLineWidth(LineWidth);
     glBegin(GL_TRIANGLES);
     math::vec n = math::Triangle(
         math::vec(x1,y1,z1),
@@ -182,10 +170,6 @@ void Triangle3D::drawShape() const
 
     glEnd();
 }
-
-/////////////////////////////////////////////////////////////////////////////////////////
-//! vvr::Frame vvr::Canvas
-/////////////////////////////////////////////////////////////////////////////////////////
 
 Frame::Frame() : show_old(true)
 {
@@ -293,10 +277,6 @@ void Canvas2D::clearFrame()
     frames[fi].shapes.clear();
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////
-//! Drawing Utilities for 3rd party lib objects
-/////////////////////////////////////////////////////////////////////////////////////////
-
 void vvr::draw(C2DPointSet &point_set, const Colour &col)
 {
     /* Draw point cloud */
@@ -367,10 +347,6 @@ void vvr::draw(C2DPolygon  &polygon, const Colour &col, bool filled)
     }
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////
-//! Geometric struct converters from 3rd party lib objects
-/////////////////////////////////////////////////////////////////////////////////////////
-
 vvr::Triangle3D vvr::math2vvr(const math::Triangle &t, const vvr::Colour &col)
 {
     return vvr::Triangle3D(
@@ -398,10 +374,6 @@ vvr::Point3D vvr::math2vvr(const math::vec &v, const vvr::Colour &col)
 {
     return vvr::Point3D(v.x, v.y, v.z, col);
 }
-
-/////////////////////////////////////////////////////////////////////////////////////////
-//! Private drawing utils
-/////////////////////////////////////////////////////////////////////////////////////////
 
 void vvr::drawSphere(double r, int lats, int longs)
 {

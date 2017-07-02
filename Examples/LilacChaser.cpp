@@ -2,7 +2,7 @@
 #include <vvr/scene.h>
 #include <vvr/mesh.h>
 #include <vvr/utils.h>
-#include <vvr/canvas.h>
+#include <vvr/drawing.h>
 #include <MathGeoLib.h>
 #include <iostream>
 #include <fstream>

@@ -57,4 +57,4 @@ protected:
 
 }
 
-#endif // VVR_WINDOW_H
+#endif
