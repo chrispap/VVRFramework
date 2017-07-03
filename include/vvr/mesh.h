@@ -89,7 +89,7 @@ struct vvrframework_API Triangle
 class vvrframework_API Mesh
 {
 public:
-    VVR_DECL_SHARED_PTR(Mesh)
+    vvr_decl_shared_ptr(Mesh)
 private:
     ~Mesh();
 

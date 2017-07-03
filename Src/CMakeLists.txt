@@ -5,6 +5,14 @@ find_package(Qt5Widgets REQUIRED)
 find_package(Qt5OpenGL REQUIRED)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
+set(QRCS icons.qrc)
+qt5_wrap_ui(UI_FILES window.ui)
+qt5_add_resources(RCS ${QRCS})
+GET_PROPERTY(prop TARGET Qt5::Core PROPERTY LOCATION)
+GET_FILENAME_COMPONENT(QT_BIN_DIR ${prop} DIRECTORY)
+#########################################################################################
+
+### Sources #############################################################################
 set(IMPL_FILES
   window.cpp window.h
   glwidget.cpp glwidget.h
@@ -31,11 +39,6 @@ set(INCL_FILES
   ../include/vvr/vvrframework_DLL.h
 )
 set(SOURCE ${IMPL_FILES} ${INCL_FILES})
-set(QRCS icons.qrc)
-qt5_wrap_ui(UI_FILES window.ui)
-qt5_add_resources(RCS ${QRCS})
-GET_PROPERTY(prop TARGET Qt5::Core PROPERTY LOCATION)
-GET_FILENAME_COMPONENT(QT_BIN_DIR ${prop} DIRECTORY)
 #########################################################################################
 
 #########################################################################################
@@ -47,14 +50,11 @@ include_directories(${CMAKE_SOURCE_DIR}/3rdParty//MathGeoLib/src)
 #########################################################################################
 
 #########################################################################################
-SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 add_library(vvrframework SHARED ${SOURCE} ${RCS} ${UI_FILES})
 qt5_use_modules(vvrframework Widgets OpenGL)
 target_link_libraries(vvrframework ${OPENGL_LIBRARIES} Qt5::Widgets Qt5::OpenGL)
 if (WIN32 OR APPLE)
-  target_link_libraries(vvrframework GeoLib MathGeoLib)
+  target_link_libraries(vvrframework  GeoLib MathGeoLib)
 elseif(UNIX)
   target_link_libraries(vvrframework GeoLib)
 endif ()

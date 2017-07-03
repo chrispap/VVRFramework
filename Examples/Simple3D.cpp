@@ -14,7 +14,7 @@
 
 struct CuttingPlane : public math::Plane, vvr::IDrawable
 {
-    VVR_DECL_SHARED_PTR(CuttingPlane);
+    vvr_decl_shared_ptr(CuttingPlane);
 
     math::vec pos;
     math::vec X, Y, Z;

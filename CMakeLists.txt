@@ -1,14 +1,21 @@
 cmake_minimum_required(VERSION 2.8.11)
 project(VVRFramework)
 
+### Target Locations ####################################################################
+SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+#########################################################################################
+
 ### Build subdirs #######################################################################
 add_subdirectory(3rdParty/GeoLib)
 add_subdirectory(3rdParty/MathGeoLib)
 add_subdirectory(src)
 add_subdirectory(Examples)
+add_subdirectory(GeoLab)
 #########################################################################################
 
-#########################################################################################
+#### Group (Visual Studio only) #########################################################
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(TARGET vvrframework PROPERTY FOLDER "Libraries")
 set_property(TARGET GeoLib PROPERTY FOLDER "Libraries")
