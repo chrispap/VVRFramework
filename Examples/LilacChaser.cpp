@@ -28,7 +28,7 @@ protected:
     void arrowEvent(vvr::ArrowDir dir, int modif) override;
 
 private:
-    vvr::Canvas2D m_canvas;
+    vvr::Canvas m_canvas;
     std::vector<vvr::Circle2D*> m_circles;
 
 private:

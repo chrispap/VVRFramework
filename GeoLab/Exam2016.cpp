@@ -376,7 +376,7 @@ void Exam2016Scene::draw()
 
     //! Split screen
     Line2D(0, 0, 0, 1).draw();
-    Canvas2D tmp_canvas;
+    Canvas tmp_canvas;
 
     //! Draw parallel lines and points
     tmp_canvas.add(m_line1, Colour::yellow);

@@ -53,22 +53,23 @@ public:
     virtual void draw() const = 0;
 };
 
-struct vvrframework_API Shape : public IDrawable
+class vvrframework_API Shape : public IDrawable
 {
+protected:
     Colour colour;
-    bool b_render_solid;
+    bool render_solid;
 
 protected:
-    Shape() : b_render_solid(false) {}
-    Shape(const Colour &rgb) : colour(rgb), b_render_solid(false) {}
+    Shape(const Colour &rgb=Colour()) : colour(rgb), render_solid(false) {}
     virtual void drawShape() const = 0;
 
 public:
     virtual ~Shape() {}
     void draw() const override;
     void setColour(const Colour &col) {colour = col;}
-    void setSolidRender(bool render_solid) {b_render_solid = render_solid;}
+    void setSolidRender(bool render_solid) {render_solid = render_solid;}
 
+public:
     static float LineWidth;
     static float PointSize;
 };
@@ -205,10 +206,10 @@ protected:
     void drawShape() const override;
 
 public:
-    Triangle2D(){b_render_solid = false;}
+    Triangle2D(){render_solid = false;}
     Triangle2D(double x1, double y1, double x2, double y2, double x3, double y3,
                const Colour &rgb=Colour()) :
-        x1(x1), y1(y1), x2(x2), y2(y2), x3(x3), y3(y3), Shape(rgb) {b_render_solid = false;}
+        x1(x1), y1(y1), x2(x2), y2(y2), x3(x3), y3(y3), Shape(rgb) {render_solid = false;}
 };
 
 struct vvrframework_API Triangle3D : public Shape
@@ -224,7 +225,7 @@ protected:
 public:
     Triangle3D()
     {
-        b_render_solid = true; 
+        render_solid = true; 
         vertex_col[0] = colour;
         vertex_col[1] = colour;
         vertex_col[2] = colour;
@@ -239,7 +240,7 @@ public:
         x3(x3), y3(y3), z3(z3),
         Shape(rgb) 
     {
-        b_render_solid = true;
+        render_solid = true;
         vertex_col[0] = colour;
         vertex_col[1] = colour;
         vertex_col[2] = colour;
@@ -258,13 +259,13 @@ struct vvrframework_API Frame {
     Frame (bool show_old);
 };
 
-class vvrframework_API Canvas2D {
+class vvrframework_API Canvas {
     std::vector<Frame> frames;
     unsigned fi;
 
 public:
-    Canvas2D();
-    ~Canvas2D();
+    Canvas();
+    ~Canvas();
 
     unsigned size() { return frames.size(); }
     unsigned frameIndex() { return fi; }
@@ -336,10 +337,6 @@ vvrframework_API vvr::LineSeg3D math2vvr(const math::LineSegment &l, const vvr::
 vvrframework_API vvr::LineSeg3D math2vvr(const math::Line &l, const vvr::Colour &col);
 
 vvrframework_API vvr::Point3D math2vvr(const math::vec &v, const vvr::Colour &col);
-
-static void drawSphere(double r, int lats, int longs);
-
-static void drawBox(double x1, double y1, double z1, double x2, double y2, double z2, Colour col, char alpha);
 
 }
 

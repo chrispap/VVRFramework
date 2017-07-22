@@ -23,7 +23,7 @@ protected:
 
 private:
     std::vector<vvr::Point2D*> m_pts;
-    vvr::Canvas2D m_canvas, m_canvas_pts;
+    vvr::Canvas m_canvas, m_canvas_pts;
     vvr::Point2D *m_point_grabbed;
     void createShapesFromPoints();
 };

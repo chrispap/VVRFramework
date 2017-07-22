@@ -36,7 +36,7 @@ private:
 private:
     C2DPolygon m_convex_hull_polygon;
     C2DPointSet m_point_cloud;
-    vvr::Canvas2D m_canvas, m_canvas_algo_steps;
+    vvr::Canvas m_canvas, m_canvas_algo_steps;
     vvr::Point2D* m_mouse_pos;
 };
 

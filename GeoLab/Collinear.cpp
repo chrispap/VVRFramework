@@ -33,7 +33,7 @@ private:
     void HandlePoint(const C2DPoint &p);
 
 private:
-    vvr::Canvas2D canvas0, canvas1;
+    vvr::Canvas canvas0, canvas1;
     C2DLine boundary1, boundary2;
     C2DPointSet points;
 };

@@ -66,9 +66,8 @@ protected:
     void mouseReleased(int x, int y, int modif) override;
 
 private:
-    void selectTri(int x, int y);
     void load3DModels();
-    void playWithMathGeoLibPolygon();
+    void pick(int x, int y);
     void defineCuttingPlane(const math::vec &pos, const vec &normal);
 
 private:
@@ -76,10 +75,12 @@ private:
     vvr::Mesh::Ptr m_mesh_2;
     vvr::Mesh::Ptr m_mesh_3;
     vvr::Colour m_obj_col;
-    vvr::Canvas2D m_canvas;
+    vvr::Canvas m_canvas;
     std::vector<math::Triangle> m_floor_tris;
     CuttingPlane::Ptr m_plane, m_plane_clipped;
     int m_style_flag;
+    vvr::Box3D* m_box;
+    int m_click_counter;
 };
 
 #define FLAG_SHOW_AXES 1
@@ -135,6 +136,10 @@ void Simple3DScene::reset()
     pos.z -= 40;
     setCameraPos(pos);
     m_canvas.clear();
+    m_box = new vvr::Box3D();
+    m_box->setColour(vvr::Colour("#459823"));
+    m_canvas.add(m_box);
+    m_click_counter = 0;
 }
 
 void Simple3DScene::resize()
@@ -217,28 +222,6 @@ void Simple3DScene::load3DModels()
     m_mesh_3->update();
 }
 
-void Simple3DScene::playWithMathGeoLibPolygon()
-{
-
-    math::Polyhedron poly;
-    vvr::Mesh::Ptr mesh = m_mesh_1;
-
-    for (unsigned i = 0; i < mesh->getVertices().size(); ++i) {
-        vec &v = mesh->getVertices()[i];
-        poly.v.push_back({ float3(v.x, v.y, v.z) });
-    }
-
-    for (unsigned i = 0; i < mesh->getTriangles().size(); ++i) {
-        vvr::Triangle &t = mesh->getTriangles()[i];
-        Polyhedron::Face f;
-        f.v = { t.vi1, t.vi2, t.vi3 };
-        f.FlipWindingOrder();
-        poly.f.push_back(f);
-    }
-
-    //echo(poly.IsConvex());
-}
-
 void Simple3DScene::draw()
 {
     //! Draw floor
@@ -275,7 +258,7 @@ void Simple3DScene::mousePressed(int x, int y, int modif)
         return Scene::mousePressed(x, y, modif);
     }
     else {
-        selectTri(x, y);
+        pick(x, y);
     }
 }
 
@@ -289,7 +272,7 @@ void Simple3DScene::mouseMoved(int x, int y, int modif)
     }
     else
     {
-        selectTri(x, y);
+        pick(x, y);
     }
 }
 
@@ -297,14 +280,7 @@ void Simple3DScene::mouseReleased(int x, int y, int modif)
 {
     const bool shift_down = shiftDown(modif);
 
-    if (!shift_down)
-    {
-        return Scene::mouseReleased(x, y, modif);
-    }
-    else
-    {
-
-    }
+    ++m_click_counter;
 }
 
 void Simple3DScene::keyEvent(unsigned char key, bool up, int modif)
@@ -324,17 +300,17 @@ void Simple3DScene::keyEvent(unsigned char key, bool up, int modif)
     }
 }
 
-void Simple3DScene::selectTri(int x, int y)
+void Simple3DScene::pick(int x, int y)
 {
     Ray ray = unproject(x, y);
-
+    math::Triangle tri_sel;
+    vec intr;
 
     for (vvr::Mesh::Ptr mesh_ptr : { m_mesh_1, m_mesh_2, m_mesh_3, })
     {
         vector<vvr::Triangle3D*> tris_sel;
         int tri_min_index = -1, tri_counter = 0;
         float tri_min_dist = FLT_MAX;
-        math::Triangle tri_sel;
 
         for (unsigned i = 0; i < mesh_ptr->getTriangles().size(); ++i)
         {
@@ -346,7 +322,7 @@ void Simple3DScene::selectTri(int x, int y)
                 vec(t.v3().x, t.v3().y, t.v3().z)
                 );
 
-            if (tri.Intersects(ray)) {
+            if (tri.Intersects(ray, NULL, &intr)) {
                 tris_sel.push_back(new Triangle3D(math2vvr(tri, Colour::magenta)));
                 float d;
                 if ((d = tri.DistanceSq(ray.pos)) < tri_min_dist) {
@@ -356,12 +332,24 @@ void Simple3DScene::selectTri(int x, int y)
                 }
                 tri_counter++;
             }
-
         }
 
-        if (tri_min_index != -1) {
+        if (tri_min_index != -1) 
+        {
+#if 0
             m_canvas.add(tris_sel.at(tri_min_index));
             defineCuttingPlane(tri_sel.CenterPoint(), tri_sel.NormalCW());
+#endif      
+            if (m_click_counter % 2 == 0) {
+                m_box->x1 = intr.x;
+                m_box->y1 = intr.y;
+                m_box->z1 = intr.z;
+            }
+            else {
+                m_box->x2 = intr.x;
+                m_box->y2 = intr.y;
+                m_box->z2 = intr.z;
+            }
         }
     }
 }

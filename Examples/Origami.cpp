@@ -50,7 +50,7 @@ private:
     void undo();
 
 private:
-    vvr::Canvas2D m_canvas;
+    vvr::Canvas m_canvas;
     std::vector<Fold> folds;
     math::vec A, B, C, D, E, F;
     C2DPolygon m_polygon;

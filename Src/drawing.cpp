@@ -6,6 +6,9 @@
 #include <QtOpenGL>
 #include <MathGeoLib.h>
 
+static void drawSphere(double r, int lats, int longs);
+static void drawBox(double x1, double y1, double z1, double x2, double y2, double z2, vvr::Colour col, char alpha);
+
 using namespace std;
 using namespace vvr;
 
@@ -29,7 +32,7 @@ const Colour Colour::yellowGreen    (0x9A, 0xCD, 0x32);
 
 void Shape::draw() const 
 {
-    glPolygonMode(GL_FRONT_AND_BACK, b_render_solid ? GL_FILL : GL_LINE);
+    glPolygonMode(GL_FRONT_AND_BACK, render_solid ? GL_FILL : GL_LINE);
     glColor3ubv(colour.data);
     drawShape();
 }
@@ -96,7 +99,7 @@ void Circle2D::drawShape() const
     unsigned const numOfSegments = 60;
 
     glLineWidth(LineWidth);
-    glBegin(b_render_solid? GL_POLYGON : (closed_loop?GL_LINE_LOOP:GL_LINE_STRIP));
+    glBegin(render_solid? GL_POLYGON : (closed_loop?GL_LINE_LOOP:GL_LINE_STRIP));
     double d_th = (rad_to - rad_from) / numOfSegments;
     for(double theta = rad_from; theta <= rad_to; theta+=d_th) {
         x_ = r * cosf(theta);
@@ -181,12 +184,12 @@ Frame::Frame(bool show_old) : show_old(show_old)
 
 }
 
-Canvas2D::Canvas2D()
+Canvas::Canvas()
 {
     clear();
 }
 
-Canvas2D::~Canvas2D()
+Canvas::~Canvas()
 {
     for (int fi=0; fi<frames.size(); fi++) {
         for (int si=0; si<frames[fi].shapes.size(); si++) {
@@ -195,18 +198,18 @@ Canvas2D::~Canvas2D()
     }
 }
 
-void Canvas2D::add(Shape *shape_ptr) 
+void Canvas::add(Shape *shape_ptr) 
 {
     frames[fi].shapes.push_back(shape_ptr);
 }
 
-void Canvas2D::newFrame(bool show_old_frames) 
+void Canvas::newFrame(bool show_old_frames) 
 {
     frames.push_back(Frame(show_old_frames));
     ff();
 }
 
-void Canvas2D::draw() 
+void Canvas::draw() 
 {
     Frame *frame;
     int fi_ = (int) fi;
@@ -219,27 +222,27 @@ void Canvas2D::draw()
     }
 }
 
-void Canvas2D::next() 
+void Canvas::next() 
 {
     if (fi<frames.size()-1) fi++;
 }
 
-void Canvas2D::prev() 
+void Canvas::prev() 
 {
     if (fi>0) fi--;
 }
 
-void Canvas2D::rew() 
+void Canvas::rew() 
 {
     fi = 0;
 }
 
-void Canvas2D::ff() 
+void Canvas::ff() 
 {
     fi = frames.size()-1;
 }
 
-void Canvas2D::resize(int i) 
+void Canvas::resize(int i) 
 {
     if (i<1 || i > size()-1) return;
 
@@ -254,7 +257,7 @@ void Canvas2D::resize(int i)
     fi=i-1;
 }
 
-void Canvas2D::clear()
+void Canvas::clear()
 {
     // Delete shapes of frames that will be discarded
     for (int fi=0; fi<frames.size(); fi++) {
@@ -268,7 +271,7 @@ void Canvas2D::clear()
     fi=0;
 }
 
-void Canvas2D::clearFrame()
+void Canvas::clearFrame()
 {
     for (int si = 0; si<frames[fi].shapes.size(); si++) {
         delete frames[fi].shapes[si];
@@ -375,7 +378,7 @@ vvr::Point3D vvr::math2vvr(const math::vec &v, const vvr::Colour &col)
     return vvr::Point3D(v.x, v.y, v.z, col);
 }
 
-void vvr::drawSphere(double r, int lats, int longs)
+void drawSphere(double r, int lats, int longs)
 {
     int i, j;
     for (i = 0; i <= lats; i++) {
@@ -400,7 +403,7 @@ void vvr::drawSphere(double r, int lats, int longs)
     }
 }
 
-void vvr::drawBox(double x1, double y1, double z1, double x2, double y2, double z2, Colour col, char a)
+void drawBox(double x1, double y1, double z1, double x2, double y2, double z2, Colour col, char a)
 {
     static vec p[8];
     vec *v = p;

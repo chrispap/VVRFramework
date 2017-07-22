@@ -20,7 +20,7 @@ private:
     void mouseMoved(int x, int y, int modif) override;
     void mouseWheel(int dir, int modif) override;
     void arrowEvent(vvr::ArrowDir dir, int modif) override;
-    vvr::Canvas2D m_canvas;
+    vvr::Canvas m_canvas;
 };
 
 using namespace std;

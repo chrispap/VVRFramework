@@ -30,7 +30,7 @@ private:
 
 private:
     std::vector<C2DPoint> m_pts;
-    vvr::Canvas2D m_canvas;
+    vvr::Canvas m_canvas;
     C2DPoint *m_curr_p;
     C2DVector m_displacement;
     C2DVector m_dv;
@@ -115,7 +115,7 @@ void MoldingScene::draw()
     poly.Move(m_displacement);
     vvr::draw(poly, col1, true);
 
-    Canvas2D canvas;
+    Canvas canvas;
 
     // Draw mold line
     float x_min_max = getViewportWidth() * 0.4;

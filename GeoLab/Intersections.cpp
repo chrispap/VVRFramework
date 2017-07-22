@@ -34,11 +34,11 @@ private: // Methods
 private: // Data
     C2DLine         m_bound_horizontal;
     C2DLine         m_bound_vertical;
-    vvr::Canvas2D   m_canvas_0;
-    vvr::Canvas2D   m_canvas_1;
-    vvr::Canvas2D   m_canvas_2;
-    vvr::Canvas2D   m_canvas_3;
-    vvr::Canvas2D   m_canvas_4;
+    vvr::Canvas   m_canvas_0;
+    vvr::Canvas   m_canvas_1;
+    vvr::Canvas   m_canvas_2;
+    vvr::Canvas   m_canvas_3;
+    vvr::Canvas   m_canvas_4;
     C2DTriangle     m_triangle_1;
     C2DTriangle     m_triangle_2;
     C2DCircle       m_circle_1;

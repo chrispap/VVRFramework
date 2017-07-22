@@ -24,7 +24,7 @@ void Task_4_Draw_PCA(vec &center, vec &dir);
 void Task_5_Intersect(std::vector<vvr::Triangle>& triangles, Plane &plane, std::vector<int> &intersection_indices);
 void Task_5_Split(vvr::Mesh &mesh, Plane &plane);
 void pca(std::vector<vec>& vertices, vec &center, vec &dir);
-void FindSubMeshes(vvr::Mesh &mesh, vvr::Canvas2D &canvas);
+void FindSubMeshes(vvr::Mesh &mesh, vvr::Canvas &canvas);
 
 class Mesh3DScene : public vvr::Scene
 {
@@ -50,7 +50,7 @@ private:
 private:
     int m_flag;
     float m_plane_d;
-    vvr::Canvas2D m_canvas;
+    vvr::Canvas m_canvas;
     vvr::Colour m_obj_col;
     vvr::Mesh::Ptr m_model_original, m_model;
     vvr::Box3D m_aabb;
@@ -562,7 +562,7 @@ void Task_5_Split(Mesh &mesh, Plane &plane)
     }
 }
 
-void FindSubMeshes(vvr::Mesh &mesh, vvr::Canvas2D &canvas)
+void FindSubMeshes(vvr::Mesh &mesh, vvr::Canvas &canvas)
 {
     const vector<vvr::Triangle> &tris = mesh.getTriangles();
     const vector<vec> &vecs = mesh.getVertices();

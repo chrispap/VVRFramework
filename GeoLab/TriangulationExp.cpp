@@ -35,7 +35,7 @@ private:
 private:
     C2DPointSet m_pts;
     std::set<Tri> m_tris;
-    vvr::Canvas2D m_canvas;
+    vvr::Canvas m_canvas;
     int m_style_flag;
     float m_lw_canvas;
     float m_lw_tris;
@@ -81,7 +81,7 @@ void FindAdjacentTriangle(std::set<Tri> &tris, C2DPoint *p1, C2DPoint *p2, C2DPo
 
 void FixViolation(std::set<Tri> &tris, unsigned violation_index);
 
-void ShowViolations(std::set<Tri> &tris, const C2DPointSet &ptset, vvr::Canvas2D &canvas, const vvr::Colour &col);
+void ShowViolations(std::set<Tri> &tris, const C2DPointSet &ptset, vvr::Canvas &canvas, const vvr::Colour &col);
 
 #endif // SCENE_TRIANGULATION_H
 #include <algorithm>
@@ -394,7 +394,7 @@ void FindAdjacentTriangle(set<Tri> &tris, C2DPoint *p1, C2DPoint *p2, C2DPoint *
     }
 }
 
-void ShowViolations(set<Tri> &tris, const C2DPointSet &ptset, Canvas2D &canvas, const Colour &col)
+void ShowViolations(set<Tri> &tris, const C2DPointSet &ptset, Canvas &canvas, const Colour &col)
 {
     set<Tri>::const_iterator tri_iter;
     for (tri_iter = tris.begin(); tri_iter != tris.end(); ++tri_iter) {

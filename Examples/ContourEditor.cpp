@@ -43,7 +43,7 @@ private:
 private:
     vector<vector<vec> >    m_pts;
     vector<float>           m_heights;
-    Canvas2D                m_canvas;
+    Canvas                m_canvas;
     float                   m_rad;
     bool                    b_render_3D, b_show_pts;
     int                     m_active_contour;

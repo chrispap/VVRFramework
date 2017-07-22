@@ -35,7 +35,7 @@ private:
     void processPoint(C2DPoint* const p);
 
 private:
-    vvr::Canvas2D m_canvas;
+    vvr::Canvas m_canvas;
     C2DPointSet m_pts;
     std::vector<Tri> m_tris;
     int m_style_flag;
@@ -82,7 +82,7 @@ bool FindAdjacentTriangle(std::vector<Tri> &tris, C2DPoint *p1, C2DPoint *p2, un
 
 void FindViolations(std::vector<Tri> &tris, const C2DPointSet &ptset, std::vector<unsigned> &violations);
 
-void ShowViolations(std::vector<Tri> &tris, const std::vector<unsigned> &violations, vvr::Canvas2D &canvas, const vvr::Colour &col);
+void ShowViolations(std::vector<Tri> &tris, const std::vector<unsigned> &violations, vvr::Canvas &canvas, const vvr::Colour &col);
 
 #endif // SCENE_TRIANGULATION_H
 #include <vvr/utils.h>
@@ -420,7 +420,7 @@ void FindViolations(vector<Tri> &tris, const C2DPointSet &ptset, vector<unsigned
     }
 }
 
-void ShowViolations(vector<Tri> &tris, const vector<unsigned> &violations, Canvas2D &canvas, const Colour &col)
+void ShowViolations(vector<Tri> &tris, const vector<unsigned> &violations, Canvas &canvas, const Colour &col)
 {
     for (int i = 0; i < violations.size(); i++) {
         Tri &tri = tris[violations[i]];

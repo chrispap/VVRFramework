@@ -26,7 +26,7 @@ protected:
 
 private:
     float m_rad;
-    vvr::Canvas2D m_canvas;
+    vvr::Canvas m_canvas;
 };
 
 using namespace std;
