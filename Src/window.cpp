@@ -1,5 +1,5 @@
 #include "window.h"
-#include "glwidget.h"
+#include <vvr/glwidget.h>
 #include <vvr/scene.h>
 #include <QtOpenGL>
 #include <QtWidgets>

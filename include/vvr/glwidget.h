@@ -1,7 +1,8 @@
 #ifndef VVR_GLWIDGET_H
 #define VVR_GLWIDGET_H
 
-#include <vvr/scene.h>
+#include "vvrframework_DLL.h"
+#include "scene.h"
 #include <QtOpenGL>
 #include <QGLWidget>
 #include <QInputEvent>

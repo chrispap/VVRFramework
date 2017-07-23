@@ -2,8 +2,8 @@
 #define VVR_WINDOW_H
 
 #include "ui_window.h"
-#include "glwidget.h"
 #include "stdout_redirector.h"
+#include <vvr/glwidget.h>
 #include <vvr/scene.h>
 
 namespace vvr {

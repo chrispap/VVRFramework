@@ -15,7 +15,7 @@ GET_FILENAME_COMPONENT(QT_BIN_DIR ${prop} DIRECTORY)
 ### Sources #############################################################################
 set(IMPL_FILES
   window.cpp window.h
-  glwidget.cpp glwidget.h
+  glwidget.cpp
   scene.cpp
   drawing.cpp
   mesh.cpp
@@ -27,6 +27,7 @@ set(IMPL_FILES
   stdout_redirector.h
 )
 set(INCL_FILES
+  ../include/vvr/glwidget.h
   ../include/vvr/scene.h
   ../include/vvr/drawing.h
   ../include/vvr/mesh.h

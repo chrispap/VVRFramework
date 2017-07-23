@@ -37,21 +37,17 @@ struct Obb : public vvr::IDrawable, private math::OBB
     vvr_decl_shared_ptr(Obb)
 
     void draw() const override;
-
     void set(const AABB& aabb, const float4x4& transform);
 
 private:
-
     Obb();
     ~Obb();
     Obb(const Obb&) = delete;
-
-    static const vvr::Colour colfill, coledge;
-
     const size_t num_verts;
     vec *verts;
     vec *norms;
     vvr::Point3D *cornerpts;
+    static const vvr::Colour colfill, coledge;
 };
 
 Obb::Obb() : num_verts(NumVerticesInTriangulation(1, 1, 1))
@@ -72,7 +68,7 @@ Obb::~Obb()
 void Obb::set(const AABB& aabb, const float4x4& transform) 
 {
     SetFrom(aabb, transform);
-    Triangulate(1, 1, 1, verts, nullptr, nullptr, true);
+    Triangulate(1, 1, 1, verts, norms, nullptr, true);
     for (size_t i = 0; i < NumVertices(); ++i) {
         cornerpts[i] = math2vvr(CornerPoint(i), coledge);
     }
@@ -130,7 +126,6 @@ BoxesScene::BoxesScene()
     m_disp_flag |= FLAG_SHOW_WIRE;
     m_disp_flag |= FLAG_SHOW_AXES;
     m_disp_flag |= FLAG_SHOW_OBB;
-
     mObb = Obb::Make();
 }
 
