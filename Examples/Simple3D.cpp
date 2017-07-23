@@ -12,7 +12,7 @@
 #include <vector>
 #include <MathGeoLib.h>
 
-struct CuttingPlane : public math::Plane, vvr::IDrawable
+struct CuttingPlane : public math::Plane, vvr::Drawable
 {
     vvr_decl_shared_ptr(CuttingPlane);
 
@@ -42,8 +42,8 @@ struct CuttingPlane : public math::Plane, vvr::IDrawable
         math::vec v4 = pos + (-X + Y) * halfside;
         t1 = math2vvr(math::Triangle(v1, v2, v3), col);
         t2 = math2vvr(math::Triangle(v3, v4, v1), col);
-        t1.setSolidRender(!wire);
-        t2.setSolidRender(!wire);
+        t1.setRenderSolid(!wire);
+        t2.setRenderSolid(!wire);
     }
 
 private:
@@ -79,7 +79,7 @@ private:
     std::vector<math::Triangle> m_floor_tris;
     CuttingPlane::Ptr m_plane, m_plane_clipped;
     int m_style_flag;
-    vvr::Box3D* m_box;
+    vvr::Aabb3D* m_box;
     int m_click_counter;
 };
 
@@ -136,7 +136,7 @@ void Simple3DScene::reset()
     pos.z -= 40;
     setCameraPos(pos);
     m_canvas.clear();
-    m_box = new vvr::Box3D();
+    m_box = new vvr::Aabb3D();
     m_box->setColour(vvr::Colour("#459823"));
     m_canvas.add(m_box);
     m_click_counter = 0;
@@ -228,7 +228,7 @@ void Simple3DScene::draw()
     for (const auto &tri : m_floor_tris)
     {
         auto floor_tri = math2vvr(tri, Colour(23, 35, 56));
-        floor_tri.setSolidRender(true);
+        floor_tri.setRenderSolid(true);
         floor_tri.draw();
     }
 

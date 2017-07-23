@@ -61,7 +61,7 @@ struct Tri
 
     vvr::Triangle2D to_vvr(vvr::Colour col = vvr::Colour::black, bool filled = false) const {
         vvr::Triangle2D t(v1->x, v1->y, v2->x, v2->y, v3->x, v3->y, col);
-        t.setSolidRender(filled);
+        t.setRenderSolid(filled);
         return t;
     }
 

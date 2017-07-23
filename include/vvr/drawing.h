@@ -46,20 +46,25 @@ struct vvrframework_API Colour
     static const Colour yellowGreen;
 };
 
-class vvrframework_API IDrawable {
-public:
-    virtual ~IDrawable() {}
-
+struct vvrframework_API Drawable 
+{
+    virtual ~Drawable() = default;
     virtual void draw() const = 0;
+    bool isVisible() { return visible; }
+    bool setVisibility(bool viz) { visible = viz; return visible; }
+    bool toggleVisibility() { visible = !visible; return visible; }
+    bool show() { visible = true; return visible; }
+    bool hide() { visible = false; return visible; }
+
+private:
+    bool visible = true;
 };
 
-class vvrframework_API Shape : public IDrawable
+class vvrframework_API Shape : public Drawable
 {
 protected:
     Colour colour;
     bool render_solid;
-
-protected:
     Shape(const Colour &rgb=Colour()) : colour(rgb), render_solid(false) {}
     virtual void drawShape() const = 0;
 
@@ -67,7 +72,7 @@ public:
     virtual ~Shape() {}
     void draw() const override;
     void setColour(const Colour &col) {colour = col;}
-    void setSolidRender(bool render_solid) {render_solid = render_solid;}
+    void setRenderSolid(bool solid) {render_solid = solid;}
 
 public:
     static float LineWidth;
@@ -171,7 +176,7 @@ public:
         x(x), y(y), z(z), rad(rad), Shape(rgb) {}
 };
 
-struct vvrframework_API Box3D : public Shape
+struct vvrframework_API Aabb3D : public Shape
 {
     double x1, y1, z1;
     double x2, y2, z2;
@@ -181,11 +186,11 @@ protected:
     void drawShape() const override;
 
 public:
-    Box3D() : transparency(0) {}
+    Aabb3D() : transparency(0) {}
 
-    Box3D(const std::vector<vec> vertices, const Colour &col = Colour());
+    Aabb3D(const std::vector<vec> vertices, const Colour &col = Colour());
 
-    Box3D(double xmin, double ymin, double zmin,
+    Aabb3D(double xmin, double ymin, double zmin,
         double xmax, double ymax, double zmax,
         const Colour &col = Colour())
         : x1(xmin), y1(ymin), z1(zmin)
@@ -194,6 +199,22 @@ public:
 
 
     void setTransparency(float a) { transparency = a; }
+};
+
+struct vvrframework_API Obb3D : public Shape, private math::OBB
+{
+    Obb3D();
+    ~Obb3D();
+    Obb3D(const Obb3D&) = delete;
+    void set(const math::AABB& aabb, const float4x4& transform);
+    void drawShape() const override;
+
+private:
+    vvr::Point3D *cornerpts;
+    vec *verts;
+    vec *norms;
+    const size_t num_verts;
+    vvr::Colour col_edge;
 };
 
 struct vvrframework_API Triangle2D : public Shape
@@ -252,29 +273,58 @@ public:
     }
 };
 
-struct vvrframework_API Frame {
-    std::vector<Shape*> shapes;
-    bool show_old;
-    Frame ();
-    Frame (bool show_old);
+struct vvrframework_API Ground : public vvr::Drawable
+{
+    Ground(const float W, const float D, const float B, const float T, const vvr::Colour &colour);
+    void draw() const override;
+
+private:
+    std::vector<math::Triangle> m_floor_tris;
+    vvr::Colour m_col;
 };
 
-class vvrframework_API Canvas {
+struct GlobalAxes : vvr::Drawable
+{
+    GlobalAxes(double d)
+        : x(0, 0, 0, d, 0, 0, vvr::Colour::red)
+        , y(0, 0, 0, 0, d, 0, vvr::Colour::green)
+        , z(0, 0, 0, 0, 0, d, vvr::Colour::blue)
+    {
+    }
+
+    virtual void draw() const override
+    {
+        x.draw();
+        y.draw();
+        z.draw();
+    };
+
+private:
+    vvr::LineSeg3D x, y, z;
+};
+
+struct vvrframework_API Frame 
+{
+    std::vector<Drawable*> drawables;
+    bool show_old;
+    Frame(bool show_old = true) : show_old(show_old) {}
+};
+
+class vvrframework_API Canvas 
+{
+    unsigned fid;
     std::vector<Frame> frames;
-    unsigned fi;
 
 public:
     Canvas();
     ~Canvas();
-
     unsigned size() { return frames.size(); }
-    unsigned frameIndex() { return fi; }
-    bool isAtStart() { return fi == 0; }
-    bool isAtEnd() { return fi == frames.size()-1; }
-    std::vector<Frame>& getFrames() { return frames; }
-
+    unsigned frameIndex() { return fid; }
+    bool isAtStart() { return fid == 0; }
+    bool isAtEnd() { return fid == frames.size()-1; }
+    std::vector<Drawable*>& getDrawables(int offs=0) { return frames[fid+offs].drawables; }
     void newFrame(bool show_old_frames=true);
-    void add(Shape *shape_ptr);
+    Drawable* add(Drawable *drawable_ptr);
     void draw();
     void next();
     void prev();
@@ -284,32 +334,37 @@ public:
     void clear();
     void clearFrame();
 
-    /* Utilities to directly add GeoLib objects to canvas */
+    /* Helpers to directly add GeoLib objects to canvas */
 
-    void add(const C2DPoint &p, const Colour &col=Colour::black) {
-        add(new Point2D(p.x, p.y, col));
+    Drawable* add(const C2DPoint &p, const Colour &col=Colour::black) 
+    {
+        return add(new Point2D(p.x, p.y, col));
     }
 
-    void add(const C2DPoint &p1, const C2DPoint &p2, const Colour &col=Colour::black, bool inf_line=false) {
+    Drawable* add(const C2DPoint &p1, const C2DPoint &p2, const Colour &col=Colour::black, bool inf_line=false) 
+    {
         if (inf_line)
-            add(new Line2D(p1.x, p1.y, p2.x, p2.y, col));
+            return add(new Line2D(p1.x, p1.y, p2.x, p2.y, col));
         else
-            add(new LineSeg2D(p1.x, p1.y, p2.x, p2.y, col));
+            return add(new LineSeg2D(p1.x, p1.y, p2.x, p2.y, col));
     }
 
-    void add(const C2DLine &line, const Colour &col=Colour::black, bool inf_line=false) {
+    Drawable* add(const C2DLine &line, const Colour &col=Colour::black, bool inf_line=false) 
+    {
         const C2DPoint &p1 = line.GetPointFrom();
         const C2DPoint &p2 = line.GetPointTo();
-        add(p1, p2, col, inf_line);
+        return add(p1, p2, col, inf_line);
     }
 
-    void add(const C2DCircle &circle, const Colour &col=Colour::black, bool solid=false) {
+    Drawable* add(const C2DCircle &circle, const Colour &col=Colour::black, bool solid=false) 
+    {
         Shape * s = new Circle2D(circle.GetCentre().x, circle.GetCentre().y, circle.GetRadius(), col);
-        s->setSolidRender(solid);
-        add(s);
+        s->setRenderSolid(solid);
+        return add(s);
     }
 
-    void add(const C2DTriangle &tri, const Colour &col=Colour::black, bool solid=false) {
+    Drawable* add(const C2DTriangle &tri, const Colour &col=Colour::black, bool solid=false) 
+    {
         Shape *s = new Triangle2D(
                     tri.GetPoint1().x,
                     tri.GetPoint1().y,
@@ -318,8 +373,8 @@ public:
                     tri.GetPoint3().x,
                     tri.GetPoint3().y,
                     col);
-        s->setSolidRender(solid);
-        add(s);
+        s->setRenderSolid(solid);
+        return add(s);
     }
 
 };

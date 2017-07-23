@@ -321,17 +321,17 @@ void OrigamiScene::newLineSegment(int x, int y, bool shiftDown)
         {
             const vvr::Colour col = vvr::Colour::red;
             vec p = pol.ClosestPoint(ray.ToLineSegment(10000));
-            vector<vvr::Shape*> &shapes = m_canvas.getFrames().back().shapes;
-            vvr::Shape *sh;
+			vector<vvr::Drawable*> &drawables = m_canvas.getDrawables();
+            vvr::Drawable *sh;
 
             // Start new line segment set
-            if (shapes.empty() || m_ongoing_slicing_count == 0)
+            if (drawables.empty() || m_ongoing_slicing_count == 0)
             {
                 m_canvas.add(new vvr::LineSeg3D(p.x, p.y, p.z, p.x, p.y, p.z, col));
             }
             else
             {
-                auto last_seg = static_cast<vvr::LineSeg3D*>(shapes.back());
+                auto last_seg = static_cast<vvr::LineSeg3D*>(drawables.back());
                 vec last_point(last_seg->x2, last_seg->y2, last_seg->z2);
 
                 if (last_point.Distance(p) < 0.3) break;
@@ -340,20 +340,20 @@ void OrigamiScene::newLineSegment(int x, int y, bool shiftDown)
 
                 //! Smoothen slice
                 const unsigned N = 4;
-                const unsigned shape_num = shapes.size();
+                const unsigned shape_num = drawables.size();
                 if (shiftDown && shape_num > N && m_ongoing_slicing_count > N + 1)
                 {
                     double x = 0; double y = 0; double z = 0;
 
                     for (int i = 0; i < N; ++i) {
-                        vvr::LineSeg3D *lseg = static_cast<vvr::LineSeg3D*>(shapes.at(shape_num - 1 - i));
+                        vvr::LineSeg3D *lseg = static_cast<vvr::LineSeg3D*>(drawables.at(shape_num - 1 - i));
                         x += lseg->x2;
                         y += lseg->y2;
                         z += lseg->z2;
                     }
 
-                    vvr::LineSeg3D *lseg0 = static_cast<vvr::LineSeg3D*>(shapes.at(shape_num - 2));
-                    vvr::LineSeg3D *lseg1 = static_cast<vvr::LineSeg3D*>(shapes.at(shape_num - 1));
+                    vvr::LineSeg3D *lseg0 = static_cast<vvr::LineSeg3D*>(drawables.at(shape_num - 2));
+                    vvr::LineSeg3D *lseg1 = static_cast<vvr::LineSeg3D*>(drawables.at(shape_num - 1));
 
                     lseg0->x2 = lseg1->x1 = x / N;
                     lseg0->y2 = lseg1->y1 = y / N;
@@ -369,50 +369,50 @@ void OrigamiScene::newLineSegment(int x, int y, bool shiftDown)
 
 void OrigamiScene::smoothSlices()
 {
-    unsigned fi = m_canvas.frameIndex();
-    m_canvas.newFrame(false);
-    vector<vvr::Shape*> &shapes_old = m_canvas.getFrames().at(fi).shapes;
-    vector<vvr::Shape*> &shapes = m_canvas.getFrames().at(fi + 1).shapes;
+	unsigned fid = m_canvas.frameIndex();
+	m_canvas.newFrame(false);
+	vector<vvr::Drawable*> &drawables = m_canvas.getDrawables(0);
+	vector<vvr::Drawable*> &drawables_prev = m_canvas.getDrawables(-1);
 
-    for (auto sh : shapes_old) {
-        m_canvas.add(new vvr::LineSeg3D(*static_cast<vvr::LineSeg3D*>(sh)));
-    }
+	for (auto sh : drawables_prev) {
+		m_canvas.add(new vvr::LineSeg3D(*static_cast<vvr::LineSeg3D*>(sh)));
+	}
 
-    for (unsigned i = 1; i < shapes.size() - 1; ++i) {
-        vvr::LineSeg3D *lseg0 = static_cast<vvr::LineSeg3D*>(shapes.at(i - 1));
-        vvr::LineSeg3D *lseg1 = static_cast<vvr::LineSeg3D*>(shapes.at(i));
-        vvr::LineSeg3D *lseg2 = static_cast<vvr::LineSeg3D*>(shapes.at(i + 1));
-        lseg1->x1 = 0.333 * (lseg0->x1 + lseg1->x1 + lseg2->x1);
-        lseg1->y1 = 0.333 * (lseg0->y1 + lseg1->y1 + lseg2->y1);
-        lseg1->z1 = 0.333 * (lseg0->z1 + lseg1->z1 + lseg2->z1);
-    }
+	for (unsigned i = 1; i < drawables.size() - 1; ++i) {
+		vvr::LineSeg3D *lseg0 = static_cast<vvr::LineSeg3D*>(drawables.at(i - 1));
+		vvr::LineSeg3D *lseg1 = static_cast<vvr::LineSeg3D*>(drawables.at(i));
+		vvr::LineSeg3D *lseg2 = static_cast<vvr::LineSeg3D*>(drawables.at(i + 1));
+		lseg1->x1 = 0.333 * (lseg0->x1 + lseg1->x1 + lseg2->x1);
+		lseg1->y1 = 0.333 * (lseg0->y1 + lseg1->y1 + lseg2->y1);
+		lseg1->z1 = 0.333 * (lseg0->z1 + lseg1->z1 + lseg2->z1);
+	}
 
-    for (unsigned i = 0; i < shapes.size() - 1; ++i) {
-        vvr::LineSeg3D *lseg1 = static_cast<vvr::LineSeg3D*>(shapes.at(i));
-        vvr::LineSeg3D *lseg2 = static_cast<vvr::LineSeg3D*>(shapes.at(i + 1));
-        lseg1->x2 = lseg2->x1;
-        lseg1->y2 = lseg2->y1;
-        lseg1->z2 = lseg2->z1;
-    }
+	for (unsigned i = 0; i < drawables.size() - 1; ++i) {
+		vvr::LineSeg3D *lseg1 = static_cast<vvr::LineSeg3D*>(drawables.at(i));
+		vvr::LineSeg3D *lseg2 = static_cast<vvr::LineSeg3D*>(drawables.at(i + 1));
+		lseg1->x2 = lseg2->x1;
+		lseg1->y2 = lseg2->y1;
+		lseg1->z2 = lseg2->z1;
+	}
 }
 
 void OrigamiScene::undo()
 {
-    auto &shapes = m_canvas.getFrames().at((m_canvas.frameIndex())).shapes;
+    auto &drawables = m_canvas.getDrawables();
 
-    if (shapes.size() > 0) {
-        delete shapes.back();
-        shapes.resize(shapes.size() - 1);
+    if (drawables.size() > 0) {
+        delete drawables.back();
+        drawables.resize(drawables.size() - 1);
     }
 }
 
 void OrigamiScene::triangulate()
 {
-    auto &shapes = m_canvas.getFrames().at((m_canvas.frameIndex())).shapes;
+	auto &drawables = m_canvas.getDrawables();
 
     C2DPointSet ptset;
 
-    for (vvr::Shape* sh : shapes) {
+    for (vvr::Drawable* sh : drawables) {
         vvr::LineSeg3D &lseg = static_cast<vvr::LineSeg3D&>(*sh);
         ptset.Add(new C2DPoint(lseg.x2, lseg.y2));
     }

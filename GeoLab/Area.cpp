@@ -71,7 +71,7 @@ void SceneArea::draw()
 
     // Draw a triangle.
     Triangle2D tri(-200, -200, -200, 200, m_x, m_y, col_tri);
-    tri.setSolidRender(false);
+    tri.setRenderSolid(false);
     tri.draw();
 
     // Draw a line segment.

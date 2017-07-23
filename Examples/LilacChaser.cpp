@@ -51,7 +51,7 @@ LilacChaserScene::LilacChaserScene()
         float x = R * sin(deg);
         float y = R * cos(deg);
         vvr::Circle2D *c = new vvr::Circle2D(x, y, r, col_lilac);
-        c->setSolidRender(true);
+        c->setRenderSolid(true);
         m_canvas.add(c);
         m_circles.push_back(c);
     }

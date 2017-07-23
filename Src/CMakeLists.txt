@@ -36,6 +36,7 @@ set(INCL_FILES
   ../include/vvr/utils.h
   ../include/vvr/settings.h
   ../include/vvr/dsp.h
+  ../include/vvr/animation.h
   ../include/vvr/macros.h
   ../include/vvr/vvrframework_DLL.h
 )

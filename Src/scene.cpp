@@ -1,4 +1,5 @@
 #include <vvr/scene.h>
+#include <vvr/drawing.h>
 #include <cstdio>
 #include <iostream>
 #include <vector>
@@ -17,7 +18,7 @@ using namespace math;
 #define VVR_FOV_MAX 160
 #define VVR_FOV_MIN 2
 
-//! Scene::
+/*--- class vvr::Scene ----------------------------------------------------------------*/
 
 Scene::Scene()
 {
@@ -51,9 +52,7 @@ void Scene::setCameraPos(const vec &pos)
     m_frustum.SetFrame(pos, front, up);
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////
-//! OpenGL Callbacks
-/////////////////////////////////////////////////////////////////////////////////////////
+/*--- OpenGL Callbacks ----------------------------------------------------------------*/
 
 static void GL_Info()
 {
@@ -152,26 +151,7 @@ void Scene::GL_Render()
 
 void Scene::drawAxes()
 {
-    GLfloat len = 2.0 * getSceneWidth();
-
-    glBegin(GL_LINES);
-
-    // X
-    glColor3ub(0xFF, 0, 0);
-    glVertex3f(0, 0, 0);
-    glVertex3f(len, 0, 0);
-
-    // Y
-    glColor3f(0, 0xFF, 0);
-    glVertex3f(0, 0, 0);
-    glVertex3f(0, len, 0);
-
-    // Z
-    glColor3f(0, 0, 0xFF);
-    glVertex3f(0, 0, 0);
-    glVertex3f(0, 0, len);
-
-    glEnd();
+    GlobalAxes(2.0 *getSceneWidth()).draw();
 }
 
 void Scene::enterPixelMode()
@@ -211,9 +191,7 @@ Ray Scene::unproject(int x, int y)
         (float)y / getViewportHeight() * 2);
 }
 
-/////////////////////////////////////////////////////////////////////////////////////////
-//! UI
-/////////////////////////////////////////////////////////////////////////////////////////
+/*--- UI ------------------------------------------------------------------------------*/
 
 void Scene::keyEvent(unsigned char key, bool up, int modif)
 {
@@ -293,32 +271,4 @@ void Scene::setSliderVal(int slider_id, float val)
     else if (val < 0) val = 0;
     //TODO: Connect scene object backwards to window in order to be able to change 
     //      slider values from the scene.
-}
-
-//! Ground::
-
-Ground::Ground(const float W, const float D, const float B, const float T, const vvr::Colour &colour)
-    : m_col(colour)
-{
-    const vec vA(-W / 2, B, -D / 2);
-    const vec vB(+W / 2, B, -D / 2);
-    const vec vC(+W / 2, B, +D / 2);
-    const vec vD(-W / 2, B, +D / 2);
-    const vec vE(-W / 2, T, -D / 2);
-    const vec vF(+W / 2, T, -D / 2);
-
-    m_floor_tris.push_back(math::Triangle(vB, vA, vD));
-    m_floor_tris.push_back(math::Triangle(vB, vD, vC));
-    m_floor_tris.push_back(math::Triangle(vF, vE, vA));
-    m_floor_tris.push_back(math::Triangle(vF, vA, vB));
-}
-
-void Ground::draw() const
-{
-    for (int i = 0; i < m_floor_tris.size(); i++)
-    {
-        vvr::Triangle3D floor_tri = vvr::math2vvr(m_floor_tris.at(i), m_col);
-        floor_tri.setSolidRender(true);
-        floor_tri.draw();
-    }
 }

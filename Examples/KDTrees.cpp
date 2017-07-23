@@ -1,4 +1,5 @@
 #include <vvr/scene.h>
+#include <vvr/animation.h>
 #include <vvr/kdtree.h>
 #include <vvr/macros.h>
 
@@ -50,7 +51,7 @@ private:
 /**
 * Class Representing scene floor and background wall.
 */
-class Ground : public vvr::IDrawable
+class Ground : public vvr::Drawable
 {
 public:
     Ground(const float W, const float D, const float B, const float T, const vvr::Colour &colour);
@@ -325,7 +326,7 @@ void KDTreeScene::draw()
                 }
                 vec c1 = levelNodes[i]->aabb.minPoint;
                 vec c2 = levelNodes[i]->aabb.maxPoint;
-                vvr::Box3D box(c1.x, c1.y, c1.z, c2.x, c2.y, c2.z);
+                vvr::Aabb3D box(c1.x, c1.y, c1.z, c2.x, c2.y, c2.z);
                 box.setTransparency(0.9);
                 box.setColour(vvr::Colour::cyan);
                 box.draw();
@@ -501,7 +502,7 @@ void Ground::draw() const
     for (int i = 0; i < m_floor_tris.size(); i++)
     {
         vvr::Triangle3D floor_tri = vvr::math2vvr(m_floor_tris.at(i), m_col);
-        floor_tri.setSolidRender(true);
+        floor_tri.setRenderSolid(true);
         floor_tri.draw();
     }
 }

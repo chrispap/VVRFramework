@@ -6,14 +6,11 @@
 #include <QtOpenGL>
 #include <MathGeoLib.h>
 
-static void drawSphere(double r, int lats, int longs);
-static void drawBox(double x1, double y1, double z1, double x2, double y2, double z2, vvr::Colour col, char alpha);
-
 using namespace std;
 using namespace vvr;
 
-float Shape::LineWidth = 2.2f;
-float Shape::PointSize = 7.0f;
+static void drawSphere(double r, int lats, int longs);
+static void drawBox(double x1, double y1, double z1, double x2, double y2, double z2, vvr::Colour col, char alpha);
 
 const Colour Colour::red            (0xFF, 0x00, 0x00);
 const Colour Colour::blue           (0x00, 0x00, 0xFF);
@@ -29,6 +26,9 @@ const Colour Colour::darkRed        (0x8B, 0x00, 0x00);
 const Colour Colour::darkOrange     (0xFF, 0x8C, 0x00);
 const Colour Colour::darkGreen      (0x00, 0x64, 0x00);
 const Colour Colour::yellowGreen    (0x9A, 0xCD, 0x32);
+
+float Shape::LineWidth = 2.2f;
+float Shape::PointSize = 7.0f;
 
 void Shape::draw() const 
 {
@@ -88,6 +88,40 @@ void LineSeg3D::drawShape() const
     glEnd();
 }
 
+void Triangle2D::drawShape() const
+{
+    glLineWidth(LineWidth);
+    glBegin(GL_TRIANGLES);
+    glVertex2f(x1, y1);
+    glVertex2f(x2, y2);
+    glVertex2f(x3, y3);
+    glEnd();
+}
+
+void Triangle3D::drawShape() const
+{
+    glLineWidth(LineWidth);
+    glBegin(GL_TRIANGLES);
+    math::vec n = math::Triangle(
+        math::vec(x1, y1, z1),
+        math::vec(x2, y2, z2),
+        math::vec(x3, y3, z3)
+    ).NormalCW();
+
+    glNormal3fv(n.ptr());
+
+    glColor3ubv(vertex_col[0].data);
+    glVertex3f(x1, y1, z1);
+
+    glColor3ubv(vertex_col[1].data);
+    glVertex3f(x2, y2, z2);
+
+    glColor3ubv(vertex_col[2].data);
+    glVertex3f(x3, y3, z3);
+
+    glEnd();
+}
+
 void Circle2D::drawShape() const 
 {
     if (rad_from >= rad_to) {
@@ -119,7 +153,7 @@ void Sphere3D::drawShape() const
     glPopMatrix();
 }
 
-Box3D::Box3D(const std::vector<vec> vertices, const Colour &col)
+Aabb3D::Aabb3D(const std::vector<vec> vertices, const Colour &col)
     : Shape(col)
     , transparency(0)
 {
@@ -134,73 +168,103 @@ Box3D::Box3D(const std::vector<vec> vertices, const Colour &col)
     z2 = aabb.maxPoint.z;
 }
 
-void Box3D::drawShape() const 
+void Aabb3D::drawShape() const 
 {
     drawBox(x1, y1, z1, x2, y2, z2, colour, 0);
     drawBox(x1, y1, z1, x2, y2, z2, colour, 255 - transparency * 255);
 }
 
-void Triangle2D::drawShape() const 
+Obb3D::Obb3D() : num_verts(NumVerticesInTriangulation(1, 1, 1))
 {
-    glLineWidth(LineWidth);
-    glBegin(GL_TRIANGLES);
-    glVertex2f(x1, y1);
-    glVertex2f(x2, y2);
-    glVertex2f(x3, y3);
-    glEnd();
+    colour = vvr::Colour("dd4311");
+    col_edge = vvr::Colour();
+    verts = new vec[num_verts];
+    norms = new vec[num_verts];
+    cornerpts = new vvr::Point3D[NumVertices()];
+    SetFrom(math::AABB{ { 0, 0, 0 }, { 0, 0, 0 } }, float4x4::identity);
 }
 
-void Triangle3D::drawShape() const 
+Obb3D::~Obb3D()
 {
-    glLineWidth(LineWidth);
-    glBegin(GL_TRIANGLES);
-    math::vec n = math::Triangle(
-        math::vec(x1,y1,z1),
-        math::vec(x2,y2,z2),
-        math::vec(x3,y3,z3)
-    ).NormalCW();
-    
-    glNormal3fv(n.ptr());
-
-    glColor3ubv(vertex_col[0].data);
-    glVertex3f(x1, y1, z1);
-    
-    glColor3ubv(vertex_col[1].data);
-    glVertex3f(x2, y2, z2);
-
-    glColor3ubv(vertex_col[2].data);
-    glVertex3f(x3, y3, z3);
-
-    glEnd();
+    delete[] verts;
+    delete[] norms;
+    delete[] cornerpts;
 }
 
-Frame::Frame() : show_old(true)
+void Obb3D::set(const math::AABB& aabb, const float4x4& transform)
 {
-
+    SetFrom(aabb, transform);
+    Triangulate(1, 1, 1, verts, norms, nullptr, true);
+    for (size_t i = 0; i < NumVertices(); ++i) {
+        cornerpts[i] = math2vvr(CornerPoint(i), col_edge);
+    }
 }
 
-Frame::Frame(bool show_old) : show_old(show_old)
+void Obb3D::drawShape() const
 {
+    if (render_solid) {
+        for (size_t i = 0; i < num_verts; i += 3) {
+            math::Triangle t(verts[i + 0], verts[i + 1], verts[i + 2]);
+            math2vvr(t, colour).draw();
+        }
+    }
 
+    for (size_t i = 0; i < NumEdges(); ++i)
+        math2vvr(Edge(i), col_edge).draw();
+
+    auto ptsz_old = vvr::Shape::PointSize;
+    vvr::Shape::PointSize = 12;
+    for (size_t i = 0; i < NumVertices(); ++i) {
+        cornerpts[i].draw();
+    }
+    vvr::Shape::PointSize = ptsz_old;
+}
+
+Ground::Ground(const float W, const float D, const float B, const float T, const vvr::Colour &colour)
+    : m_col(colour)
+{
+    const vec vA(-W / 2, B, -D / 2);
+    const vec vB(+W / 2, B, -D / 2);
+    const vec vC(+W / 2, B, +D / 2);
+    const vec vD(-W / 2, B, +D / 2);
+    const vec vE(-W / 2, T, -D / 2);
+    const vec vF(+W / 2, T, -D / 2);
+
+    m_floor_tris.push_back(math::Triangle(vB, vA, vD));
+    m_floor_tris.push_back(math::Triangle(vB, vD, vC));
+    m_floor_tris.push_back(math::Triangle(vF, vE, vA));
+    m_floor_tris.push_back(math::Triangle(vF, vA, vB));
+}
+
+void Ground::draw() const
+{
+    for (int i = 0; i < m_floor_tris.size(); i++)
+    {
+        vvr::Triangle3D floor_tri = vvr::math2vvr(m_floor_tris.at(i), m_col);
+        floor_tri.setRenderSolid(true);
+        floor_tri.draw();
+    }
 }
 
 Canvas::Canvas()
 {
+    frames.reserve(16);
     clear();
 }
 
 Canvas::~Canvas()
 {
-    for (int fi=0; fi<frames.size(); fi++) {
-        for (int si=0; si<frames[fi].shapes.size(); si++) {
-            delete frames[fi].shapes[si];
+    for (int fid=0; fid<frames.size(); fid++) {
+        for (int i=0; i<frames[fid].drawables.size(); i++) {
+            delete frames[fid].drawables[i];
         }
     }
 }
 
-void Canvas::add(Shape *shape_ptr) 
+Drawable* Canvas::add(Drawable *drawable_ptr)
 {
-    frames[fi].shapes.push_back(shape_ptr);
+    frames[fid].drawables.push_back(drawable_ptr);
+    return drawable_ptr;
 }
 
 void Canvas::newFrame(bool show_old_frames) 
@@ -212,34 +276,37 @@ void Canvas::newFrame(bool show_old_frames)
 void Canvas::draw() 
 {
     Frame *frame;
-    int fi_ = (int) fi;
-    while (frames[fi_].show_old && --fi_>=0);
-    while(fi_ <= fi) {
-        frame = &frames[fi_];
-        for (unsigned i=0; i<frames[fi_].shapes.size(); i++)
-            frames[fi_].shapes[i]->draw();
-        fi_++;
+    int fi = (int) fid;
+    while (frames[fi].show_old && --fi >= 0);
+    while(fi <= fid) {
+        frame = &frames[fi];
+        for (unsigned i = 0; i < frames[fi].drawables.size(); i++) {
+            if (frames[fi].drawables[i]->isVisible()) {
+                frames[fi].drawables[i]->draw();
+            }
+        }
+        fi++;
     }
 }
 
 void Canvas::next() 
 {
-    if (fi<frames.size()-1) fi++;
+    if (fid<frames.size()-1) fid++;
 }
 
 void Canvas::prev() 
 {
-    if (fi>0) fi--;
+    if (fid>0) fid--;
 }
 
 void Canvas::rew() 
 {
-    fi = 0;
+    fid = 0;
 }
 
 void Canvas::ff() 
 {
-    fi = frames.size()-1;
+    fid = frames.size()-1;
 }
 
 void Canvas::resize(int i) 
@@ -247,37 +314,37 @@ void Canvas::resize(int i)
     if (i<1 || i > size()-1) return;
 
     // Delete shapes of frames that will be discarded
-    for (int fi=i; fi<frames.size(); fi++) {
-        for (int si=0; si<frames[fi].shapes.size(); si++) {
-            delete frames[fi].shapes[si];
+    for (int fid=i; fid<frames.size(); fid++) {
+        for (int si=0; si<frames[fid].drawables.size(); si++) {
+            delete frames[fid].drawables[si];
         }
     }
 
     frames.resize(i);
-    fi=i-1;
+    fid=i-1;
 }
 
 void Canvas::clear()
 {
     // Delete shapes of frames that will be discarded
-    for (int fi=0; fi<frames.size(); fi++) {
-        for (int si=0; si<frames[fi].shapes.size(); si++) {
-            delete frames[fi].shapes[si];
+    for (int fid=0; fid<frames.size(); fid++) {
+        for (int si=0; si<frames[fid].drawables.size(); si++) {
+            delete frames[fid].drawables[si];
         }
     }
 
     frames.clear();
     frames.push_back(Frame(false));
-    fi=0;
+    fid=0;
 }
 
 void Canvas::clearFrame()
 {
-    for (int si = 0; si<frames[fi].shapes.size(); si++) {
-        delete frames[fi].shapes[si];
+    for (int si = 0; si<frames[fid].drawables.size(); si++) {
+        delete frames[fid].drawables[si];
     }
 
-    frames[fi].shapes.clear();
+    frames[fid].drawables.clear();
 }
 
 void vvr::draw(C2DPointSet &point_set, const Colour &col)
@@ -326,7 +393,7 @@ void vvr::draw(C2DPolygon  &polygon, const Colour &col, bool filled)
                         convpoly.GetLines().GetAt(j)->GetPointTo().x,
                         convpoly.GetLines().GetAt(j)->GetPointTo().y,
                         convpoly_centroid.x, convpoly_centroid.y);
-                    t.setSolidRender(true);
+                    t.setRenderSolid(true);
                     t.setColour(col);
                     t.draw();
                 }

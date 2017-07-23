@@ -151,11 +151,6 @@ void vvr::Window::do_log_cout(const QString &str)
     if (keep_on_bottom) {
         vScrollBar->triggerAction(QScrollBar::SliderToMaximum);
     }
-
-    //! Optionally log
-#ifdef VVR_USE_BOOST
-    vvr::logi(str.toStdString());
-#endif
 }
 
 void vvr::Window::do_log_cerr(const QString &str)
@@ -178,11 +173,6 @@ void vvr::Window::do_log_cerr(const QString &str)
     if (keep_on_bottom) {
         vScrollBar->triggerAction(QScrollBar::SliderToMaximum);
     }
-
-    //! Optionally log
-#ifdef VVR_USE_BOOST
-    vvr::loge(str.toStdString());
-#endif
 }
 
 int vvr::mainLoop(int argc, char* argv[], vvr::Scene *scene)

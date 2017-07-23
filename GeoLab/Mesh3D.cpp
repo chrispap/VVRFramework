@@ -18,7 +18,7 @@
     << std::endl; break
 
 void Task_1_FindCenterMass(std::vector<vec> &vertices, vec &cm);
-void Task_2_FindAABB(std::vector<vec> &vertices, vvr::Box3D &aabb);
+void Task_2_FindAABB(std::vector<vec> &vertices, vvr::Aabb3D &aabb);
 void Task_3_AlignOriginTo(std::vector<vec> &vertices, const vec &cm);
 void Task_4_Draw_PCA(vec &center, vec &dir);
 void Task_5_Intersect(std::vector<vvr::Triangle>& triangles, Plane &plane, std::vector<int> &intersection_indices);
@@ -53,7 +53,7 @@ private:
     vvr::Canvas m_canvas;
     vvr::Colour m_obj_col;
     vvr::Mesh::Ptr m_model_original, m_model;
-    vvr::Box3D m_aabb;
+    vvr::Aabb3D m_aabb;
     math::vec m_center_mass;
     math::vec m_pca_cen;
     math::vec m_pca_dir;
@@ -402,7 +402,7 @@ void Task_1_FindCenterMass(vector<vec> &vertices, vec &cm)
     cm /= N;
 }
 
-void Task_2_FindAABB(vector<vec> &vertices, Box3D &aabb)
+void Task_2_FindAABB(vector<vec> &vertices, Aabb3D &aabb)
 {
     //!//////////////////////////////////////////////////////////////////////////////////
     //! TASK:
@@ -417,7 +417,7 @@ void Task_2_FindAABB(vector<vec> &vertices, Box3D &aabb)
     //!
     //!//////////////////////////////////////////////////////////////////////////////////
 
-    aabb = Box3D(vertices);
+    aabb = Aabb3D(vertices);
 }
 
 vec Mesh3DScene::Task_3_Pick_Origin()
@@ -619,7 +619,7 @@ void FindSubMeshes(vvr::Mesh &mesh, vvr::Canvas &canvas)
             v_tbc.erase(v);
         }
 
-        vvr::Box3D* bb = new vvr::Box3D(vs);
+        vvr::Aabb3D* bb = new vvr::Aabb3D(vs);
         
         if (bb->x2 - bb->x1 < 1 || 
             bb->y2 - bb->y1 < 1 || 

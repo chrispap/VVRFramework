@@ -375,7 +375,7 @@ void Mesh::draw(Colour col, Style x)
     if (x & NORMALS) drawNormals(col);
     if (x & BOUND) 
     {
-        Box3D aabb(mAABB.MinX(), mAABB.MinY(), mAABB.MinZ(), mAABB.MaxX(), mAABB.MaxY(), mAABB.MaxZ(), col);
+        Aabb3D aabb(mAABB.MinX(), mAABB.MinY(), mAABB.MinZ(), mAABB.MaxX(), mAABB.MaxY(), mAABB.MaxZ(), col);
         aabb.setTransparency(0.88);
         aabb.draw();
     }

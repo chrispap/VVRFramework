@@ -3,6 +3,7 @@
 
 #include <vvr/scene.h>
 #include <vvr/drawing.h>
+#include <vvr/animation.h>
 #include "GeoLib.h"
 
 class MoldingScene : public vvr::Scene

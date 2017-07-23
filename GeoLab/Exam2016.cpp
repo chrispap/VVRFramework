@@ -1,5 +1,6 @@
 #include <vvr/scene.h>
 #include <vvr/mesh.h>
+#include <vvr/animation.h>
 #include <algorithm>
 #include <vector>
 #include <MathGeoLib.h>

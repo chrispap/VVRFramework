@@ -221,7 +221,7 @@ bool MoldingScene::isFreeToMove(C2DVector &dv)
         vvr::Circle2D *dir_circle_line = new vvr::Circle2D(x, y, r);
         dir_circle_fill->setRange(rad_from, rad_to);
         dir_circle_line->setRange(rad_from, rad_to);
-        dir_circle_fill->setSolidRender(true);
+        dir_circle_fill->setRenderSolid(true);
         m_canvas.add(dir_circle_fill);
         m_canvas.add(dir_circle_line);
     }

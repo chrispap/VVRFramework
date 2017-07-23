@@ -3,6 +3,7 @@
 #include <vvr/settings.h>
 #include <vvr/scene.h>
 #include <vvr/mesh.h>
+#include <vvr/animation.h>
 #include <iostream>
 #include <fstream>
 #include <iostream>
@@ -79,14 +80,14 @@ void HelixScene::draw()
         p[0].z = m_r * Sin(phase + t);
         p[0].y = m_c * t;
         Sphere3D s1(p[0].x, p[0].y, p[0].z, m_r / 8, Colour::darkRed);
-        s1.setSolidRender(1);
+        s1.setRenderSolid(1);
         s1.draw();
 
         p[1].x = m_r * Cos(phase + t + DegToRad(90 * 2));
         p[1].z = m_r * Sin(phase + t + DegToRad(90 * 2));
         p[1].y = m_c * t;
         Sphere3D s2(p[1].x, p[1].y, p[1].z, m_r / 8, Colour::darkGreen);
-        s2.setSolidRender(1);
+        s2.setRenderSolid(1);
         s2.draw();
 
         LineSeg3D(p[0].x, p[0].y, p[0].z, p[1].x, p[1].y, p[1].z, Colour(34, 34, 34)).draw();
