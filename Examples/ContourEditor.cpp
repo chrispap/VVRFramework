@@ -13,13 +13,14 @@
 #include <cstring>
 
 #define APP_TITLE "Contour Editor"
+#define CONTOUR_FILENAME  "resources/contours/contours.txt"
+#define CONTOUR_FILENAME  "resources/contours/contours3.txt"
+#define CONTOUR_FILENAME  "resources/contours/contoursPaths.txt"
+#define CONTOUR_FILENAME  "resources/contours/contourstest.txt"
+#define CONTOUR_FILENAME  "resources/contours/contoursOlympus.txt"
+#define CONTOUR_DELIMITER "CONTOUR-LINE"
+#define MIN_POINT_DIST_PIXELS 10
 
-using namespace std;
-using namespace vvr;
-
-/**
-* @brief The Simple2DScene class
-*/
 class ContourEditorScene : public vvr::Scene
 {
 public:
@@ -33,29 +34,25 @@ protected:
     void mousePressed(int x, int y, int modif) override;
     void mouseMoved(int x, int y, int modif) override;
     void keyEvent(unsigned char key, bool up, int modif) override;
-    void arrowEvent(ArrowDir dir, int modif) override;
+    void arrowEvent(vvr::ArrowDir dir, int modif) override;
 
 private:
     void saveContoursToFile();
-    void loadContoursFromFile(string filename);
+    void loadContoursFromFile(std::string filename);
     void pixelCoordsToSceneCoords(float &x, float &y);
 
 private:
-    vector<vector<vec> >    m_pts;
-    vector<float>           m_heights;
-    Canvas                m_canvas;
-    float                   m_rad;
-    bool                    b_render_3D, b_show_pts;
-    int                     m_active_contour;
-    math::Frustum           m_frustum;
+    std::vector<std::vector<vec> > m_pts;
+    std::vector<float> m_heights;
+    vvr::Canvas m_canvas;
+    math::Frustum m_frustum;
+    bool b_render_3D, b_show_pts;
+    int m_active_contour;
+    float m_rad;
 };
 
-#define CONTOUR_FILENAME  "resources/contours/contours.txt"
-#define CONTOUR_DELIMITER "CONTOUR-LINE"
-#define MIN_POINT_DIST_PIXELS 10
-
-using namespace vvr;
 using namespace std;
+using namespace vvr;
 
 ContourEditorScene::ContourEditorScene()
 {
@@ -284,7 +281,7 @@ void ContourEditorScene::saveContoursToFile()
     fclose(file);
 }
 
-void ContourEditorScene::loadContoursFromFile(string filename)
+void ContourEditorScene::loadContoursFromFile(std::string filename)
 {
     FILE* file = fopen(filename.c_str(), "r");
     if (!file) throw "Cannot open <" + filename + "> for reading";

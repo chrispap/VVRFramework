@@ -283,7 +283,7 @@ private:
     vvr::Colour m_col;
 };
 
-struct GlobalAxes : vvr::Drawable
+struct vvrframework_API GlobalAxes : vvr::Drawable
 {
     GlobalAxes(double d)
         : x(0, 0, 0, d, 0, 0, vvr::Colour::red)

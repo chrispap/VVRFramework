@@ -3,24 +3,24 @@
 
 #include <vector>
 
-template<typename Point>
+template<typename point_t>
 class BSpline
 {
     std::vector<double> mKnots;
-    std::vector<Point> mCps;
-    std::vector<Point> mCurvePts;
+    std::vector<point_t> mCps;
+    std::vector<point_t> mCurvePts;
     size_t m_num_pts;
 
 public:
     BSpline() : m_num_pts(0) {}
-    void setCtrPts(std::vector<Point> &&cps);
+    void setCtrPts(std::vector<point_t> &&cps);
     void setKnots(std::vector<double> &&knots);
     size_t getNumPts() { return m_num_pts; }
     std::pair<double, double> getParamRange();
-    Point getCurvePoint(const double t);
+    point_t getCurvePoint(const double t);
     void updateCurve(size_t num_pts, bool force = false);
-    std::vector<Point>& getCtrlPts() { return mCps; }
-    const std::vector<Point>& getCurvePts() { return mCurvePts; }
+    std::vector<point_t>& getCtrlPts() { return mCps; }
+    const std::vector<point_t>& getCurvePts() { return mCurvePts; }
 
 private:
     template<typename T>
@@ -32,20 +32,20 @@ private:
     }
 };
 
-template<typename Point>
-void BSpline<Point>::setCtrPts(std::vector<Point> &&cps)
+template<typename point_t>
+void BSpline<point_t>::setCtrPts(std::vector<point_t> &&cps)
 {
     mCps = cps;
 }
 
-template<typename Point>
-void BSpline<Point>::setKnots(std::vector<double> &&knots)
+template<typename point_t>
+void BSpline<point_t>::setKnots(std::vector<double> &&knots)
 {
     mKnots = knots;
 }
 
-template<typename Point>
-std::pair<double, double> BSpline<Point>::getParamRange()
+template<typename point_t>
+std::pair<double, double> BSpline<point_t>::getParamRange()
 {
     const int mb = mKnots.size() - mCps.size();
     std::pair<double, double> range;
@@ -54,8 +54,8 @@ std::pair<double, double> BSpline<Point>::getParamRange()
     return range;
 }
 
-template<typename Point>
-Point BSpline<Point>::getCurvePoint(const double t)
+template<typename point_t>
+point_t BSpline<point_t>::getCurvePoint(const double t)
 {
     const auto &X = mKnots;
     const auto &B = mCps;
@@ -84,7 +84,7 @@ Point BSpline<Point>::getCurvePoint(const double t)
         }
     }
 
-    Point p = B[0] * N[0][mb - 1];
+    point_t p = B[0] * N[0][mb - 1];
     for (i = 1; i < kp; i++) {
         p += B[i] * N[i][mb - 1];
     }
@@ -92,8 +92,8 @@ Point BSpline<Point>::getCurvePoint(const double t)
     return p;
 }
 
-template<typename Point>
-void BSpline<Point>::updateCurve(size_t num_pts, bool force)
+template<typename point_t>
+void BSpline<point_t>::updateCurve(size_t num_pts, bool force)
 {
     if (num_pts < 2) num_pts = 2;
     if (m_num_pts == num_pts && !force) return;

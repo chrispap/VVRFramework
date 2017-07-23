@@ -12,9 +12,26 @@
 #include <vector>
 #include <MathGeoLib.h>
 
+#define FLAG_SHOW_AXES 1
+#define FLAG_SHOW_AABB 2
+#define FLAG_SHOW_WIRE 4
+#define FLAG_SHOW_SOLID 8
+#define FLAG_SHOW_NORMALS 16
+
+#define objName "cube.obj"
+#define objName "bunny_low.obj"
+#define objName "unicorn_low.obj"
+#define objName "dragon_low_low.obj"
+#define objName "large/unicorn.obj"
+#define objName "ironman.obj"
+
+using namespace vvr;
+using namespace std;
+using namespace math;
+
 struct CuttingPlane : public math::Plane, vvr::Drawable
 {
-    vvr_decl_shared_ptr(CuttingPlane);
+    vvr_decl_shared_ptr(CuttingPlane)
 
     math::vec pos;
     math::vec X, Y, Z;
@@ -71,61 +88,28 @@ private:
     void defineCuttingPlane(const math::vec &pos, const vec &normal);
 
 private:
+    int m_style_flag;
+    int m_click_counter;
     vvr::Mesh::Ptr m_mesh_1;
     vvr::Mesh::Ptr m_mesh_2;
     vvr::Mesh::Ptr m_mesh_3;
     vvr::Colour m_obj_col;
     vvr::Canvas m_canvas;
-    std::vector<math::Triangle> m_floor_tris;
-    CuttingPlane::Ptr m_plane, m_plane_clipped;
-    int m_style_flag;
+    vvr::Ground* m_floor;
     vvr::Aabb3D* m_box;
-    int m_click_counter;
+    CuttingPlane::Ptr m_plane;
+    CuttingPlane::Ptr m_plane_clipped;
 };
-
-#define FLAG_SHOW_AXES 1
-#define FLAG_SHOW_AABB 2
-#define FLAG_SHOW_WIRE 4
-#define FLAG_SHOW_SOLID 8
-#define FLAG_SHOW_NORMALS 16
-
-#define objName "cube.obj"
-#define objName "bunny_low.obj"
-#define objName "unicorn_low.obj"
-#define objName "dragon_low_low.obj"
-#define objName "large/unicorn.obj"
-#define objName "ironman.obj"
-
-using namespace vvr;
-using namespace std;
-using namespace math;
-
-const float L1 = 25;
-const float L2 = 5;
-const float h1 = -7;
-const float h2 = 13;
-
-const vec A(-L1, h1, -L2);
-const vec B(+L1, h1, -L2);
-const vec C(+L1, h1, +L2);
-const vec D(-L1, h1, +L2);
-const vec E(-L1, h2, -L2);
-const vec F(+L1, h2, -L2);
 
 Simple3DScene::Simple3DScene()
 {
     m_bg_col = Colour("768E77");
     m_obj_col = Colour("454545");
-    m_perspective_proj = true;
-    
+    m_perspective_proj = false;
     m_style_flag = 0;
     m_style_flag |= FLAG_SHOW_SOLID;
     m_style_flag |= FLAG_SHOW_WIRE;
-
-    m_floor_tris.push_back(math::Triangle(B, A, D));
-    m_floor_tris.push_back(math::Triangle(B, D, C));
-    m_floor_tris.push_back(math::Triangle(F, E, A));
-    m_floor_tris.push_back(math::Triangle(F, A, B));
+    m_floor = new vvr::Ground(25, 5, -5, 5, vvr::Colour(23, 35, 56));
 }
 
 void Simple3DScene::reset()
@@ -145,14 +129,11 @@ void Simple3DScene::reset()
 void Simple3DScene::resize()
 {
     static bool first_pass = true;
-
-    if (first_pass)
-    {
+    if (first_pass) {
         reset();
         load3DModels();
         defineCuttingPlane({10, 10, 0}, { 1, 1, 1 });
     }
-
     first_pass = false;
 }
 
@@ -213,9 +194,9 @@ void Simple3DScene::load3DModels()
     m_mesh_2->setBigSize(m_mesh_1->getMaxSize() * 1.5);
     m_mesh_3->setBigSize(m_mesh_1->getMaxSize() / 1.5);
 
-    m_mesh_1->move(vec(m_mesh_1->getAABB().Size().x * -0.5, h1, 0));
-    m_mesh_2->move(vec(m_mesh_1->getAABB().Size().x * +0.5, h1, 0));
-    m_mesh_3->move(vec(m_mesh_1->getAABB().Size().x * -0.5 + m_mesh_3->getAABB().Size().x * -1, h1, 0));
+    m_mesh_1->move(vec(m_mesh_1->getAABB().Size().x * -0.5, -5, 0));
+    m_mesh_2->move(vec(m_mesh_1->getAABB().Size().x * +0.5, -5, 0));
+    m_mesh_3->move(vec(m_mesh_1->getAABB().Size().x * -0.5 + m_mesh_3->getAABB().Size().x * -1, -5, 0));
 
     m_mesh_1->update();
     m_mesh_2->update();
@@ -224,13 +205,7 @@ void Simple3DScene::load3DModels()
 
 void Simple3DScene::draw()
 {
-    //! Draw floor
-    for (const auto &tri : m_floor_tris)
-    {
-        auto floor_tri = math2vvr(tri, Colour(23, 35, 56));
-        floor_tri.setRenderSolid(true);
-        floor_tri.draw();
-    }
+    m_floor->draw();
 
     //! Draw meshes
     for (auto mesh : { m_mesh_1, m_mesh_2, m_mesh_3 })

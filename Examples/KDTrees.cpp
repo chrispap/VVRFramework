@@ -49,20 +49,6 @@ private:
 };
 
 /**
-* Class Representing scene floor and background wall.
-*/
-class Ground : public vvr::Drawable
-{
-public:
-    Ground(const float W, const float D, const float B, const float T, const vvr::Colour &colour);
-    void draw() const override;
-
-private:
-    std::vector<math::Triangle> m_floor_tris;
-    vvr::Colour m_col;
-};
-
-/**
 * Function object to compare 2 3D-vecs in the specified axis.
 */
 struct VecComparator {
@@ -241,7 +227,7 @@ void KDTreeScene::draw()
     if (m_flag & vvr_flag(SHOW_AXES)) drawAxes();
 
     //! Draw ground
-    Ground ground(GND_WIDTH, GND_DEPTH, GND_BOTTOM, GND_TOP, vvr::Colour(35, 45, 55));
+    vvr::Ground ground(GND_WIDTH, GND_DEPTH, GND_BOTTOM, GND_TOP, vvr::Colour(35, 45, 55));
     ground.draw();
 
     //! Animate sphere
@@ -476,34 +462,6 @@ int main(int argc, char* argv[])
     {
         std::cerr << "Unknown exception" << std::endl;
         return 1;
-    }
-}
-
-//! Ground::
-
-Ground::Ground(const float W, const float D, const float B, const float T, const vvr::Colour &colour)
-    : m_col(colour)
-{
-    const vec vA(-W / 2, B, -D / 2);
-    const vec vB(+W / 2, B, -D / 2);
-    const vec vC(+W / 2, B, +D / 2);
-    const vec vD(-W / 2, B, +D / 2);
-    const vec vE(-W / 2, T, -D / 2);
-    const vec vF(+W / 2, T, -D / 2);
-
-    m_floor_tris.push_back(math::Triangle(vB, vA, vD));
-    m_floor_tris.push_back(math::Triangle(vB, vD, vC));
-    m_floor_tris.push_back(math::Triangle(vF, vE, vA));
-    m_floor_tris.push_back(math::Triangle(vF, vA, vB));
-}
-
-void Ground::draw() const
-{
-    for (int i = 0; i < m_floor_tris.size(); i++)
-    {
-        vvr::Triangle3D floor_tri = vvr::math2vvr(m_floor_tris.at(i), m_col);
-        floor_tri.setRenderSolid(true);
-        floor_tri.draw();
     }
 }
 
