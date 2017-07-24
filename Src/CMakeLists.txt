@@ -53,7 +53,6 @@ include_directories(${CMAKE_SOURCE_DIR}/3rdParty//MathGeoLib/src)
 
 #########################################################################################
 add_library(vvrframework SHARED ${SOURCE} ${RCS} ${UI_FILES})
-qt5_use_modules(vvrframework Widgets OpenGL)
 target_link_libraries(vvrframework ${OPENGL_LIBRARIES} Qt5::Widgets Qt5::OpenGL)
 if (WIN32 OR APPLE)
   target_link_libraries(vvrframework  GeoLib MathGeoLib)

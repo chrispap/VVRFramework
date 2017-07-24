@@ -1,0 +1,25 @@
+~TODO~
+-----------------------------------------------------------------------en------------------
+ - Design [correct, complete, flexible] inheritance with the Geometry Libraries used:
+    + MathGeoLib: For every primitive geometric entity that we provide support,
+      inherit from `namespace math`.
+    + The same for GeoLib for 2D stuff.
+ - Design a flexible Scene management class/system.
+    + It should provide some utilities to the client developer, otherwise it does not
+      have reason to exist. These could for example be:
+    + Basic mouse interaction/manipulation of scene, drawables, camera, viewport.
+    + Get rid of the limitations of VVRFramework scene regarding the scene dimensions
+      and the resize event handling.
+ - Try to get away from the imperative drawing to a more declarative one.
+ - Try to introcude a wider adoptation of `std::shared_ptr` and generally make more
+   automatic and reliable the memory management.
+ - Find a smart way to implement the various composite geometric types so that direct 
+   editing through their defining entities will emerge naturally. Basically, adopt the 
+   point type as the basis for all mouse interaction.
+ - The next step is to not limit ourselves to points for picking and manipulation, but
+   offer also, hover capabilities and complex geometry picking and manipulating.
+ - 
+ - 
+ - 
+ - 
+ - 

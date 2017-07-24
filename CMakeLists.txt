@@ -13,6 +13,7 @@ add_subdirectory(3rdParty/MathGeoLib)
 add_subdirectory(src)
 add_subdirectory(Examples)
 add_subdirectory(GeoLab)
+add_subdirectory(Tavli)
 #########################################################################################
 
 #### Group (Visual Studio only) #########################################################

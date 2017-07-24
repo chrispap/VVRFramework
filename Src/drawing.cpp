@@ -246,7 +246,7 @@ void Ground::draw() const
     }
 }
 
-Canvas::Canvas()
+Canvas::Canvas() : del_on_clear(true)
 {
     frames.reserve(16);
     clear();
@@ -254,9 +254,11 @@ Canvas::Canvas()
 
 Canvas::~Canvas()
 {
-    for (int fid=0; fid<frames.size(); fid++) {
-        for (int i=0; i<frames[fid].drawables.size(); i++) {
-            delete frames[fid].drawables[i];
+    if (del_on_clear) {
+        for (int fid = 0; fid < frames.size(); fid++) {
+            for (int i = 0; i < frames[fid].drawables.size(); i++) {
+                delete frames[fid].drawables[i];
+            }
         }
     }
 }
@@ -273,13 +275,11 @@ void Canvas::newFrame(bool show_old_frames)
     ff();
 }
 
-void Canvas::draw() 
+void Canvas::draw() const
 {
-    Frame *frame;
     int fi = (int) fid;
     while (frames[fi].show_old && --fi >= 0);
     while(fi <= fid) {
-        frame = &frames[fi];
         for (unsigned i = 0; i < frames[fi].drawables.size(); i++) {
             if (frames[fi].drawables[i]->isVisible()) {
                 frames[fi].drawables[i]->draw();
@@ -313,10 +313,11 @@ void Canvas::resize(int i)
 {
     if (i<1 || i > size()-1) return;
 
-    // Delete shapes of frames that will be discarded
-    for (int fid=i; fid<frames.size(); fid++) {
-        for (int si=0; si<frames[fid].drawables.size(); si++) {
-            delete frames[fid].drawables[si];
+    if (del_on_clear) {
+        for (int fid = i; fid < frames.size(); fid++) {
+            for (int si = 0; si < frames[fid].drawables.size(); si++) {
+                delete frames[fid].drawables[si];
+            }
         }
     }
 
@@ -326,10 +327,11 @@ void Canvas::resize(int i)
 
 void Canvas::clear()
 {
-    // Delete shapes of frames that will be discarded
-    for (int fid=0; fid<frames.size(); fid++) {
-        for (int si=0; si<frames[fid].drawables.size(); si++) {
-            delete frames[fid].drawables[si];
+    if (del_on_clear) {
+        for (int fid = 0; fid < frames.size(); fid++) {
+            for (int si = 0; si < frames[fid].drawables.size(); si++) {
+                delete frames[fid].drawables[si];
+            }
         }
     }
 
@@ -340,8 +342,10 @@ void Canvas::clear()
 
 void Canvas::clearFrame()
 {
-    for (int si = 0; si<frames[fid].drawables.size(); si++) {
-        delete frames[fid].drawables[si];
+    if (del_on_clear) {
+        for (int si = 0; si < frames[fid].drawables.size(); si++) {
+            delete frames[fid].drawables[si];
+        }
     }
 
     frames[fid].drawables.clear();

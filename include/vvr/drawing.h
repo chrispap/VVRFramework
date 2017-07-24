@@ -312,12 +312,14 @@ struct vvrframework_API Frame
 
 class vvrframework_API Canvas 
 {
-    unsigned fid;
     std::vector<Frame> frames;
+    unsigned fid;
+    bool del_on_clear;
 
 public:
     Canvas();
     ~Canvas();
+    void setDelOnClear(bool del) { del_on_clear = del; }
     unsigned size() { return frames.size(); }
     unsigned frameIndex() { return fid; }
     bool isAtStart() { return fid == 0; }
@@ -325,7 +327,7 @@ public:
     std::vector<Drawable*>& getDrawables(int offs=0) { return frames[fid+offs].drawables; }
     void newFrame(bool show_old_frames=true);
     Drawable* add(Drawable *drawable_ptr);
-    void draw();
+    void draw() const;
     void next();
     void prev();
     void rew();
