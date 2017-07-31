@@ -32,7 +32,7 @@ using namespace std;
 
 SceneArea::SceneArea()
 {
-    m_bg_col = Colour::grey;
+    m_bg_col = vvr::grey;
     m_rad = 30;
     m_x = 300;
     m_y = 0;
@@ -45,8 +45,8 @@ void SceneArea::draw()
     // Instruct VVRFramework to render in pixel coordinates.
     enterPixelMode();
 
-    Colour col_circ = Colour::black;
-    Colour col_tri = Colour::black;
+    Colour col_circ = vvr::black;
+    Colour col_tri = vvr::black;
 
     // Compute areas.
     // Triangle area: http://en.wikipedia.org/wiki/Triangle#Using_coordinates
@@ -59,10 +59,10 @@ void SceneArea::draw()
     vvr_echo(area_tri);
 
     if (area_circ > area_tri) {
-        col_circ = Colour::green;
+        col_circ = vvr::green;
     }
     else {
-        col_tri = Colour::green;
+        col_tri = vvr::green;
     }
 
     // Draw a circle centered at: (m_x , m_y).
@@ -71,11 +71,11 @@ void SceneArea::draw()
 
     // Draw a triangle.
     Triangle2D tri(-200, -200, -200, 200, m_x, m_y, col_tri);
-    tri.setRenderSolid(false);
+    tri.filled = false;
     tri.draw();
 
     // Draw a line segment.
-    LineSeg2D line(300, -200, m_x, m_y, Colour::white);
+    LineSeg2D line(300, -200, m_x, m_y, vvr::white);
     line.draw();
 }
 

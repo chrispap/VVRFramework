@@ -79,7 +79,7 @@ const vvr::Colour COLMAP[] = {
 
 OrigamiScene::OrigamiScene()
 {
-    m_bg_col = vvr::Colour::grey;
+    m_bg_col = vvr::grey;
     m_fullscreen = false;
     m_hide_log = false;
     m_perspective_proj = true;
@@ -164,14 +164,14 @@ void OrigamiScene::draw()
         //! Outline
         if (m_style_flag & SHOW_WIRE) {
             for (int i = 0; i < pol.NumEdges(); ++i) {
-                math2vvr(pol.Edge(i), vvr::Colour::black).draw();
+                math2vvr(pol.Edge(i), vvr::black).draw();
             }
         }
 
         //! Points
         if (m_style_flag & SHOW_POINTS) {
             for (int i = 0; i < pol.NumVertices(); ++i) {
-                math2vvr(pol.Vertex(i), vvr::Colour::black).draw();
+                math2vvr(pol.Vertex(i), vvr::black).draw();
             }
         }
     }
@@ -179,10 +179,10 @@ void OrigamiScene::draw()
     m_canvas.draw();
 
     for (int i = 0; i < m_polygon_set.size(); ++i) {
-        vvr::draw(*m_polygon_set.GetAt(i), vvr::Colour::magenta, true);
+        vvr::draw(*m_polygon_set.GetAt(i), vvr::magenta, true);
     }
 
-    vvr::draw(m_polygon, vvr::Colour::orange, true);
+    vvr::draw(m_polygon, vvr::orange, true);
 }
 
 bool OrigamiScene::idle()
@@ -319,9 +319,9 @@ void OrigamiScene::newLineSegment(int x, int y, bool shiftDown)
 
         if (ray.Intersects(pol))
         {
-            const vvr::Colour col = vvr::Colour::red;
+            const vvr::Colour col = vvr::red;
             vec p = pol.ClosestPoint(ray.ToLineSegment(10000));
-			vector<vvr::Drawable*> &drawables = m_canvas.getDrawables();
+            vector<vvr::Drawable*> &drawables = m_canvas.getDrawables();
             vvr::Drawable *sh;
 
             // Start new line segment set
@@ -332,32 +332,28 @@ void OrigamiScene::newLineSegment(int x, int y, bool shiftDown)
             else
             {
                 auto last_seg = static_cast<vvr::LineSeg3D*>(drawables.back());
-                vec last_point(last_seg->x2, last_seg->y2, last_seg->z2);
+                vec last_point(last_seg->b);
 
                 if (last_point.Distance(p) < 0.3) break;
 
-                m_canvas.add(new vvr::LineSeg3D(last_seg->x2, last_seg->y2, last_seg->z2, p.x, p.y, p.z, col));
+                m_canvas.add(new vvr::LineSeg3D(math::LineSegment(last_seg->b, p), col));
 
                 //! Smoothen slice
                 const unsigned N = 4;
                 const unsigned shape_num = drawables.size();
                 if (shiftDown && shape_num > N && m_ongoing_slicing_count > N + 1)
                 {
-                    double x = 0; double y = 0; double z = 0;
+                    math::vec v(0,0,0);
 
                     for (int i = 0; i < N; ++i) {
                         vvr::LineSeg3D *lseg = static_cast<vvr::LineSeg3D*>(drawables.at(shape_num - 1 - i));
-                        x += lseg->x2;
-                        y += lseg->y2;
-                        z += lseg->z2;
+                        v += lseg->b;
                     }
 
                     vvr::LineSeg3D *lseg0 = static_cast<vvr::LineSeg3D*>(drawables.at(shape_num - 2));
                     vvr::LineSeg3D *lseg1 = static_cast<vvr::LineSeg3D*>(drawables.at(shape_num - 1));
-
-                    lseg0->x2 = lseg1->x1 = x / N;
-                    lseg0->y2 = lseg1->y1 = y / N;
-                    lseg0->z2 = lseg1->z1 = z / N;
+                    lseg1->a = v / N;
+                    lseg0 = lseg1;
                 }
             }
 
@@ -369,31 +365,27 @@ void OrigamiScene::newLineSegment(int x, int y, bool shiftDown)
 
 void OrigamiScene::smoothSlices()
 {
-	unsigned fid = m_canvas.frameIndex();
-	m_canvas.newFrame(false);
-	vector<vvr::Drawable*> &drawables = m_canvas.getDrawables(0);
-	vector<vvr::Drawable*> &drawables_prev = m_canvas.getDrawables(-1);
+    unsigned fid = m_canvas.frameIndex();
+    m_canvas.newFrame(false);
+    vector<vvr::Drawable*> &drawables = m_canvas.getDrawables(0);
+    vector<vvr::Drawable*> &drawables_prev = m_canvas.getDrawables(-1);
 
-	for (auto sh : drawables_prev) {
-		m_canvas.add(new vvr::LineSeg3D(*static_cast<vvr::LineSeg3D*>(sh)));
-	}
+    for (auto sh : drawables_prev) {
+        m_canvas.add(new vvr::LineSeg3D(*static_cast<vvr::LineSeg3D*>(sh)));
+    }
 
-	for (unsigned i = 1; i < drawables.size() - 1; ++i) {
-		vvr::LineSeg3D *lseg0 = static_cast<vvr::LineSeg3D*>(drawables.at(i - 1));
-		vvr::LineSeg3D *lseg1 = static_cast<vvr::LineSeg3D*>(drawables.at(i));
-		vvr::LineSeg3D *lseg2 = static_cast<vvr::LineSeg3D*>(drawables.at(i + 1));
-		lseg1->x1 = 0.333 * (lseg0->x1 + lseg1->x1 + lseg2->x1);
-		lseg1->y1 = 0.333 * (lseg0->y1 + lseg1->y1 + lseg2->y1);
-		lseg1->z1 = 0.333 * (lseg0->z1 + lseg1->z1 + lseg2->z1);
-	}
+    for (unsigned i = 1; i < drawables.size() - 1; ++i) {
+        vvr::LineSeg3D *lseg0 = static_cast<vvr::LineSeg3D*>(drawables.at(i - 1));
+        vvr::LineSeg3D *lseg1 = static_cast<vvr::LineSeg3D*>(drawables.at(i));
+        vvr::LineSeg3D *lseg2 = static_cast<vvr::LineSeg3D*>(drawables.at(i + 1));
+        lseg1->a = 0.333 * (lseg0->a + lseg1->a + lseg2->a);
+    }
 
-	for (unsigned i = 0; i < drawables.size() - 1; ++i) {
-		vvr::LineSeg3D *lseg1 = static_cast<vvr::LineSeg3D*>(drawables.at(i));
-		vvr::LineSeg3D *lseg2 = static_cast<vvr::LineSeg3D*>(drawables.at(i + 1));
-		lseg1->x2 = lseg2->x1;
-		lseg1->y2 = lseg2->y1;
-		lseg1->z2 = lseg2->z1;
-	}
+    for (unsigned i = 0; i < drawables.size() - 1; ++i) {
+        vvr::LineSeg3D *lseg1 = static_cast<vvr::LineSeg3D*>(drawables.at(i));
+        vvr::LineSeg3D *lseg2 = static_cast<vvr::LineSeg3D*>(drawables.at(i + 1));
+        lseg1->b = lseg2->a;
+    }
 }
 
 void OrigamiScene::undo()
@@ -408,13 +400,13 @@ void OrigamiScene::undo()
 
 void OrigamiScene::triangulate()
 {
-	auto &drawables = m_canvas.getDrawables();
+    auto &drawables = m_canvas.getDrawables();
 
     C2DPointSet ptset;
 
     for (vvr::Drawable* sh : drawables) {
         vvr::LineSeg3D &lseg = static_cast<vvr::LineSeg3D&>(*sh);
-        ptset.Add(new C2DPoint(lseg.x2, lseg.y2));
+        ptset.Add(new C2DPoint(lseg.b.x, lseg.b.y));
     }
 
     m_polygon.Create(ptset);

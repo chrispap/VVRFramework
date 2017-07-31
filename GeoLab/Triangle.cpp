@@ -52,7 +52,7 @@ void TriangleScene::reset()
     Shape::PointSize = POINT_SIZE;
     Shape::LineWidth = LINE_WIDTH;
 
-    m_bg_col = Colour::white;
+    m_bg_col = vvr::white;
 
     m_pts.clear();
     m_pts.push_back(new Point2D(0, 150));
@@ -89,17 +89,17 @@ void TriangleScene::createShapesFromPoints()
     //! by adding them to the canvas object.
 
     m_canvas.add(new Triangle2D(m_pts[0]->x, m_pts[0]->y, m_pts[1]->x, m_pts[1]->y, m_pts[2]->x, m_pts[2]->y));
-    m_canvas.add(new Point2D(cc.x, cc.y, Colour::red));
-    m_canvas.add(new Point2D(ce.x, ce.y, Colour::yellowGreen));
-    m_canvas.add(new Point2D(mid1.x, mid1.y, Colour::red));
-    m_canvas.add(new Point2D(mid2.x, mid2.y, Colour::red));
-    m_canvas.add(new Point2D(mid3.x, mid3.y, Colour::red));
-    m_canvas.add(new LineSeg2D(cc.x, cc.y, mid1.x, mid1.y, Colour::red));
-    m_canvas.add(new LineSeg2D(cc.x, cc.y, mid2.x, mid2.y, Colour::red));
-    m_canvas.add(new LineSeg2D(cc.x, cc.y, mid3.x, mid3.y, Colour::red));
-    m_canvas.add(new LineSeg2D(ce.x, ce.y, t.GetPoint1().x, t.GetPoint1().y, Colour::yellowGreen));
-    m_canvas.add(new LineSeg2D(ce.x, ce.y, t.GetPoint2().x, t.GetPoint2().y, Colour::yellowGreen));
-    m_canvas.add(new LineSeg2D(ce.x, ce.y, t.GetPoint3().x, t.GetPoint3().y, Colour::yellowGreen));
+    m_canvas.add(new Point2D(cc.x, cc.y, vvr::red));
+    m_canvas.add(new Point2D(ce.x, ce.y, vvr::yellowGreen));
+    m_canvas.add(new Point2D(mid1.x, mid1.y, vvr::red));
+    m_canvas.add(new Point2D(mid2.x, mid2.y, vvr::red));
+    m_canvas.add(new Point2D(mid3.x, mid3.y, vvr::red));
+    m_canvas.add(new LineSeg2D(cc.x, cc.y, mid1.x, mid1.y, vvr::red));
+    m_canvas.add(new LineSeg2D(cc.x, cc.y, mid2.x, mid2.y, vvr::red));
+    m_canvas.add(new LineSeg2D(cc.x, cc.y, mid3.x, mid3.y, vvr::red));
+    m_canvas.add(new LineSeg2D(ce.x, ce.y, t.GetPoint1().x, t.GetPoint1().y, vvr::yellowGreen));
+    m_canvas.add(new LineSeg2D(ce.x, ce.y, t.GetPoint2().x, t.GetPoint2().y, vvr::yellowGreen));
+    m_canvas.add(new LineSeg2D(ce.x, ce.y, t.GetPoint3().x, t.GetPoint3().y, vvr::yellowGreen));
 }
 
 void TriangleScene::draw()
@@ -129,14 +129,14 @@ void TriangleScene::mousePressed(int x, int y, int modif)
     }
 
     if (m_point_grabbed) {
-        m_point_grabbed->setColour(Colour::magenta);
+        m_point_grabbed->colour = vvr::magenta;
     }
 }
 
 void TriangleScene::mouseReleased(int x, int y, int modif)
 {
     if (m_point_grabbed) {
-        m_point_grabbed->setColour(Colour::black);
+        m_point_grabbed->colour = vvr::black;
     }
 }
 

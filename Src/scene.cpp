@@ -151,7 +151,7 @@ void Scene::GL_Render()
 
 void Scene::drawAxes()
 {
-    GlobalAxes(2.0 *getSceneWidth()).draw();
+    Axes(2.0 *getSceneWidth()).draw();
 }
 
 void Scene::enterPixelMode()

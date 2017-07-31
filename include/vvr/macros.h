@@ -17,6 +17,9 @@
     << #f << " = " << (vvr_flag_on(v,f) ? "ON" : "OFF") \
     << std::endl; break
 
+
+#define vvr_setmemb(x) this->x = x
+
 #define vvr_decl_shared_ptr(x) \
     template<typename ...T>\
     static inline std::shared_ptr<x> Make(T&&... t) {\
@@ -27,5 +30,14 @@
     }\
     typedef std::shared_ptr<x> Ptr;\
     typedef std::shared_ptr<const x> ConstPtr;
+
+#define vvr_decl_shape(Name, Base, filled) \
+    typedef Base GeomBase; \
+    void set(const Base& gm) { static_cast<Base&>(*this) = gm; } \
+    Name(const Base& gm, const vvr::Colour& col=vvr::Colour()) \
+        : Shape(col, filled) \
+        , Base(gm) \
+    {} \
+    vvr_decl_shared_ptr(Name) \
 
 #endif

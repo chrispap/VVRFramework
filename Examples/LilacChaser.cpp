@@ -35,7 +35,6 @@ private:
     const float R = 120;
     const float r = 20;
     const unsigned N = 12;
-    const vvr::Colour col_lilac = vvr::Colour("CDA9CD");
 };
 
 using namespace std;
@@ -50,8 +49,8 @@ LilacChaserScene::LilacChaserScene()
         float deg = math::DegToRad(360.0) / N * i;
         float x = R * sin(deg);
         float y = R * cos(deg);
-        vvr::Circle2D *c = new vvr::Circle2D(x, y, r, col_lilac);
-        c->setRenderSolid(true);
+        vvr::Circle2D *c = new vvr::Circle2D(x, y, r, vvr::lilac);
+        c->filled = true;
         m_canvas.add(c);
         m_circles.push_back(c);
     }
@@ -80,9 +79,9 @@ bool LilacChaserScene::idle()
     int i = (int) (sec / 0.125) % N;
     vvr::Circle2D *c = m_circles.at(i);
     for (vvr::Circle2D *c : m_circles) {
-        c->setColour(col_lilac);
+        c->colour = vvr::lilac;
     }
-    c->setColour(m_bg_col);
+    c->colour = m_bg_col;
     return true;
 }
 

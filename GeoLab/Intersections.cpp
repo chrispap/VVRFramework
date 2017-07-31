@@ -63,7 +63,7 @@ using namespace vvr;
 
 IntersectionsScene::IntersectionsScene()
 {
-    m_bg_col = vvr::Colour::grey;
+    m_bg_col = vvr::grey;
     reset();
 }
 
@@ -80,8 +80,8 @@ void IntersectionsScene::reset()
     // Divide window to Tasks
     m_bound_vertical.Set(C2DPoint(0, -3000), C2DPoint(0, 3000));
     m_bound_horizontal.Set(C2DPoint(4000, 0), C2DPoint(-4000, 0));
-    m_canvas_0.add(m_bound_horizontal, Colour::black);
-    m_canvas_0.add(m_bound_vertical, Colour::black);
+    m_canvas_0.add(m_bound_horizontal, vvr::black);
+    m_canvas_0.add(m_bound_vertical, vvr::black);
 
     // Setup Task 1:
     {
@@ -92,12 +92,12 @@ void IntersectionsScene::reset()
 
         m_line_1 = C2DLine(a1, a2);
         m_line_2 = C2DLine(b1, b2);
-        m_canvas_0.add(a1, Colour::orange);
-        m_canvas_0.add(a2, Colour::orange);
-        m_canvas_0.add(m_line_1, Colour::orange);
-        m_canvas_1.add(b1, Colour::cyan);
-        m_canvas_1.add(b2, Colour::cyan);
-        m_canvas_1.add(m_line_2, Colour::cyan);
+        m_canvas_0.add(a1, vvr::orange);
+        m_canvas_0.add(a2, vvr::orange);
+        m_canvas_0.add(m_line_1, vvr::orange);
+        m_canvas_1.add(b1, vvr::cyan);
+        m_canvas_1.add(b2, vvr::cyan);
+        m_canvas_1.add(m_line_2, vvr::cyan);
     }
 
     // Setup Task 2:
@@ -107,10 +107,10 @@ void IntersectionsScene::reset()
 
         m_circle_1 = C2DCircle(c1, 80);
         m_circle_2 = C2DCircle(c2, 60);
-        m_canvas_0.add(c1, Colour::orange);
-        m_canvas_0.add(m_circle_1, Colour::orange);
-        m_canvas_2.add(c2, Colour::cyan);
-        m_canvas_2.add(m_circle_2, Colour::cyan);
+        m_canvas_0.add(c1, vvr::orange);
+        m_canvas_0.add(m_circle_1, vvr::orange);
+        m_canvas_2.add(c2, vvr::cyan);
+        m_canvas_2.add(m_circle_2, vvr::cyan);
     }
 
     // Task 3:
@@ -125,8 +125,8 @@ void IntersectionsScene::reset()
         C2DPoint t2c(-108, -76);
         m_triangle_2 = C2DTriangle(t2a, t2b, t2c);
 
-        m_canvas_0.add(m_triangle_1, Colour::orange);
-        m_canvas_3.add(m_triangle_2, Colour::cyan);
+        m_canvas_0.add(m_triangle_1, vvr::orange);
+        m_canvas_3.add(m_triangle_2, vvr::cyan);
     }
 
     Task1(m_line_2.GetPointTo());
@@ -162,9 +162,9 @@ void IntersectionsScene::Task1(const C2DPoint &p)
     m_line_2 = C2DLine(p1, p);   // To teliko simeio tis grammis akolouthei to mouse.
 
     m_canvas_1.clear();
-    m_canvas_1.add(p, Colour::cyan);
-    m_canvas_1.add(p1, Colour::cyan);
-    m_canvas_1.add(m_line_2, Colour::cyan);
+    m_canvas_1.add(p, vvr::cyan);
+    m_canvas_1.add(p1, vvr::cyan);
+    m_canvas_1.add(m_line_2, vvr::cyan);
 
     /**
     * Breite to simeio tomis twn 2 euth. tmimatwn
@@ -244,15 +244,15 @@ void IntersectionsScene::Task1(const C2DPoint &p)
     //! SOLUTION 2 <<<
 #endif
 
-    m_canvas_1.add(i, seg_intersect ? Colour::green : Colour::red);
+    m_canvas_1.add(i, seg_intersect ? vvr::green : vvr::red);
 }
 
 void IntersectionsScene::Task2(const C2DPoint &p)
 {
     m_circle_2.SetCentre(p);
     m_canvas_2.clear();
-    m_canvas_2.add(p, Colour::cyan);
-    m_canvas_2.add(m_circle_2, Colour::cyan);
+    m_canvas_2.add(p, vvr::cyan);
+    m_canvas_2.add(m_circle_2, vvr::cyan);
 
     const double x1 = m_circle_1.GetCentre().x;
     const double y1 = m_circle_1.GetCentre().y;
@@ -279,8 +279,8 @@ void IntersectionsScene::Task2(const C2DPoint &p)
     i2 = C2DPoint(i2x, i2y);
     //---SOLUTION---
 
-    m_canvas_2.add(i1, Colour::red);
-    m_canvas_2.add(i2, Colour::red);
+    m_canvas_2.add(i1, vvr::red);
+    m_canvas_2.add(i2, vvr::red);
 }
 
 void IntersectionsScene::Task3(const C2DPoint &p)
@@ -289,7 +289,7 @@ void IntersectionsScene::Task3(const C2DPoint &p)
     const C2DPoint &p2 = m_triangle_2.GetPoint2();
     m_triangle_2.Set(p1, p2, p);
     m_canvas_3.clear();
-    m_canvas_3.add(m_triangle_2, Colour::cyan);
+    m_canvas_3.add(m_triangle_2, vvr::cyan);
 
     /**
     * Breite ola ta simeia tomis twn 2 trigwnwn

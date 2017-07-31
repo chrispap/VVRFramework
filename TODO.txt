@@ -1,5 +1,7 @@
 ~TODO~
------------------------------------------------------------------------en------------------
+
+
+--- [General] ---------------------------------------------------------------------------
  - Design [correct, complete, flexible] inheritance with the Geometry Libraries used:
     + MathGeoLib: For every primitive geometric entity that we provide support,
       inherit from `namespace math`.
@@ -18,8 +20,21 @@
    point type as the basis for all mouse interaction.
  - The next step is to not limit ourselves to points for picking and manipulation, but
    offer also, hover capabilities and complex geometry picking and manipulating.
- - 
- - 
- - 
- - 
- - 
+-----------------------------------------------------------------------------------------
+
+
+--- [Picking mechanism] -----------------------------------------------------------------
+
+[Pickable Interface]:
+ - bool pick (world space ray coordinates)
+ - void onPick ()
+ - void onDrag (world space ray coordinates)
+ - void onRelease ()
+
+[Mechanism Flow]:
+ - On mouse-click => Query all drawables for pickability. 
+    + Select the closest.
+    + Mark it 'picked'.
+ - On mouse-move invoke 'drag' method on the picked drawable.
+ - On mouse-release invoke 'onRelease'
+-----------------------------------------------------------------------------------------

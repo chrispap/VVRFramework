@@ -47,7 +47,7 @@ namespace vvr {
         bool createMenus() { return m_create_menus; }
         bool hideLog() { return m_hide_log; }
         bool hideSliders() { return m_hide_sliders; }
-        GlobalAxes* getGlobalAxes() { return new GlobalAxes(2.0 *getSceneWidth()); }
+        Axes* getGlobalAxes() { return new Axes(2.0 *getSceneWidth()); }
 
         /*--- Setters -----------------------------------------------------------------*/
         void setFrustum(const Frustum &frustum) { m_frustum = frustum; }

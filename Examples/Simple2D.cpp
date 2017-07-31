@@ -33,15 +33,15 @@ using namespace std;
 
 Simple2DScene::Simple2DScene()
 {
-    m_bg_col = vvr::Colour::grey;
+    m_bg_col = vvr::grey;
     m_rad = 20;
 
     // Add 5 circles to our canvas.
-    m_canvas.add(new vvr::Circle2D( -40, -20, 40, vvr::Colour::red));
-    m_canvas.add(new vvr::Circle2D( -20,  20, 40, vvr::Colour::green));
-    m_canvas.add(new vvr::Circle2D(   0, -20, 40, vvr::Colour::blue));
-    m_canvas.add(new vvr::Circle2D(  20,  20, 40, vvr::Colour::black));
-    m_canvas.add(new vvr::Circle2D(  40, -20, 40, vvr::Colour::yellow));
+    m_canvas.add(new vvr::Circle2D( -40, -20, 40, vvr::red));
+    m_canvas.add(new vvr::Circle2D( -20,  20, 40, vvr::green));
+    m_canvas.add(new vvr::Circle2D(   0, -20, 40, vvr::blue));
+    m_canvas.add(new vvr::Circle2D(  20,  20, 40, vvr::black));
+    m_canvas.add(new vvr::Circle2D(  40, -20, 40, vvr::yellow));
     m_canvas.newFrame(true);
 }
 
@@ -55,12 +55,12 @@ void Simple2DScene::draw()
 void Simple2DScene::mousePressed(int x, int y, int modif)
 {
     m_canvas.newFrame();
-    m_canvas.add(new vvr::Circle2D(x, y, m_rad, vvr::Colour::black));
+    m_canvas.add(new vvr::Circle2D(x, y, m_rad, vvr::black));
 }
 
 void Simple2DScene::mouseMoved(int x, int y, int modif)
 {
-    m_canvas.add(new vvr::Circle2D(x, y, m_rad, vvr::Colour::red));
+    m_canvas.add(new vvr::Circle2D(x, y, m_rad, vvr::red));
 }
 
 void Simple2DScene::mouseWheel(int dir, int modif)

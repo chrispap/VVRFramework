@@ -7,8 +7,8 @@
 * Array with 6 predefined colours.
 */
 static const vvr::Colour Pallete[6] = {
-    vvr::Colour::red, vvr::Colour::green, vvr::Colour::blue, vvr::Colour::magenta,
-    vvr::Colour::orange, vvr::Colour::yellow,
+    vvr::red, vvr::green, vvr::blue, vvr::magenta,
+    vvr::orange, vvr::yellow,
 };
 
 class KDTreeScene : public vvr::Scene
@@ -39,7 +39,7 @@ private:
 private:
     vvr::KDTree *m_KDTree;
     VecArray m_pts;
-    vvr::Sphere3D m_sphere;
+    vvr::Sphere3D::Ptr m_sphere;
     vvr::Animation m_anim;
     int m_flag;
     math::LCG m_lcg;
@@ -98,7 +98,7 @@ KDTreeScene::KDTreeScene()
 {
     vvr::Shape::LineWidth = 1;
     vvr::Shape::PointSize = 10;
-    m_bg_col = vvr::Colour::grey;
+    m_bg_col = vvr::grey;
     m_perspective_proj = true;
     m_hide_log = false;
     m_hide_sliders = false;
@@ -130,7 +130,7 @@ void KDTreeScene::reset()
     m_flag |= vvr_flag(BRUTEFORCE);
 
     //! Define scene objects
-    m_sphere = vvr::Sphere3D(-GND_WIDTH / 2, 0, 0, SPHERE_RAD, vvr::Colour::white);
+    m_sphere = vvr::Sphere3D::Make(-GND_WIDTH / 2, 0, 0, SPHERE_RAD, vvr::white);
 
     //! Create random points
     const float mw = getSceneWidth() * 0.3;
@@ -232,17 +232,17 @@ void KDTreeScene::draw()
 
     //! Animate sphere
     float t = m_anim.t;
-    vvr::Sphere3D sphere_moved(m_sphere);
-    sphere_moved.x += t * ((float)GND_WIDTH / SEC_PER_FLOOR);
-    vec sc = vec(sphere_moved.x, sphere_moved.y, sphere_moved.z);
-    Sphere sphere(sc, sphere_moved.rad);
-    if (sphere_moved.x > GND_WIDTH / 2) m_anim.setTime(0); // Bring back to start
+    vvr::Sphere3D sphere_moved(*m_sphere);
+    sphere_moved.pos.x += t * ((float)GND_WIDTH / SEC_PER_FLOOR);
+    vec sc(sphere_moved.pos);
+    Sphere sphere(sc, sphere_moved.r);
+    if (sphere_moved.pos.x > GND_WIDTH / 2) m_anim.setTime(0); // Bring back to start
 
     //! Draw points
     if (vvr_flag_on(m_flag, SHOW_PTS_ALL)) {
         for (size_t i = 0; i < m_pts.size(); i++) {
             vvr::Shape::PointSize = vvr::Shape::PointSize = POINT_SIZE;
-            math2vvr(m_pts[i], vvr::Colour::white).draw();
+            math2vvr(m_pts[i], vvr::white).draw();
             vvr::Shape::PointSize = POINT_SIZE_SAVE;
         }
     }
@@ -262,7 +262,7 @@ void KDTreeScene::draw()
         }
         vvr::Shape::PointSize = vvr::Shape::PointSize = POINT_SIZE;
         for (size_t i = 0; i < pts_in.size(); i++) {
-            math2vvr(pts_in[i], vvr::Colour::magenta).draw();
+            math2vvr(pts_in[i], vvr::magenta).draw();
         }
         vvr::Shape::PointSize = POINT_SIZE_SAVE;
     }
@@ -274,8 +274,8 @@ void KDTreeScene::draw()
         Task_02_Nearest(sc, m_KDTree->root(), &nearest, &dist);
         vec nn = nearest->split_point;
         vvr::Shape::PointSize = vvr::Shape::PointSize = POINT_SIZE;
-        math2vvr(sc, vvr::Colour::blue).draw();
-        math2vvr(nn, vvr::Colour::green).draw();
+        math2vvr(sc, vvr::blue).draw();
+        math2vvr(nn, vvr::green).draw();
         vvr::Shape::PointSize = POINT_SIZE_SAVE;
     }
 
@@ -289,8 +289,8 @@ void KDTreeScene::draw()
             if (!nearests[i]) continue;
             vec nn = nearests[i]->split_point;
             vvr::Shape::PointSize = vvr::Shape::PointSize = POINT_SIZE;
-            math2vvr(sc, vvr::Colour::blue).draw();
-            math2vvr(nn, vvr::Colour::green).draw();
+            math2vvr(sc, vvr::blue).draw();
+            math2vvr(nn, vvr::green).draw();
             vvr::Shape::PointSize = POINT_SIZE_SAVE;
         }
         delete[] nearests;
@@ -314,7 +314,7 @@ void KDTreeScene::draw()
                 vec c2 = levelNodes[i]->aabb.maxPoint;
                 vvr::Aabb3D box(c1.x, c1.y, c1.z, c2.x, c2.y, c2.z);
                 box.setTransparency(0.9);
-                box.setColour(vvr::Colour::cyan);
+                box.colour = vvr::cyan;
                 box.draw();
             }
         }
@@ -441,7 +441,7 @@ void KDTreeScene::sliderChanged(int slider_id, float v)
     m_tree_invalidation_sec = vvr::getSeconds();
     break;
     case 2:
-        m_sphere.rad = v * 30 * SPHERE_RAD;
+        m_sphere->r = v * 30 * SPHERE_RAD;
         break;
     case 3:
         m_kn = v * 100;

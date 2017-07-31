@@ -60,9 +60,9 @@ struct Tri
 
     C2DTriangle to_C2D() const { return C2DTriangle(*v1, *v2, *v3); }
 
-    vvr::Triangle2D to_vvr(vvr::Colour col = vvr::Colour::black, bool filled = false) const {
+    vvr::Triangle2D to_vvr(vvr::Colour col = vvr::black, bool filled = false) const {
         vvr::Triangle2D t(v1->x, v1->y, v2->x, v2->y, v3->x, v3->y, col);
-        t.setRenderSolid(filled);
+        t.filled = filled;
         return t;
     }
 
@@ -193,12 +193,12 @@ void TriangulationScene::draw()
 
     vector<Tri>::const_iterator tri_iter;
     for (tri_iter = m_tris.begin(); tri_iter != m_tris.end(); ++tri_iter) {
-        tri_iter->to_vvr(Colour::black).draw();
+        tri_iter->to_vvr(vvr::black).draw();
     }
 
     //! Draw points
     Shape::PointSize = m_sz_pt;
-    vvr::draw(m_pts, Colour::red);
+    vvr::draw(m_pts, vvr::red);
 
     returnFromPixelMode();
 }
@@ -333,15 +333,15 @@ void TriangulationScene::processPoint(C2DPoint* const p)
                 m_tris.erase(m_tris.begin() + tri_adjacent_index);
                 m_tris.push_back(tri_flip_1);
                 m_tris.push_back(tri_flip_2);
-                m_canvas.add(new Triangle2D(tri_flip_1.to_vvr(Colour::green, true)));
-                m_canvas.add(new Triangle2D(tri_flip_2.to_vvr(Colour::yellow, true)));
+                m_canvas.add(new Triangle2D(tri_flip_1.to_vvr(vvr::green, true)));
+                m_canvas.add(new Triangle2D(tri_flip_2.to_vvr(vvr::yellow, true)));
                 did_flip = true;
             }
         }
 
         if (!did_flip)
         {
-            m_canvas.add(new Triangle2D(tris_new[i].to_vvr(Colour::darkGreen, true)));
+            m_canvas.add(new Triangle2D(tris_new[i].to_vvr(vvr::darkGreen, true)));
             m_tris.push_back(tris_new[i]);
         }
     }
@@ -349,7 +349,7 @@ void TriangulationScene::processPoint(C2DPoint* const p)
     //! Visualize the violations.
     vector<unsigned> violations;
     FindViolations(m_tris, m_pts, violations);
-    ShowViolations(m_tris, violations, m_canvas, Colour::magenta);
+    ShowViolations(m_tris, violations, m_canvas, vvr::magenta);
 }
 
 C2DCircle GetCircumCircle(const C2DTriangle &t)

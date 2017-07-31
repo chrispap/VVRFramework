@@ -91,16 +91,16 @@ void ContourEditorScene::draw()
             vec p1 = m_pts[ci][pi];
             vec p2 = m_pts[ci][(pi + 1) % m_pts[ci].size()];
 
-            Colour line_col = Colour::yellow;
+            Colour line_col = vvr::yellow;
 
             if (ci == m_pts.size() - 1 && pi == m_pts[ci].size() - 1) {
-                line_col = Colour::grey;
+                line_col = vvr::grey;
             }
 
             if (!b_render_3D)
             {
                 LineSeg2D(p1.x, p1.y, p2.x, p2.y, line_col).draw();
-                if (b_show_pts) Point2D(p1.x, p1.y, Colour::yellow).draw();
+                if (b_show_pts) Point2D(p1.x, p1.y, vvr::yellow).draw();
             }
             else
             {
@@ -113,9 +113,9 @@ void ContourEditorScene::draw()
                 /* All three colours can be set at once using:
                    --> vvr::Triangle3D::setColourPerVertex(...); */
                 
-                Colour col_base = Colour::darkGreen;
-                Colour col_sel1 = Colour::red;
-                Colour col_sel2 = Colour::darkRed;
+                Colour col_base = vvr::darkGreen;
+                Colour col_sel1 = vvr::red;
+                Colour col_sel2 = vvr::darkRed;
                 Colour col_top; col_top.g = height / height_max * 255;
 
                 Triangle3D t1(

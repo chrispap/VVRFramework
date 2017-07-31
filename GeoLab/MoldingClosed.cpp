@@ -464,7 +464,7 @@ void Mold(const std::vector<C2DPoint> &pts, std::vector<C2DPolygon> &mold_pieces
 
 MoldingScene::MoldingScene()
 {
-    m_bg_col = Colour::grey;
+    m_bg_col = vvr::grey;
     m_hide_log = false;
     m_fullscreen = true;
     m_curr_p = NULL;
@@ -487,9 +487,9 @@ void MoldingScene::draw()
     enterPixelMode();
 
     static const vvr::Colour Pallete[3] = {
-        vvr::Colour::magenta,
-        vvr::Colour::darkGreen,
-        vvr::Colour::orange
+        vvr::magenta,
+        vvr::darkGreen,
+        vvr::orange
     };
 
     if (!m_pts.empty())
@@ -510,7 +510,7 @@ void MoldingScene::draw()
 
         Colour col1 = Colour(46, 97, 162);
         vvr::draw(m_polygon, col1, true);
-        vvr::draw(m_polygon, Colour::black, false);
+        vvr::draw(m_polygon, vvr::black, false);
 
         //! Object vertices
 
@@ -523,7 +523,7 @@ void MoldingScene::draw()
 
         if (m_curr_p)
         {
-            vvr::Point2D(m_curr_p->x, m_curr_p->y, vvr::Colour::magenta).draw();
+            vvr::Point2D(m_curr_p->x, m_curr_p->y, vvr::magenta).draw();
         }
     }
 

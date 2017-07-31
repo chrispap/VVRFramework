@@ -10,10 +10,10 @@
 #include <algorithm>
 #include <cassert>
 
-#define col_bg          vvr::Colour::white
-#define col_line        vvr::Colour::grey
-#define col_pts_ctrl    vvr::Colour::red
-#define col_pts_sel     vvr::Colour::darkRed
+#define col_bg          vvr::white
+#define col_line        vvr::grey
+#define col_pts_ctrl    vvr::red
+#define col_pts_sel     vvr::darkRed
 
 struct BSplineScene : public vvr::Scene
 {

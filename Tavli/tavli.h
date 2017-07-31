@@ -10,26 +10,32 @@ namespace tavli
 
     struct Piece : public vvr::Drawable
     {
-        Piece();
         void draw() const override;
-        vvr::Circle2D cir;
+        vvr::Circle2D circle;
     };
 
     struct Region : public vvr::Drawable
     {
-        Region();
         void draw() const override;
         vvr::Triangle2D tri;
     };
 
     struct Board : public vvr::Drawable
     {
-        Board(float w, float h);
+        Board();
         void draw() const override;
+        void resize(float width, float height);
         std::vector<Piece*> pieces;
         std::vector<Region*> regions;
+        std::vector<vvr::LineSeg2D*> bounds;
+        std::vector<vvr::Triangle2D*> wood;
         vvr::Canvas canvas;
         float w, h;
+    };
+
+    struct Player 
+    {
+
     };
 
     class Scene : public vvr::Scene
@@ -46,8 +52,7 @@ namespace tavli
         void mouseReleased(int x, int y, int modif) override;
 
     private:
-        vvr::Canvas mCanvas;
-        vvr::GlobalAxes *mAxes;
+        vvr::Axes *mAxes;
         Board *mBoard;
     };
 

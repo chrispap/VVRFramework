@@ -189,9 +189,9 @@ void Mesh3DScene::draw()
     }
 
     if (FLAG_ON(m_flag, SHOW_SOLID)) m_model->draw(m_obj_col, SOLID);
-    if (FLAG_ON(m_flag, SHOW_WIRE)) m_model->draw(Colour::black, WIRE);
-    if (FLAG_ON(m_flag, SHOW_NORMALS)) m_model->draw(Colour::black, NORMALS);
-    if (FLAG_ON(m_flag, SHOW_AXES)) m_model->draw(Colour::black, AXES);
+    if (FLAG_ON(m_flag, SHOW_WIRE)) m_model->draw(vvr::black, WIRE);
+    if (FLAG_ON(m_flag, SHOW_NORMALS)) m_model->draw(vvr::black, NORMALS);
+    if (FLAG_ON(m_flag, SHOW_AXES)) m_model->draw(vvr::black, AXES);
 
     //! Draw pca line
     if (FLAG_ON(m_flag, SHOW_PCA)) {
@@ -200,12 +200,12 @@ void Mesh3DScene::draw()
 
     //! Draw center mass
     if (FLAG_ON(m_flag, SHOW_CM)) {
-        Point3D(m_center_mass.x, m_center_mass.y, m_center_mass.z, Colour::red).draw();
+        Point3D(m_center_mass.x, m_center_mass.y, m_center_mass.z, vvr::red).draw();
     }
 
     //! Draw AABB
     if (FLAG_ON(m_flag, SHOW_AABB)) {
-        m_aabb.setColour(Colour::black);
+        m_aabb.colour = vvr::black;
         m_aabb.setTransparency(1);
         m_aabb.draw();
     }
@@ -219,7 +219,7 @@ void Mesh3DScene::draw()
                 t.v1().x, t.v1().y, t.v1().z,
                 t.v2().x, t.v2().y, t.v2().z,
                 t.v3().x, t.v3().y, t.v3().z,
-                Colour::green);
+                vvr::green);
             t3d.draw();
         }
     }
@@ -457,14 +457,14 @@ void Task_4_Draw_PCA(vec &center, vec &dir)
     //!
     //!//////////////////////////////////////////////////////////////////////////////////
 
-    Point3D pt(center.x, center.y, center.z, Colour::magenta);
+    Point3D pt(center.x, center.y, center.z, vvr::magenta);
     vec start = dir;
     vec end = dir;
     start *= -1000;
     end *= 1000;
     start += center;
     end += center;
-    LineSeg3D line(start.x, start.y, start.z, end.x, end.y, end.z, Colour::magenta);
+    LineSeg3D line(start.x, start.y, start.z, end.x, end.y, end.z, vvr::magenta);
     line.draw();
     pt.draw();
 }
@@ -629,7 +629,7 @@ void FindSubMeshes(vvr::Mesh &mesh, vvr::Canvas &canvas)
         }
         else
         {
-            bb->setColour(vvr::Colour::orange);
+            bb->colour = vvr::orange;
             bb->setTransparency(0.40);
             canvas.add(bb);
             canvas.newFrame(true);

@@ -212,11 +212,11 @@ void Task_Edges(const vvr::Mesh &mesh, std::vector<vvr::LineSeg3D> &segments)
     for (int i = 0; i < edges.size(); i++)
     {
         const Edge &e = edges[i];
-        Colour col = Colour::black;
+        Colour col = vvr::black;
 
         if (e.t1 < 0 || e.t2 < 0)
         {
-            col = Colour::green;
+            col = vvr::green;
         }
         else
         {
@@ -258,11 +258,11 @@ void Task_Edges(const vvr::Mesh &mesh, std::vector<vvr::LineSeg3D> &segments)
     for (int i = 0; i < edge_vec.size(); i++)
     {
     const Edge &e = edge_vec[i];
-    Colour col = Colour::black;
+    Colour col = vvr::black;
 
     if (e.t1 < 0 || e.t2 < 0)
     {
-    col = Colour::green;
+    col = vvr::green;
     }
     else
     {
@@ -349,26 +349,22 @@ void Exam2016Scene::resize()
 void Exam2016Scene::draw()
 {
     //! Draw mesh
-    if (m_style_flag & FLAG_SHOW_SOLID) m_mesh->draw(Colour::grey, SOLID);
-    if (m_style_flag & FLAG_SHOW_WIRE) m_mesh->draw(Colour::black, WIRE);
-    if (m_style_flag & FLAG_SHOW_NORMALS) m_mesh->draw(Colour::black, NORMALS);
-    if (m_style_flag & FLAG_SHOW_AXES) m_mesh->draw(Colour::black, AXES);
-    if (m_style_flag & FLAG_SHOW_AABB) m_mesh->draw(Colour::black, BOUND);
+    if (m_style_flag & FLAG_SHOW_SOLID) m_mesh->draw(vvr::grey, SOLID);
+    if (m_style_flag & FLAG_SHOW_WIRE) m_mesh->draw(vvr::black, WIRE);
+    if (m_style_flag & FLAG_SHOW_NORMALS) m_mesh->draw(vvr::black, NORMALS);
+    if (m_style_flag & FLAG_SHOW_AXES) m_mesh->draw(vvr::black, AXES);
+    if (m_style_flag & FLAG_SHOW_AABB) m_mesh->draw(vvr::black, BOUND);
 
     float w = vvr::Shape::LineWidth;
     vvr::Shape::LineWidth = 3;
     for (int i = 0; i < m_edges.size(); i++) {
         LineSeg3D seg = m_edges.at(i);
-        vec v1(seg.x1, seg.y1, seg.z1);
-        vec v2(seg.x2, seg.y2, seg.z2);
+        vec v1(seg.a);
+        vec v2(seg.b);
         v1 = m_mesh->getTransform().TransformPos(v1);
         v2 = m_mesh->getTransform().TransformPos(v2);
-        seg.x1 = v1.x;
-        seg.y1 = v1.y;
-        seg.z1 = v1.z;
-        seg.x2 = v2.x;
-        seg.y2 = v2.y;
-        seg.z2 = v2.z;
+        seg.a = v1;
+        seg.b = v2;
         seg.draw();
     }
     vvr::Shape::LineWidth = w;
@@ -380,8 +376,8 @@ void Exam2016Scene::draw()
     Canvas tmp_canvas;
 
     //! Draw parallel lines and points
-    tmp_canvas.add(m_line1, Colour::yellow);
-    tmp_canvas.add(m_line2, Colour::yellowGreen);
+    tmp_canvas.add(m_line1, vvr::yellow);
+    tmp_canvas.add(m_line2, vvr::yellowGreen);
     tmp_canvas.draw();
     vvr::draw(m_pts);
 

@@ -70,7 +70,7 @@ void AnimationScene::resize()
 void AnimationScene::draw()
 {
     vvr::Sphere3D sphere(0, 0, 0, m_sphere_rad, Colour(134, 100, 25));
-    sphere.setRenderSolid(true);
+    sphere.filled = true;
     sphere.draw();
 }
 

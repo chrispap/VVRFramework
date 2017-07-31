@@ -31,7 +31,7 @@ static C2DPoint p1, p2;
 
 TutorialScene::TutorialScene()
 {
-    m_bg_col = vvr::Colour::grey;
+    m_bg_col = vvr::grey;
     m_hide_log = false;
 }
 
@@ -60,7 +60,7 @@ void TutorialScene::mouseMoved(int x, int y, int modif)
 
     C2DPoint p2(x,y);
     m_canvas.add(p1, p2);
-    m_canvas.add(p1, Colour::darkRed);
+    m_canvas.add(p1, vvr::darkRed);
     p1 = p2;
 }
 

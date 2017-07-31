@@ -59,8 +59,8 @@ struct CuttingPlane : public math::Plane, vvr::Drawable
         math::vec v4 = pos + (-X + Y) * halfside;
         t1 = math2vvr(math::Triangle(v1, v2, v3), col);
         t2 = math2vvr(math::Triangle(v3, v4, v1), col);
-        t1.setRenderSolid(!wire);
-        t2.setRenderSolid(!wire);
+        t1.filled = !wire;
+        t2.filled = !wire;
     }
 
 private:
@@ -121,7 +121,7 @@ void Simple3DScene::reset()
     setCameraPos(pos);
     m_canvas.clear();
     m_box = new vvr::Aabb3D();
-    m_box->setColour(vvr::Colour("#459823"));
+    m_box->colour = vvr::Colour("#459823");
     m_canvas.add(m_box);
     m_click_counter = 0;
 }
@@ -139,7 +139,7 @@ void Simple3DScene::resize()
 
 void Simple3DScene::defineCuttingPlane(const math::vec &pos, const math::vec &normal)
 {
-    m_plane = CuttingPlane::Make(pos, normal, 10, Colour::red);
+    m_plane = CuttingPlane::Make(pos, normal, 10, vvr::red);
 
     std::vector<vec> vertices;
     for (auto mesh : { m_mesh_1, m_mesh_2, m_mesh_3 })
@@ -175,7 +175,7 @@ void Simple3DScene::defineCuttingPlane(const math::vec &pos, const math::vec &no
 
     float newside = sqrt(2.0f) * std::max(maxx - minx, maxy - miny);
 
-    m_plane = CuttingPlane::Make(newpos, m_plane->normal, newside / 2, vvr::Colour::red, false);
+    m_plane = CuttingPlane::Make(newpos, m_plane->normal, newside / 2, vvr::red, false);
 }
 
 void Simple3DScene::load3DModels()
@@ -211,10 +211,10 @@ void Simple3DScene::draw()
     for (auto mesh : { m_mesh_1, m_mesh_2, m_mesh_3 })
     {
         if (m_style_flag & FLAG_SHOW_SOLID) mesh->draw(m_obj_col, SOLID);
-        if (m_style_flag & FLAG_SHOW_WIRE) mesh->draw(Colour::black, WIRE);
-        if (m_style_flag & FLAG_SHOW_NORMALS) mesh->draw(Colour::black, NORMALS);
-        if (m_style_flag & FLAG_SHOW_AXES) mesh->draw(Colour::black, AXES);
-        if (m_style_flag & FLAG_SHOW_AABB) mesh->draw(Colour::black, BOUND);
+        if (m_style_flag & FLAG_SHOW_WIRE) mesh->draw(vvr::black, WIRE);
+        if (m_style_flag & FLAG_SHOW_NORMALS) mesh->draw(vvr::black, NORMALS);
+        if (m_style_flag & FLAG_SHOW_AXES) mesh->draw(vvr::black, AXES);
+        if (m_style_flag & FLAG_SHOW_AABB) mesh->draw(vvr::black, BOUND);
     }
 
     //! Draw selected triangles
@@ -298,7 +298,7 @@ void Simple3DScene::pick(int x, int y)
                 );
 
             if (tri.Intersects(ray, NULL, &intr)) {
-                tris_sel.push_back(new Triangle3D(math2vvr(tri, Colour::magenta)));
+                tris_sel.push_back(new Triangle3D(math2vvr(tri, vvr::magenta)));
                 float d;
                 if ((d = tri.DistanceSq(ray.pos)) < tri_min_dist) {
                     tri_min_dist = d;

@@ -30,7 +30,7 @@ public:
     void mouseReleased(int x, int y, int modif) override;
     void setBoxFromCurrentView();
     vvr::Canvas mCanvas;
-    vvr::GlobalAxes *mAxes;
+    vvr::Axes *mAxes;
     vvr::Aabb3D *mAabb1;
     vvr::Aabb3D *mAabb2;
     vvr::Obb3D* mBox;
@@ -42,9 +42,9 @@ BoxesScene::BoxesScene()
     m_perspective_proj = false;
     m_fullscreen = false;
     mBox = new vvr::Obb3D();
-    mAabb1 = new vvr::Aabb3D(0, 0, 0, 10, 10, 10, vvr::Colour::red);
-    mAabb2 = new vvr::Aabb3D(-10, -10, -10, 5, 5, 5, vvr::Colour::green);
-    mBox->setRenderSolid(true);
+    mAabb1 = new vvr::Aabb3D(0, 0, 0, 10, 10, 10, vvr::red);
+    mAabb2 = new vvr::Aabb3D(-10, -10, -10, 5, 5, 5, vvr::green);
+    mBox->filled = true;
     mAabb1->setTransparency(0.5);
     mAabb2->setTransparency(0.5);
 }

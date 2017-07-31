@@ -66,8 +66,8 @@ void SceneCollinear::reset()
     // Divide window to Tasks
     boundary1.Set(C2DPoint(4000, 400), C2DPoint(-4000, 400));
     boundary2.Set(C2DPoint(-800, -3000), C2DPoint(-800, 400));
-    canvas0.add(boundary1, vvr::Colour::black);
-    canvas0.add(boundary2, vvr::Colour::black);
+    canvas0.add(boundary1, vvr::black);
+    canvas0.add(boundary2, vvr::black);
 
     SetupTask();
 
@@ -82,17 +82,17 @@ void SceneCollinear::reset()
         dist3 = colPts[j + 2].Distance(colPts[j]);
 
         if (dist1 > dist2 && dist1 > dist3) {
-            canvas1.add(C2DLine(colPts[j], colPts[j + 1]), vvr::Colour::darkRed);
+            canvas1.add(C2DLine(colPts[j], colPts[j + 1]), vvr::darkRed);
         }
         else if (dist2 > dist3) {
-            canvas1.add(C2DLine(colPts[j + 1], colPts[j + 2]), vvr::Colour::darkRed);
+            canvas1.add(C2DLine(colPts[j + 1], colPts[j + 2]), vvr::darkRed);
         }
         else {
-            canvas1.add(C2DLine(colPts[j + 2], colPts[j]), vvr::Colour::darkRed);
+            canvas1.add(C2DLine(colPts[j + 2], colPts[j]), vvr::darkRed);
         }
     }
     for (unsigned i = 0; i < colPts.size(); i++) {
-        canvas1.add(colPts[i], vvr::Colour::red);
+        canvas1.add(colPts[i], vvr::red);
     }
 
 }
@@ -117,23 +117,23 @@ void SceneCollinear::SetupTask()
     points.AddCopy(C2DPoint(235, -40));
     points.AddCopy(C2DPoint(235, -140));
 
-    canvas1.add(C2DPoint(125, -55), vvr::Colour::green);
-    canvas1.add(C2DPoint(75, -55), vvr::Colour::green);
-    canvas1.add(C2DPoint(25, -55), vvr::Colour::green);
-    canvas1.add(C2DPoint(125, -105), vvr::Colour::green);
-    canvas1.add(C2DPoint(25, -105), vvr::Colour::green);
-    canvas1.add(C2DPoint(125, -155), vvr::Colour::green);
-    canvas1.add(C2DPoint(75, -155), vvr::Colour::green);
-    canvas1.add(C2DPoint(25, -155), vvr::Colour::green);
+    canvas1.add(C2DPoint(125, -55), vvr::green);
+    canvas1.add(C2DPoint(75, -55), vvr::green);
+    canvas1.add(C2DPoint(25, -55), vvr::green);
+    canvas1.add(C2DPoint(125, -105), vvr::green);
+    canvas1.add(C2DPoint(25, -105), vvr::green);
+    canvas1.add(C2DPoint(125, -155), vvr::green);
+    canvas1.add(C2DPoint(75, -155), vvr::green);
+    canvas1.add(C2DPoint(25, -155), vvr::green);
 
-    canvas1.add(C2DPoint(175, -40), vvr::Colour::green);
-    canvas1.add(C2DPoint(175, -90), vvr::Colour::green);
-    canvas1.add(C2DPoint(175, -140), vvr::Colour::green);
-    canvas1.add(C2DPoint(205, -40), vvr::Colour::green);
-    canvas1.add(C2DPoint(205, -90), vvr::Colour::green);
-    canvas1.add(C2DPoint(205, -140), vvr::Colour::green);
-    canvas1.add(C2DPoint(235, -40), vvr::Colour::green);
-    canvas1.add(C2DPoint(235, -140), vvr::Colour::green);
+    canvas1.add(C2DPoint(175, -40), vvr::green);
+    canvas1.add(C2DPoint(175, -90), vvr::green);
+    canvas1.add(C2DPoint(175, -140), vvr::green);
+    canvas1.add(C2DPoint(205, -40), vvr::green);
+    canvas1.add(C2DPoint(205, -90), vvr::green);
+    canvas1.add(C2DPoint(205, -140), vvr::green);
+    canvas1.add(C2DPoint(235, -40), vvr::green);
+    canvas1.add(C2DPoint(235, -140), vvr::green);
 
     C2DPoint pt;
     CRandomNumber rnX(5, 500);
@@ -142,14 +142,14 @@ void SceneCollinear::SetupTask()
     for (int i = 0; i < NUMPOINTS; i++) {
         pt.Set(rnX.Get(), rnY.Get());
         points.AddCopy(pt);
-        canvas1.add(pt, vvr::Colour::green);
+        canvas1.add(pt, vvr::green);
     }
 
     canvas1.newFrame(true);
 
     C2DPoint mousePt = C2DPoint(37, -10);
     points.AddCopy(mousePt);
-    canvas1.add(mousePt, vvr::Colour::yellow);
+    canvas1.add(mousePt, vvr::yellow);
 }
 
 /* UI Handling */
@@ -185,7 +185,7 @@ void SceneCollinear::HandleTask(const C2DPoint &p)
     canvas1.newFrame(true);
 
     points[points.size() - 1].Set(p.x, p.y);
-    canvas1.add(p, vvr::Colour::yellow);
+    canvas1.add(p, vvr::yellow);
 
     C2DPointSet colPts;
     Task_CollinearPoints(points, colPts);
@@ -197,18 +197,18 @@ void SceneCollinear::HandleTask(const C2DPoint &p)
         dist3 = colPts[j + 2].Distance(colPts[j]);
 
         if (dist1 > dist2 && dist1 > dist3) {
-            canvas1.add(C2DLine(colPts[j], colPts[j + 1]), vvr::Colour::darkRed);
+            canvas1.add(C2DLine(colPts[j], colPts[j + 1]), vvr::darkRed);
         }
         else if (dist2 > dist3) {
-            canvas1.add(C2DLine(colPts[j + 1], colPts[j + 2]), vvr::Colour::darkRed);
+            canvas1.add(C2DLine(colPts[j + 1], colPts[j + 2]), vvr::darkRed);
         }
         else {
-            canvas1.add(C2DLine(colPts[j + 2], colPts[j]), vvr::Colour::darkRed);
+            canvas1.add(C2DLine(colPts[j + 2], colPts[j]), vvr::darkRed);
         }
     }
 
     for (unsigned i = 0; i < colPts.size(); i++) {
-        canvas1.add(colPts[i], vvr::Colour::red);
+        canvas1.add(colPts[i], vvr::red);
     }
 
 }

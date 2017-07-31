@@ -82,7 +82,7 @@ void ConvexHullScene::reset()
 void ConvexHullScene::mousePressed(int x, int y, int modif)
 {
     Scene::mousePressed(x, y, modif);
-    m_mouse_pos->setColour(vvr::Colour::magenta);
+    m_mouse_pos->colour = vvr::magenta;
     m_mouse_pos->x = x; m_mouse_pos->y = y;
 
     C2DPoint p(x, y);
@@ -101,11 +101,11 @@ void ConvexHullScene::mousePressed(int x, int y, int modif)
     }
 
     m_canvas.clear();
-    m_canvas.add(new vvr::Point2D(x, y, inside ? vvr::Colour::yellow : vvr::Colour::red));
+    m_canvas.add(new vvr::Point2D(x, y, inside ? vvr::yellow : vvr::red));
 
     if (!inside)
     {
-        vvr::LineSeg2D *l1 = new vvr::LineSeg2D(x, y, 0, 0, vvr::Colour::blue);
+        vvr::LineSeg2D *l1 = new vvr::LineSeg2D(x, y, 0, 0, vvr::blue);
         vvr::LineSeg2D *l2 = new vvr::LineSeg2D(*l1);
         const C2DLine *poly_seg;
         int i = 0;
@@ -125,7 +125,7 @@ void ConvexHullScene::mousePressed(int x, int y, int modif)
             m_canvas.add(new vvr::LineSeg2D(poly_seg->GetPointFrom().x,
                 poly_seg->GetPointFrom().y,
                 poly_seg->GetPointTo().x,
-                poly_seg->GetPointTo().y, vvr::Colour::blue));
+                poly_seg->GetPointTo().y, vvr::blue));
             poly_seg = m_convex_hull_polygon.GetLine(++i);
         } while (!poly_seg->IsOnRight(p));
 
@@ -142,7 +142,7 @@ void ConvexHullScene::mousePressed(int x, int y, int modif)
 
 void ConvexHullScene::mouseReleased(int x, int y, int modif)
 {
-    m_mouse_pos->setColour(vvr::Colour::white);
+    m_mouse_pos->colour = vvr::white;
     m_mouse_pos->x = x; m_mouse_pos->y = y;
 }
 
@@ -169,8 +169,8 @@ void ConvexHullScene::draw()
     enterPixelMode();
 
     // Do any drawing here.
-    vvr::draw(m_convex_hull_polygon, vvr::Colour::green);
-    vvr::draw(m_point_cloud, vvr::Colour::black);
+    vvr::draw(m_convex_hull_polygon, vvr::green);
+    vvr::draw(m_point_cloud, vvr::black);
     m_canvas_algo_steps.draw();
     m_canvas.draw();
 
@@ -228,17 +228,17 @@ void ConvexHullScene::ConvexHull_Slow()
 
                 if (line.IsOnRight(*t)) {
                     keep = false;
-                    m_canvas_algo_steps.add(new vvr::Point2D(t->x, t->y, vvr::Colour::red));
+                    m_canvas_algo_steps.add(new vvr::Point2D(t->x, t->y, vvr::red));
                 }
                 else {
-                    m_canvas_algo_steps.add(new vvr::Point2D(t->x, t->y, vvr::Colour::green));
+                    m_canvas_algo_steps.add(new vvr::Point2D(t->x, t->y, vvr::green));
                 }
 
             }
 
-            m_canvas_algo_steps.add(new vvr::Point2D(p->x, p->y, vvr::Colour::yellow));
-            m_canvas_algo_steps.add(new vvr::Point2D(q->x, q->y, vvr::Colour::blue));
-            m_canvas_algo_steps.add(new vvr::Line2D(p->x, p->y, q->x, q->y, keep ? vvr::Colour::magenta : vvr::Colour::black));
+            m_canvas_algo_steps.add(new vvr::Point2D(p->x, p->y, vvr::yellow));
+            m_canvas_algo_steps.add(new vvr::Point2D(q->x, q->y, vvr::blue));
+            m_canvas_algo_steps.add(new vvr::Line2D(p->x, p->y, q->x, q->y, keep ? vvr::magenta : vvr::black));
 
             if (keep) {
                 lineset.AddCopy(line);

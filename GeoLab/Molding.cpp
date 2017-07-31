@@ -56,7 +56,7 @@ using namespace vvr;
 
 MoldingScene::MoldingScene()
 {
-    m_bg_col = Colour::grey;
+    m_bg_col = vvr::grey;
     m_hide_log = false;
     m_fullscreen = true;
     reset();
@@ -119,15 +119,15 @@ void MoldingScene::draw()
 
     // Draw mold line
     float x_min_max = getViewportWidth() * 0.4;
-    canvas.add(C2DPoint(-x_min_max, 0), m_pts.front(), Colour::black);
+    canvas.add(C2DPoint(-x_min_max, 0), m_pts.front(), vvr::black);
     for (int i = 0; i < (int)m_pts.size() - 1; ++i) {
-        canvas.add(m_pts[i], m_pts[i + 1], Colour::black);
+        canvas.add(m_pts[i], m_pts[i + 1], vvr::black);
     }
 
     // Draw mold pts
-    canvas.add(C2DPoint(x_min_max, 0), m_pts.back(), Colour::black);
+    canvas.add(C2DPoint(x_min_max, 0), m_pts.back(), vvr::black);
     for (int i = 0; i < (int)m_pts.size(); ++i) {
-        Colour point_col = m_curr_p != &m_pts[i] ? Colour::black : Colour::red;
+        Colour point_col = m_curr_p != &m_pts[i] ? vvr::black : vvr::red;
         canvas.add(m_pts[i], point_col);
     }
 
@@ -135,7 +135,7 @@ void MoldingScene::draw()
     if (m_anim_on) {
         C2DPoint arrow_end(m_dv.i * 30, m_dv.j * 30);
         arrow_end += m_click_anchor;
-        Colour arrow_col = Colour::darkOrange;
+        Colour arrow_col = vvr::darkOrange;
         canvas.add(C2DCircle(m_click_anchor, 30), arrow_col);
         canvas.add(m_click_anchor, arrow_end, arrow_col);
         canvas.add(arrow_end, arrow_col);
@@ -205,11 +205,11 @@ bool MoldingScene::isFreeToMove(C2DVector &dv)
         vvr::Colour col;
         if (poly.Crosses(side) || poly.Contains(side))
         {
-            col = vvr::Colour::red;
+            col = vvr::red;
         }
         else
         {
-            col = vvr::Colour::green;
+            col = vvr::green;
         }
         float dy = p2.y - p1.y;
         float dx = p2.x - p1.x;
@@ -221,7 +221,7 @@ bool MoldingScene::isFreeToMove(C2DVector &dv)
         vvr::Circle2D *dir_circle_line = new vvr::Circle2D(x, y, r);
         dir_circle_fill->setRange(rad_from, rad_to);
         dir_circle_line->setRange(rad_from, rad_to);
-        dir_circle_fill->setRenderSolid(true);
+        dir_circle_fill->filled = true;
         m_canvas.add(dir_circle_fill);
         m_canvas.add(dir_circle_line);
     }
