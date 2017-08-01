@@ -126,7 +126,7 @@ void vvr::Triangle3D::drawShape() const
 {
     glLineWidth(LineWidth);
     glBegin(GL_TRIANGLES);
-    math::vec n = math::Triangle(a, b, c).NormalCW();
+    math::vec n = NormalCCW();
 
     glNormal3fv(n.ptr());
 
