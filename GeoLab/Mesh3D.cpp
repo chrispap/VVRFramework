@@ -17,6 +17,8 @@
     << #f << " = " << (FLAG_ON(v,f) ? "ON" : "OFF") \
     << std::endl; break
 
+using namespace math;
+
 void Task_1_FindCenterMass(std::vector<vec> &vertices, vec &cm);
 void Task_2_FindAABB(std::vector<vec> &vertices, vvr::Aabb3D &aabb);
 void Task_3_AlignOriginTo(std::vector<vec> &vertices, const vec &cm);

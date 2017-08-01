@@ -8,14 +8,14 @@ namespace vvr {
      */
     struct vvrframework_API KDNode
     {
-        vec split_point;
-        int axis;
-        int level;
-        AABB aabb;
-        KDNode *child_left;
-        KDNode *child_right;
         KDNode() : child_left(NULL), child_right(NULL) {}
         ~KDNode() { delete child_left; delete child_right; }
+        KDNode *child_left;
+        KDNode *child_right;
+        math::vec split_point;
+        math::AABB aabb;
+        int axis;
+        int level;
     };
 
     /**
@@ -24,20 +24,20 @@ namespace vvr {
     class vvrframework_API KDTree
     {
     public:
-        KDTree(VecArray &pts, int dimensions = 3);
+        KDTree(math::VecArray &pts, int dimensions = 3);
         ~KDTree();
         std::vector<KDNode*> getNodesOfLevel(int level);
         int depth() const { return m_depth; }
         const KDNode* root() const { return m_root; }
-        const VecArray &pts;
+        const math::VecArray &pts;
 
     private:
-        int makeNode(KDNode *node, VecArray &pts, const int level);
+        int makeNode(KDNode *node, math::VecArray &pts, const int level);
         void getNodesOfLevel(KDNode *node, std::vector<KDNode*> &nodes, int level);
 
     private:
-        int m_DIM;
         KDNode *m_root;
+        int m_DIM;
         int m_depth;
     };
 
@@ -47,7 +47,7 @@ namespace vvr {
     struct VecComparator {
         unsigned axis;
         VecComparator(unsigned axis) : axis(axis % 3) {}
-        virtual inline bool operator() (const vec& v1, const vec& v2) {
+        virtual inline bool operator() (const math::vec& v1, const math::vec& v2) {
             return (v1.ptr()[axis] < v2.ptr()[axis]);
         }
     };

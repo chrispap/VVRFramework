@@ -7,7 +7,7 @@ using namespace vvr;
 using namespace std;
 using namespace math;
 
-KDTree::KDTree(VecArray &pts, int dimensions)
+KDTree::KDTree(math::VecArray &pts, int dimensions)
     : m_DIM(dimensions)
     , pts(pts)
 {

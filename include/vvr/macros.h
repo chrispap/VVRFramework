@@ -32,12 +32,11 @@
     typedef std::shared_ptr<const x> ConstPtr;
 
 #define vvr_decl_shape(Name, Base, filled) \
-    typedef Base GeomBase; \
     void set(const Base& gm) { static_cast<Base&>(*this) = gm; } \
     Name(const Base& gm, const vvr::Colour& col=vvr::Colour()) \
         : Shape(col, filled) \
-        , Base(gm) \
-    {} \
+        , Base(gm) { setup(); } \
+    typedef Base GeomBase; \
     vvr_decl_shared_ptr(Name) \
 
 #endif

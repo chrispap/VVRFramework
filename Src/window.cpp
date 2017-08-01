@@ -12,7 +12,7 @@
 using std::cerr;
 using std::endl;
 
-QString vvr::Window::aboutMessage = QString("VVR LAB 2016") + QString(QChar(0xA9));
+QString vvr::Window::aboutMessage = QString("Chris Papapavlou | chrispapapaulou@gmail.com ") + QString(QChar(0xA9));
 
 vvr::Window::Window(vvr::Scene *scene) : scene(scene)
 {

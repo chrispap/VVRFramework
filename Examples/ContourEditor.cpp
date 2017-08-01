@@ -21,6 +21,8 @@
 #define CONTOUR_DELIMITER "CONTOUR-LINE"
 #define MIN_POINT_DIST_PIXELS 10
 
+using namespace math;
+
 class ContourEditorScene : public vvr::Scene
 {
 public:

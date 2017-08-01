@@ -1,46 +1,46 @@
 #include <vvr/drawing.h>
 #include <vvr/mesh.h>
+#include <MathGeoLib.h>
+#include <GeoLib.h>
 #include <iostream>
 #include <vector>
 #include <cmath>
 #include <QtOpenGL>
-#include <MathGeoLib.h>
 
-using namespace std;
-using namespace vvr;
+using vvr::real_t;
 
-const Colour vvr::red(0xFF, 0x00, 0x00);
-const Colour vvr::blue(0x00, 0x00, 0xFF);
-const Colour vvr::grey(0x66, 0x66, 0x66);
-const Colour vvr::cyan(0x00, 0xFF, 0xFF);
-const Colour vvr::white(0xFF, 0xFF, 0xFF);
-const Colour vvr::green(0x00, 0xFF, 0x00);
-const Colour vvr::black(0x00, 0x00, 0x00);
-const Colour vvr::yellow(0xFF, 0xFF, 0x00);
-const Colour vvr::orange(0xFF, 0x66, 0x00);
-const Colour vvr::magenta(0xFF, 0x00, 0xFF);
-const Colour vvr::darkRed(0x8B, 0x00, 0x00);
-const Colour vvr::darkOrange(0xFF, 0x8C, 0x00);
-const Colour vvr::darkGreen(0x00, 0x64, 0x00);
-const Colour vvr::yellowGreen(0x9A, 0xCD, 0x32);
-const Colour vvr::lilac(0xCD, 0xA9, 0xCD);
+real_t vvr::Shape::LineWidth = 2.2f;
+real_t vvr::Shape::PointSize = 7.0f;
 
-float Shape::LineWidth = 2.2f;
-float Shape::PointSize = 7.0f;
+const vvr::Colour vvr::red(0xFF, 0x00, 0x00);
+const vvr::Colour vvr::blue(0x00, 0x00, 0xFF);
+const vvr::Colour vvr::grey(0x66, 0x66, 0x66);
+const vvr::Colour vvr::cyan(0x00, 0xFF, 0xFF);
+const vvr::Colour vvr::white(0xFF, 0xFF, 0xFF);
+const vvr::Colour vvr::green(0x00, 0xFF, 0x00);
+const vvr::Colour vvr::black(0x00, 0x00, 0x00);
+const vvr::Colour vvr::yellow(0xFF, 0xFF, 0x00);
+const vvr::Colour vvr::orange(0xFF, 0x66, 0x00);
+const vvr::Colour vvr::magenta(0xFF, 0x00, 0xFF);
+const vvr::Colour vvr::darkRed(0x8B, 0x00, 0x00);
+const vvr::Colour vvr::darkOrange(0xFF, 0x8C, 0x00);
+const vvr::Colour vvr::darkGreen(0x00, 0x64, 0x00);
+const vvr::Colour vvr::yellowGreen(0x9A, 0xCD, 0x32);
+const vvr::Colour vvr::lilac(0xCD, 0xA9, 0xCD);
 
 static void drawSphere(real_t r, int lats, int longs);
-static void drawBox(const vec &p1, const vec &p2, vvr::Colour col, char alpha);
+static void drawBox(const math::vec &p1, const math::vec &p2, vvr::Colour col, char alpha);
 
-void Shape::draw() const 
+void vvr::Shape::draw() const 
 {
     glPolygonMode(GL_FRONT_AND_BACK, filled ? GL_FILL : GL_LINE);
     glColor4ubv(colour.data);
     drawShape();
 }
 
-/*--- [Shape] 2D Drawing ---------------------------------------------------------------*/
+/*--- [Shape] 2D Drawing --------------------------------------------------------------*/
 
-void Point2D::drawShape() const 
+void vvr::Point2D::drawShape() const 
 {
     glPointSize(PointSize);
     glEnable(GL_POINT_SMOOTH);
@@ -49,7 +49,7 @@ void Point2D::drawShape() const
     glEnd();
 }
 
-void LineSeg2D::drawShape() const
+void vvr::LineSeg2D::drawShape() const
 {
     glLineWidth(LineWidth);
     glBegin(GL_LINES);
@@ -58,7 +58,7 @@ void LineSeg2D::drawShape() const
     glEnd();
 }
 
-void Line2D::drawShape() const 
+void vvr::Line2D::drawShape() const
 {
     double dx = x2-x1;
     double dy = y2-y1;
@@ -70,7 +70,7 @@ void Line2D::drawShape() const
     glEnd();
 }
 
-void Triangle2D::drawShape() const
+void vvr::Triangle2D::drawShape() const
 {
     glLineWidth(LineWidth);
     glBegin(GL_TRIANGLES);
@@ -80,7 +80,7 @@ void Triangle2D::drawShape() const
     glEnd();
 }
 
-void Circle2D::drawShape() const
+void vvr::Circle2D::drawShape() const
 {
     if (rad_from >= rad_to) {
         std::cerr << "Trying to render circle with [rad_from >= rad_to]" << std::endl;
@@ -102,9 +102,9 @@ void Circle2D::drawShape() const
 
 }
 
-/*--- [Shape] 3D Drawing ---------------------------------------------------------------*/
+/*--- [Shape] 3D Drawing --------------------------------------------------------------*/
 
-void Point3D::drawShape() const
+void vvr::Point3D::drawShape() const
 {
     glPointSize(PointSize);
     glEnable(GL_POINT_SMOOTH);
@@ -113,7 +113,7 @@ void Point3D::drawShape() const
     glEnd();
 }
 
-void LineSeg3D::drawShape() const 
+void vvr::LineSeg3D::drawShape() const
 {
     glLineWidth(LineWidth);
     glBegin(GL_LINES);
@@ -122,7 +122,7 @@ void LineSeg3D::drawShape() const
     glEnd();
 }
 
-void Triangle3D::drawShape() const
+void vvr::Triangle3D::drawShape() const
 {
     glLineWidth(LineWidth);
     glBegin(GL_TRIANGLES);
@@ -142,7 +142,7 @@ void Triangle3D::drawShape() const
     glEnd();
 }
 
-void Sphere3D::drawShape() const 
+void vvr::Sphere3D::drawShape() const
 {
     glPushMatrix();
     glTranslated(pos.x, pos.y, pos.z);
@@ -151,13 +151,13 @@ void Sphere3D::drawShape() const
     glPopMatrix();
 }
 
-void Aabb3D::drawShape() const
+void vvr::Aabb3D::drawShape() const
 {
-    drawBox(vec{ x1, y1, z1 }, vec{ x2, y2, z2 }, colour, 0);
-    drawBox(vec{ x1, y1, z1 }, vec{ x2, y2, z2 }, colour, 255 - transparency * 255);
+    drawBox(math::vec{ x1, y1, z1 }, math::vec{ x2, y2, z2 }, colour, 0);
+    drawBox(math::vec{ x1, y1, z1 }, math::vec{ x2, y2, z2 }, colour, 255 - transparency * 255);
 }
 
-void Obb3D::drawShape() const
+void vvr::Obb3D::drawShape() const
 {
     if (filled) 
     {
@@ -181,19 +181,14 @@ void Obb3D::drawShape() const
     vvr::Shape::PointSize = ptsz_old;
 }
 
-void Ground::draw() const
+void vvr::Ground::draw() const
 {
-    for (int i = 0; i < m_floor_tris.size(); i++)
-    {
-        vvr::Triangle3D floor_tri = vvr::math2vvr(m_floor_tris.at(i), m_col);
-        floor_tri.filled = true;
-        floor_tri.draw();
-    }
+    for (auto &t : m_floor_tris) t.draw();
 }
 
 /*--- [Ctors/Dtors] -------------------------------------------------------------------*/
 
-Aabb3D::Aabb3D(const std::vector<vec> vertices, const Colour &col)
+vvr::Aabb3D::Aabb3D(const std::vector<math::vec> vertices, const Colour &col)
     : Shape(col)
     , transparency(0)
 {
@@ -208,20 +203,20 @@ Aabb3D::Aabb3D(const std::vector<vec> vertices, const Colour &col)
     z2 = aabb.maxPoint.z;
 }
 
-Obb3D::Obb3D() : num_verts(NumVerticesInTriangulation(1, 1, 1))
+vvr::Obb3D::Obb3D() : num_verts(NumVerticesInTriangulation(1, 1, 1))
 {
     colour = vvr::Colour("dd4311");
     col_edge = vvr::Colour();
-    verts = new vec[num_verts];
-    norms = new vec[num_verts];
+    verts = new math::vec[num_verts];
+    norms = new math::vec[num_verts];
     cornerpts.resize(NumVertices());
     for (size_t i = 0; i < NumVertices(); ++i) {
         cornerpts[i] = new Point3D(0, 0, 0, col_edge);
     }
-    SetFrom(math::AABB{ { 0, 0, 0 }, { 0, 0, 0 } }, float4x4::identity);
+    SetFrom(math::AABB{ { 0, 0, 0 }, { 0, 0, 0 } }, math::float4x4::identity);
 }
 
-Obb3D::~Obb3D()
+vvr::Obb3D::~Obb3D()
 {
     delete[] verts;
     delete[] norms;
@@ -230,40 +225,40 @@ Obb3D::~Obb3D()
     }
 }
 
-void Obb3D::set(const math::AABB& aabb, const float4x4& transform)
+void vvr::Obb3D::set(const math::AABB& aabb, const math::float4x4& transform)
 {
     SetFrom(aabb, transform);
     Triangulate(1, 1, 1, verts, norms, nullptr, true);
     for (size_t i = 0; i < NumVertices(); ++i) {
-        *static_cast<vec*>(cornerpts[i]) = CornerPoint(i);
+        *static_cast<math::vec*>(cornerpts[i]) = CornerPoint(i);
     }
 }
 
-Ground::Ground(const float W, const float D, const float B, const float T, const vvr::Colour &col)
+vvr::Ground::Ground(const real_t W, const real_t D, const real_t B, const real_t T, const vvr::Colour &col)
     : m_col(col)
 {
-    const vec vA(-W / 2, B, -D / 2);
-    const vec vB(+W / 2, B, -D / 2);
-    const vec vC(+W / 2, B, +D / 2);
-    const vec vD(-W / 2, B, +D / 2);
-    const vec vE(-W / 2, T, -D / 2);
-    const vec vF(+W / 2, T, -D / 2);
+    const math::vec vA(-W / 2, B, -D / 2);
+    const math::vec vB(+W / 2, B, -D / 2);
+    const math::vec vC(+W / 2, B, +D / 2);
+    const math::vec vD(-W / 2, B, +D / 2);
+    const math::vec vE(-W / 2, T, -D / 2);
+    const math::vec vF(+W / 2, T, -D / 2);
 
-    m_floor_tris.push_back(math::Triangle(vB, vA, vD));
-    m_floor_tris.push_back(math::Triangle(vB, vD, vC));
-    m_floor_tris.push_back(math::Triangle(vF, vE, vA));
-    m_floor_tris.push_back(math::Triangle(vF, vA, vB));
+    m_floor_tris.push_back(vvr::Triangle3D(math::Triangle(vB, vA, vD), col));
+    m_floor_tris.push_back(vvr::Triangle3D(math::Triangle(vB, vD, vC), col));
+    m_floor_tris.push_back(vvr::Triangle3D(math::Triangle(vF, vE, vA), col));
+    m_floor_tris.push_back(vvr::Triangle3D(math::Triangle(vF, vA, vB), col));
 }
 
 /*--- [Canvas] ------------------------------------------------------------------------*/
 
-Canvas::Canvas() : fid(0) , del_on_clear(true)
+vvr::Canvas::Canvas() : fid(0) , del_on_clear(true)
 {
     frames.reserve(16);
     frames.push_back(Frame(false));
 }
 
-Canvas::~Canvas()
+vvr::Canvas::~Canvas()
 {
     if (del_on_clear) {
         for (int fid = 0; fid < frames.size(); fid++) {
@@ -274,19 +269,19 @@ Canvas::~Canvas()
     }
 }
 
-Drawable* Canvas::add(Drawable *drawable_ptr)
+vvr::Drawable* vvr::Canvas::add(vvr::Drawable *drawable_ptr)
 {
     frames[fid].drvec.push_back(drawable_ptr);
     return drawable_ptr;
 }
 
-void Canvas::newFrame(bool show_old_frames) 
+void vvr::Canvas::newFrame(bool show_old_frames)
 {
     frames.push_back(Frame(show_old_frames));
     ff();
 }
 
-void Canvas::draw() const
+void vvr::Canvas::draw() const
 {
     int fi = (int) fid;
     while (frames[fi].show_old && --fi >= 0);
@@ -298,7 +293,7 @@ void Canvas::draw() const
     }
 }
 
-void Canvas::resize(int i) 
+void vvr::Canvas::resize(int i)
 {
     if (i<1 || i > size()-1) 
         return;
@@ -315,7 +310,7 @@ void Canvas::resize(int i)
     fid=i-1;
 }
 
-void Canvas::clear()
+void vvr::Canvas::clear()
 {
     if (del_on_clear) {
         for (int fid = 0; fid < frames.size(); fid++) {
@@ -330,7 +325,7 @@ void Canvas::clear()
     fid=0;
 }
 
-void Canvas::clearFrame()
+void vvr::Canvas::clearFrame()
 {
     if (del_on_clear) {
         for (int si = 0; si < frames[fid].drvec.size(); si++) {
@@ -413,34 +408,26 @@ void vvr::draw(C2DPolygon  &polygon, const Colour &col, bool filled)
     }
 }
 
-/*--- [vvr Converters] ----------------------------------------------------------------*/
+/*--- [MathGeoLib => vvr Converters] --------------------------------------------------*/
 
 vvr::Triangle3D vvr::math2vvr(const math::Triangle &t, const vvr::Colour &col)
 {
-    return vvr::Triangle3D(
-        t.a.x, t.a.y, t.a.z,
-        t.c.x, t.c.y, t.c.z,
-        t.b.x, t.b.y, t.b.z,
-        col);
+    return vvr::Triangle3D(t, col);
 }
 
 vvr::LineSeg3D vvr::math2vvr(const math::LineSegment &l, const vvr::Colour &col)
 {
-    return vvr::LineSeg3D(
-        l.a.x, l.a.y, l.a.z,
-        l.b.x, l.b.y, l.b.z,
-        col);
+    return vvr::LineSeg3D(l, col);
 }
 
 vvr::LineSeg3D vvr::math2vvr(const math::Line &l, const vvr::Colour &col)
 {
-    const auto &lseg(l.ToLineSegment(1000));
-    return math2vvr(lseg, col);
+    return vvr::LineSeg3D(l.ToLineSegment(1000), col);
 }
 
 vvr::Point3D vvr::math2vvr(const math::vec &v, const vvr::Colour &col)
 {
-    return vvr::Point3D(v.x, v.y, v.z, col);
+    return vvr::Point3D(v, col);
 }
 
 /*--- [Static drawing functions] ------------------------------------------------------*/
@@ -470,19 +457,19 @@ void drawSphere(real_t r, int lats, int longs)
     }
 }
 
-void drawBox(const vec &p1, const vec &p2, Colour col, char a)
+void drawBox(const math::vec &p1, const math::vec &p2, vvr::Colour col, char a)
 {
-    static vec p[8];
-    vec *v = p;
+    static math::vec p[8];
+    math::vec *v = p;
 
-    *v++ = vec(p1.x, p1.y, p1.z); //0
-    *v++ = vec(p1.x, p2.y, p1.z); //1
-    *v++ = vec(p1.x, p2.y, p2.z); //2
-    *v++ = vec(p1.x, p1.y, p2.z); //3
-    *v++ = vec(p2.x, p1.y, p1.z); //4
-    *v++ = vec(p2.x, p2.y, p1.z); //5
-    *v++ = vec(p2.x, p2.y, p2.z); //6
-    *v++ = vec(p2.x, p1.y, p2.z); //7
+    *v++ = math::vec(p1.x, p1.y, p1.z); //0
+    *v++ = math::vec(p1.x, p2.y, p1.z); //1
+    *v++ = math::vec(p1.x, p2.y, p2.z); //2
+    *v++ = math::vec(p1.x, p1.y, p2.z); //3
+    *v++ = math::vec(p2.x, p1.y, p1.z); //4
+    *v++ = math::vec(p2.x, p2.y, p1.z); //5
+    *v++ = math::vec(p2.x, p2.y, p2.z); //6
+    *v++ = math::vec(p2.x, p1.y, p2.z); //7
 
     glPolygonMode(GL_FRONT_AND_BACK, a ? GL_FILL : GL_LINE);
     glBegin(GL_QUADS);
@@ -526,3 +513,5 @@ void drawBox(const vec &p1, const vec &p2, Colour col, char a)
 
     glEnd();
 }
+
+/*-------------------------------------------------------------------------------------*/

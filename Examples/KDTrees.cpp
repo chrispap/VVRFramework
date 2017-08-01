@@ -38,7 +38,7 @@ private:
 
 private:
     vvr::KDTree *m_KDTree;
-    VecArray m_pts;
+    math::VecArray m_pts;
     vvr::Sphere3D::Ptr m_sphere;
     vvr::Animation m_anim;
     int m_flag;
@@ -54,7 +54,7 @@ private:
 struct VecComparator {
     unsigned axis;
     VecComparator(unsigned axis) : axis(axis % 3) {}
-    virtual inline bool operator() (const vec& v1, const vec& v2) {
+    virtual inline bool operator() (const math::vec& v1, const math::vec& v2) {
         return (v1.ptr()[axis] < v2.ptr()[axis]);
     }
 };
@@ -64,22 +64,22 @@ struct VecComparator {
 /**
 * Find all the points under `root` node of the tree.
 */
-void Task_01_FindPtsOfNode(const vvr::KDNode* root, VecArray &pts);
+void Task_01_FindPtsOfNode(const vvr::KDNode* root, math::VecArray &pts);
 
 /**
 * Find the nearest neighbour of `test_pt` inside `root`.
 */
-void Task_02_Nearest(const vec& test_pt, const vvr::KDNode* root, const vvr::KDNode **nn, float *best_dist);
+void Task_02_Nearest(const math::vec& test_pt, const vvr::KDNode* root, const vvr::KDNode **nn, float *best_dist);
 
 /**
 * Find the points of `kdtree` that are contained inside `sphere`.
 */
-void Task_03_InSphere(const Sphere &sphere, const vvr::KDNode *root, VecArray &pts);
+void Task_03_InSphere(const math::Sphere &sphere, const vvr::KDNode *root, math::VecArray &pts);
 
 /**
 * Find the `k` nearest neighbours of `test_pt` inside `root`.
 */
-void Task_04_NearestK(const int k, const vec& test_pt, const vvr::KDNode* root, const vvr::KDNode **knn, float *best_dist);
+void Task_04_NearestK(const int k, const math::vec& test_pt, const vvr::KDNode* root, const vvr::KDNode **knn, float *best_dist);
 
 #define DIMENSIONS 3
 #define NUM_PTS_DEFAULT 100
@@ -166,7 +166,7 @@ void KDTreeScene::createRandomPts(int num_pts)
         float x = GND_WIDTH * 0.8 * (m_lcg.Float() - 0.5f);
         float y = GND_BOTTOM + (GND_TOP - GND_BOTTOM) * 0.8 * (m_lcg.Float() + 0.1);
         float z = GND_DEPTH * 0.8 * (m_lcg.Float() - 0.5f);
-        m_pts.push_back(vec(x, y, z));
+        m_pts.push_back(math::vec(x, y, z));
     }
     m_pts.shrink_to_fit();
 }
@@ -199,7 +199,7 @@ void KDTreeScene::createSurfacePts(int num_pts)
             float x = x0 + dx * xi;
             float z = z0 + dz * zi;
             float y = y0 + sin(x / 2) * sin(z / 2) * (y1 - y0);
-            m_pts.push_back(vec(x, y, z));
+            m_pts.push_back(math::vec(x, y, z));
         }
     }
 
@@ -234,8 +234,8 @@ void KDTreeScene::draw()
     float t = m_anim.t;
     vvr::Sphere3D sphere_moved(*m_sphere);
     sphere_moved.pos.x += t * ((float)GND_WIDTH / SEC_PER_FLOOR);
-    vec sc(sphere_moved.pos);
-    Sphere sphere(sc, sphere_moved.r);
+    math::vec sc(sphere_moved.pos);
+    math::Sphere sphere(sc, sphere_moved.r);
     if (sphere_moved.pos.x > GND_WIDTH / 2) m_anim.setTime(0); // Bring back to start
 
     //! Draw points
@@ -252,7 +252,7 @@ void KDTreeScene::draw()
         if (vvr_flag_on(m_flag, SHOW_SPHERE)) {
             sphere_moved.draw();
         }
-        VecArray pts_in;
+        math::VecArray pts_in;
         if (vvr_flag_on(m_flag, BRUTEFORCE)) {
             for (size_t i = 0; i < m_KDTree->pts.size(); i++)
                 if (sphere.Contains(m_KDTree->pts.at(i))) pts_in.push_back(m_KDTree->pts.at(i));
@@ -272,7 +272,7 @@ void KDTreeScene::draw()
         float dist;
         const vvr::KDNode *nearest = NULL;
         Task_02_Nearest(sc, m_KDTree->root(), &nearest, &dist);
-        vec nn = nearest->split_point;
+        math::vec nn = nearest->split_point;
         vvr::Shape::PointSize = vvr::Shape::PointSize = POINT_SIZE;
         math2vvr(sc, vvr::blue).draw();
         math2vvr(nn, vvr::green).draw();
@@ -287,7 +287,7 @@ void KDTreeScene::draw()
         Task_04_NearestK(m_kn, sc, m_KDTree->root(), nearests, &dist);
         for (int i = 0; i < m_kn; i++) {
             if (!nearests[i]) continue;
-            vec nn = nearests[i]->split_point;
+            math::vec nn = nearests[i]->split_point;
             vvr::Shape::PointSize = vvr::Shape::PointSize = POINT_SIZE;
             math2vvr(sc, vvr::blue).draw();
             math2vvr(nn, vvr::green).draw();
@@ -302,7 +302,7 @@ void KDTreeScene::draw()
             std::vector<vvr::KDNode*> levelNodes = m_KDTree->getNodesOfLevel(level);
             for (int i = 0; i < levelNodes.size(); i++) {
                 if (m_flag & vvr_flag(SHOW_PTS_KDTREE)) {
-                    VecArray pts;
+                    math::VecArray pts;
                     Task_01_FindPtsOfNode(levelNodes[i], pts);
                     vvr::Shape::PointSize = vvr::Shape::PointSize = POINT_SIZE;
                     for (int pi = 0; pi < pts.size(); pi++) {
@@ -310,8 +310,8 @@ void KDTreeScene::draw()
                     }
                     vvr::Shape::PointSize = POINT_SIZE_SAVE;
                 }
-                vec c1 = levelNodes[i]->aabb.minPoint;
-                vec c2 = levelNodes[i]->aabb.maxPoint;
+                math::vec c1 = levelNodes[i]->aabb.minPoint;
+                math::vec c2 = levelNodes[i]->aabb.maxPoint;
                 vvr::Aabb3D box(c1.x, c1.y, c1.z, c2.x, c2.y, c2.z);
                 box.setTransparency(0.9);
                 box.colour = vvr::cyan;
@@ -467,14 +467,14 @@ int main(int argc, char* argv[])
 
 //! Tasks
 
-void Task_01_FindPtsOfNode(const vvr::KDNode* root, VecArray &pts)
+void Task_01_FindPtsOfNode(const vvr::KDNode* root, math::VecArray &pts)
 {
     pts.push_back(root->split_point);
     if (root->child_left) Task_01_FindPtsOfNode(root->child_left, pts);
     if (root->child_right) Task_01_FindPtsOfNode(root->child_right, pts);
 }
 
-void Task_02_Nearest(const vec& test_pt, const vvr::KDNode* root, const vvr::KDNode **nn, float *best_dist)
+void Task_02_Nearest(const math::vec& test_pt, const vvr::KDNode* root, const vvr::KDNode **nn, float *best_dist)
 {
     if (!root) return;
 
@@ -495,7 +495,7 @@ void Task_02_Nearest(const vec& test_pt, const vvr::KDNode* root, const vvr::KDN
     Task_02_Nearest(test_pt, right_of_split ? root->child_left : root->child_right, nn, best_dist);
 }
 
-void Task_03_InSphere(const Sphere &sphere, const vvr::KDNode *root, VecArray &pts)
+void Task_03_InSphere(const math::Sphere &sphere, const vvr::KDNode *root, math::VecArray &pts)
 {
     if (!root) return;
 
@@ -513,7 +513,7 @@ void Task_03_InSphere(const Sphere &sphere, const vvr::KDNode *root, VecArray &p
     Task_03_InSphere(sphere, right_of_split ? root->child_left : root->child_right, pts);
 }
 
-void Task_04_NearestK(const int k, const vec& test_pt, const vvr::KDNode* root, const vvr::KDNode **knn, float *best_dist)
+void Task_04_NearestK(const int k, const math::vec& test_pt, const vvr::KDNode* root, const vvr::KDNode **knn, float *best_dist)
 {
     //...
     const vvr::KDNode *node = root;

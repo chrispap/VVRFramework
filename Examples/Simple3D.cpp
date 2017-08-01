@@ -36,31 +36,26 @@ struct CuttingPlane : public math::Plane, vvr::Drawable
     math::vec pos;
     math::vec X, Y, Z;
     vvr::Colour col;
-    vvr::Triangle3D t1, t2;
     float halfside;
 
     void draw() const override
     {
-        t1.draw();
-        t2.draw();
+        math::vec v1 = pos + (+X + Y) * halfside;
+        math::vec v2 = pos + (+X - Y) * halfside;
+        math::vec v3 = pos + (-X - Y) * halfside;
+        math::vec v4 = pos + (-X + Y) * halfside;
+        vvr::Triangle3D(math::Triangle(v1, v2, v3), col).draw();
+        vvr::Triangle3D(math::Triangle(v3, v4, v1), col).draw();
     }
 
-    CuttingPlane(const math::vec &pos, const math::vec &normal, float halfside, const vvr::Colour &col, bool wire = false)
+    CuttingPlane(const math::vec &pos, const math::vec &normal, float halfside, const vvr::Colour &col)
         : math::Plane(pos, normal.Normalized())
         , pos(pos)
         , halfside(halfside)
         , col(col)
     {
-        Z = this->normal;
+        Z = normal;
         Z.PerpendicularBasis(X, Y);
-        math::vec v1 = pos + (+X + Y) * halfside;
-        math::vec v2 = pos + (+X - Y) * halfside;
-        math::vec v3 = pos + (-X - Y) * halfside;
-        math::vec v4 = pos + (-X + Y) * halfside;
-        t1 = math2vvr(math::Triangle(v1, v2, v3), col);
-        t2 = math2vvr(math::Triangle(v3, v4, v1), col);
-        t1.filled = !wire;
-        t2.filled = !wire;
     }
 
 private:
@@ -105,7 +100,7 @@ Simple3DScene::Simple3DScene()
 {
     m_bg_col = Colour("768E77");
     m_obj_col = Colour("454545");
-    m_perspective_proj = false;
+    m_perspective_proj = true;
     m_style_flag = 0;
     m_style_flag |= FLAG_SHOW_SOLID;
     m_style_flag |= FLAG_SHOW_WIRE;
@@ -175,7 +170,7 @@ void Simple3DScene::defineCuttingPlane(const math::vec &pos, const math::vec &no
 
     float newside = sqrt(2.0f) * std::max(maxx - minx, maxy - miny);
 
-    m_plane = CuttingPlane::Make(newpos, m_plane->normal, newside / 2, vvr::red, false);
+    m_plane = CuttingPlane::Make(newpos, m_plane->normal, newside / 2, vvr::red);
 }
 
 void Simple3DScene::load3DModels()

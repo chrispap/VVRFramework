@@ -38,7 +38,7 @@ namespace vvr {
         virtual void sliderChanged(int slider_id, float val);
 
         /*--- Getters -----------------------------------------------------------------*/
-        Frustum getFrustum() { return m_frustum; };
+        math::Frustum getFrustum() { return m_frustum; };
         int getViewportWidth() { return m_screen_width; } // In pixels
         int getViewportHeight() { return m_screen_height; } // In pixels
         float getSceneWidth() { return m_scene_width; }
@@ -50,14 +50,14 @@ namespace vvr {
         Axes* getGlobalAxes() { return new Axes(2.0 *getSceneWidth()); }
 
         /*--- Setters -----------------------------------------------------------------*/
-        void setFrustum(const Frustum &frustum) { m_frustum = frustum; }
+        void setFrustum(const math::Frustum &frustum) { m_frustum = frustum; }
         void setCol(const Colour& col) { m_bg_col = col; }
         void setSliderVal(int slider_id, float val);
 
-        void setCameraPos(const vec &pos);
+        void setCameraPos(const math::vec &pos);
 
         /*--- Helpers -----------------------------------------------------------------*/
-        Ray unproject(int x, int y);
+        math::Ray unproject(int x, int y);
         void mouse2pix(int &x, int &y);
         bool ctrlDown(int modif) { return modif & (1 << 0); }
         bool shiftDown(int modif) { return modif & (1 << 1); }
@@ -84,7 +84,7 @@ namespace vvr {
 
         /*--- Information that do not concern the derived classes ---------------------*/
     private:
-        Frustum m_frustum;
+        math::Frustum m_frustum;
         float m_fov;
         float m_camera_dist;
         float m_scene_width, m_scene_height;

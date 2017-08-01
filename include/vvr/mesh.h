@@ -40,14 +40,14 @@ struct vvrframework_API Triangle
     /**
      * Vector3fer to the std::vector containing the vertices
      */
-    std::vector<vec> *vecList;
+    std::vector<math::vec> *vecList;
 
     /**
      * Plane equation coefficients
      */
     double A, B, C, D;
 
-    Triangle(std::vector<vec> *vecList, int v1 = 0, int v2 = 0, int v3 = 0) :
+    Triangle(std::vector<math::vec> *vecList, int v1 = 0, int v2 = 0, int v3 = 0) :
         vi1(v1), vi2(v2), vi3(v3), vecList(vecList)
     {
         update();
@@ -58,21 +58,21 @@ struct vvrframework_API Triangle
      */
     void update();
 
-    const vec &v1() const;
+    const math::vec &v1() const;
 
-    const vec &v2() const;
+    const math::vec &v2() const;
 
-    const vec &v3() const;
+    const math::vec &v3() const;
 
     /**
      * Returns the normal of this triangle
      */
-    const vec getNormal() const;
+    const math::vec getNormal() const;
 
     /**
      * Returns the center Vector3f of this triangle
      */
-    const vec getCenter() const;
+    const math::vec getCenter() const;
 
     /**
      * Evaluates the plane equation of this triangle's plane
@@ -80,7 +80,7 @@ struct vvrframework_API Triangle
      * @param r The Vector3f at which we find the value of the plane equation.
      * @return The value of the plane equation at the given Vector3f.
      */
-    double planeEquation(const vec &r) const;
+    double planeEquation(const math::vec &r) const;
 };
 
 /** 
@@ -101,9 +101,9 @@ public:
     void exportToObj(const std::string &filename);
 
 private:
-    std::vector<vec>        mVertices;              ///< Vertex list
+    std::vector<math::vec>  mVertices;              ///< Vertex list
     std::vector<Triangle>   mTriangles;             ///< Triangle list | contains indices to the Vertex list
-    std::vector<vec>        mVertexNormals;         ///< Normals per vertex
+    std::vector<math::vec>  mVertexNormals;         ///< Normals per vertex
     math::float3x4          mTransform;             ///< Model rotation around its local axis
     math::AABB              mAABB;                  ///< The bounding box of the model
     bool                    mCCW;                   ///< Clockwise-ness
@@ -125,9 +125,9 @@ public:
     void update(const bool recomputeAABB=false);    ///< Call after making changes to the vertices
     void setTransform(const math::float3x4 &transform) { mTransform = transform; }
 
-    std::vector<vec> &getVertices() { return mVertices; }
+    std::vector<math::vec> &getVertices() { return mVertices; }
     std::vector<Triangle> &getTriangles() { return mTriangles; }
-    const std::vector<vec> &getVertices() const { return mVertices; }
+    const std::vector<math::vec> &getVertices() const { return mVertices; }
     const std::vector<Triangle> &getTriangles() const { return mTriangles; }
     math::float3x4 getTransform() const { return mTransform; }
     math::AABB getAABB() const { return mAABB; }

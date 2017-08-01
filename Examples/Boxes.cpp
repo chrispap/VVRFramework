@@ -78,9 +78,9 @@ void BoxesScene::setBoxFromCurrentView()
 {
     vec lo(0, 0, 0);
     vec hi(2, 4, 8);
-    AABB aabb(lo, hi);
-    float4x4 transform;
-    transform = float4x4::RotateFromTo(vec(0, 0, 1), getFrustum().Front());
+    math::AABB aabb(lo, hi);
+    math::float4x4 transform;
+    transform = math::float4x4::RotateFromTo(vec(0, 0, 1), getFrustum().Front());
     mBox->set(aabb, transform);
 }
 

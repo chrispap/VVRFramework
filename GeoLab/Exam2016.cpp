@@ -5,6 +5,8 @@
 #include <vector>
 #include <MathGeoLib.h>
 
+using namespace math;
+
 void Task_Calliper(const C2DPointSet &pts, C2DLine &line1, C2DLine &line2);
 
 void Task_Edges(const vvr::Mesh &mesh, std::vector<vvr::LineSeg3D> &segments);

@@ -1,5 +1,6 @@
 #include <vvr/scene.h>
 #include <vvr/drawing.h>
+#include <MathGeoLib.h>
 #include <cstdio>
 #include <iostream>
 #include <vector>
@@ -9,7 +10,6 @@
 #include <locale>
 #include <cmath>
 #include <QtOpenGL>
-#include <MathGeoLib.h>
 
 using namespace vvr;
 using namespace std;

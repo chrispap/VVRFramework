@@ -1,4 +1,5 @@
 #include <vvr/mesh.h>
+#include <MathGeoLib.h>
 #include "tiny_obj_loader.h"
 #include <cstdio>
 #include <ctime>
@@ -7,7 +8,6 @@
 #include <vector>
 #include <list>
 #include <set>
-#include <MathGeoLib.h>
 #include <QtOpenGL>
 #include <QFile>
 

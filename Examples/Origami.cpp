@@ -12,8 +12,8 @@
 struct Fold
 {
     math::Polygon pol;
+    math::float4x4 M = math::float4x4::identity;
     vvr::Colour col;
-    float4x4 M = float4x4::identity;
 };
 
 struct Animation
@@ -102,7 +102,7 @@ void OrigamiScene::reset()
 
 void OrigamiScene::makePaper()
 {
-    const float h = 25;
+    const float h = 15;
     const float w = h * math::Sqrt(2); // A4 paper size ratio
 
     A = math::vec(-w, h, 0);
@@ -114,10 +114,11 @@ void OrigamiScene::makePaper()
 
     Fold f;
     folds.clear();
+    size_t col_index = 0;
 
-#ifdef TWOPIECES
+#if(TWOPIECES)
     f = Fold();
-    f.col = COLMAP[0];
+    f.col = COLMAP[col_index];
     f.pol.p.push_back(E);
     f.pol.p.push_back(F);
     f.pol.p.push_back(B);
@@ -126,7 +127,7 @@ void OrigamiScene::makePaper()
     folds.push_back(f);
 
     f = Fold();
-    f.col = COLMAP[0];
+    f.col = COLMAP[col_index];
     f.pol.p.push_back(A);
     f.pol.p.push_back(F);
     f.pol.p.push_back(E);
@@ -156,8 +157,8 @@ void OrigamiScene::draw()
         //! Fill
         if (m_style_flag & SHOW_SOLID) {
             const auto &tri_arr = pol.Triangulate();
-            for (auto &t : tri_arr) {
-                math2vvr(t, fold.col).draw();
+            for (auto &tri : tri_arr) {
+                vvr::Triangle3D(tri, fold.col).draw();
             }
         }
 
@@ -195,12 +196,12 @@ bool OrigamiScene::idle()
     anim.time += (vvr::getSeconds() - anim.last_update);
     anim.last_update = vvr::getSeconds();
 
-    float4x4 T1 = float3x4::Translate(-E);
-    float4x4 T2 = float3x4::Translate(E);
-    vec dir = vec(F - E).Normalized();
+    math::float4x4 T1 = math::float3x4::Translate(-E);
+    math::float4x4 T2 = math::float3x4::Translate(E);
+    math::vec dir = math::vec(F - E).Normalized();
     float rad = math::DegToRad(anim.time * 90);
-    float4x4 R = float3x3::RotateAxisAngle(dir, rad);
-    float4x4 M = T2*R*T1;
+    math::float4x4 R = math::float3x3::RotateAxisAngle(dir, rad);
+    math::float4x4 M = T2*R*T1;
     folds.at(1).M = M;
 }
 
@@ -260,12 +261,12 @@ void OrigamiScene::sliderChanged(int slider_id, float val)
         break;
     case 3:
     {
-        float4x4 T1 = float3x4::Translate(-E);
-        float4x4 T2 = float3x4::Translate(E);
-        vec dir = vec(F - E).Normalized();
+        math::float4x4 T1 = math::float3x4::Translate(-E);
+        math::float4x4 T2 = math::float3x4::Translate(E);
+        math::vec dir = math::vec(F - E).Normalized();
         float rad = math::DegToRad(val * 178);
-        float4x4 R = float3x3::RotateAxisAngle(dir, rad);
-        float4x4 M = T2*R*T1;
+        math::float4x4 R = math::float3x3::RotateAxisAngle(dir, rad);
+        math::float4x4 M = T2*R*T1;
         folds.at(1).M = M;
         break;
     }
@@ -320,7 +321,7 @@ void OrigamiScene::newLineSegment(int x, int y, bool shiftDown)
         if (ray.Intersects(pol))
         {
             const vvr::Colour col = vvr::red;
-            vec p = pol.ClosestPoint(ray.ToLineSegment(10000));
+            math::vec p = pol.ClosestPoint(ray.ToLineSegment(10000));
             vector<vvr::Drawable*> &drawables = m_canvas.getDrawables();
             vvr::Drawable *sh;
 
@@ -332,7 +333,7 @@ void OrigamiScene::newLineSegment(int x, int y, bool shiftDown)
             else
             {
                 auto last_seg = static_cast<vvr::LineSeg3D*>(drawables.back());
-                vec last_point(last_seg->b);
+                math::vec last_point(last_seg->b);
 
                 if (last_point.Distance(p) < 0.3) break;
 
@@ -353,7 +354,7 @@ void OrigamiScene::newLineSegment(int x, int y, bool shiftDown)
                     vvr::LineSeg3D *lseg0 = static_cast<vvr::LineSeg3D*>(drawables.at(shape_num - 2));
                     vvr::LineSeg3D *lseg1 = static_cast<vvr::LineSeg3D*>(drawables.at(shape_num - 1));
                     lseg1->a = v / N;
-                    lseg0 = lseg1;
+                    lseg0->b = lseg1->a;
                 }
             }
 
@@ -416,7 +417,8 @@ void OrigamiScene::triangulate()
 
 int main(int argc, char* argv[])
 {
-    try {
+    try 
+    {
         return vvr::mainLoop(argc, argv, new OrigamiScene);
     }
     catch (std::string exc)

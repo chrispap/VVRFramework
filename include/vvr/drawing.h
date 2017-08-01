@@ -4,11 +4,11 @@
 #include "vvrframework_DLL.h"
 #include "utils.h"
 #include "macros.h"
+#include <MathGeoLib.h>
+#include <GeoLib.h>
 #include <string>
 #include <vector>
 #include <cstdlib>
-#include <GeoLib.h>
-#include <MathGeoLib.h>
 
 namespace vvr {
 
@@ -85,6 +85,7 @@ namespace vvr {
         Shape(const Colour &col, bool filled=false) : colour(col), filled(filled) { }
         virtual ~Shape() { }
         virtual void drawShape() const = 0;
+        virtual void setup() { };
         void draw() const override;
         Colour colour;
         bool filled = false;
@@ -216,7 +217,7 @@ namespace vvr {
 
     struct vvrframework_API Point3D : public Shape, public math::vec
     {
-        vvr_decl_shape(vvr::Point3D, math::vec, false)
+        vvr_decl_shape(vvr::Point3D, math::vec, false);
 
         Point3D(real_t x, real_t y, real_t z, const Colour &col = Colour())
             : Shape(col)
@@ -229,7 +230,7 @@ namespace vvr {
 
     struct vvrframework_API LineSeg3D : public Shape, public math::LineSegment
     {
-        vvr_decl_shape(vvr::LineSeg3D, math::LineSegment, false)
+        vvr_decl_shape(vvr::LineSeg3D, math::LineSegment, false);
 
         LineSeg3D(real_t x1, real_t y1, real_t z1, real_t x2, real_t y2, real_t z2, 
                   const Colour &col = Colour()) 
@@ -243,7 +244,7 @@ namespace vvr {
 
     struct vvrframework_API Sphere3D : public Shape, public math::Sphere
     {
-        vvr_decl_shape(vvr::Sphere3D, math::Sphere, false)
+        vvr_decl_shape(vvr::Sphere3D, math::Sphere, false);
 
         Sphere3D(real_t x, real_t y, real_t z, real_t r, const Colour &col = Colour()) 
             : Shape(col) 
@@ -284,7 +285,7 @@ namespace vvr {
         Obb3D();
         ~Obb3D();
         Obb3D(const Obb3D&) = delete;
-        void set(const math::AABB& aabb, const float4x4& transform);
+        void set(const math::AABB& aabb, const math::float4x4& transform);
         void drawShape() const override;
 
     private:
@@ -297,39 +298,35 @@ namespace vvr {
 
     struct vvrframework_API Triangle3D : public Shape, public math::Triangle
     {
-        vvr_decl_shape(vvr::Triangle3D, math::Triangle, true)
+        vvr_decl_shape(vvr::Triangle3D, math::Triangle, true);
 
-        Triangle3D()
-        {
-            filled = true;
-            vertex_col[0] = colour;
-            vertex_col[1] = colour;
-            vertex_col[2] = colour;
-        }
-
-        Triangle3D(real_t x1, real_t y1, real_t z1,
-                   real_t x2, real_t y2, real_t z2,
-                   real_t x3, real_t y3, real_t z3,
-                   const Colour &col = Colour()) 
+        Triangle3D(real_t x1, real_t y1, real_t z1, real_t x2, real_t y2, real_t z2,
+                   real_t x3, real_t y3, real_t z3, const Colour &col = Colour()) 
             : Shape(col, true)
-            , math::Triangle({x1, y1, z1}, { x2, y2, z2 }, { x3, y3, z3 })
+            , math::Triangle(
+                math::vec{ x1, y1, z1}, 
+                math::vec{ x2, y2, z2 }, 
+                math::vec{ x3, y3, z3 })
         {
-            vertex_col[0] = colour;
-            vertex_col[1] = colour;
-            vertex_col[2] = colour;
+            setup();
         }
 
         void setColourPerVertex(const Colour &c1, const Colour &c2, const Colour &c3)
         {
-            vertex_col[0] = c1; 
-            vertex_col[1] = c2; 
-            vertex_col[2] = c3;
+            setup();
         }
 
         Colour vertex_col[3];
 
     private:
         void drawShape() const override;
+        
+        void setup() override
+        {
+            vertex_col[0] = colour;
+            vertex_col[1] = colour;
+            vertex_col[2] = colour;
+        }
     };
 
     struct vvrframework_API Ground : public vvr::Drawable
@@ -338,7 +335,7 @@ namespace vvr {
         void draw() const override;
 
     private:
-        std::vector<math::Triangle> m_floor_tris;
+        std::vector<vvr::Triangle3D> m_floor_tris;
         vvr::Colour m_col;
     };
 
@@ -448,7 +445,7 @@ namespace vvr {
 
     vvrframework_API void draw(C2DPolygon &polygon, const Colour &col = Colour(), bool filled = false);
 
-    /*--- [vvr Converters] ------------------------------------------------------------*/
+    /*--- [MathGeoLib => vvr Converters] (Deprecated. Keep for legacy code)------------*/
 
     vvrframework_API vvr::Triangle3D math2vvr(const math::Triangle &t, const vvr::Colour &col);
 
@@ -475,6 +472,8 @@ namespace vvr {
     extern const vvrframework_API Colour darkGreen;
     extern const vvrframework_API Colour yellowGreen;
     extern const vvrframework_API Colour lilac;
+
+    /*---------------------------------------------------------------------------------*/
 }
 
 #endif
