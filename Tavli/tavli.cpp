@@ -13,19 +13,6 @@
 #include <vector>
 #include <MathGeoLib.h>
 
-int main(int argc, char* argv[])
-{
-    try 
-    {
-        return vvr::mainLoop(argc, argv, new tavli::Scene());
-    }
-    catch (std::string exc) 
-    {
-        std::cerr << exc << std::endl;
-        return 1;
-    }
-}
-
 /*--- [Scene] ---------------------------------------------------------------------------*/
 
 using math::vec;
@@ -58,7 +45,7 @@ void tavli::Scene::draw()
     enterPixelMode();
     mBoard->draw();
     mAxes->drawif();
-    returnFromPixelMode();
+    exitPixelMode();
 }
 
 void tavli::Scene::mousePressed(int x, int y, int modif)
@@ -176,3 +163,16 @@ void tavli::Board::draw() const
 }
 
 /*-------------------------------------------------------------------------------------*/
+
+int main(int argc, char* argv[])
+{
+    try
+    {
+        return vvr::mainLoop(argc, argv, new tavli::Scene());
+    }
+    catch (std::string exc)
+    {
+        std::cerr << exc << std::endl;
+        return 1;
+    }
+}

@@ -107,7 +107,7 @@ void TriangleScene::draw()
     enterPixelMode();
     m_canvas.draw();
     m_canvas_pts.draw();
-    returnFromPixelMode();
+    exitPixelMode();
 }
 
 void TriangleScene::mousePressed(int x, int y, int modif)

@@ -304,21 +304,17 @@ void Simple3DScene::pick(int x, int y)
             }
         }
 
-        if (tri_min_index != -1) 
+        if (tri_min_index != -1)  
         {
 #if 0
             m_canvas.add(tris_sel.at(tri_min_index));
             defineCuttingPlane(tri_sel.CenterPoint(), tri_sel.NormalCW());
 #endif      
             if (m_click_counter % 2 == 0) {
-                m_box->x1 = intr.x;
-                m_box->y1 = intr.y;
-                m_box->z1 = intr.z;
+                m_box->minPoint = intr;
             }
             else {
-                m_box->x2 = intr.x;
-                m_box->y2 = intr.y;
-                m_box->z2 = intr.z;
+                m_box->maxPoint = intr;
             }
         }
     }

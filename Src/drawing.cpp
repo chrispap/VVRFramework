@@ -8,6 +8,7 @@
 #include <QtOpenGL>
 
 using vvr::real_t;
+using math::vec;
 
 real_t vvr::Shape::LineWidth = 2.2f;
 real_t vvr::Shape::PointSize = 7.0f;
@@ -29,7 +30,29 @@ const vvr::Colour vvr::yellowGreen(0x9A, 0xCD, 0x32);
 const vvr::Colour vvr::lilac(0xCD, 0xA9, 0xCD);
 
 static void drawSphere(real_t r, int lats, int longs);
-static void drawBox(const math::vec &p1, const math::vec &p2, vvr::Colour col, char alpha);
+static void drawBox(const vec &p1, const vec &p2, vvr::Colour col, char alpha);
+
+/*--- [Helpers] -----------------------------------------------------------------------*/
+
+math::AABB vvr::aabbFromVertices(const std::vector<vec> &vertices)
+{
+    vec lo, hi;
+    lo.x = lo.y = lo.z = FLT_MAX;
+    hi.x = hi.y = hi.z = -FLT_MAX;
+    std::vector<vec>::const_iterator vi;
+    for (vi = vertices.begin(); vi != vertices.end(); ++vi) {
+        if (vi->x > hi.x) hi.x = vi->x;
+        else if (vi->x < lo.x) lo.x = vi->x;
+        if (vi->y > hi.y) hi.y = vi->y;
+        else if (vi->y < lo.y) lo.y = vi->y;
+        if (vi->z > hi.z) hi.z = vi->z;
+        else if (vi->z < lo.z) lo.z = vi->z;
+    }
+
+    return math::AABB(lo, hi);
+}
+
+/*--- [Shape] Drawing -----------------------------------------------------------------*/
 
 void vvr::Shape::draw() const 
 {
@@ -38,7 +61,7 @@ void vvr::Shape::draw() const
     drawShape();
 }
 
-/*--- [Shape] 2D Drawing --------------------------------------------------------------*/
+/*--- [Shape] Drawing 2D --------------------------------------------------------------*/
 
 void vvr::Point2D::drawShape() const 
 {
@@ -102,7 +125,7 @@ void vvr::Circle2D::drawShape() const
 
 }
 
-/*--- [Shape] 3D Drawing --------------------------------------------------------------*/
+/*--- [Shape] Drawing 3D --------------------------------------------------------------*/
 
 void vvr::Point3D::drawShape() const
 {
@@ -126,7 +149,7 @@ void vvr::Triangle3D::drawShape() const
 {
     glLineWidth(LineWidth);
     glBegin(GL_TRIANGLES);
-    math::vec n = NormalCCW();
+    vec n = NormalCCW();
 
     glNormal3fv(n.ptr());
 
@@ -153,32 +176,53 @@ void vvr::Sphere3D::drawShape() const
 
 void vvr::Aabb3D::drawShape() const
 {
-    drawBox(math::vec{ x1, y1, z1 }, math::vec{ x2, y2, z2 }, colour, 0);
-    drawBox(math::vec{ x1, y1, z1 }, math::vec{ x2, y2, z2 }, colour, 255 - transparency * 255);
+    drawBox(minPoint, maxPoint, colour, 0);
+    drawBox(minPoint, maxPoint, colour, 255 - transparency * 255);
 }
 
 void vvr::Obb3D::drawShape() const
 {
     if (filled) 
     {
-        for (size_t i = 0; i < num_verts; i += 3) {
-            math::Triangle t(verts[i + 0], verts[i + 1], verts[i + 2]);
+        for (size_t i = 0; i < num_triverts; i += 3) {
+            math::Triangle t(triverts[i + 0], triverts[i + 1], triverts[i + 2]);
             math2vvr(t, colour).draw();
         }
     }
 
-    for (size_t i = 0; i < NumEdges(); ++i) {
+    for (size_t i = 0; i < NumEdges(); ++i) 
         math2vvr(Edge(i), col_edge).draw();
-    }
-
+    
     auto ptsz_old = vvr::Shape::PointSize;
     vvr::Shape::PointSize = 12;
-    
-    for (size_t i = 0; i < NumVertices(); ++i) {
-        cornerpts[i]->draw();
-    }
-
+    for (size_t i = 0; i < NumVertices(); ++i) 
+        cornerpts[i].draw();
     vvr::Shape::PointSize = ptsz_old;
+}
+
+vvr::Obb3D::Obb3D() : num_triverts(NumVerticesInTriangulation(1, 1, 1))
+{
+    colour = vvr::Colour("dd4311");
+    col_edge = vvr::Colour();
+    triverts = new vec[num_triverts];
+    trinorms = new vec[num_triverts];
+    cornerpts = new vvr::Point3D[NumVertices()];
+    SetFrom(math::AABB{ vec{ 0, 0, 0 }, vec{ 0, 0, 0 } }, math::float4x4::identity);
+}
+
+vvr::Obb3D::~Obb3D()
+{
+    delete[] triverts;
+    delete[] trinorms;
+    delete[] cornerpts;
+}
+
+void vvr::Obb3D::set(const math::AABB& aabb, const math::float4x4& transform)
+{
+    SetFrom(aabb, transform);
+    Triangulate(1, 1, 1, triverts, trinorms, nullptr, true);
+    for (size_t i = 0; i < NumVertices(); ++i) 
+        cornerpts[i].set(CornerPoint(i));
 }
 
 void vvr::Ground::draw() const
@@ -186,63 +230,15 @@ void vvr::Ground::draw() const
     for (auto &t : m_floor_tris) t.draw();
 }
 
-/*--- [Ctors/Dtors] -------------------------------------------------------------------*/
-
-vvr::Aabb3D::Aabb3D(const std::vector<math::vec> vertices, const Colour &col)
-    : Shape(col)
-    , transparency(0)
-{
-    math::AABB aabb = aabbFromVertices(vertices);
-
-    x1 = aabb.minPoint.x;
-    y1 = aabb.minPoint.y;
-    z1 = aabb.minPoint.z;
-
-    x2 = aabb.maxPoint.x;
-    y2 = aabb.maxPoint.y;
-    z2 = aabb.maxPoint.z;
-}
-
-vvr::Obb3D::Obb3D() : num_verts(NumVerticesInTriangulation(1, 1, 1))
-{
-    colour = vvr::Colour("dd4311");
-    col_edge = vvr::Colour();
-    verts = new math::vec[num_verts];
-    norms = new math::vec[num_verts];
-    cornerpts.resize(NumVertices());
-    for (size_t i = 0; i < NumVertices(); ++i) {
-        cornerpts[i] = new Point3D(0, 0, 0, col_edge);
-    }
-    SetFrom(math::AABB{ { 0, 0, 0 }, { 0, 0, 0 } }, math::float4x4::identity);
-}
-
-vvr::Obb3D::~Obb3D()
-{
-    delete[] verts;
-    delete[] norms;
-    for (size_t i = 0; i < NumVertices(); ++i) {
-        delete cornerpts[i];
-    }
-}
-
-void vvr::Obb3D::set(const math::AABB& aabb, const math::float4x4& transform)
-{
-    SetFrom(aabb, transform);
-    Triangulate(1, 1, 1, verts, norms, nullptr, true);
-    for (size_t i = 0; i < NumVertices(); ++i) {
-        *static_cast<math::vec*>(cornerpts[i]) = CornerPoint(i);
-    }
-}
-
 vvr::Ground::Ground(const real_t W, const real_t D, const real_t B, const real_t T, const vvr::Colour &col)
     : m_col(col)
 {
-    const math::vec vA(-W / 2, B, -D / 2);
-    const math::vec vB(+W / 2, B, -D / 2);
-    const math::vec vC(+W / 2, B, +D / 2);
-    const math::vec vD(-W / 2, B, +D / 2);
-    const math::vec vE(-W / 2, T, -D / 2);
-    const math::vec vF(+W / 2, T, -D / 2);
+    const vec vA(-W / 2, B, -D / 2);
+    const vec vB(+W / 2, B, -D / 2);
+    const vec vC(+W / 2, B, +D / 2);
+    const vec vD(-W / 2, B, +D / 2);
+    const vec vE(-W / 2, T, -D / 2);
+    const vec vF(+W / 2, T, -D / 2);
 
     m_floor_tris.push_back(vvr::Triangle3D(math::Triangle(vB, vA, vD), col));
     m_floor_tris.push_back(vvr::Triangle3D(math::Triangle(vB, vD, vC), col));
@@ -425,7 +421,7 @@ vvr::LineSeg3D vvr::math2vvr(const math::Line &l, const vvr::Colour &col)
     return vvr::LineSeg3D(l.ToLineSegment(1000), col);
 }
 
-vvr::Point3D vvr::math2vvr(const math::vec &v, const vvr::Colour &col)
+vvr::Point3D vvr::math2vvr(const vec &v, const vvr::Colour &col)
 {
     return vvr::Point3D(v, col);
 }
@@ -457,19 +453,19 @@ void drawSphere(real_t r, int lats, int longs)
     }
 }
 
-void drawBox(const math::vec &p1, const math::vec &p2, vvr::Colour col, char a)
+void drawBox(const vec &p1, const vec &p2, vvr::Colour col, char a)
 {
-    static math::vec p[8];
-    math::vec *v = p;
+    static vec p[8];
+    vec *v = p;
 
-    *v++ = math::vec(p1.x, p1.y, p1.z); //0
-    *v++ = math::vec(p1.x, p2.y, p1.z); //1
-    *v++ = math::vec(p1.x, p2.y, p2.z); //2
-    *v++ = math::vec(p1.x, p1.y, p2.z); //3
-    *v++ = math::vec(p2.x, p1.y, p1.z); //4
-    *v++ = math::vec(p2.x, p2.y, p1.z); //5
-    *v++ = math::vec(p2.x, p2.y, p2.z); //6
-    *v++ = math::vec(p2.x, p1.y, p2.z); //7
+    *v++ = vec(p1.x, p1.y, p1.z); //0
+    *v++ = vec(p1.x, p2.y, p1.z); //1
+    *v++ = vec(p1.x, p2.y, p2.z); //2
+    *v++ = vec(p1.x, p1.y, p2.z); //3
+    *v++ = vec(p2.x, p1.y, p1.z); //4
+    *v++ = vec(p2.x, p2.y, p1.z); //5
+    *v++ = vec(p2.x, p2.y, p2.z); //6
+    *v++ = vec(p2.x, p1.y, p2.z); //7
 
     glPolygonMode(GL_FRONT_AND_BACK, a ? GL_FILL : GL_LINE);
     glBegin(GL_QUADS);

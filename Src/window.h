@@ -52,7 +52,7 @@ private:
 
 protected:
     Scene *scene;
-    GLWidget *glWidget;
+    GlWidget *glWidget;
 };
 
 }

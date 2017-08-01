@@ -144,7 +144,7 @@ void MoldingScene::draw()
     canvas.draw();
     m_canvas.draw();
 
-    returnFromPixelMode();
+    exitPixelMode();
 }
 
 bool MoldingScene::idle()

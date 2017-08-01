@@ -8,43 +8,43 @@
 
 #define ANIM_INTERVAL 10
 
-vvr::GLWidget::GLWidget(vvr::Scene *scene, QWidget *parent) : QGLWidget(parent)
+vvr::GlWidget::GlWidget(vvr::Scene *scene, QWidget *parent) : QGLWidget(parent)
 {
     mScene = scene;
-    connect(&timer, SIGNAL(timeout()), this, SLOT(idle()));
-    timer.start(ANIM_INTERVAL);
+    connect(&mTimer, SIGNAL(timeout()), this, SLOT(idle()));
+    mTimer.start(ANIM_INTERVAL);
 }
 
-vvr::GLWidget::~GLWidget()
+vvr::GlWidget::~GlWidget()
 {
     delete mScene;
 }
 
-void vvr::GLWidget::initializeGL()
+void vvr::GlWidget::initializeGL()
 {
-    mScene->GL_Init();
+    mScene->glInit();
 }
 
-void vvr::GLWidget::paintGL()
+void vvr::GlWidget::paintGL()
 {
-    mScene->GL_Render();
+    mScene->glRender();
 }
 
-void vvr::GLWidget::resizeGL(int width, int height)
+void vvr::GlWidget::resizeGL(int width, int height)
 {
-    mScene->GL_Resize(width, height);
+    mScene->glResize(width, height);
 }
 
-void vvr::GLWidget::idle()
+void vvr::GlWidget::idle()
 {
     if (!mScene->idle())
-        timer.stop();
-    else if (!timer.isActive())
-        timer.start(ANIM_INTERVAL);
+        mTimer.stop();
+    else if (!mTimer.isActive())
+        mTimer.start(ANIM_INTERVAL);
     update();
 }
 
-void vvr::GLWidget::mousePressEvent(QMouseEvent *event)
+void vvr::GlWidget::mousePressEvent(QMouseEvent *event)
 {
     setFocus();
     int x = event->x();
@@ -54,7 +54,7 @@ void vvr::GLWidget::mousePressEvent(QMouseEvent *event)
     idle();
 }
 
-void vvr::GLWidget::mouseReleaseEvent(QMouseEvent *event)
+void vvr::GlWidget::mouseReleaseEvent(QMouseEvent *event)
 {
     setFocus();
     int x = event->x();
@@ -64,7 +64,7 @@ void vvr::GLWidget::mouseReleaseEvent(QMouseEvent *event)
     idle();
 }
 
-void vvr::GLWidget::mouseMoveEvent(QMouseEvent *event)
+void vvr::GlWidget::mouseMoveEvent(QMouseEvent *event)
 {
     int x = event->x();
     int y = event->y();
@@ -73,18 +73,18 @@ void vvr::GLWidget::mouseMoveEvent(QMouseEvent *event)
     update();
 }
 
-void vvr::GLWidget::wheelEvent(QWheelEvent *event)
+void vvr::GlWidget::wheelEvent(QWheelEvent *event)
 {
     mScene->mouseWheel(event->delta()>0?1:-1, mkModif(event));
     idle();
 }
 
-void vvr::GLWidget::keyPressEvent(QKeyEvent *event)
+void vvr::GlWidget::keyPressEvent(QKeyEvent *event)
 {
     onKeyPressed(event);
 }
 
-void vvr::GLWidget::onKeyPressed(QKeyEvent *event)
+void vvr::GlWidget::onKeyPressed(QKeyEvent *event)
 {
     int modif = mkModif(event);
     QString txt = event->text();
@@ -98,7 +98,7 @@ void vvr::GLWidget::onKeyPressed(QKeyEvent *event)
     idle();
 }
 
-int vvr::GLWidget::mkModif(QInputEvent *event)
+int vvr::GlWidget::mkModif(QInputEvent *event)
 {
     int ctrl  = event->modifiers() & Qt::ControlModifier ? 1 : 0;
     int shift = event->modifiers() & Qt::ShiftModifier   ? 1 : 0;

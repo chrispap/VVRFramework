@@ -40,7 +40,7 @@ void TutorialScene::draw()
     cout << "Drawing" << endl;
     enterPixelMode();
     m_canvas.draw();
-    returnFromPixelMode();
+    exitPixelMode();
 }
 
 void TutorialScene::mousePressed(int x, int y, int modif)

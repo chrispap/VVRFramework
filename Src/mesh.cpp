@@ -1,4 +1,5 @@
 #include <vvr/mesh.h>
+#include <vvr/drawing.h>
 #include <MathGeoLib.h>
 #include "tiny_obj_loader.h"
 #include <cstdio>
@@ -14,24 +15,6 @@
 using namespace std;
 using namespace vvr;
 using namespace math;
-
-math::AABB vvr::aabbFromVertices(const vector<vec> &vertices)
-{
-    vec min, max;
-    min.x = min.y = min.z = FLT_MAX;
-    max.x = max.y = max.z = -FLT_MAX;
-    vector<vec>::const_iterator vi;
-    for (vi = vertices.begin(); vi != vertices.end(); ++vi) {
-        if (vi->x > max.x) max.x = vi->x;
-        else if (vi->x < min.x) min.x = vi->x;
-        if (vi->y > max.y) max.y = vi->y;
-        else if (vi->y < min.y) min.y = vi->y;
-        if (vi->z > max.z) max.z = vi->z;
-        else if (vi->z < min.z) min.z = vi->z;
-    }
-
-    return AABB(min, max);
-}
 
 void vvr::Triangle::update()
 {

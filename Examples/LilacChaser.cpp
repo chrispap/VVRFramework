@@ -70,7 +70,7 @@ void LilacChaserScene::draw()
 {
     enterPixelMode();
     m_canvas.draw();
-    returnFromPixelMode();
+    exitPixelMode();
 }
 
 bool LilacChaserScene::idle()

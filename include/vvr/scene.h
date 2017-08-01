@@ -7,27 +7,19 @@
 
 namespace vvr {
 
-    enum ArrowDir
-    {
-        UP = 0,
-        DOWN,
-        RIGHT,
-        LEFT
-    };
+    enum ArrowDir { UP = 0, DOWN, RIGHT, LEFT };
 
     class vvrframework_API Scene
     {
     public:
         Scene();
         virtual ~Scene() {}
-        virtual const char* getName() const { return "VVR Framework Scene"; }
+        virtual const char* getName() const { 
+            return "VVRFramework Application"; 
+        }
 
-        /*--- OpenGL Callbacks --------------------------------------------------------*/
-        void GL_Render();
-        void GL_Init();
-        void GL_Resize(int width, int height);
-
-        /*--- Events ------------------------------------------------------------------*/
+    protected:
+        /*--- [Events] ----------------------------------------------------------------*/
         virtual bool idle() { return false; }
         virtual void keyEvent(unsigned char key, bool up, int modif);
         virtual void arrowEvent(ArrowDir dir, int modif);
@@ -37,59 +29,64 @@ namespace vvr {
         virtual void mouseWheel(int dir, int modif);
         virtual void sliderChanged(int slider_id, float val);
 
-        /*--- Getters -----------------------------------------------------------------*/
+        /*--- [Getters / Setters] -----------------------------------------------------*/
         math::Frustum getFrustum() { return m_frustum; };
         int getViewportWidth() { return m_screen_width; } // In pixels
         int getViewportHeight() { return m_screen_height; } // In pixels
         float getSceneWidth() { return m_scene_width; }
         float getSceneHeight() { return m_scene_height; }
-        bool fullScreen() { return m_fullscreen; }
-        bool createMenus() { return m_create_menus; }
-        bool hideLog() { return m_hide_log; }
-        bool hideSliders() { return m_hide_sliders; }
+        bool getFullScreen() { return m_fullscreen; }
+        bool getCreateMenus() { return m_create_menus; }
+        bool getHideLog() { return m_hide_log; }
+        bool getHideSliders() { return m_hide_sliders; }
         Axes* getGlobalAxes() { return new Axes(2.0 *getSceneWidth()); }
-
-        /*--- Setters -----------------------------------------------------------------*/
         void setFrustum(const math::Frustum &frustum) { m_frustum = frustum; }
-        void setCol(const Colour& col) { m_bg_col = col; }
         void setSliderVal(int slider_id, float val);
-
         void setCameraPos(const math::vec &pos);
 
-        /*--- Helpers -----------------------------------------------------------------*/
+        /*--- [Virtual] ---------------------------------------------------------------*/
+        virtual void draw() = 0;
+        virtual void reset();
+        virtual void resize() {}
+
+        /*--- [Helpers] ---------------------------------------------------------------*/
         math::Ray unproject(int x, int y);
         void mouse2pix(int &x, int &y);
         bool ctrlDown(int modif) { return modif & (1 << 0); }
         bool shiftDown(int modif) { return modif & (1 << 1); }
         bool altDown(int modif) { return modif & (1 << 2); }
+        void enterPixelMode();
+        void exitPixelMode();
         void drawAxes();
 
-    protected:
-        bool m_hide_sliders;
-        void enterPixelMode();
-        void returnFromPixelMode();
+    private:
+        /*--- [OpenGL Callbacks] ------------------------------------------------------*/
+        void glRender();
+        void glInit();
+        void glResize(int width, int height);
 
-    protected:
-        virtual void draw() = 0;
-        virtual void reset();
-        virtual void resize() {}
-
-        /*--- Information about the scene available to the derived classes ------------*/
     protected:
         Colour m_bg_col;
         bool m_perspective_proj;
         bool m_fullscreen;
         bool m_create_menus;
         bool m_hide_log;
+        bool m_hide_sliders;
+        bool m_first_resize;
 
-        /*--- Information that do not concern the derived classes ---------------------*/
     private:
         math::Frustum m_frustum;
         float m_fov;
         float m_camera_dist;
-        float m_scene_width, m_scene_height;
-        int m_screen_width, m_screen_height;
-        int m_mouselastX, m_mouselastY;
+        float m_scene_width;
+        float m_scene_height;
+        int m_screen_width;
+        int m_screen_height;
+        int m_mouse_x;
+        int m_mouse_y;
+
+        friend class GlWidget;
+        friend class Window;
     };
 
     int vvrframework_API mainLoop(int argc, char* argv[], Scene *scene);

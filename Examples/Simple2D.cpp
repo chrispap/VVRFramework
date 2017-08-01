@@ -49,7 +49,7 @@ void Simple2DScene::draw()
 {
     enterPixelMode();
     m_canvas.draw();
-    returnFromPixelMode();
+    exitPixelMode();
 }
 
 void Simple2DScene::mousePressed(int x, int y, int modif)

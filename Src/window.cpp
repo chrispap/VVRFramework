@@ -26,7 +26,7 @@ vvr::Window::Window(vvr::Scene *scene) : scene(scene)
     connect(this, SIGNAL(log_cerr(const QString&)), this, SLOT(do_log_cerr(const QString&)));
 
     // Init glwidget
-    glWidget = new vvr::GLWidget(scene);
+    glWidget = new vvr::GlWidget(scene);
     scrollArea->setWidget(glWidget);
     scrollArea->setWidgetResizable(true);
     scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -41,13 +41,13 @@ vvr::Window::Window(vvr::Scene *scene) : scene(scene)
     connect(horizontalSlider_5, SIGNAL(valueChanged(int)), this, SLOT(sliderMoved(int)));
     createActions();
 
-    if (scene->createMenus()) {
+    if (scene->getCreateMenus()) {
         createMenus();
     }
-    if (scene->hideLog()) {
+    if (scene->getHideLog()) {
         plain_text_log->hide();
     }
-    if (scene->hideSliders()) {
+    if (scene->getHideSliders()) {
         QLayout * layout = slider_groupbox->layout();
         QLayoutItem * item;
         QLayout * sublayout;
@@ -61,7 +61,7 @@ vvr::Window::Window(vvr::Scene *scene) : scene(scene)
         delete slider_groupbox;
     }
 
-    if (scene->fullScreen()) {
+    if (scene->getFullScreen()) {
         QTimer::singleShot(150, this, SLOT(showFullScreen()));
     }
     else {

@@ -222,7 +222,7 @@ void SceneCollinear::draw()
     canvas0.draw();
     canvas1.draw();
 
-    returnFromPixelMode();
+    exitPixelMode();
 }
 
 /*! Dosmenwn triwn shmeiwn epistrefei an auta einai syneftheiaka

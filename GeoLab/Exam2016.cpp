@@ -383,7 +383,7 @@ void Exam2016Scene::draw()
     tmp_canvas.draw();
     vvr::draw(m_pts);
 
-    returnFromPixelMode();
+    exitPixelMode();
 }
 
 bool Exam2016Scene::idle()

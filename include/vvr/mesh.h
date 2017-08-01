@@ -13,8 +13,6 @@
 
 namespace vvr {
 
-    math::AABB aabbFromVertices(const std::vector<math::vec> &vertices);
-
 /**
  * Enum used to control what to draw in a call of draw()
  */

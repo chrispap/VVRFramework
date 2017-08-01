@@ -228,7 +228,7 @@ void TriangulationScene::draw()
     Shape::PointSize = m_sz_pt;
     vvr::draw(m_pts, vvr::red);
 
-    returnFromPixelMode();
+    exitPixelMode();
 }
 
 int main(int argc, char* argv[])

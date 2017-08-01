@@ -527,7 +527,7 @@ void MoldingScene::draw()
         }
     }
 
-    returnFromPixelMode();
+    exitPixelMode();
 }
 
 bool MoldingScene::idle()

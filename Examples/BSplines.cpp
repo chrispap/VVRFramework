@@ -80,7 +80,7 @@ void BSplineScene::draw()
         vvr::Colour col = &p == m_curr_p ? col_pts_sel : col_pts_ctrl;
         vvr::Point2D(p.x, p.y, col).draw();
     }
-    returnFromPixelMode();
+    exitPixelMode();
 }
 
 void BSplineScene::keyEvent(unsigned char key, bool up, int modif)

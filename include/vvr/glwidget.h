@@ -9,13 +9,13 @@
 
 namespace vvr {
 
-class vvrframework_API GLWidget : public QGLWidget
+class vvrframework_API GlWidget : public QGLWidget
 {
     Q_OBJECT
 
 public:
-    GLWidget(vvr::Scene *scene, QWidget *parent = 0);
-    ~GLWidget();
+    GlWidget(vvr::Scene *scene, QWidget *parent = 0);
+    ~GlWidget();
 
     public slots:
     void onKeyPressed(QKeyEvent *event);
@@ -31,13 +31,11 @@ protected:
     void wheelEvent(QWheelEvent *event);
     void keyPressEvent(QKeyEvent *event);
 
-private: //data
-    Scene *mScene;
-    QTimer timer;
-
 private:
     static int mkModif(QInputEvent *event);
 
+    Scene *mScene;
+    QTimer mTimer;
 };
 
 }

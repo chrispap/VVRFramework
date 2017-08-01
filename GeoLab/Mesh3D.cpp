@@ -424,7 +424,9 @@ void Task_2_FindAABB(vector<vec> &vertices, Aabb3D &aabb)
 
 vec Mesh3DScene::Task_3_Pick_Origin()
 {
-    return vec(0.5f * (m_aabb.x1 + m_aabb.x2), 0.5f * (m_aabb.y1 + m_aabb.y2), 0.5f * (m_aabb.z1 + m_aabb.z2));
+    return vec(0.5f * (m_aabb.MinX() + m_aabb.MaxX()),
+               0.5f * (m_aabb.MinY() + m_aabb.MaxY()), 
+               0.5f * (m_aabb.MinZ() + m_aabb.MaxZ()));
     return m_center_mass;
 }
 
@@ -623,9 +625,9 @@ void FindSubMeshes(vvr::Mesh &mesh, vvr::Canvas &canvas)
 
         vvr::Aabb3D* bb = new vvr::Aabb3D(vs);
         
-        if (bb->x2 - bb->x1 < 1 || 
-            bb->y2 - bb->y1 < 1 || 
-            bb->z2 - bb->z1 < 1)
+        if (bb->MaxX() - bb->MinX() < 1 || 
+            bb->MaxY() - bb->MinY() < 1 || 
+            bb->MaxZ() - bb->MinZ() < 1)
         {
 
         }

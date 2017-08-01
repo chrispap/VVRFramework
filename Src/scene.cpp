@@ -18,8 +18,6 @@ using namespace math;
 #define VVR_FOV_MAX 160
 #define VVR_FOV_MIN 2
 
-/*--- class vvr::Scene ----------------------------------------------------------------*/
-
 Scene::Scene()
 {
     m_perspective_proj = false;
@@ -29,12 +27,48 @@ Scene::Scene()
     m_hide_sliders = true;
     m_camera_dist = 100;
     m_fov = 30;
+    m_first_resize = true;
     setCameraPos(vec(0, 0, m_camera_dist));
 }
 
 void Scene::reset()
 {
     setCameraPos(vec(0, 0, m_camera_dist));
+}
+
+void Scene::drawAxes()
+{
+    Axes(2.0 *getSceneWidth()).draw();
+}
+
+void Scene::enterPixelMode()
+{
+    glDisable(GL_LIGHTING);
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    glOrtho(-m_screen_width / 2, m_screen_width / 2, -m_screen_height / 2, m_screen_height / 2, 1, -1);
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+    glDisable(GL_DEPTH_TEST);
+}
+
+void Scene::exitPixelMode()
+{
+    glEnable(GL_LIGHTING);
+    glEnable(GL_DEPTH_TEST);
+    glPopMatrix();
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+}
+
+void Scene::mouse2pix(int &x, int &y)
+{
+    x -= m_screen_width / 2;
+    y -= m_screen_height / 2;
+    // Reverse the default window coordinate system so that y grows upwards.
+    y = -y;
 }
 
 void Scene::setCameraPos(const vec &pos)
@@ -52,9 +86,16 @@ void Scene::setCameraPos(const vec &pos)
     m_frustum.SetFrame(pos, front, up);
 }
 
-/*--- OpenGL Callbacks ----------------------------------------------------------------*/
+Ray Scene::unproject(int x, int y)
+{
+    return m_frustum.UnProject(
+        (float)x / getViewportWidth() * 2,
+        (float)y / getViewportHeight() * 2);
+}
 
-static void GL_Info()
+/*--- [OpenGL callbacks] --------------------------------------------------------------*/
+
+static void glInfo()
 {
     /* PRINT OpenGL INFO */
     printf("\n=== VVR Framework ================\n");
@@ -65,7 +106,7 @@ static void GL_Info()
     fflush(0);
 }
 
-void Scene::GL_Init()
+void Scene::glInit()
 {
     // Light setup
     float lz = m_camera_dist * 3;
@@ -99,10 +140,10 @@ void Scene::GL_Init()
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    GL_Info();
+    glInfo();
 }
 
-void Scene::GL_Resize(int w, int h)
+void Scene::glResize(int w, int h)
 {
     const float ar = (float)w / h;
     m_screen_width = w;
@@ -135,9 +176,10 @@ void Scene::GL_Resize(int w, int h)
     pjm.Transpose(); // Covert to colunm major for OpenGL
     glMultMatrixf(pjm.ptr());
     resize();
+    m_first_resize = false;
 }
 
-void Scene::GL_Render()
+void Scene::glRender()
 {
     glClearColor(m_bg_col.r / 255.0, m_bg_col.g / 255.0, m_bg_col.b / 255.0, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -149,49 +191,7 @@ void Scene::GL_Render()
     draw();
 }
 
-void Scene::drawAxes()
-{
-    Axes(2.0 *getSceneWidth()).draw();
-}
-
-void Scene::enterPixelMode()
-{
-    glDisable(GL_LIGHTING);
-    glMatrixMode(GL_PROJECTION);
-    glPushMatrix();
-    glLoadIdentity();
-    glOrtho(-m_screen_width / 2, m_screen_width / 2, -m_screen_height / 2, m_screen_height / 2, 1, -1);
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-    glLoadIdentity();
-    glDisable(GL_DEPTH_TEST);
-}
-
-void Scene::returnFromPixelMode()
-{
-    glEnable(GL_LIGHTING);
-    glEnable(GL_DEPTH_TEST);
-    glPopMatrix();
-    glMatrixMode(GL_PROJECTION);
-    glPopMatrix();
-}
-
-void Scene::mouse2pix(int &x, int &y)
-{
-    x -= m_screen_width / 2;
-    y -= m_screen_height / 2;
-    // Reverse the default window coordinate system so that y grows upwards.
-    y = -y;
-}
-
-Ray Scene::unproject(int x, int y)
-{
-    return m_frustum.UnProject(
-        (float)x / getViewportWidth() * 2,
-        (float)y / getViewportHeight() * 2);
-}
-
-/*--- UI ------------------------------------------------------------------------------*/
+/*--- [Events] ------------------------------------------------------------------------*/
 
 void Scene::keyEvent(unsigned char key, bool up, int modif)
 {
@@ -219,16 +219,16 @@ void Scene::arrowEvent(ArrowDir dir, int modif)
 
 void Scene::mousePressed(int x, int y, int modif)
 {
-    m_mouselastX = x;
-    m_mouselastY = y;
+    m_mouse_x = x;
+    m_mouse_y = y;
 }
 
 void Scene::mouseMoved(int x, int y, int modif)
 {
-    const int dx = x - m_mouselastX;
-    const int dy = y - m_mouselastY;
-    m_mouselastX = x;
-    m_mouselastY = y;
+    const int dx = x - m_mouse_x;
+    const int dy = y - m_mouse_y;
+    m_mouse_x = x;
+    m_mouse_y = y;
 
     const math::vec up = m_frustum.Up();
     const math::vec right = m_frustum.WorldRight();
@@ -256,7 +256,7 @@ void Scene::mouseWheel(int dir, int modif)
     m_fov += -4.0 * dir;
     if (m_fov < VVR_FOV_MIN) m_fov = VVR_FOV_MIN;
     else if (m_fov > VVR_FOV_MAX) m_fov = VVR_FOV_MAX;
-    GL_Resize(m_screen_width, m_screen_height);
+    glResize(m_screen_width, m_screen_height);
 }
 
 void Scene::sliderChanged(int slider_id, float val)
@@ -269,6 +269,7 @@ void Scene::setSliderVal(int slider_id, float val)
     if (slider_id > 5 || slider_id < 0) return;
     if (val > 1) val = 1;
     else if (val < 0) val = 0;
-    //TODO: Connect scene object backwards to window in order to be able to change 
+    //TODO: Connect scene object backwards to window 
+    //      in order to be able to change 
     //      slider values from the scene.
 }

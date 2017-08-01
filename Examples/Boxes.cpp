@@ -23,11 +23,7 @@ public:
     const char* getName() const { return "Boxes Scene"; }
     void draw() override;
     void resize() override;
-    void reset() override;
     void keyEvent(unsigned char key, bool up, int modif) override;
-    void mousePressed(int x, int y, int modif) override;
-    void mouseMoved(int x, int y, int modif) override;
-    void mouseReleased(int x, int y, int modif) override;
     void setBoxFromCurrentView();
     vvr::Canvas mCanvas;
     vvr::Axes *mAxes;
@@ -49,24 +45,17 @@ BoxesScene::BoxesScene()
     mAabb2->setTransparency(0.5);
 }
 
-void BoxesScene::reset()
-{
-    Scene::reset();
-    setBoxFromCurrentView();
-}
-
 void BoxesScene::resize()
 {
-    static bool first_pass = true;
-    if (first_pass) {
+    if (m_first_resize) 
+    {
         mAxes = getGlobalAxes();
         mCanvas.add(mAxes)->show();
         mCanvas.add(mAabb1)->hide();
         mCanvas.add(mAabb2)->hide();
         mCanvas.add(mBox)->show();
-        reset();
+        setBoxFromCurrentView();
     }
-    first_pass = false;
 }
 
 void BoxesScene::draw()
@@ -82,24 +71,6 @@ void BoxesScene::setBoxFromCurrentView()
     math::float4x4 transform;
     transform = math::float4x4::RotateFromTo(vec(0, 0, 1), getFrustum().Front());
     mBox->set(aabb, transform);
-}
-
-void BoxesScene::mousePressed(int x, int y, int modif)
-{
-    const bool shift_down = shiftDown(modif);
-    return Scene::mousePressed(x, y, modif);
-}
-
-void BoxesScene::mouseMoved(int x, int y, int modif)
-{
-    const bool shift_down = shiftDown(modif);
-    return Scene::mouseMoved(x, y, modif);
-}
-
-void BoxesScene::mouseReleased(int x, int y, int modif)
-{
-    const bool shift_down = shiftDown(modif);
-    return Scene::mouseReleased(x, y, modif);
 }
 
 void BoxesScene::keyEvent(unsigned char key, bool up, int modif)

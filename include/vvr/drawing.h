@@ -14,9 +14,15 @@ namespace vvr {
 
     typedef float real_t;
 
+    /*--- [Helpers] -------------------------------------------------------------------*/
+
+    math::AABB aabbFromVertices(const std::vector<math::vec> &vertices);
+
+    /*--- [Colour] --------------------------------------------------------------------*/
+
     struct vvrframework_API Colour
     {
-        Colour() 
+        Colour()
             : r(0)
             , g(0)
             , b(0)
@@ -37,7 +43,7 @@ namespace vvr {
             , a(255)
         { }
 
-        Colour(std::string hex_str) 
+        Colour(std::string hex_str)
             : r(strtol(hex_str.substr(0, 2).c_str(), 0, 16))
             , g(strtol(hex_str.substr(2, 2).c_str(), 0, 16))
             , b(strtol(hex_str.substr(4, 2).c_str(), 0, 16))
@@ -65,6 +71,8 @@ namespace vvr {
         };
 
     };
+
+    /*--- [Interfaces] ----------------------------------------------------------------*/
 
     struct vvrframework_API Drawable
     {
@@ -217,7 +225,7 @@ namespace vvr {
 
     struct vvrframework_API Point3D : public Shape, public math::vec
     {
-        vvr_decl_shape(vvr::Point3D, math::vec, false);
+        vvr_decl_shape(Point3D, math::vec, false);
 
         Point3D(real_t x, real_t y, real_t z, const Colour &col = Colour())
             : Shape(col)
@@ -230,7 +238,7 @@ namespace vvr {
 
     struct vvrframework_API LineSeg3D : public Shape, public math::LineSegment
     {
-        vvr_decl_shape(vvr::LineSeg3D, math::LineSegment, false);
+        vvr_decl_shape(LineSeg3D, math::LineSegment, false);
 
         LineSeg3D(real_t x1, real_t y1, real_t z1, real_t x2, real_t y2, real_t z2, 
                   const Colour &col = Colour()) 
@@ -244,7 +252,7 @@ namespace vvr {
 
     struct vvrframework_API Sphere3D : public Shape, public math::Sphere
     {
-        vvr_decl_shape(vvr::Sphere3D, math::Sphere, false);
+        vvr_decl_shape(Sphere3D, math::Sphere, false);
 
         Sphere3D(real_t x, real_t y, real_t z, real_t r, const Colour &col = Colour()) 
             : Shape(col) 
@@ -255,29 +263,39 @@ namespace vvr {
         void drawShape() const override;
     };
 
-    struct vvrframework_API Aabb3D : public Shape
+    struct vvrframework_API Aabb3D : public Shape, public math::AABB
     {
-        real_t x1, y1, z1;
-        real_t x2, y2, z2;
+        vvr_decl_shape(Aabb3D, math::AABB, false);
+
+        Aabb3D(real_t xmin, real_t ymin, real_t zmin, 
+               real_t xmax, real_t ymax, real_t zmax, const Colour &col = Colour())
+            : Shape(col)
+            , math::AABB(math::vec{ xmin, ymin, zmin }, math::vec{ xmax, ymax, zmax })
+        {
+            setup();
+        }
+
+        Aabb3D(const std::vector<math::vec> vertices, const Colour &col = Colour())
+            : Shape(col)
+            , math::AABB(aabbFromVertices(vertices))
+        {
+            setup();
+        }
+
+        void setTransparency(real_t a) 
+        { 
+            transparency = a; 
+        }
+
         real_t transparency;
 
-    protected:
+    private:
         void drawShape() const override;
 
-    public:
-        Aabb3D() : transparency(0) {}
-
-        Aabb3D(const std::vector<math::vec> vertices, const Colour &col = Colour());
-
-        Aabb3D(real_t xmin, real_t ymin, real_t zmin,
-            real_t xmax, real_t ymax, real_t zmax,
-            const Colour &col = Colour())
-            : x1(xmin), y1(ymin), z1(zmin)
-            , x2(xmax), y2(ymax), z2(zmax)
-            , Shape(col), transparency(0) {}
-
-
-        void setTransparency(real_t a) { transparency = a; }
+        void setup() override
+        {
+            transparency = 0;
+        }
     };
 
     struct vvrframework_API Obb3D : public Shape, private math::OBB
@@ -289,16 +307,17 @@ namespace vvr {
         void drawShape() const override;
 
     private:
-        std::vector<vvr::Point3D*> cornerpts;
-        math::vec *verts;
+        const size_t num_triverts;
+        math::vec *triverts;
+        math::vec *trinorms;
         math::vec *norms;
-        const size_t num_verts;
-        vvr::Colour col_edge;
+        Point3D *cornerpts;
+        Colour col_edge;
     };
 
     struct vvrframework_API Triangle3D : public Shape, public math::Triangle
     {
-        vvr_decl_shape(vvr::Triangle3D, math::Triangle, true);
+        vvr_decl_shape(Triangle3D, math::Triangle, true);
 
         Triangle3D(real_t x1, real_t y1, real_t z1, real_t x2, real_t y2, real_t z2,
                    real_t x3, real_t y3, real_t z3, const Colour &col = Colour()) 
@@ -313,7 +332,9 @@ namespace vvr {
 
         void setColourPerVertex(const Colour &c1, const Colour &c2, const Colour &c3)
         {
-            setup();
+            vertex_col[0] = c1;
+            vertex_col[1] = c2;
+            vertex_col[2] = c3;
         }
 
         Colour vertex_col[3];
@@ -323,23 +344,21 @@ namespace vvr {
         
         void setup() override
         {
-            vertex_col[0] = colour;
-            vertex_col[1] = colour;
-            vertex_col[2] = colour;
+            setColourPerVertex(colour, colour, colour);
         }
     };
 
-    struct vvrframework_API Ground : public vvr::Drawable
+    struct vvrframework_API Ground : public Drawable
     {
-        Ground(const real_t W, const real_t D, const real_t B, const real_t T, const vvr::Colour &colour);
+        Ground(const real_t W, const real_t D, const real_t B, const real_t T, const Colour &colour);
         void draw() const override;
 
     private:
-        std::vector<vvr::Triangle3D> m_floor_tris;
-        vvr::Colour m_col;
+        std::vector<Triangle3D> m_floor_tris;
+        Colour m_col;
     };
 
-    struct vvrframework_API Axes : vvr::Drawable
+    struct vvrframework_API Axes : Drawable
     {
         Axes(real_t d)
             : x(0, 0, 0, d, 0, 0, Colour(1.0f, 0.0f, 0.0f))
@@ -355,7 +374,7 @@ namespace vvr {
         };
 
     private:
-        vvr::LineSeg3D x, y, z;
+        LineSeg3D x, y, z;
     };
 
     /*--- [Canvas] --------------------------------------------------------------------*/
@@ -447,13 +466,13 @@ namespace vvr {
 
     /*--- [MathGeoLib => vvr Converters] (Deprecated. Keep for legacy code)------------*/
 
-    vvrframework_API vvr::Triangle3D math2vvr(const math::Triangle &t, const vvr::Colour &col);
+    vvrframework_API Triangle3D math2vvr(const math::Triangle &t, const Colour &col);
 
-    vvrframework_API vvr::LineSeg3D math2vvr(const math::LineSegment &l, const vvr::Colour &col);
+    vvrframework_API LineSeg3D math2vvr(const math::LineSegment &l, const Colour &col);
 
-    vvrframework_API vvr::LineSeg3D math2vvr(const math::Line &l, const vvr::Colour &col);
+    vvrframework_API LineSeg3D math2vvr(const math::Line &l, const Colour &col);
 
-    vvrframework_API vvr::Point3D math2vvr(const math::vec &v, const vvr::Colour &col);
+    vvrframework_API Point3D math2vvr(const math::vec &v, const Colour &col);
 
     /*--- [Predefined colours] --------------------------------------------------------*/
 

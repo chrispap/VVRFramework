@@ -174,7 +174,7 @@ void ConvexHullScene::draw()
     m_canvas_algo_steps.draw();
     m_canvas.draw();
 
-    returnFromPixelMode();
+    exitPixelMode();
 }
 
 void ConvexHullScene::ConvexHull_Slow()
