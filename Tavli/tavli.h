@@ -7,11 +7,10 @@
 
 namespace tavli
 {
-
     struct Piece : public vvr::Drawable
     {
         void draw() const override;
-        vvr::Circle2D circle;
+        vvr::Circle2D cir;
     };
 
     struct Region : public vvr::Drawable
@@ -25,17 +24,12 @@ namespace tavli
         Board();
         void draw() const override;
         void resize(float width, float height);
-        std::vector<Piece*> pieces;
-        std::vector<Region*> regions;
-        std::vector<vvr::LineSeg2D*> bounds;
-        std::vector<vvr::Triangle2D*> wood;
-        vvr::Canvas canvas;
-        float w, h;
-    };
-
-    struct Player 
-    {
-
+        std::vector<Piece*>             pieces;
+        std::vector<Region*>            regions;
+        std::vector<vvr::LineSeg2D*>    bounds;
+        std::vector<vvr::Triangle2D*>   wood;
+        vvr::Canvas                     canvas;
+        float                           w, h;
     };
 
     class Scene : public vvr::Scene
@@ -55,7 +49,6 @@ namespace tavli
         vvr::Axes *mAxes;
         Board *mBoard;
     };
-
 }
 
 #endif

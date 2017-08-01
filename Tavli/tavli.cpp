@@ -13,14 +13,11 @@
 #include <vector>
 #include <MathGeoLib.h>
 
-/*--- [Scene] ---------------------------------------------------------------------------*/
-
 using math::vec;
 
 tavli::Scene::Scene()
 {
     m_bg_col = vvr::Colour("3d2001");
-    m_hide_log = false;
     mBoard = new Board();
 }
 
@@ -31,12 +28,12 @@ void tavli::Scene::reset()
 
 void tavli::Scene::resize()
 {
-    static bool first_pass = true;
-    if (first_pass) {
-        first_pass = false;
+    if (m_first_resize) 
+    {
         mAxes = getGlobalAxes();
         mAxes->hide();
     }
+
     mBoard->resize(0.88*getViewportWidth(), 0.88*getViewportHeight());
 }
 
@@ -50,20 +47,17 @@ void tavli::Scene::draw()
 
 void tavli::Scene::mousePressed(int x, int y, int modif)
 {
-    const bool shift_down = shiftDown(modif);
-    return vvr::Scene::mousePressed(x, y, modif);
+    vvr::Scene::mousePressed(x, y, modif);
 }
 
 void tavli::Scene::mouseMoved(int x, int y, int modif)
 {
-    const bool shift_down = shiftDown(modif);
-    return vvr::Scene::mouseMoved(x, y, modif);
+    vvr::Scene::mouseMoved(x, y, modif);
 }
 
 void tavli::Scene::mouseReleased(int x, int y, int modif)
 {
-    const bool shift_down = shiftDown(modif);
-    return vvr::Scene::mouseReleased(x, y, modif);
+    vvr::Scene::mouseReleased(x, y, modif);
 }
 
 void tavli::Scene::keyEvent(unsigned char key, bool up, int modif)
@@ -88,8 +82,8 @@ const char* tavli::Scene::getName() const
 
 void tavli::Piece::draw() const
 {
-    circle.draw();
-    vvr::Circle2D c(circle);
+    cir.draw();
+    vvr::Circle2D c(cir);
     c.r *= 0.70;
     c.colour = vvr::darkRed;
     c.draw();
@@ -97,29 +91,33 @@ void tavli::Piece::draw() const
 
 void tavli::Region::draw() const
 {
+
 }
 
 tavli::Board::Board()
 {
     /* Bounds */
     bounds.resize(4);
-    for (size_t i = 0; i < 4; ++i) {
+    for (size_t i = 0; i < 4; ++i) 
+    {
         canvas.add(bounds[i] = new vvr::LineSeg2D());
     }
 
     /* The wood in the middle */
     wood.resize(2);
-    for (size_t i = 0; i < 2; ++i) {
+    for (size_t i = 0; i < 2; ++i) 
+    {
         canvas.add(wood[i] = new vvr::Triangle2D());
         wood[i]->filled = true;
     }
 
     /* Pieces */
     pieces.resize(15);
-    for (size_t i = 0; i < pieces.size(); ++i) {
+    for (size_t i = 0; i < pieces.size(); ++i) 
+    {
         canvas.add(pieces[i] = new Piece());
-        pieces[i]->circle.filled = true;
-        pieces[i]->circle.colour = vvr::Colour(0x95, 0, 0);
+        pieces[i]->cir.filled = true;
+        pieces[i]->cir.colour = vvr::Colour(0x95, 0, 0);
     }
 }
 
@@ -132,17 +130,15 @@ void tavli::Board::resize(float width, float height)
     const float prad = pdiam / 2;
 
     /* Bounds */
-    do {
-        size_t i;
-        i = 0;
-        bounds[i++]->set(-w / 2, -h / 2, -w / 2, +h / 2);
-        bounds[i++]->set(-w / 2, +h / 2, +w / 2, +h / 2);
-        bounds[i++]->set(+w / 2, +h / 2, +w / 2, -h / 2);
-        bounds[i++]->set(+w / 2, -h / 2, -w / 2, -h / 2);
-        i = 0;
-        wood[i++]->set(-prad, -height / 2, -prad, height / 2, prad, +height / 2);
-        wood[i++]->set(-prad, -height / 2, +prad, height / 2, prad, -height / 2);
-    } while (0);
+    size_t i;
+    i = 0;
+    bounds[i++]->set(-w / 2, -h / 2, -w / 2, +h / 2);
+    bounds[i++]->set(-w / 2, +h / 2, +w / 2, +h / 2);
+    bounds[i++]->set(+w / 2, +h / 2, +w / 2, -h / 2);
+    bounds[i++]->set(+w / 2, -h / 2, -w / 2, -h / 2);
+    i = 0;
+    wood[i++]->set(-prad, -height / 2, -prad, height / 2, prad, +height / 2);
+    wood[i++]->set(-prad, -height / 2, +prad, height / 2, prad, -height / 2);
 
     /* Pieces */
     for (size_t i = 0; i < pieces.size(); ++i) 
@@ -152,7 +148,7 @@ void tavli::Board::resize(float width, float height)
         size_t regrow = i / 6;
         x = pdiam + pdiam * regcol;
         y = -h / 2 + prad + regrow * pdiam;
-        pieces[i]->circle.set(x, y, pdiam * 0.48);
+        pieces[i]->cir.set(x, y, pdiam * 0.48);
     }
 }
 
