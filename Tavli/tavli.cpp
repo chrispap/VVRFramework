@@ -15,19 +15,26 @@
 
 using math::vec;
 
-tavli::Scene::Scene()
+/*--- [Tavli scene] -------------------------------------------------------------------*/
+
+TavliScene::TavliScene()
 {
     m_bg_col = vvr::Colour("3d2001");
-    mBoard = new Board();
-    mPicker = new vvr::MousePicker2D<vvr::Dragger2D>(mBoard->canvas, mDragger);
+    mBoard = new tavli::Board();
+    mPicker = new PiecePicker(mBoard->canvas, new tavli::PieceDragger2D);
 }
 
-void tavli::Scene::reset()
+TavliScene::~TavliScene()
+{
+    delete mPicker;
+}
+
+void TavliScene::reset()
 {
     vvr::Scene::reset();
 }
 
-void tavli::Scene::resize()
+void TavliScene::resize()
 {
     if (m_first_resize) 
     {
@@ -38,7 +45,7 @@ void tavli::Scene::resize()
     mBoard->resize(0.88*getViewportWidth(), 0.88*getViewportHeight());
 }
 
-void tavli::Scene::draw()
+void TavliScene::draw()
 {
     enterPixelMode();
     mBoard->draw();
@@ -46,22 +53,7 @@ void tavli::Scene::draw()
     exitPixelMode();
 }
 
-void tavli::Scene::mousePressed(int x, int y, int modif)
-{
-    mPicker->mousePressed(x, y, modif);
-}
-
-void tavli::Scene::mouseMoved(int x, int y, int modif)
-{
-    mPicker->mouseMoved(x, y, modif);
-}
-
-void tavli::Scene::mouseReleased(int x, int y, int modif)
-{
-    mPicker->mouseReleased(x, y, modif);
-}
-
-void tavli::Scene::keyEvent(unsigned char key, bool up, int modif)
+void TavliScene::keyEvent(unsigned char key, bool up, int modif)
 {
     vvr::Scene::keyEvent(key, up, modif);
     key = tolower(key);
@@ -74,11 +66,6 @@ void tavli::Scene::keyEvent(unsigned char key, bool up, int modif)
     }
 }
 
-const char* tavli::Scene::getName() const
-{ 
-    return "Tavli Game";
-}
-
 /*--- [Tavli entities] ----------------------------------------------------------------*/
 
 void tavli::Piece::draw() const
@@ -88,6 +75,11 @@ void tavli::Piece::draw() const
     c.SetRadius(c.GetRadius() * 0.70);
     c.colour.darker();
     c.draw();
+}
+
+void tavli::Piece::drop()
+{
+
 }
 
 void tavli::Region::draw() const
@@ -122,24 +114,20 @@ tavli::Board::Board()
     }
 }
 
-void tavli::Board::resize(float width, float height)
+void tavli::Board::resize(const float w, const float h)
 {
-    w = width;
-    h = height;
+    this->w = w;
+    this->h = h;
+    this->d = w / 13;
+    this->r = d / 2;
 
-    const float pdiam = w / 13;
-    const float prad = pdiam / 2;
-
-    /* Bounds */
-    size_t i;
-    i = 0;
-    bounds[i++]->set(-w / 2, -h / 2, -w / 2, +h / 2);
-    bounds[i++]->set(-w / 2, +h / 2, +w / 2, +h / 2);
-    bounds[i++]->set(+w / 2, +h / 2, +w / 2, -h / 2);
-    bounds[i++]->set(+w / 2, -h / 2, -w / 2, -h / 2);
-    i = 0;
-    wood[i++]->set(-prad, -height / 2, -prad, height / 2, prad, +height / 2);
-    wood[i++]->set(-prad, -height / 2, +prad, height / 2, prad, -height / 2);
+    /* Passive drawing. Board terrain. */
+    bounds[0]->set(-w / 2, -h / 2, -w / 2, +h / 2);
+    bounds[1]->set(-w / 2, +h / 2, +w / 2, +h / 2);
+    bounds[2]->set(+w / 2, +h / 2, +w / 2, -h / 2);
+    bounds[3]->set(+w / 2, -h / 2, -w / 2, -h / 2);
+    wood[0]->set(-r, -h / 2, -r, h / 2, r, +h / 2);
+    wood[1]->set(-r, -h / 2, +r, h / 2, r, -h / 2);
 
     /* Pieces */
     for (size_t i = 0; i < pieces.size(); ++i) 
@@ -147,9 +135,9 @@ void tavli::Board::resize(float width, float height)
         float x, y;
         size_t regcol = i % 6;
         size_t regrow = i / 6;
-        x = pdiam + pdiam * regcol;
-        y = -h / 2 + prad + regrow * pdiam;
-        pieces[i]->set(C2DCircle({ x, y }, pdiam * 0.48));
+        x = d * (regcol + 1);
+        y = -h / 2 + r + regrow * d;
+        pieces[i]->set(C2DCircle({ x, y }, d * 0.48));
     }
 }
 
@@ -165,7 +153,7 @@ int main(int argc, char* argv[])
 {
     try
     {
-        return vvr::mainLoop(argc, argv, new tavli::Scene());
+        return vvr::mainLoop(argc, argv, new TavliScene());
     }
     catch (std::string exc)
     {
