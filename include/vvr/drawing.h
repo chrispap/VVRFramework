@@ -78,6 +78,7 @@ namespace vvr {
     {
         virtual ~Drawable() { };
         virtual void draw() const = 0;
+        virtual float pickdist(int x, int y) const { return -1.0f; }
         void drawif() { if (visible) draw(); }
         bool isVisible() { return visible; }
         bool setVisibility(bool viz) { visible = viz; return visible; }
@@ -188,37 +189,41 @@ namespace vvr {
         }
     };
 
-    struct vvrframework_API Circle2D : public Shape
+    struct vvrframework_API Circle2D : public Shape, public C2DCircle
     {
-        real_t x, y, r;
-        real_t rad_from, rad_to;
-        bool closed_loop;
+        vvr_decl_shape(Circle2D, C2DCircle, false);
 
-    protected:
-        void drawShape() const override;
-
-    public:
-        Circle2D() : rad_from(0), rad_to(6.28318530718), closed_loop(true) {}
-        Circle2D(real_t x, real_t y, real_t rad, const Colour &col = Colour())
+        Circle2D(real_t x, real_t y, real_t r, const Colour &col = Colour())
             : Shape(col)
-            , x(x)
-            , y(y)
-            , r(rad)
-            , rad_from(0)
-            , rad_to(6.28318530718)
-            , closed_loop(true)
-        { }
-
-        void set(real_t x, real_t y, real_t r)
-        {
-            vvr_setmemb(x);
-            vvr_setmemb(y);
-            vvr_setmemb(r);
+            , C2DCircle(C2DPoint(x,y), r)
+        { 
+            setup();
         }
 
-        void setRange(real_t Rad_from, real_t Rad_to) { rad_from = Rad_from; rad_to = Rad_to; }
+        void setRange(real_t from, real_t to) 
+        { 
+            rad_from = from; 
+            rad_to = to; 
+        }
 
-        void setClosedLoop(bool Closed_loop) { closed_loop = Closed_loop; }
+        void setClosedLoop(bool Closed_loop) 
+        {
+            closed_loop = Closed_loop; 
+        }
+
+        real_t rad_from;
+        real_t rad_to;
+        bool closed_loop;
+
+    private:
+        void drawShape() const override;
+
+        void setup()
+        {
+            rad_from = 0.0f; 
+            rad_to = math::pi * 2.0f;
+            closed_loop = true;
+        }
     };
 
     /*--- [Shapes] 3D -----------------------------------------------------------------*/
@@ -347,6 +352,8 @@ namespace vvr {
             setColourPerVertex(colour, colour, colour);
         }
     };
+
+    /*--- [Other drawables] -----------------------------------------------------------*/
 
     struct vvrframework_API Ground : public Drawable
     {

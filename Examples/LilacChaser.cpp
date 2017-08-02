@@ -22,14 +22,11 @@ protected:
     void draw() override;
     void reset() override;
     bool idle() override;
-    void mousePressed(int x, int y, int modif) override;
-    void mouseMoved(int x, int y, int modif) override;
     void mouseWheel(int dir, int modif) override;
-    void arrowEvent(vvr::ArrowDir dir, int modif) override;
 
 private:
     vvr::Canvas m_canvas;
-    std::vector<vvr::Circle2D*> m_circles;
+    std::vector<vvr::Circle2D> m_circles;
 
 private:
     const float R = 120;
@@ -49,9 +46,8 @@ LilacChaserScene::LilacChaserScene()
         float deg = math::DegToRad(360.0) / N * i;
         float x = R * sin(deg);
         float y = R * cos(deg);
-        vvr::Circle2D *c = new vvr::Circle2D(x, y, r, vvr::lilac);
-        c->filled = true;
-        m_canvas.add(c);
+        vvr::Circle2D c(x, y, r, vvr::lilac);
+        c.filled = true;
         m_circles.push_back(c);
     }
 
@@ -70,57 +66,33 @@ void LilacChaserScene::draw()
 {
     enterPixelMode();
     m_canvas.draw();
+    for (vvr::Circle2D &c : m_circles) c.draw();
     exitPixelMode();
 }
 
 bool LilacChaserScene::idle()
 {
     double sec = vvr::getSeconds();
-    int i = (int) (sec / 0.125) % N;
-    vvr::Circle2D *c = m_circles.at(i);
-    for (vvr::Circle2D *c : m_circles) {
-        c->colour = vvr::lilac;
-    }
-    c->colour = m_bg_col;
+    for (vvr::Circle2D &c : m_circles) c.colour = vvr::lilac;
+    m_circles.at((size_t)(sec / 0.125) % N).colour = m_bg_col;
     return true;
-}
-
-void LilacChaserScene::mousePressed(int x, int y, int modif)
-{
-
-}
-
-void LilacChaserScene::mouseMoved(int x, int y, int modif)
-{
-
 }
 
 void LilacChaserScene::mouseWheel(int dir, int modif)
 {
-    const double coef = dir > 0 ? 1.2 : 1.0 / 1.2;
+    double coef = dir > 0 ? 1.2 : 1.0 / 1.2;
 
     if (shiftDown(modif))
     {
-        for (vvr::Circle2D *c : m_circles) {
-            math::vec v(c->x, c->y, 0);
-            v *= coef; c->x = v.x; c->y = v.y;
+        for (vvr::Circle2D &c : m_circles) {
+            c.SetCentre(c.GetCentre() * coef);
         }
     }
     else
     {
-        for (vvr::Circle2D *c : m_circles) {
-            c->r *= coef;
+        for (vvr::Circle2D &c : m_circles) {
+            c.SetRadius(c.GetRadius() * coef);
         }
-    }
-}
-
-void LilacChaserScene::arrowEvent(vvr::ArrowDir dir, int modif)
-{
-    if (dir==vvr::LEFT) {
-
-    }
-    else if (dir==vvr::RIGHT) {
-
     }
 }
 

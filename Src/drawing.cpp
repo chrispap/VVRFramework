@@ -105,24 +105,24 @@ void vvr::Triangle2D::drawShape() const
 
 void vvr::Circle2D::drawShape() const
 {
-    if (rad_from >= rad_to) {
-        std::cerr << "Trying to render circle with [rad_from >= rad_to]" << std::endl;
-        return;
-    }
+    assert(rad_from < rad_to);
 
-    double x_, y_;
     unsigned const numOfSegments = 60;
+    const float cx = GetCentre().x;
+    const float cy = GetCentre().y;
+    const float cr = GetRadius();
 
     glLineWidth(LineWidth);
     glBegin(filled ? GL_POLYGON : (closed_loop ? GL_LINE_LOOP : GL_LINE_STRIP));
     double d_th = (rad_to - rad_from) / numOfSegments;
     for (double theta = rad_from; theta <= rad_to; theta += d_th) {
-        x_ = r * cosf(theta);
-        y_ = r * sinf(theta);
-        glVertex2f(x + x_, y + y_);
+        float x, y;
+        math::SinCos(theta, y, x);
+        x *= cr;
+        y *= cr;
+        glVertex2f(cx + x, cy + y);
     }
     glEnd();
-
 }
 
 /*--- [Shape] Drawing 3D --------------------------------------------------------------*/

@@ -11,6 +11,7 @@ namespace tavli
     {
         void draw() const override;
         vvr::Circle2D cir;
+        float pickdist(int x, int y) const { return 0; }
     };
 
     struct Region : public vvr::Drawable

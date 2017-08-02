@@ -15,6 +15,39 @@
 
 using math::vec;
 
+template <typename Dragger>
+struct Picker2D
+{
+    void mousePressed(int x, int y, int modif)
+    {
+        vvr::Drawable *drw = nullptr;
+        dragger.grab(drw, x, y);
+    }
+
+    void mouseMoved(int x, int y, int modif)
+    {
+        dragger.drag(drw, x, y);
+    }
+
+    void mouseReleased(int x, int y, int modif)
+    {
+        dragger.release(drw, x, y);
+    }
+
+    Picker2D(Dragger &dragger) 
+        : dragger(dragger)
+        , drw(nullptr)
+    {
+
+    }
+
+private:
+    Dragger &dragger;
+    vvr::Drawable* drw;
+    vec pickpos;
+    vec currpos;
+};
+
 tavli::Scene::Scene()
 {
     m_bg_col = vvr::Colour("3d2001");
@@ -84,7 +117,7 @@ void tavli::Piece::draw() const
 {
     cir.draw();
     vvr::Circle2D c(cir);
-    c.r *= 0.70;
+    c.SetRadius(c.GetRadius() * 0.70);
     c.colour = vvr::darkRed;
     c.draw();
 }
