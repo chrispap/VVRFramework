@@ -27,22 +27,22 @@ using namespace std;
 //_MEMORY_POOL_IMPLEMENATION(C2DPoint)
 
 
-void* C2DPoint::operator new(size_t)
-{
-	return ::new C2DPoint;
- }
-
-
-void C2DPoint::operator delete(void* p)
-{
-	::delete p;
-}
-
-
-void* C2DPoint::operator new(size_t, const char*,int)
-{
-	return ::new C2DPoint;
-}
+//void* C2DPoint::operator new(size_t)
+//{
+//	return ::new C2DPoint;
+// }
+//
+//
+//void C2DPoint::operator delete(void* p)
+//{
+//	::delete p;
+//}
+//
+//
+//void* C2DPoint::operator new(size_t, const char*,int)
+//{
+//	return ::new C2DPoint;
+//}
 
 
 /**--------------------------------------------------------------------------<BR>

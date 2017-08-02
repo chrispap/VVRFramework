@@ -1,6 +1,6 @@
 /**--------------------------------------------------------------------------<BR>
 \file MemoryPool.h
-\brief Declaration file for the CMemoryPool class.
+brief Declaration file for the CMemoryPool class.
 
 Declaration file for the CMemoryPool class which allocates large chuncks on the
 heap to speed things up.
@@ -12,27 +12,39 @@ heap to speed things up.
 #include <vector>
 #include <cstdio>
 
-#define _MEMORY_POOL_DECLARATION_PURE	virtual void* operator new(unsigned int) = 0;\
-										virtual void* operator new(unsigned int, const char*,int) = 0;\
-										virtual void operator delete(void* p) = 0;
+#if 0
+#define _MEMORY_POOL_DECLARATION_PURE	                                                \
+    virtual void* operator new(unsigned int) = 0;                                       \
+    virtual void* operator new(unsigned int, const char*,int) = 0;                      \
+    virtual void operator delete(void* p) = 0;                                          \
 
-#define _MEMORY_POOL_DECLARATION void* operator new(size_t);\
-                                 void* operator new(size_t, const char*,int);\
-								 void operator delete(void* p);
+#define _MEMORY_POOL_DECLARATION                                                        \
+    void* operator new(size_t);                                                         \
+    void* operator new(size_t, const char*,int);                                        \
+    void operator delete(void* p);                                                      \
 
-#define _MEMORY_POOL_IMPLEMENATION(_TYPE) void* _TYPE::operator new(size_t) \
-											{return CMemoryPool<_TYPE>::Allocate();} \
-										  void _TYPE::operator delete(void* p) \
-											{CMemoryPool<_TYPE>::Deallocate(p);} \
-                                          void* _TYPE::operator new(size_t, const char*,int) \
-											{return CMemoryPool<_TYPE>::Allocate();}
+#define _MEMORY_POOL_IMPLEMENATION(_TYPE)                                               \
+    void* _TYPE::operator new(size_t)                                                   \
+    {return CMemoryPool<_TYPE>::Allocate();}                                            \
+    void _TYPE::operator delete(void* p)                                                \
+    {CMemoryPool<_TYPE>::Deallocate(p);}                                                \
+    void* _TYPE::operator new(size_t, const char*,int)                                  \
+    {return CMemoryPool<_TYPE>::Allocate();}                                            \
 
-#define _MEMORY_SIMPLE_IMPLEMENATION(_TYPE) void* _TYPE::operator new(size_t) \
-											{return ::new _TYPE;} \
-										  void _TYPE::operator delete(void* p) \
-											{::delete p;} \
-                                          void* _TYPE::operator new(size_t, const char*,int) \
-											{return ::new _TYPE;}
+#define _MEMORY_SIMPLE_IMPLEMENATION(_TYPE)                                             \
+    void* _TYPE::operator new(size_t)                                                   \
+    {return ::new _TYPE;}                                                               \
+    void _TYPE::operator delete(void* p)                                                \
+    {::delete p;}                                                                       \
+    void* _TYPE::operator new(size_t, const char*,int)                                  \
+    {return ::new _TYPE;}                                                               \
+
+#else
+#define _MEMORY_POOL_DECLARATION_PURE	                                              
+#define _MEMORY_POOL_DECLARATION                                                      
+#define _MEMORY_POOL_IMPLEMENATION(_TYPE)                                             
+#define _MEMORY_SIMPLE_IMPLEMENATION(_TYPE)                                           
+#endif
 
 
 #define _BLOCK_SIZE 1000 // = 10kb / byte
@@ -136,6 +148,7 @@ void* CMemoryPool<TYPE>::Allocate(void)
 
 	return m_spInstance->PAllocate();
 }
+
 
 template<class TYPE>
 /**--------------------------------------------------------------------------<BR>

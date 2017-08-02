@@ -203,14 +203,7 @@ bool MoldingScene::isFreeToMove(C2DVector &dv)
         float y = side.GetMidPoint().y;
         float r = side.GetLength() * 0.45;
         vvr::Colour col;
-        if (poly.Crosses(side) || poly.Contains(side))
-        {
-            col = vvr::red;
-        }
-        else
-        {
-            col = vvr::green;
-        }
+        col = (poly.Crosses(side) || poly.Contains(side)) ? vvr::red : vvr::green;
         float dy = p2.y - p1.y;
         float dx = p2.x - p1.x;
         float rad_from = ::atan2(dy, dx);

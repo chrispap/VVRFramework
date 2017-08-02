@@ -15,43 +15,11 @@
 
 using math::vec;
 
-template <typename Dragger>
-struct Picker2D
-{
-    void mousePressed(int x, int y, int modif)
-    {
-        vvr::Drawable *drw = nullptr;
-        dragger.grab(drw, x, y);
-    }
-
-    void mouseMoved(int x, int y, int modif)
-    {
-        dragger.drag(drw, x, y);
-    }
-
-    void mouseReleased(int x, int y, int modif)
-    {
-        dragger.release(drw, x, y);
-    }
-
-    Picker2D(Dragger &dragger) 
-        : dragger(dragger)
-        , drw(nullptr)
-    {
-
-    }
-
-private:
-    Dragger &dragger;
-    vvr::Drawable* drw;
-    vec pickpos;
-    vec currpos;
-};
-
 tavli::Scene::Scene()
 {
     m_bg_col = vvr::Colour("3d2001");
     mBoard = new Board();
+    mPicker = new vvr::MousePicker2D<vvr::Dragger2D>(mBoard->canvas, mDragger);
 }
 
 void tavli::Scene::reset()
@@ -80,17 +48,17 @@ void tavli::Scene::draw()
 
 void tavli::Scene::mousePressed(int x, int y, int modif)
 {
-    vvr::Scene::mousePressed(x, y, modif);
+    mPicker->mousePressed(x, y, modif);
 }
 
 void tavli::Scene::mouseMoved(int x, int y, int modif)
 {
-    vvr::Scene::mouseMoved(x, y, modif);
+    mPicker->mouseMoved(x, y, modif);
 }
 
 void tavli::Scene::mouseReleased(int x, int y, int modif)
 {
-    vvr::Scene::mouseReleased(x, y, modif);
+    mPicker->mouseReleased(x, y, modif);
 }
 
 void tavli::Scene::keyEvent(unsigned char key, bool up, int modif)
@@ -115,10 +83,10 @@ const char* tavli::Scene::getName() const
 
 void tavli::Piece::draw() const
 {
-    cir.draw();
-    vvr::Circle2D c(cir);
+    vvr::Circle2D::draw();
+    vvr::Circle2D c(*this);
     c.SetRadius(c.GetRadius() * 0.70);
-    c.colour = vvr::darkRed;
+    c.colour.darker();
     c.draw();
 }
 
@@ -149,8 +117,8 @@ tavli::Board::Board()
     for (size_t i = 0; i < pieces.size(); ++i) 
     {
         canvas.add(pieces[i] = new Piece());
-        pieces[i]->cir.filled = true;
-        pieces[i]->cir.colour = vvr::Colour(0x95, 0, 0);
+        pieces[i]->filled = true;
+        pieces[i]->colour = vvr::Colour(0x95, 0, 0);
     }
 }
 
@@ -181,7 +149,7 @@ void tavli::Board::resize(float width, float height)
         size_t regrow = i / 6;
         x = pdiam + pdiam * regcol;
         y = -h / 2 + prad + regrow * pdiam;
-        pieces[i]->cir.set(x, y, pdiam * 0.48);
+        pieces[i]->set(C2DCircle({ x, y }, pdiam * 0.48));
     }
 }
 

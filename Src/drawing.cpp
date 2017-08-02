@@ -105,20 +105,21 @@ void vvr::Triangle2D::drawShape() const
 
 void vvr::Circle2D::drawShape() const
 {
-    assert(rad_from < rad_to);
+    assert(range_from < range_to);
 
     unsigned const numOfSegments = 60;
-    const float cx = GetCentre().x;
-    const float cy = GetCentre().y;
-    const float cr = GetRadius();
+    const real_t cx = GetCentre().x;
+    const real_t cy = GetCentre().y;
+    const real_t cr = GetRadius();
+    real_t x, y;
 
     glLineWidth(LineWidth);
+
     glBegin(filled ? GL_POLYGON : (closed_loop ? GL_LINE_LOOP : GL_LINE_STRIP));
-    double d_th = (rad_to - rad_from) / numOfSegments;
-    for (double theta = rad_from; theta <= rad_to; theta += d_th) {
-        float x, y;
+    real_t d_th = (range_to - range_from) / numOfSegments;
+    for (real_t theta = range_from; theta <= range_to; theta += d_th) {
         math::SinCos(theta, y, x);
-        x *= cr;
+        x *= cr; 
         y *= cr;
         glVertex2f(cx + x, cy + y);
     }

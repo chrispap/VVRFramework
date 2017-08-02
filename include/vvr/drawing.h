@@ -52,9 +52,9 @@ namespace vvr {
 
         void lighther()
         {
-            r = std::max((int)(1.1 * r), 0xFF);
-            g = std::max((int)(1.1 * g), 0xFF);
-            b = std::max((int)(1.1 * b), 0xFF);
+            r = std::min((int)(1.2f * r), 0xFF);
+            g = std::min((int)(1.2f * g), 0xFF);
+            b = std::min((int)(1.2f * b), 0xFF);
         }
 
         void darker()
@@ -78,7 +78,7 @@ namespace vvr {
     {
         virtual ~Drawable() { };
         virtual void draw() const = 0;
-        virtual float pickdist(int x, int y) const { return -1.0f; }
+        virtual real_t pickdist(int x, int y) const { return -1.0f; }
         void drawif() { if (visible) draw(); }
         bool isVisible() { return visible; }
         bool setVisibility(bool viz) { visible = viz; return visible; }
@@ -202,17 +202,23 @@ namespace vvr {
 
         void setRange(real_t from, real_t to) 
         { 
-            rad_from = from; 
-            rad_to = to; 
+            range_from = from; 
+            range_to = to; 
         }
 
-        void setClosedLoop(bool Closed_loop) 
+        void setClosedLoop(bool closed) 
         {
-            closed_loop = Closed_loop; 
+            closed_loop = closed; 
         }
 
-        real_t rad_from;
-        real_t rad_to;
+        real_t pickdist(int x, int y) const override
+        {
+            real_t d = GetCentre().Distance(C2DPoint(x,y));
+            return d <= GetRadius() ? d : -1.0f;
+        }
+
+        real_t range_from;  // in radians
+        real_t range_to;    // in radians
         bool closed_loop;
 
     private:
@@ -220,8 +226,8 @@ namespace vvr {
 
         void setup()
         {
-            rad_from = 0.0f; 
-            rad_to = math::pi * 2.0f;
+            range_from = 0.0f; 
+            range_to = math::pi * 2.0f;
             closed_loop = true;
         }
     };
