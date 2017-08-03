@@ -10,16 +10,30 @@ using math::vec;
 namespace tavli
 {
 
+    class Region;
+    class Board;
+
     struct Piece : public vvr::Circle2D
     {
+        Piece(Board* board) : board(board) {}
         void draw() const override;
         void drop();
+        Region* region;
+        Board* board;
     };
 
     struct Region : public vvr::Drawable
     {
+        Region(int regcol) : regcol(regcol) {}
         void draw() const override;
+        void addPiece(Piece *piece);
+        void removePiece(Piece *piece);
+        void resize();
+        void resize(float diam, float boardheight);
         vvr::Triangle2D tri;
+        std::vector<Piece*> pieces;
+        int regcol;
+        float d, h, x;
     };
 
     struct Board : public vvr::Drawable
@@ -27,17 +41,15 @@ namespace tavli
         Board();
         void draw() const override;
         void resize(const float width, const float height);
-        std::vector<Piece*> pieces;
-        std::vector<Region*> regions;
+        vvr::Canvas& getCanvas() { return canvas; }
         std::vector<vvr::LineSeg2D*> bounds;
         std::vector<vvr::Triangle2D*> wood;
+        std::vector<Region*> regions;
         vvr::Canvas canvas;
-        float w;
-        float h;
-        float d;
-        float r;
-    };
+        float w, h, d;
 
+        friend class Piece;
+    };
 
     struct PieceDragger2D
     {

@@ -21,7 +21,7 @@ TavliScene::TavliScene()
 {
     m_bg_col = vvr::Colour("3d2001");
     mBoard = new tavli::Board();
-    mPicker = new PiecePicker(mBoard->canvas, new tavli::PieceDragger2D);
+    mPicker = new PiecePicker(mBoard->getCanvas(), new tavli::PieceDragger2D);
 }
 
 TavliScene::~TavliScene()
@@ -79,47 +79,105 @@ void tavli::Piece::draw() const
 
 void tavli::Piece::drop()
 {
+    float mindist = 222222;
+    Region* oldreg = region;
+    Region* newreg = nullptr;
 
+    for (auto &reg : board->regions) {
+        float dist = fabs(reg->x - GetCentre().x);
+        if (dist < mindist) {
+            newreg = reg;
+            mindist = dist;
+        }
+    }
+
+    oldreg->removePiece(this);
+    newreg->addPiece(this);
+    newreg->resize();
+    oldreg->resize();
 }
 
 void tavli::Region::draw() const
 {
+    float x = d * (regcol + 1);
+    float ytop = 0;
+    float ybot = -h / 2;
+    float r = d / 2;
 
+    vvr::Triangle2D t(x, ytop, x-r, ybot, x+r, ybot, vvr::darkGreen);
+    t.filled = true;
+    t.draw();
+}
+
+void tavli::Region::addPiece(Piece *piece)
+{
+    pieces.push_back(piece);
+    piece->region = this;
+}
+
+void tavli::Region::removePiece(Piece *piece)
+{
+    pieces.erase(std::remove(pieces.begin(), pieces.end(), piece), pieces.end());
+    piece->region = nullptr;
+}
+
+void tavli::Region::resize()
+{
+    float r = d / 2;
+
+    for (size_t regrow = 0; regrow < pieces.size(); ++regrow)
+    {
+        float y = -h / 2 + r + regrow * d;
+        pieces[regrow]->set(C2DCircle({ x, y }, d * 0.50));
+    }
+}
+
+void tavli::Region::resize(float diam, float boardheight)
+{
+    d = diam;
+    h = boardheight;
+    x = d * (regcol + 1);
+    resize();
 }
 
 tavli::Board::Board()
 {
     /* Bounds */
-    bounds.resize(4);
-    for (size_t i = 0; i < 4; ++i) 
-    {
-        canvas.add(bounds[i] = new vvr::LineSeg2D());
+    for (size_t i = 0; i < 4; ++i) {
+        bounds.push_back(new vvr::LineSeg2D());
+        canvas.add(bounds.back());
     }
 
     /* The wood in the middle */
-    wood.resize(2);
-    for (size_t i = 0; i < 2; ++i) 
-    {
-        canvas.add(wood[i] = new vvr::Triangle2D());
-        wood[i]->filled = true;
+    for (size_t i = 0; i < 2; ++i) {
+        wood.push_back(new vvr::Triangle2D());
+        wood.back()->filled = true;
+        canvas.add(wood.back());
+    }
+
+    /* Regions */
+    for (size_t i = 0; i < 6; ++i) {
+        regions.push_back(new Region(i));
+        canvas.add(regions.back());
     }
 
     /* Pieces */
-    pieces.resize(15);
-    for (size_t i = 0; i < pieces.size(); ++i) 
-    {
-        canvas.add(pieces[i] = new Piece());
-        pieces[i]->filled = true;
-        pieces[i]->colour = vvr::Colour(0x95, 0, 0);
+    for (size_t i = 0; i < 15; ++i) {
+        Region* reg = regions[i % 6];
+        tavli::Piece* piece = new Piece(this);
+        piece->filled = true;
+        piece->colour = vvr::Colour(0x95, 0, 0);
+        canvas.add(piece);
+        reg->addPiece(piece);
     }
 }
 
-void tavli::Board::resize(const float w, const float h)
+void tavli::Board::resize(const float width, const float height)
 {
-    this->w = w;
-    this->h = h;
-    this->d = w / 13;
-    this->r = d / 2;
+    w = width;
+    h = height;
+    d = width / 13;
+    float r = d / 2;
 
     /* Passive drawing. Board terrain. */
     bounds[0]->set(-w / 2, -h / 2, -w / 2, +h / 2);
@@ -130,14 +188,8 @@ void tavli::Board::resize(const float w, const float h)
     wood[1]->set(-r, -h / 2, +r, h / 2, r, -h / 2);
 
     /* Pieces */
-    for (size_t i = 0; i < pieces.size(); ++i) 
-    {
-        float x, y;
-        size_t regcol = i % 6;
-        size_t regrow = i / 6;
-        x = d * (regcol + 1);
-        y = -h / 2 + r + regrow * d;
-        pieces[i]->set(C2DCircle({ x, y }, d * 0.48));
+    for (auto &reg : regions) {
+        reg->resize(d, h);
     }
 }
 
