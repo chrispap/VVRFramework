@@ -63,7 +63,7 @@ void vvr::Shape::draw() const
 
 /*--- [Shape] Drawing 2D --------------------------------------------------------------*/
 
-void vvr::Point2D::drawShape() const 
+void vvr::Point2D::drawShape() const
 {
     glPointSize(PointSize);
     glEnable(GL_POINT_SMOOTH);
@@ -166,10 +166,61 @@ void vvr::Triangle3D::drawShape() const
     glEnd();
 }
 
+void vvr::Cylinder3D::drawShape() const
+{
+    auto m = math::float4x4::RotateFromTo({ 0,0,1 }, normal);
+    m.SetTranslatePart(basecenter);
+    m.Transpose();
+ 
+    glPushMatrix();
+    glMultMatrixf(m.ptr());
+    
+    /* Base */
+    glBegin(GL_POLYGON);
+    vec normalinv(-normal);
+    glNormal3fv(normalinv.ptr());
+    for (int i = 0; i <= 24; ++i) {
+        real_t x, y;
+        math::SinCos(math::pi * 2 / 24 * i, y, x);
+        glVertex3f(x*radius, y*radius, 0);
+    }
+    glEnd();
+
+    /* Sides */
+    if (sides)
+    {
+        glBegin(GL_TRIANGLE_STRIP);
+        for (int i = 0; i <= 24; ++i) {
+            real_t x, y;
+            math::SinCos(math::pi * 2 / 24 * i, y, x);
+            glNormal3f(x, y, 0);
+            glVertex3f(x*radius, y*radius, 0);
+            glVertex3f(x*radius, y*radius, -height);
+            math::SinCos(math::pi * 2 / 24 * (i + 1), y, x);
+            glNormal3f(x, y, 0);
+            glVertex3f(x*radius, y*radius, 0);
+            glVertex3f(x*radius, y*radius, -height);
+        }
+        glEnd();
+    }
+
+    /* Top */
+    glNormal3fv(normal.ptr());
+    glBegin(GL_POLYGON);
+    for (int i = 0; i <= 24; ++i) {
+        real_t x, y;
+        math::SinCos(math::pi * 2 / 24 * i, y, x);
+        glVertex3f(x*radius, y*radius, -height);
+    }
+    glEnd();
+
+    glPopMatrix();
+}
+
 void vvr::Sphere3D::drawShape() const
 {
     glPushMatrix();
-    glTranslated(pos.x, pos.y, pos.z);
+    glTranslatef(pos.x, pos.y, pos.z);
     glScalef(r, r, r);
     drawSphere(r, 12, 15);
     glPopMatrix();

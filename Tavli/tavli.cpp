@@ -17,21 +17,37 @@ using math::vec;
 
 /*--- [Tavli scene] -------------------------------------------------------------------*/
 
-TavliScene::TavliScene()
+TavliScene::TavliScene(vvr::Colour col1, vvr::Colour col2)
 {
+    vvr_setmemb(col1);
+    vvr_setmemb(col2);
     m_bg_col = vvr::Colour("3d2001");
-    mBoard = new tavli::Board();
-    mPicker = new PiecePicker(mBoard->getCanvas(), new tavli::PieceDragger2D);
+    m_perspective_proj = true;
+    mBoard = nullptr;    
+    mPicker = nullptr;
+    reset();
 }
 
 TavliScene::~TavliScene()
 {
     delete mPicker;
+    delete mBoard;
 }
 
 void TavliScene::reset()
 {
     vvr::Scene::reset();
+    delete mPicker;
+    delete mBoard;
+    mBoard = new tavli::Board(col1, col2);
+    mPicker = new tavli::PiecePicker(mBoard->getCanvas(), new tavli::PieceDragger);
+
+    auto pos = getFrustum().Pos();
+    pos.y -= 80;
+    pos.z -= 20;
+    setCameraPos(pos);
+
+    resize();
 }
 
 void TavliScene::resize()
@@ -42,15 +58,14 @@ void TavliScene::resize()
         mAxes->hide();
     }
 
-    mBoard->resize(0.88*getViewportWidth(), 0.88*getViewportHeight());
+    float w = 0.8 * getSceneWidth();
+    mBoard->resize(1.0 * w, 0.8 * w);
 }
 
 void TavliScene::draw()
 {
-    enterPixelMode();
     mBoard->draw();
     mAxes->drawif();
-    exitPixelMode();
 }
 
 void TavliScene::keyEvent(unsigned char key, bool up, int modif)
@@ -66,25 +81,27 @@ void TavliScene::keyEvent(unsigned char key, bool up, int modif)
     }
 }
 
-/*--- [Tavli entities] ----------------------------------------------------------------*/
+/*--- [Tavli Piece] -------------------------------------------------------------------*/
+
+tavli::Piece::Piece(Board* board, vvr::Colour col) : vvr::Cylinder3D(col), board(board)
+{
+    normal.Set(0, 0, 1);
+}
 
 void tavli::Piece::draw() const
 {
-    vvr::Circle2D::draw();
-    vvr::Circle2D c(*this);
-    c.SetRadius(c.GetRadius() * 0.70);
-    c.colour.darker();
-    c.draw();
+    vvr::Cylinder3D::draw();
 }
 
 void tavli::Piece::drop()
 {
-    float mindist = 222222;
+    float mindist = std::numeric_limits<float>::max();
     Region* oldreg = region;
     Region* newreg = nullptr;
 
     for (auto &reg : board->regions) {
-        float dist = fabs(reg->x - GetCentre().x);
+        math::LineSegment l(reg->base, reg->top);
+        float dist = l.Distance(basecenter);
         if (dist < mindist) {
             newreg = reg;
             mindist = dist;
@@ -93,20 +110,15 @@ void tavli::Piece::drop()
 
     oldreg->removePiece(this);
     newreg->addPiece(this);
-    newreg->resize();
-    oldreg->resize();
+    newreg->arrangePieces();
+    oldreg->arrangePieces();
 }
 
-void tavli::Region::draw() const
-{
-    float x = d * (regcol + 1);
-    float ytop = 0;
-    float ybot = -h / 2;
-    float r = d / 2;
+/*--- [Tavli Region] ------------------------------------------------------------------*/
 
-    vvr::Triangle2D t(x, ytop, x-r, ybot, x+r, ybot, vvr::darkGreen);
-    t.filled = true;
-    t.draw();
+tavli::Region::Region(int regcol) : vvr::Triangle3D(vvr::darkGreen), regcol(regcol) 
+{
+
 }
 
 void tavli::Region::addPiece(Piece *piece)
@@ -121,33 +133,71 @@ void tavli::Region::removePiece(Piece *piece)
     piece->region = nullptr;
 }
 
-void tavli::Region::resize()
+void tavli::Region::resize(float piecediam, float boardheight)
 {
-    float r = d / 2;
+    vvr_setmemb(piecediam);
+    vvr_setmemb(boardheight);
+    base.z = 0.001;
+    float r = piecediam / 2;
+    float ytop;
 
-    for (size_t regrow = 0; regrow < pieces.size(); ++regrow)
+    switch (regcol / 6)
     {
-        float y = -h / 2 + r + regrow * d;
-        pieces[regrow]->set(C2DCircle({ x, y }, d * 0.50));
+    case 0:
+        base.x = piecediam * (6 - regcol);
+        base.y = -boardheight / 2;
+        ytop = -boardheight*0.05;
+        updir.Set(0, 1, 0);
+        break;
+    case 1:
+        base.x = -piecediam * (regcol - 5);
+        base.y = -boardheight / 2;
+        ytop = -boardheight*0.05;
+        updir.Set(0, 1, 0);
+        break;
+    case 2:
+        base.x = -piecediam * (18 - regcol);
+        base.y = boardheight / 2;
+        ytop = boardheight*0.05;
+        updir.Set(0, -1, 0);
+        break;
+    case 3:
+        base.x = piecediam * (regcol - 17);
+        base.y = boardheight / 2;
+        ytop = boardheight*0.05;
+        updir.Set(0, -1, 0);
+        break;
+    default:
+        assert(false);
+    }
+
+    top = base;
+    top.y = ytop;
+
+    a.Set(base.x, ytop, 0);
+    b.Set(base.x - r, base.y, 0);
+    c.Set(base.x + r, base.y, 0);
+    if (regcol / 12) std::swap(a, b); // Fix CCW of opposite sides.
+
+    arrangePieces();
+}
+
+void tavli::Region::arrangePieces()
+{
+    float r = piecediam / 2;
+
+    for (size_t i = 0; i < pieces.size(); ++i)
+    {
+        pieces[i]->basecenter = base + (updir*(piecediam*i+r));
+        pieces[i]->radius = r;
+        pieces[i]->height = r / 4;
     }
 }
 
-void tavli::Region::resize(float diam, float boardheight)
-{
-    d = diam;
-    h = boardheight;
-    x = d * (regcol + 1);
-    resize();
-}
+/*--- [Tavli Board] -------------------------------------------------------------------*/
 
-tavli::Board::Board()
+tavli::Board::Board(vvr::Colour col1, vvr::Colour col2)
 {
-    /* Bounds */
-    for (size_t i = 0; i < 4; ++i) {
-        bounds.push_back(new vvr::LineSeg2D());
-        canvas.add(bounds.back());
-    }
-
     /* The wood in the middle */
     for (size_t i = 0; i < 2; ++i) {
         wood.push_back(new vvr::Triangle2D());
@@ -156,30 +206,51 @@ tavli::Board::Board()
     }
 
     /* Regions */
-    for (size_t i = 0; i < 6; ++i) {
+    for (size_t i = 0; i < 24; ++i) {
         regions.push_back(new Region(i));
         canvas.add(regions.back());
     }
 
     /* Pieces */
+    int positions_plakwto[24]
+    {
+        23,23,
+        12,12,12,12,12,
+        7,7,7,
+        5,5,5,5,5
+    };
+
+    /* Player 1 */
     for (size_t i = 0; i < 15; ++i) {
-        Region* reg = regions[i % 6];
-        tavli::Piece* piece = new Piece(this);
-        piece->filled = true;
-        piece->colour = vvr::Colour(0x95, 0, 0);
-        canvas.add(piece);
+        Region* reg = regions[positions_plakwto[i]];
+        tavli::Piece* piece = new Piece(this, col1);
         reg->addPiece(piece);
+        canvas.add(piece);
+    }
+
+    /* Player 2 */
+    for (size_t i = 0; i < 15; ++i) {
+        Region* reg = regions[23-positions_plakwto[i]];
+        tavli::Piece* piece = new Piece(this, col2);
+        reg->addPiece(piece);
+        canvas.add(piece);
+    }
+
+    /* Bounds */
+    for (size_t i = 0; i < 4; ++i) {
+        bounds.push_back(new vvr::LineSeg2D());
+        canvas.add(bounds.back());
     }
 }
 
-void tavli::Board::resize(const float width, const float height)
+void tavli::Board::resize(const float w, const float h)
 {
-    w = width;
-    h = height;
-    d = width / 13;
+    width = w;
+    height = h;
+    float d = width / 13;
     float r = d / 2;
 
-    /* Passive drawing. Board terrain. */
+    /* Reszie board terrain. (Passive drawing) */
     bounds[0]->set(-w / 2, -h / 2, -w / 2, +h / 2);
     bounds[1]->set(-w / 2, +h / 2, +w / 2, +h / 2);
     bounds[2]->set(+w / 2, +h / 2, +w / 2, -h / 2);
@@ -187,7 +258,7 @@ void tavli::Board::resize(const float width, const float height)
     wood[0]->set(-r, -h / 2, -r, h / 2, r, +h / 2);
     wood[1]->set(-r, -h / 2, +r, h / 2, r, -h / 2);
 
-    /* Pieces */
+    /* Regions. (Will also resize their pieces) */
     for (auto &reg : regions) {
         reg->resize(d, h);
     }
@@ -195,8 +266,10 @@ void tavli::Board::resize(const float width, const float height)
 
 void tavli::Board::draw() const
 {
-    vvr::Shape::LineWidth = 8;
+    auto lw(vvr::Shape::LineWidth);
+    vvr::Shape::LineWidth = 12;
     canvas.draw();
+    vvr::Shape::LineWidth = lw;
 }
 
 /*-------------------------------------------------------------------------------------*/
@@ -205,7 +278,15 @@ int main(int argc, char* argv[])
 {
     try
     {
-        return vvr::mainLoop(argc, argv, new TavliScene());
+        vvr::Colour col1("950000");
+        vvr::Colour col2("DDDDDD");
+        
+        if (argc == 3) {
+            col1 = vvr::Colour(argv[1]);
+            col2 = vvr::Colour(argv[2]);
+        }
+
+        return vvr::mainLoop(argc, argv, new TavliScene(col1, col2));
     }
     catch (std::string exc)
     {

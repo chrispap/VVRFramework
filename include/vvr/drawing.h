@@ -79,6 +79,7 @@ namespace vvr {
         virtual ~Drawable() { };
         virtual void draw() const = 0;
         virtual real_t pickdist(int x, int y) const { return -1.0f; }
+        virtual real_t pickdist(const math::Ray&) const { return -1.0f; }
         void drawif() { if (visible) draw(); }
         bool isVisible() { return visible; }
         bool setVisibility(bool viz) { visible = viz; return visible; }
@@ -356,6 +357,50 @@ namespace vvr {
         void setup() override
         {
             setColourPerVertex(colour, colour, colour);
+        }
+    };
+
+    struct vvrframework_API Cylinder3D : public Shape
+    {
+        Cylinder3D(Colour col=Colour())
+            : Shape(col)
+        {
+            setup();
+        }
+
+        Cylinder3D(const vec& org, const vec& dir, real_t r, real_t h, Colour col)
+            : Shape(col)
+            , basecenter(org)
+            , normal(dir.Normalized())
+            , radius(r)
+            , height(h)
+        {
+            setup();
+        }
+
+        math::Circle diskBase() const
+        {
+            return math::Circle(basecenter, normal, radius);
+        }
+        
+        math::Circle diskTop() const
+        {
+            return math::Circle(basecenter + normal*height, normal, radius);
+        }
+
+        vec basecenter;
+        vec normal;
+        real_t radius;
+        real_t height;
+        bool sides;
+
+    private:
+        void drawShape() const override;
+
+        void setup()
+        {
+            sides = true;
+            filled = true;
         }
     };
 

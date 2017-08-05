@@ -7,92 +7,8 @@
 
 using math::vec;
 
-namespace tavli
-{
-
-    class Region;
-    class Board;
-
-    struct Piece : public vvr::Circle2D
-    {
-        Piece(Board* board) : board(board) {}
-        void draw() const override;
-        void drop();
-        Region* region;
-        Board* board;
-    };
-
-    struct Region : public vvr::Drawable
-    {
-        Region(int regcol) : regcol(regcol) {}
-        void draw() const override;
-        void addPiece(Piece *piece);
-        void removePiece(Piece *piece);
-        void resize();
-        void resize(float diam, float boardheight);
-        vvr::Triangle2D tri;
-        std::vector<Piece*> pieces;
-        int regcol;
-        float d, h, x;
-    };
-
-    struct Board : public vvr::Drawable
-    {
-        Board();
-        void draw() const override;
-        void resize(const float width, const float height);
-        vvr::Canvas& getCanvas() { return canvas; }
-        std::vector<vvr::LineSeg2D*> bounds;
-        std::vector<vvr::Triangle2D*> wood;
-        std::vector<Region*> regions;
-        vvr::Canvas canvas;
-        float w, h, d;
-
-        friend class Piece;
-    };
-
-    struct PieceDragger2D
-    {
-        bool grab(vvr::Drawable* drw)
-        {
-            if (auto sh = dynamic_cast<tavli::Piece*>(drw))
-            {
-                col_org = sh->colour;
-                sh->colour.lighther();
-                sh->colour.lighther();
-                vvr_msg("Grabbed");
-                return true;
-            }
-
-            vvr_msg("Grab rejected");
-            return false;
-        }
-
-        void drag(vvr::Drawable* drw, int x, int y)
-        {
-            if (auto c = dynamic_cast<tavli::Piece*>(drw)) {
-                c->Move(C2DPoint(x, y));
-            }
-        }
-
-        void drop(vvr::Drawable* drw)
-        {
-            if (auto piece = dynamic_cast<tavli::Piece*>(drw)) {
-                piece->colour = col_org;
-                piece->drop();
-            }
-            vvr_msg("Dropped");
-        }
-
-    private:
-        vvr::Colour col_org;
-    };
-
-}
-
 namespace vvr
 {
-
     template <typename Dragger2D>
     struct MousePicker2D
     {
@@ -107,7 +23,7 @@ namespace vvr
             {
                 real_t pd = drw->pickdist(x, y);
 
-                if (pd >= 0.0f && pd < dmin)
+                if (pd >= 0 && pd < dmin)
                 {
                     drw_nearest = drw;
                     dmin = pd;
@@ -158,40 +74,204 @@ namespace vvr
         Mousepos mousepos;
     };
 
+    template <typename Dragger3D>
+    struct MousePicker3D
+    {
+        void mousePressed(math::Ray ray, int modif)
+        {
+            Drawable *drw_nearest = nullptr;
+            real_t dmin = std::numeric_limits<real_t>::max();
+
+            for (auto drw : canvas.getDrawables()) {
+                real_t pickdist = drw->pickdist(ray);
+                if (pickdist >= 0 && pickdist < dmin) {
+                    drw_nearest = drw;
+                    dmin = pickdist;
+                }
+            }
+
+            if (drw_nearest) {
+                mouseray = ray;
+                drw = drw_nearest;
+                if (!dragger->grab(drw)) {
+                    drw = nullptr;
+                }
+            }
+        }
+
+        void mouseMoved(math::Ray ray, int modif)
+        {
+            if (!drw) return;
+            dragger->drag(drw, mouseray, ray);
+            mouseray = ray;
+        }
+
+        void mouseReleased(math::Ray ray, int modif)
+        {
+            if (!drw) return;
+            dragger->drag(drw, mouseray, ray);
+            dragger->drop(drw);
+            mouseray = ray;
+            drw = nullptr;
+        }
+
+        MousePicker3D(Canvas &canvas, Dragger3D *dragger)
+            : drw(nullptr)
+            , canvas(canvas)
+            , dragger(dragger)
+        { }
+
+        ~MousePicker3D()
+        {
+            delete dragger;
+        }
+
+    private:
+        Dragger3D *dragger;
+        Drawable* drw;
+        Canvas &canvas;
+        math::Ray mouseray;
+    };
+}
+
+namespace tavli
+{
+    class Piece;
+    class Region;
+    class Board;
+
+    struct Piece : public vvr::Cylinder3D
+    {
+        Piece(Board* board, vvr::Colour col);
+        void draw() const override;
+        vvr::real_t pickdist(const math::Ray& ray) const override
+        {
+            math::Circle c(diskTop());
+            float d;
+            bool intersectsPlane = ray.Intersects(c.ContainingPlane(), &d);
+            if (!intersectsPlane) return -1;
+            float rd = ray.GetPoint(d).Distance(c.pos);
+            if (rd > radius) return -1;
+            else return rd;
+        }
+        void drop();
+        Region* region;
+        Board* board;
+    };
+
+    struct Region : public vvr::Triangle3D
+    {
+        Region(int regcol);
+        void addPiece(Piece *piece);
+        void removePiece(Piece *piece);
+        void resize(float diam, float boardheight);
+        void arrangePieces();
+        std::vector<Piece*> pieces;
+        vec base;
+        vec top;
+        vec updir;
+        float piecediam;
+        float boardheight;
+        int regcol;
+    };
+
+    struct Board : public vvr::Drawable
+    {
+        Board(vvr::Colour col1, vvr::Colour col2);
+        void draw() const override;
+        void resize(const float width, const float height);
+        vvr::Canvas& getCanvas() { return canvas; }
+        std::vector<vvr::LineSeg2D*> bounds;
+        std::vector<vvr::Triangle2D*> wood;
+        std::vector<Region*> regions;
+        vvr::Canvas canvas;
+        float width;
+        float height;
+
+        friend class Piece;
+    };
+
+    struct PieceDragger
+    {
+        bool grab(vvr::Drawable* drw)
+        {
+            if (auto sh = dynamic_cast<tavli::Piece*>(drw))
+            {
+                vvr_msg("Grabbed piece");
+                col_org = sh->colour;
+                sh->colour.lighther();
+                sh->colour.lighther();
+                return true;
+            }
+
+            return false;
+        }
+
+        void drag(vvr::Drawable* drw, math::Ray ray0, math::Ray ray1)
+        {
+            if (auto piece = dynamic_cast<tavli::Piece*>(drw)) {
+                float d0, d1;
+                math::Plane boardplane(piece->diskBase().ContainingPlane());
+                boardplane.Intersects(ray0, &d0);
+                boardplane.Intersects(ray1, &d1);
+                vec dv(ray1.GetPoint(d1) - ray0.GetPoint(d0));
+                piece->basecenter += dv;
+            }
+        }
+
+        void drop(vvr::Drawable* drw)
+        {
+            if (auto piece = dynamic_cast<tavli::Piece*>(drw)) {
+                vvr_msg("Dropped piece");
+                piece->colour = col_org;
+                piece->drop();
+            }
+        }
+
+    private:
+        vvr::Colour col_org;
+    };
+
+    typedef vvr::MousePicker2D<PieceDragger> PiecePicker2D;
+    typedef vvr::MousePicker3D<PieceDragger> PiecePicker;
 }
 
 class TavliScene : public vvr::Scene
 {
 public:
-
-    TavliScene();
+    TavliScene(vvr::Colour col1, vvr::Colour col2);
     ~TavliScene();
-    void draw() override;
-    void resize() override;
-    void reset() override;
 
     const char* getName() const {
         return "Tavli Game";
     }
 
+    void draw() override;
+    void resize() override;
+    void reset() override;
+
     void keyEvent(unsigned char key, bool up, int modif);
 
     void mousePressed(int x, int y, int modif) override {
-        mPicker->mousePressed(x, y, modif);
+        if (ctrlDown(modif)) vvr::Scene::mousePressed(x, y, modif);
+        mPicker->mousePressed(unproject(x, y), modif);
     }
+    
     void mouseMoved(int x, int y, int modif) override {
-        mPicker->mouseMoved(x, y, modif);
+        if (ctrlDown(modif)) vvr::Scene::mouseMoved(x, y, modif);
+        mPicker->mouseMoved(unproject(x, y), modif);
     }
+    
     void mouseReleased(int x, int y, int modif) override {
-        mPicker->mouseReleased(x, y, modif);
+        if (ctrlDown(modif)) vvr::Scene::mouseReleased(x, y, modif);
+        mPicker->mouseReleased(unproject(x, y), modif);
     }
-
-    typedef vvr::MousePicker2D<tavli::PieceDragger2D> PiecePicker;
 
 private:
+    vvr::Colour col1, col2;
     vvr::Axes *mAxes;
     tavli::Board *mBoard;
-    PiecePicker *mPicker;
+    tavli::PiecePicker *mPicker;
 };
 
 #endif
