@@ -161,7 +161,7 @@ namespace tavli
 
     struct Region : public vvr::Triangle3D
     {
-        Region(int regcol);
+        Region(int regcol, vvr::Colour colour);
         void addPiece(Piece *piece);
         void removePiece(Piece *piece);
         void resize(float diam, float boardheight);
@@ -177,7 +177,7 @@ namespace tavli
 
     struct Board : public vvr::Drawable
     {
-        Board(vvr::Colour col1, vvr::Colour col2);
+        Board(vvr::Colour colt, vvr::Colour col1, vvr::Colour col2);
         void draw() const override;
         void resize(const float width, const float height);
         vvr::Canvas& getCanvas() { return canvas; }
@@ -191,20 +191,20 @@ namespace tavli
         friend class Piece;
     };
 
-    struct PieceDragger
+    struct PieceDragger3D
     {
         bool grab(vvr::Drawable* drw)
         {
-            if (auto sh = dynamic_cast<tavli::Piece*>(drw))
+            if (auto piece = dynamic_cast<tavli::Piece*>(drw))
             {
                 vvr_msg("Grabbed piece");
-                col_org = sh->colour;
-                sh->colour.lighther();
-                sh->colour.lighther();
+                col_org = piece->colour;
+                base_z_org = piece->basecenter.z;
+                piece->basecenter.z += piece->height * 2;
+                piece->colour.lighther();
+                piece->colour.lighther();
                 return true;
-            }
-
-            return false;
+            } else return false;
         }
 
         void drag(vvr::Drawable* drw, math::Ray ray0, math::Ray ray1)
@@ -224,22 +224,24 @@ namespace tavli
             if (auto piece = dynamic_cast<tavli::Piece*>(drw)) {
                 vvr_msg("Dropped piece");
                 piece->colour = col_org;
+                piece->basecenter.z = base_z_org;
                 piece->drop();
             }
         }
 
     private:
+        float base_z_org;
         vvr::Colour col_org;
     };
 
-    typedef vvr::MousePicker2D<PieceDragger> PiecePicker2D;
-    typedef vvr::MousePicker3D<PieceDragger> PiecePicker;
+    typedef vvr::MousePicker2D<PieceDragger3D> PiecePicker2D;
+    typedef vvr::MousePicker3D<PieceDragger3D> PiecePicker;
 }
 
 class TavliScene : public vvr::Scene
 {
 public:
-    TavliScene(vvr::Colour col1, vvr::Colour col2);
+    TavliScene(vvr::Colour colt, vvr::Colour col1, vvr::Colour col2);
     ~TavliScene();
 
     const char* getName() const {
@@ -268,7 +270,7 @@ public:
     }
 
 private:
-    vvr::Colour col1, col2;
+    vvr::Colour colt, col1, col2;
     vvr::Axes *mAxes;
     tavli::Board *mBoard;
     tavli::PiecePicker *mPicker;

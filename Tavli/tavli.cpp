@@ -17,8 +17,9 @@ using math::vec;
 
 /*--- [Tavli scene] -------------------------------------------------------------------*/
 
-TavliScene::TavliScene(vvr::Colour col1, vvr::Colour col2)
+TavliScene::TavliScene(vvr::Colour colt, vvr::Colour col1, vvr::Colour col2)
 {
+    vvr_setmemb(colt);
     vvr_setmemb(col1);
     vvr_setmemb(col2);
     m_bg_col = vvr::Colour("3d2001");
@@ -39,12 +40,12 @@ void TavliScene::reset()
     vvr::Scene::reset();
     delete mPicker;
     delete mBoard;
-    mBoard = new tavli::Board(col1, col2);
-    mPicker = new tavli::PiecePicker(mBoard->getCanvas(), new tavli::PieceDragger);
+    mBoard = new tavli::Board(colt, col1, col2);
+    mPicker = new tavli::PiecePicker(mBoard->getCanvas(), new tavli::PieceDragger3D);
 
-    auto pos = getFrustum().Pos();
-    pos.y -= 80;
-    pos.z -= 20;
+    vec pos = getFrustum().Pos();
+    pos.y -= 60;
+    pos.z += 20;
     setCameraPos(pos);
 
     resize();
@@ -78,12 +79,22 @@ void TavliScene::keyEvent(unsigned char key, bool up, int modif)
     case 'a': 
         mAxes->toggleVisibility();
         break;
+
+    case '0':
+        vvr::Scene::reset();
+        vec pos = getFrustum().Pos();
+        pos.y -= 60;
+        pos.z += 20;
+        setCameraPos(pos);
+        break;
     }
 }
 
 /*--- [Tavli Piece] -------------------------------------------------------------------*/
 
-tavli::Piece::Piece(Board* board, vvr::Colour col) : vvr::Cylinder3D(col), board(board)
+tavli::Piece::Piece(Board* board, vvr::Colour col) 
+    : vvr::Cylinder3D(col)
+    , board(board)
 {
     normal.Set(0, 0, 1);
 }
@@ -116,7 +127,9 @@ void tavli::Piece::drop()
 
 /*--- [Tavli Region] ------------------------------------------------------------------*/
 
-tavli::Region::Region(int regcol) : vvr::Triangle3D(vvr::darkGreen), regcol(regcol) 
+tavli::Region::Region(int regcol, vvr::Colour colour) 
+    : vvr::Triangle3D(colour)
+    , regcol(regcol) 
 {
 
 }
@@ -196,7 +209,7 @@ void tavli::Region::arrangePieces()
 
 /*--- [Tavli Board] -------------------------------------------------------------------*/
 
-tavli::Board::Board(vvr::Colour col1, vvr::Colour col2)
+tavli::Board::Board(vvr::Colour colt, vvr::Colour col1, vvr::Colour col2)
 {
     /* The wood in the middle */
     for (size_t i = 0; i < 2; ++i) {
@@ -207,7 +220,7 @@ tavli::Board::Board(vvr::Colour col1, vvr::Colour col2)
 
     /* Regions */
     for (size_t i = 0; i < 24; ++i) {
-        regions.push_back(new Region(i));
+        regions.push_back(new Region(i, colt));
         canvas.add(regions.back());
     }
 
@@ -278,15 +291,17 @@ int main(int argc, char* argv[])
 {
     try
     {
+        vvr::Colour colt = vvr::darkGreen;
         vvr::Colour col1("950000");
         vvr::Colour col2("DDDDDD");
         
-        if (argc == 3) {
-            col1 = vvr::Colour(argv[1]);
-            col2 = vvr::Colour(argv[2]);
+        if (argc == 4) {
+            colt = vvr::Colour(argv[1]);
+            col1 = vvr::Colour(argv[2]);
+            col2 = vvr::Colour(argv[3]);
         }
 
-        return vvr::mainLoop(argc, argv, new TavliScene(col1, col2));
+        return vvr::mainLoop(argc, argv, new TavliScene(colt, col1, col2));
     }
     catch (std::string exc)
     {
