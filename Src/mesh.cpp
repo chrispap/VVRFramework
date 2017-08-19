@@ -56,18 +56,14 @@ double vvr::Triangle::planeEquation(const vec &r) const
 
 Mesh::Mesh()
 {
-    cout << "Mesh: Ctor [" << this <<  "]" << endl;
-
     mCCW = false;
-    mTransform.SetIdentity();
+    mMatrix.SetIdentity();
 }
 
 Mesh::Mesh(const string &objFile, const string &texFile, bool ccw)
 {
-    cout << "Mesh: Ctor [" << this << "]" << endl;
-
     mCCW = ccw;
-    mTransform.SetIdentity();
+    mMatrix.SetIdentity();
 
     std::string err;
     std::vector<tinyobj::shape_t> shapes;
@@ -102,12 +98,10 @@ Mesh::Mesh(const Mesh &src)
     : mVertices(src.mVertices)
     , mTriangles(src.mTriangles)
     , mVertexNormals(src.mVertexNormals)
-    , mTransform(src.mTransform)
+    , mMatrix(src.mMatrix)
     , mAABB(src.mAABB)
     , mCCW(src.mCCW)
 {
-    cout << "Mesh: Copy [" << this << "] from [" << &src << "]" << endl;
-
     vector<Triangle>::iterator ti;
     for (ti = mTriangles.begin(); ti != mTriangles.end(); ++ti) {
         ti->vecList = &mVertices;
@@ -116,12 +110,10 @@ Mesh::Mesh(const Mesh &src)
 
 void Mesh::operator=(const Mesh &src)
 {
-    cout << "Mesh: Assigment [" << this << "] from [" << &src << "]" << endl;
-
     mVertices = src.mVertices;
     mTriangles = src.mTriangles;
     mVertexNormals = src.mVertexNormals;
-    mTransform = src.mTransform;
+    mMatrix = src.mMatrix;
     mAABB = src.mAABB;
     mCCW = src.mCCW;
 
@@ -133,7 +125,6 @@ void Mesh::operator=(const Mesh &src)
 
 Mesh::~Mesh()
 {
-    cout << "Mesh: Dtor [" << this << "]" << endl;
 }
 
 void Mesh::exportToObj(const string &filename)
@@ -252,6 +243,13 @@ void Mesh::setBigSize(float size)
     updateTriangleData();
 }
 
+math::AABB Mesh::getAABB() const
+{
+    auto aabb(mAABB); 
+    aabb.TransformAsAABB(mMatrix);
+    return aabb;
+}
+
 void Mesh::cornerAlign()
 {
     vec offs = mAABB.minPoint * -1;
@@ -267,18 +265,21 @@ void Mesh::centerAlign()
 
 void Mesh::move(const vec &p)
 {
-    std::vector<vec>::iterator vi;
-    for (vi = mVertices.begin(); vi != mVertices.end(); ++vi)
-        *vi += p;
-
+    for (auto &v : mVertices) v += p;
     mAABB.Translate(p);
-
     updateTriangleData();
 }
 
-void Mesh::rotate(const vec &p)
+void Mesh::transform(const math::float3x4 &t)
 {
+    for (auto &v : mVertices) v = t.TransformPos(v);
+    mAABB.TransformAsAABB(t);
+    update(false);
+}
 
+void Mesh::setTransform(const math::float3x4 &t)
+{
+    mMatrix = t;
 }
 
 void Mesh::drawTriangles(Colour col, bool wire)
@@ -349,7 +350,7 @@ void Mesh::draw(Colour col, Style x)
 {
     glPushMatrix();
 
-    float4x4 M(mTransform);
+    float4x4 M(mMatrix);
     M.Transpose();
     glMultMatrixf(M.ptr());
 

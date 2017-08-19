@@ -27,17 +27,18 @@ set(IMPL_FILES
   stdout_redirector.h
 )
 set(INCL_FILES
+  ../include/vvr/macros.h
   ../include/vvr/glwidget.h
   ../include/vvr/scene.h
   ../include/vvr/drawing.h
+  ../include/vvr/picking.h
   ../include/vvr/mesh.h
   ../include/vvr/kdtree.h
   ../include/vvr/bspline.h
   ../include/vvr/utils.h
   ../include/vvr/settings.h
-  ../include/vvr/dsp.h
   ../include/vvr/animation.h
-  ../include/vvr/macros.h
+  ../include/vvr/dsp.h
   ../include/vvr/vvrframework_DLL.h
 )
 set(SOURCE ${IMPL_FILES} ${INCL_FILES})

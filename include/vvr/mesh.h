@@ -102,7 +102,7 @@ private:
     std::vector<math::vec>  mVertices;              ///< Vertex list
     std::vector<Triangle>   mTriangles;             ///< Triangle list | contains indices to the Vertex list
     std::vector<math::vec>  mVertexNormals;         ///< Normals per vertex
-    math::float3x4          mTransform;             ///< Model rotation around its local axis
+    math::float3x4          mMatrix;                ///< Model rotation around its local axis
     math::AABB              mAABB;                  ///< The bounding box of the model
     bool                    mCCW;                   ///< Clockwise-ness
 
@@ -116,19 +116,19 @@ private:
 public:
     void draw(Colour col, Style style);             ///< Draw the mesh with the specified style
     void move(const math::vec &p);                  ///< Move the mesh in the world.
-    void rotate(const math::vec &p);                ///< Rotate mesh around its local axis
     void setBigSize(float size);                    ///< Set the meshes size according to the max size of three (x|y|z)
     void cornerAlign();                             ///< Align the mesh to the corner of each local axis
     void centerAlign();                             ///< Align the mesh to the center of each local axis
     void update(const bool recomputeAABB=false);    ///< Call after making changes to the vertices
-    void setTransform(const math::float3x4 &transform) { mTransform = transform; }
+    void transform(const math::float3x4 &);         ///< Transforms the actual data.
 
     std::vector<math::vec> &getVertices() { return mVertices; }
     std::vector<Triangle> &getTriangles() { return mTriangles; }
     const std::vector<math::vec> &getVertices() const { return mVertices; }
     const std::vector<Triangle> &getTriangles() const { return mTriangles; }
-    math::float3x4 getTransform() const { return mTransform; }
-    math::AABB getAABB() const { return mAABB; }
+    math::float3x4 getTransform() const { return mMatrix; }
+    void setTransform(const math::float3x4 &t);
+    math::AABB getAABB() const;
     float getMaxSize() const;
 };
 

@@ -7,11 +7,11 @@
 #include <cmath>
 #include <QtOpenGL>
 
-using vvr::real_t;
+using vvr::real;
 using math::vec;
 
-real_t vvr::Shape::LineWidth = 2.2f;
-real_t vvr::Shape::PointSize = 7.0f;
+real vvr::Shape::LineWidth = 2.2f;
+real vvr::Shape::PointSize = 7.0f;
 
 const vvr::Colour vvr::red(0xFF, 0x00, 0x00);
 const vvr::Colour vvr::blue(0x00, 0x00, 0xFF);
@@ -29,7 +29,7 @@ const vvr::Colour vvr::darkGreen(0x00, 0x64, 0x00);
 const vvr::Colour vvr::yellowGreen(0x9A, 0xCD, 0x32);
 const vvr::Colour vvr::lilac(0xCD, 0xA9, 0xCD);
 
-static void drawSphere(real_t r, int lats, int longs);
+static void drawSphere(real r, int lats, int longs);
 static void drawBox(const vec &p1, const vec &p2, vvr::Colour col, char alpha);
 
 /*--- [Helpers] -----------------------------------------------------------------------*/
@@ -108,16 +108,16 @@ void vvr::Circle2D::drawShape() const
     assert(range_from < range_to);
 
     unsigned const numOfSegments = 60;
-    const real_t cx = GetCentre().x;
-    const real_t cy = GetCentre().y;
-    const real_t cr = GetRadius();
-    real_t x, y;
+    const real cx = GetCentre().x;
+    const real cy = GetCentre().y;
+    const real cr = GetRadius();
+    real x, y;
 
     glLineWidth(LineWidth);
 
     glBegin(filled ? GL_POLYGON : (closed_loop ? GL_LINE_LOOP : GL_LINE_STRIP));
-    real_t d_th = (range_to - range_from) / numOfSegments;
-    for (real_t theta = range_from; theta <= range_to; theta += d_th) {
+    real d_th = (range_to - range_from) / numOfSegments;
+    for (real theta = range_from; theta <= range_to; theta += d_th) {
         math::SinCos(theta, y, x);
         x *= cr; 
         y *= cr;
@@ -180,7 +180,7 @@ void vvr::Cylinder3D::drawShape() const
     vec normalinv(-normal);
     glNormal3fv(normalinv.ptr());
     for (int i = 0; i <= 24; ++i) {
-        real_t x, y;
+        real x, y;
         math::SinCos(math::pi * 2 / 24 * i, y, x);
         glVertex3f(x*radius, y*radius, 0);
     }
@@ -191,7 +191,7 @@ void vvr::Cylinder3D::drawShape() const
     {
         glBegin(GL_TRIANGLE_STRIP);
         for (int i = 0; i <= 24; ++i) {
-            real_t x, y;
+            real x, y;
             math::SinCos(math::pi * 2 / 24 * i, y, x);
             glNormal3f(x, y, 0);
             glVertex3f(x*radius, y*radius, 0);
@@ -208,7 +208,7 @@ void vvr::Cylinder3D::drawShape() const
     glNormal3fv(normal.ptr());
     glBegin(GL_POLYGON);
     for (int i = 0; i <= 24; ++i) {
-        real_t x, y;
+        real x, y;
         math::SinCos(math::pi * 2 / 24 * i, y, x);
         glVertex3f(x*radius, y*radius, -height);
     }
@@ -282,7 +282,7 @@ void vvr::Ground::draw() const
     for (auto &t : m_floor_tris) t.draw();
 }
 
-vvr::Ground::Ground(const real_t W, const real_t D, const real_t B, const real_t T, const vvr::Colour &col)
+vvr::Ground::Ground(const real W, const real D, const real B, const real T, const vvr::Colour &col)
     : m_col(col)
 {
     const vec vA(-W / 2, B, -D / 2);
@@ -480,22 +480,22 @@ vvr::Point3D vvr::math2vvr(const vec &v, const vvr::Colour &col)
 
 /*--- [Static drawing functions] ------------------------------------------------------*/
 
-void drawSphere(real_t r, int lats, int longs)
+void drawSphere(real r, int lats, int longs)
 {
     int i, j;
     for (i = 0; i <= lats; i++) {
-        real_t lat0 = M_PI * (-0.5 + (real_t)(i - 1) / lats);
-        real_t z0 = sin(lat0);
-        real_t zr0 = cos(lat0);
+        real lat0 = M_PI * (-0.5 + (real)(i - 1) / lats);
+        real z0 = sin(lat0);
+        real zr0 = cos(lat0);
 
-        real_t lat1 = M_PI * (-0.5 + (real_t)i / lats);
-        real_t z1 = sin(lat1);
-        real_t zr1 = cos(lat1);
+        real lat1 = M_PI * (-0.5 + (real)i / lats);
+        real z1 = sin(lat1);
+        real zr1 = cos(lat1);
         glBegin(GL_QUAD_STRIP);
         for (j = 0; j <= longs; j++) {
-            real_t lng = 2 * M_PI * (real_t)(j - 1) / longs;
-            real_t x = cos(lng);
-            real_t y = sin(lng);
+            real lng = 2 * M_PI * (real)(j - 1) / longs;
+            real x = cos(lng);
+            real y = sin(lng);
             glNormal3f(x * zr0, y * zr0, z0);
             glVertex3f(x * zr0, y * zr0, z0);
             glNormal3f(x * zr1, y * zr1, z1);

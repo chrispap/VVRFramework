@@ -18,12 +18,13 @@
 #define FLAG_SHOW_SOLID 8
 #define FLAG_SHOW_NORMALS 16
 
+#define objName "tavli.obj"
 #define objName "cube.obj"
 #define objName "bunny_low.obj"
-#define objName "unicorn_low.obj"
-#define objName "dragon_low_low.obj"
 #define objName "large/unicorn.obj"
 #define objName "ironman.obj"
+#define objName "unicorn_low.obj"
+#define objName "dragon_low_low.obj"
 
 using namespace vvr;
 using namespace std;
