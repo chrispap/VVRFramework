@@ -9,16 +9,24 @@
 
 namespace tavli
 {
-    using math::vec;
-    using math::Ray;
-    using vvr::real;
-    using vvr::Colour;
+    using namespace vvr;
+    using namespace math;
 
     class Piece;
     class Region;
     class Board;
 
-    struct Piece : public vvr::Cylinder3D
+    struct PieceDragger
+    {
+        bool grab(Drawable* drw);
+        void drag(Drawable* drw, Ray ray0, Ray ray1);
+        void drop(Drawable* drw);
+
+    private:
+        Colour colour;
+    };
+
+    struct Piece : public Cylinder3D
     {
         Piece(Colour col);
         void draw() const override;
@@ -30,7 +38,7 @@ namespace tavli
         Region* region;
     };
 
-    struct Region : public vvr::Triangle3D
+    struct Region : public Triangle3D
     {
         Region(Board* board, int reg, Colour colour);
         void addPiece(Piece *piece);
@@ -48,9 +56,11 @@ namespace tavli
         float piecediam, boardheight;
     };
 
-    struct Board : public vvr::Drawable
+    struct Board : public Drawable
     {
         Board(std::vector<Colour> &cols);
+        ~Board();
+        void load3DModels();
         void clearPieces();
         void setupGamePortes();
         void setupGamePlakwto();
@@ -58,35 +68,20 @@ namespace tavli
         void draw() const override;
         void resize(const float width, const float height);
 
-        
+        typedef MousePicker3D<PieceDragger> PiecePicker;
+
         /* Data [Logic] */
         float width, height;
         std::vector<Piece*> pieces;
         std::vector<Region*> regions;
+        PiecePicker *picker;
 
         /* Data [Drawing] */
         std::vector<Colour> colours;
-        vvr::Canvas canvas_pieces;
-        vvr::Canvas canvas_regions;
-        vvr::Mesh::Ptr mBoard3D;
-
-        friend class Piece;
+        Canvas canvasPieces;
+        Canvas canvasRegions;
+        Mesh::Ptr m3DBoard;
     };
-
-    struct PieceDragger3D
-    {
-        bool grab(vvr::Drawable* drw);
-
-        void drag(vvr::Drawable* drw, Ray ray0, Ray ray1);
-
-        void drop(vvr::Drawable* drw);
-
-    private:
-        Colour col_org;
-    };
-
-    typedef vvr::MousePicker2D<PieceDragger3D> PiecePicker2D;
-    typedef vvr::MousePicker3D<PieceDragger3D> PiecePicker;
 }
 
 #endif
