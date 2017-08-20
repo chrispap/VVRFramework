@@ -5,7 +5,6 @@
 
 namespace vvr
 {
-
     template <class Dragger2D>
     struct MousePicker2D
     {
@@ -13,48 +12,48 @@ namespace vvr
 
         void mousePressed(int x, int y, int modif)
         {
-            Drawable *drw_nearest = nullptr;
+            Drawable *dr_nearest = nullptr;
             real dmin = std::numeric_limits<real>::max();
 
-            for (auto drw : canvas.getDrawables())
+            for (auto dr : canvas.getDrawables())
             {
-                real pd = drw->pickdist(x, y);
+                real pd = dr->pickdist(x, y);
 
                 if (pd >= 0 && pd < dmin)
                 {
-                    drw_nearest = drw;
+                    dr_nearest = dr;
                     dmin = pd;
                 }
             }
 
-            if (drw_nearest)
+            if (dr_nearest)
             {
                 mousepos = { x,y };
-                drw = drw_nearest;
-                if (!dragger->grab(drw)) {
-                    drw = nullptr;
+                dr = dr_nearest;
+                if (!dragger->grab(dr)) {
+                    dr = nullptr;
                 }
             }
         }
 
         void mouseMoved(int x, int y, int modif)
         {
-            if (!drw) return;
-            dragger->drag(drw, x - mousepos.x, y - mousepos.y);
+            if (!dr) return;
+            dragger->drag(dr, x - mousepos.x, y - mousepos.y);
             mousepos = { x,y };
         }
 
         void mouseReleased(int x, int y, int modif)
         {
-            if (!drw) return;
-            dragger->drag(drw, x - mousepos.x, y - mousepos.y);
-            dragger->drop(drw);
+            if (!dr) return;
+            dragger->drag(dr, x - mousepos.x, y - mousepos.y);
+            dragger->drop(dr);
             mousepos = { x,y };
-            drw = nullptr;
+            dr = nullptr;
         }
 
         MousePicker2D(Canvas &canvas, Dragger2D *dragger)
-            : drw(nullptr)
+            : dr(nullptr)
             , canvas(canvas)
             , dragger(dragger)
         { }
@@ -66,7 +65,7 @@ namespace vvr
 
     private:
         Dragger2D *dragger;
-        Drawable* drw;
+        Drawable* dr;
         Canvas &canvas;
         Mousepos mousepos;
     };
@@ -85,22 +84,22 @@ namespace vvr
          */
         void mousePressed(math::Ray ray, int modif)
         {
-            Drawable *drw_nearest = nullptr;
+            Drawable *dr_nearest = nullptr;
             real dmin = std::numeric_limits<real>::max();
 
-            for (auto drw : canvas.getDrawables()) {
-                real pickdist = drw->pickdist(ray);
+            for (auto dr : canvas.getDrawables()) {
+                real pickdist = dr->pickdist(ray);
                 if (pickdist >= 0 && pickdist < dmin) {
-                    drw_nearest = drw;
+                    dr_nearest = dr;
                     dmin = pickdist;
                 }
             }
 
-            if (drw_nearest) {
+            if (dr_nearest) {
                 mouseray = ray;
-                drw = drw_nearest;
-                if (!dragger->grab(drw)) {
-                    drw = nullptr;
+                dr = dr_nearest;
+                if (!dragger->grab(dr)) {
+                    dr = nullptr;
                 }
             }
         }
@@ -110,8 +109,8 @@ namespace vvr
          */
         void mouseMoved(math::Ray ray, int modif)
         {
-            if (!drw) return;
-            dragger->drag(drw, mouseray, ray);
+            if (!dr) return;
+            dragger->drag(dr, mouseray, ray);
             mouseray = ray;
         }
 
@@ -120,17 +119,22 @@ namespace vvr
          */
         void mouseReleased(math::Ray ray, int modif)
         {
-            if (!drw) return;
-            dragger->drag(drw, mouseray, ray);
-            dragger->drop(drw);
+            if (!dr) return;
+            dragger->drag(dr, mouseray, ray);
+            dragger->drop(dr);
             mouseray = ray;
-            drw = nullptr;
+            dr = nullptr;
+        }
+
+        Drawable* getDrawable()
+        {
+            return dr;
         }
 
         MousePicker3D(Canvas &canvas, Dragger3D *dragger)
             : canvas(canvas)
             , dragger(dragger)
-            , drw(nullptr)
+            , dr(nullptr)
         { }
 
         ~MousePicker3D()
@@ -140,11 +144,10 @@ namespace vvr
 
     private:
         Canvas &canvas;
+        Drawable* dr;
         Dragger3D *dragger;
-        Drawable* drw;
         math::Ray mouseray;
     };
-
 }
 
 #endif

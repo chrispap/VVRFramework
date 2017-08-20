@@ -16,14 +16,30 @@ namespace tavli
     class Region;
     class Board;
 
-    struct PieceDragger
+    struct RegionChooser
     {
-        bool grab(Drawable* drw);
-        void drag(Drawable* drw, Ray ray0, Ray ray1);
-        void drop(Drawable* drw);
+        bool grab(Drawable* dr);
+        void drag(Drawable* dr, Ray ray0, Ray ray1);
+        void drop(Drawable* dr);
 
     private:
         Colour colour;
+        bool visible;
+    };
+
+    struct PieceDragger
+    {
+        bool grab(Drawable* dr);
+        void drag(Drawable* dr, Ray ray0, Ray ray1);
+        void drop(Drawable* dr);
+
+        PieceDragger(Canvas &canvas, RegionChooser *rc) 
+            : regionPicker(canvas, rc) { }
+
+    private:
+        Ray ray;
+        Colour colour;
+        MousePicker3D<RegionChooser> regionPicker;
     };
 
     struct Piece : public Cylinder3D
@@ -41,6 +57,7 @@ namespace tavli
     struct Region : public Triangle3D
     {
         Region(Board* board, int reg, Colour colour);
+        real pickdist(const Ray& ray) const override;
         void addPiece(Piece *piece);
         void removePiece(Piece *piece);
         void resize(float diam, float boardheight);
@@ -61,6 +78,7 @@ namespace tavli
         Board(std::vector<Colour> &cols);
         ~Board();
         void load3DModels();
+        void createRegions();
         void clearPieces();
         void setupGamePortes();
         void setupGamePlakwto();
@@ -69,17 +87,18 @@ namespace tavli
         void resize(const float width, const float height);
 
         typedef MousePicker3D<PieceDragger> PiecePicker;
+        typedef MousePicker3D<RegionChooser> RegionPicker;
 
         /* Data [Logic] */
         float width, height;
         std::vector<Piece*> pieces;
         std::vector<Region*> regions;
-        PiecePicker *picker;
+        PiecePicker *piecePicker;
 
         /* Data [Drawing] */
         std::vector<Colour> colours;
-        Canvas canvasPieces;
-        Canvas canvasRegions;
+        Canvas pieceCanvas;
+        Canvas regionCanvas;
         Mesh::Ptr m3DBoard;
     };
 }
