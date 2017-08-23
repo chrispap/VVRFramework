@@ -320,7 +320,7 @@ void TriangulationScene::processPoint(C2DPoint* const p)
             C2DPoint *p2 = tris_new[i].v2;
             C2DPoint *p3 = tris_new[i].v3;
 
-            unsigned tri_adjacent_index = NULL;
+            unsigned tri_adjacent_index = 0;
             C2DPoint *v_opposite = NULL;
             bool adj_exists = FindAdjacentTriangle(m_tris, p2, p3, &tri_adjacent_index, &v_opposite);
 
