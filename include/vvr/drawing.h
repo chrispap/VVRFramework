@@ -29,17 +29,17 @@ namespace vvr {
             , a(255)
         { }
 
-        Colour(int red, int green, int blue)
-            : r((unsigned char)red)
-            , g((unsigned char)green)
-            , b((unsigned char)blue)
+        Colour(int r, int g, int b)
+            : r((unsigned char)r)
+            , g((unsigned char)g)
+            , b((unsigned char)b)
             , a(255)
         { }
 
-        Colour(float red, float green, float blue)
-            : r(red * 0xFF)
-            , g(green * 0xFF)
-            , b(blue * 0xFF)
+        Colour(float r, float g, float b)
+            : r((unsigned char)(r * 0xFF))
+            , g((unsigned char)(g * 0xFF))
+            , b((unsigned char)(b * 0xFF))
             , a(255)
         { }
 
@@ -59,9 +59,9 @@ namespace vvr {
 
         void darker()
         {
-            r = 0.9f * r;
-            g = 0.9f * g;
-            b = 0.9f * b;
+            r = (unsigned char)(0.9f * r);
+            g = (unsigned char)(0.9f * g);
+            b = (unsigned char)(0.9f * b);
         }
 
         void mul(float c)

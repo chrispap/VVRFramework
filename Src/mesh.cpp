@@ -85,8 +85,8 @@ Mesh::Mesh(const string &objFile, const string &texFile, bool ccw)
 
     //! Store normals
     if (!normals.empty()) {
-        const int n = normals.size();
-        for (unsigned i = 0; i < n; i += 3)
+        const size_t n = normals.size();
+        for (size_t i = 0; i < n; i += 3)
             mVertexNormals.push_back(vec(normals[i], normals[i + 1], normals[i + 2]));
     }
     else createNormals(); //! Or create them...
@@ -360,7 +360,7 @@ void Mesh::draw(Colour col, Style x)
     if (x & BOUND) 
     {
         Aabb3D aabb(mAABB.MinX(), mAABB.MinY(), mAABB.MinZ(), mAABB.MaxX(), mAABB.MaxY(), mAABB.MaxZ(), col);
-        aabb.setTransparency(0.88);
+        aabb.setTransparency(0.88f);
         aabb.draw();
     }
     if (x & AXES) drawAxes();

@@ -242,12 +242,13 @@ void vvr::Obb3D::drawShape() const
         }
     }
 
-    for (size_t i = 0; i < NumEdges(); ++i) 
+    for (int i = 0; i < NumEdges(); ++i) {
         math2vvr(Edge(i), col_edge).draw();
+    }
     
     auto ptsz_old = vvr::Shape::PointSize;
     vvr::Shape::PointSize = 12;
-    for (size_t i = 0; i < NumVertices(); ++i) 
+    for (int i = 0; i < NumVertices(); ++i) 
         cornerpts[i].draw();
     vvr::Shape::PointSize = ptsz_old;
 }
@@ -273,8 +274,9 @@ void vvr::Obb3D::set(const math::AABB& aabb, const math::float4x4& transform)
 {
     SetFrom(aabb, transform);
     Triangulate(1, 1, 1, triverts, trinorms, nullptr, true);
-    for (size_t i = 0; i < NumVertices(); ++i) 
+    for (size_t i = 0; i < NumVertices(); ++i) {
         cornerpts[i].set(CornerPoint(i));
+    }
 }
 
 void vvr::Ground::draw() const
@@ -389,7 +391,7 @@ void vvr::Canvas::clearFrame()
 void vvr::draw(C2DPointSet &point_set, Colour col)
 {
     /* Draw point cloud */
-    for (int i = 0; i < point_set.size(); i++) {
+    for (size_t i = 0; i < point_set.size(); i++) {
         Point2D(
             point_set.GetAt(i)->x,
             point_set.GetAt(i)->y,
@@ -399,7 +401,7 @@ void vvr::draw(C2DPointSet &point_set, Colour col)
 
 void vvr::draw(C2DLineSet  &line_set, Colour col)
 {
-    for (int i = 0; i < line_set.size(); i++) {
+    for (size_t i = 0; i < line_set.size(); i++) {
         LineSeg2D(
             line_set.GetAt(i)->GetPointFrom().x,
             line_set.GetAt(i)->GetPointFrom().y,
@@ -422,10 +424,10 @@ void vvr::draw(C2DPolygon  &polygon, Colour col, bool filled)
         {
             C2DPolygonSet polyset;
             polygon.GetConvexSubAreas(polyset);
-            for (int i = 0; i < polyset.size(); i++) {
+            for (size_t i = 0; i < polyset.size(); i++) {
                 C2DPolygon &convpoly = *polyset.GetAt(i);
                 C2DPoint convpoly_centroid = convpoly.GetCentroid();
-                for (int j = 0; j < convpoly.GetLines().size(); j++) {
+                for (size_t j = 0; j < convpoly.GetLines().size(); j++) {
                     Triangle2D t(
                         convpoly.GetLines().GetAt(j)->GetPointFrom().x,
                         convpoly.GetLines().GetAt(j)->GetPointFrom().y,
@@ -441,7 +443,7 @@ void vvr::draw(C2DPolygon  &polygon, Colour col, bool filled)
     }
     else
     {
-        for (int i = 0; i < polygon.GetLines().size(); i++) {
+        for (size_t i = 0; i < polygon.GetLines().size(); i++) {
             LineSeg2D(
                 polygon.GetLines().GetAt(i)->GetPointFrom().x,
                 polygon.GetLines().GetAt(i)->GetPointFrom().y,
