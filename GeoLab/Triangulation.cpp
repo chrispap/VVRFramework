@@ -71,6 +71,7 @@ struct Tri
         else if (v1 != other.v1) return v1 < other.v1;
         else if (v2 != other.v2) return v2 < other.v2;
         else if (v3 != other.v3) return v3 < other.v3;
+        else return false;
     }
 };
 
@@ -153,9 +154,6 @@ void TriangulationScene::mouseMoved(int x, int y, int modif)
 void TriangulationScene::keyEvent(unsigned char key, bool up, int modif)
 {
     Scene::keyEvent(key, up, modif);
-    const bool ctrl_down = ctrlDown(modif);
-    const bool alt_down = altDown(modif);
-    const bool shift_down = shiftDown(modif);
     key = tolower(key);
 
     switch (key)

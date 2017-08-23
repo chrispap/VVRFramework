@@ -33,8 +33,8 @@ class ArmJointScene : public vvr::Scene
 {
 public:
     ArmJointScene();
-    const char* getName() const { return "Orientation Viewer"; }
-    bool idle();
+    const char* getName() const override { return "Orientation Viewer"; }
+    bool idle() override;
     void keyEvent(unsigned char key, bool up, int modif) override;
     void arrowEvent(vvr::ArrowDir dir, int modif) override;
     void reset() override;

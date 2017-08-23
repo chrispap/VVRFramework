@@ -70,6 +70,7 @@ struct Tri
         else if (v1 != other.v1) return v1 < other.v1;
         else if (v2 != other.v2) return v2 < other.v2;
         else if (v3 != other.v3) return v3 < other.v3;
+        else return false;
     }
 };
 
@@ -155,9 +156,6 @@ void TriangulationScene::mouseMoved(int x, int y, int modif)
 void TriangulationScene::keyEvent(unsigned char key, bool up, int modif)
 {
     Scene::keyEvent(key, up, modif);
-    const bool ctrl_down = ctrlDown(modif);
-    const bool alt_down = altDown(modif);
-    const bool shift_down = shiftDown(modif);
     key = tolower(key);
 
     switch (key)
@@ -308,7 +306,6 @@ void TriangulationScene::processPoint(C2DPoint* const p)
             C2DPoint *p2 = tris_new[i].v2;
             C2DPoint *p3 = tris_new[i].v3;
             C2DPoint *v_opposite = NULL;
-            unsigned tri_adjacent_index;
             FindAdjacentTriangle(m_tris, p2, p3, &v_opposite, true);
             Tri tri_flip_1(p1, p2, v_opposite);
             Tri tri_flip_2(p1, p3, v_opposite);

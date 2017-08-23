@@ -8,8 +8,8 @@ using namespace std;
 using namespace math;
 
 KDTree::KDTree(math::VecArray &pts, int dimensions)
-    : m_DIM(dimensions)
-    , pts(pts)
+    : pts(pts)
+    , m_DIM(dimensions)
 {
     const float t = vvr::getSeconds();
     m_root = new KDNode();

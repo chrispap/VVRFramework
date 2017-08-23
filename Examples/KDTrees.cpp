@@ -21,11 +21,11 @@ class KDTreeScene : public vvr::Scene
 
 public:
     KDTreeScene();
-    const char* getName() const { return "KD Tree Scene"; }
+    const char* getName() const override { return "KD Tree Scene"; }
     void keyEvent(unsigned char key, bool up, int modif) override;
     void arrowEvent(vvr::ArrowDir dir, int modif) override;
     void mouseWheel(int dir, int modif) override;
-    void sliderChanged(int slider_id, float val);
+    void sliderChanged(int slider_id, float val) override;
 
 private:
     void draw() override;
@@ -114,28 +114,16 @@ void KDTreeScene::reset()
     m_kn = 1;
     m_current_tree_level = 0;
 
-    //! Position camera
-    //auto pos = getFrustum().Pos();
-    //pos.y += 20;
-    //pos.z -= 40;
-    //setCameraPos(pos);
-
     //! Define what will be vissible by default
     m_flag = 0;
     m_flag |= vvr_flag(SHOW_NN);
     m_flag |= vvr_flag(SHOW_PTS_KDTREE);
-    m_flag |= vvr_flag(SHOW_KDTREE);
     m_flag |= vvr_flag(SHOW_PTS_ALL);
     m_flag |= vvr_flag(SHOW_PTS_IN_SPHERE);
     m_flag |= vvr_flag(BRUTEFORCE);
 
     //! Define scene objects
     m_sphere = vvr::Sphere3D::Make(-GND_WIDTH / 2, 0, 0, SPHERE_RAD, vvr::white);
-
-    //! Create random points
-    const float mw = getSceneWidth() * 0.3;
-    const float mh = getSceneHeight() * 0.3;
-    const float mz = std::min(mw, mh);
 
     if (vvr_flag_on(m_flag, POINTS_ON_SURFACE)) {
         createSurfacePts(m_pts.empty() ? NUM_PTS_DEFAULT : m_pts.size());
@@ -283,7 +271,7 @@ void KDTreeScene::draw()
     if (vvr_flag_on(m_flag, SHOW_KNN)) {
         float dist;
         const vvr::KDNode **nearests = new const vvr::KDNode*[m_kn];
-        memset(nearests, NULL, m_kn * sizeof(vvr::KDNode*));
+        memset(nearests, 0, m_kn * sizeof(vvr::KDNode*));
         Task_04_NearestK(m_kn, sc, m_KDTree->root(), nearests, &dist);
         for (int i = 0; i < m_kn; i++) {
             if (!nearests[i]) continue;
@@ -507,7 +495,7 @@ void Task_03_InSphere(const math::Sphere &sphere, const vvr::KDNode *root, math:
     if (d <= vvr_square(sphere.r)) pts.push_back(root->split_point);
 
     Task_03_InSphere(sphere, right_of_split ? root->child_right : root->child_left, pts);
-    
+
     if (vvr_square(d_split) >= vvr_square(sphere.r)) return;
 
     Task_03_InSphere(sphere, right_of_split ? root->child_left : root->child_right, pts);

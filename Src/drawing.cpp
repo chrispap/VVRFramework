@@ -282,7 +282,7 @@ void vvr::Ground::draw() const
     for (auto &t : m_floor_tris) t.draw();
 }
 
-vvr::Ground::Ground(const real W, const real D, const real B, const real T, const vvr::Colour &col)
+vvr::Ground::Ground(const real W, const real D, const real B, const real T, Colour col)
     : m_col(col)
 {
     const vec vA(-W / 2, B, -D / 2);
@@ -386,7 +386,7 @@ void vvr::Canvas::clearFrame()
 
 /*--- [Drawing helpers] ---------------------------------------------------------------*/
 
-void vvr::draw(C2DPointSet &point_set, const Colour &col)
+void vvr::draw(C2DPointSet &point_set, Colour col)
 {
     /* Draw point cloud */
     for (int i = 0; i < point_set.size(); i++) {
@@ -397,7 +397,7 @@ void vvr::draw(C2DPointSet &point_set, const Colour &col)
     }
 }
 
-void vvr::draw(C2DLineSet  &line_set, const Colour &col)
+void vvr::draw(C2DLineSet  &line_set, Colour col)
 {
     for (int i = 0; i < line_set.size(); i++) {
         LineSeg2D(
@@ -409,7 +409,7 @@ void vvr::draw(C2DLineSet  &line_set, const Colour &col)
     }
 }
 
-void vvr::draw(C2DPolygon  &polygon, const Colour &col, bool filled)
+void vvr::draw(C2DPolygon  &polygon, Colour col, bool filled)
 {
     bool err = false;
 
@@ -458,22 +458,22 @@ void vvr::draw(C2DPolygon  &polygon, const Colour &col, bool filled)
 
 /*--- [MathGeoLib => vvr Converters] --------------------------------------------------*/
 
-vvr::Triangle3D vvr::math2vvr(const math::Triangle &t, const vvr::Colour &col)
+vvr::Triangle3D vvr::math2vvr(const math::Triangle &t, Colour col)
 {
     return vvr::Triangle3D(t, col);
 }
 
-vvr::LineSeg3D vvr::math2vvr(const math::LineSegment &l, const vvr::Colour &col)
+vvr::LineSeg3D vvr::math2vvr(const math::LineSegment &l, Colour col)
 {
     return vvr::LineSeg3D(l, col);
 }
 
-vvr::LineSeg3D vvr::math2vvr(const math::Line &l, const vvr::Colour &col)
+vvr::LineSeg3D vvr::math2vvr(const math::Line &l, Colour col)
 {
     return vvr::LineSeg3D(l.ToLineSegment(1000), col);
 }
 
-vvr::Point3D vvr::math2vvr(const vec &v, const vvr::Colour &col)
+vvr::Point3D vvr::math2vvr(const vec &v, Colour col)
 {
     return vvr::Point3D(v, col);
 }

@@ -20,7 +20,7 @@ class BoxesScene : public vvr::Scene
 {
 public:
     BoxesScene();
-    const char* getName() const { return "Boxes Scene"; }
+    const char* getName() const override { return "Boxes Scene"; }
     void draw() override;
     void resize() override;
     void keyEvent(unsigned char key, bool up, int modif) override;

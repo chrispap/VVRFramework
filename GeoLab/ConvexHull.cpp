@@ -27,7 +27,7 @@ protected:
     void mousePressed(int x, int y, int modif) override;
     void mouseReleased(int x, int y, int modif) override;
     void mouseMoved(int x, int y, int modif) override;
-    void arrowEvent(vvr::ArrowDir dir, int modif);
+    void arrowEvent(vvr::ArrowDir dir, int modif) override;
 
 private:
     void ConvexHull_Slow();
@@ -43,8 +43,8 @@ private:
 #endif // SCENE_CONVEX_HULL_H
 
 #define MAX_NUM_PTS 50
-#define ConvexHull ConvexHull_Fast 
-#define ConvexHull ConvexHull_Slow 
+//#define ConvexHull ConvexHull_Slow
+#define ConvexHull ConvexHull_Fast
 
 using namespace std;
 
@@ -122,10 +122,10 @@ void ConvexHullScene::mousePressed(int x, int y, int modif)
         // vvr::Colour the vissisble segments
         do
         {
-            m_canvas.add(new vvr::LineSeg2D(poly_seg->GetPointFrom().x,
-                poly_seg->GetPointFrom().y,
-                poly_seg->GetPointTo().x,
-                poly_seg->GetPointTo().y, vvr::blue));
+            auto from = poly_seg->GetPointFrom();
+            auto to = poly_seg->GetPointTo();
+            auto ls = new vvr::LineSeg2D(from.x, from.y, to.x, to.y, vvr::blue);
+            m_canvas.add(ls);
             poly_seg = m_convex_hull_polygon.GetLine(++i);
         } while (!poly_seg->IsOnRight(p));
 

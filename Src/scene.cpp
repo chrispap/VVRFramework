@@ -197,9 +197,6 @@ void Scene::keyEvent(unsigned char key, bool up, int modif)
 {
     if (up) return;
 
-    int ctrl = modif & 0x01;
-    int shift = modif & 0x02;
-
     switch (isprint(key) ? tolower(key) : key) {
     case 'r': this->reset(); break;
     case '2': setCameraPos(vec(0, -m_camera_dist, 0)); break;
@@ -212,8 +209,6 @@ void Scene::keyEvent(unsigned char key, bool up, int modif)
 
 void Scene::arrowEvent(ArrowDir dir, int modif)
 {
-    int ctrl = modif & 0x01;
-    int shift = modif & 0x02;
 
 }
 

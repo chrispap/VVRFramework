@@ -30,7 +30,7 @@ public:
         m_bg_col = Colour("222222");
         m_create_menus = false;
         m_perspective_proj = true;
-        m_fullscreen = true;
+        m_fullscreen = false;
         mBoard = nullptr;
         reset();
     }
@@ -40,7 +40,7 @@ public:
         delete mBoard;
     }
 
-    const char* getName() const  override 
+    const char* getName() const  override
     {
         return "Tavli Game";
     }
@@ -197,7 +197,7 @@ void tavli::Region::resize(float piecediam, float boardheight)
     default: assert(false);
     }
 
-    if (id == 25) 
+    if (id == 25)
     {
         base.x = 0;
         base.y = -r * 1.5;
@@ -207,7 +207,7 @@ void tavli::Region::resize(float piecediam, float boardheight)
         top.z = base.z;
         dir.Set(0, -1, 0);
     }
-    else if (id == 26) 
+    else if (id == 26)
     {
         base.x = 0;
         base.y = r * 1.5;
@@ -414,7 +414,7 @@ void tavli::Board::setupGamePortes()
         reg->addPiece(piece);
         pieceCanvas.add(piece);
     }
-    
+
     vvr_msg("Setup game portes.");
 }
 
@@ -479,7 +479,6 @@ void tavli::Board::setupGameFevga()
 void tavli::Board::draw() const
 {
     /* Draw pieces and regions */
-    auto lw(Shape::LineWidth);
     regionCanvas.draw();
     pieceCanvas.draw();
 
@@ -569,7 +568,7 @@ int main(int argc, char* argv[])
     {
         std::vector<Colour> colours;
         colours.resize(4);
-        
+
         int coli = 0;
 
         /* Default colors */
@@ -578,8 +577,12 @@ int main(int argc, char* argv[])
         colours[coli++] = Colour("550000");
         colours[coli++] = Colour("BBBBBB");
 
+#ifndef __APPLE__
         /* Load from CLI */
-        for(coli=0; coli < argc-1; coli++) colours[coli] = Colour(argv[1+coli]);
+        for(coli=0; coli < argc; coli++) {
+            colours[coli] = Colour(argv[1+coli]);
+        }
+#endif
 
         /* Print colours */
         vvr_msg("Colours: ");

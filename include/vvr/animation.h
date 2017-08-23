@@ -15,9 +15,9 @@ namespace vvr
     {
         Animation()
             : t(m_time)
+            , m_paused(true)
             , m_time(0)
             , m_speed(1)
-            , m_paused(true)
         {
         }
 
@@ -53,7 +53,7 @@ namespace vvr
         void update(bool force_resume = false)
         {
             const float sec = getSeconds();
-            if (m_paused) if (force_resume) m_last_update = sec; else return;
+            if (m_paused) { if (force_resume) m_last_update = sec; else return; }
             m_paused = false;
             m_time += ((sec - m_last_update) * m_speed);
             m_last_update = sec;
@@ -70,7 +70,6 @@ namespace vvr
         bool m_paused;
         float m_time;
         float m_last_update;
-        float m_end_time;
         float m_speed;
     };
 

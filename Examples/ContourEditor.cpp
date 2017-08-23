@@ -13,10 +13,10 @@
 #include <cstring>
 
 #define APP_TITLE "Contour Editor"
-#define CONTOUR_FILENAME  "resources/contours/contours.txt"
-#define CONTOUR_FILENAME  "resources/contours/contours3.txt"
-#define CONTOUR_FILENAME  "resources/contours/contoursPaths.txt"
-#define CONTOUR_FILENAME  "resources/contours/contourstest.txt"
+//#define CONTOUR_FILENAME  "resources/contours/contours.txt"
+//#define CONTOUR_FILENAME  "resources/contours/contours3.txt"
+//#define CONTOUR_FILENAME  "resources/contours/contoursPaths.txt"
+//#define CONTOUR_FILENAME  "resources/contours/contourstest.txt"
 #define CONTOUR_FILENAME  "resources/contours/contoursOlympus.txt"
 #define CONTOUR_DELIMITER "CONTOUR-LINE"
 #define MIN_POINT_DIST_PIXELS 10
@@ -50,7 +50,6 @@ private:
     math::Frustum m_frustum;
     bool b_render_3D, b_show_pts;
     int m_active_contour;
-    float m_rad;
 };
 
 using namespace std;

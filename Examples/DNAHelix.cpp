@@ -17,7 +17,7 @@ class HelixScene : public vvr::Scene
 {
 public:
     HelixScene();
-    const char* getName() const { return "Simple 3D Scene"; }
+    const char* getName() const override { return "Simple 3D Scene"; }
     void keyEvent(unsigned char key, bool up, int modif) override;
 
 protected:

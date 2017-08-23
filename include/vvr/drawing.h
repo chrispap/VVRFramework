@@ -83,7 +83,7 @@ namespace vvr {
 
     struct vvrframework_API Drawable
     {
-        virtual ~Drawable() { };
+        virtual ~Drawable() { }
         virtual void draw() const = 0;
         virtual real pickdist(int x, int y) const { return -1.0f; }
         virtual real pickdist(const math::Ray&) const { return -1.0f; }
@@ -99,10 +99,10 @@ namespace vvr {
     struct vvrframework_API Shape : public Drawable
     {
         Shape() { }
-        Shape(const Colour &col, bool filled=false) : colour(col), filled(filled) { }
+        Shape(Colour col, bool filled=false) : colour(col), filled(filled) { }
         virtual ~Shape() { }
         virtual void drawShape() const = 0;
-        virtual void setup() { };
+        virtual void setup() { }
         void draw() const override;
         Colour colour;
         bool filled = false;
@@ -120,12 +120,12 @@ namespace vvr {
         void drawShape() const override;
 
     public:
-        Point2D() {}
+        Point2D() { }
 
-        Point2D(real x, real y, const Colour &col = Colour()) 
-            : x(x)
+        Point2D(real x, real y, Colour col = Colour())
+            : Shape(col)
+            , x(x)
             , y(y)
-            , Shape(col) 
         { }
     };
 
@@ -139,14 +139,14 @@ namespace vvr {
         void drawShape() const override;
 
     public:
-        LineSeg2D() {}
-        
-        LineSeg2D(real x1, real y1, real x2, real y2, const Colour &col = Colour()) 
-            : x1(x1)
+        LineSeg2D() { }
+
+        LineSeg2D(real x1, real y1, real x2, real y2, Colour col = Colour())
+            : Shape(col)
+            , x1(x1)
             , y1(y1)
             , x2(x2)
             , y2(y2)
-            , Shape(col) 
         { }
 
         void set(real x1, real y1, real x2, real y2)
@@ -164,9 +164,9 @@ namespace vvr {
         void drawShape() const override;
 
     public:
-        Line2D() {}
-        Line2D(real x1, real y1, real x2, real y2, const Colour &col = Colour()) 
-            : LineSeg2D(x1, y1, x2, y2, col) 
+        Line2D() { }
+        Line2D(real x1, real y1, real x2, real y2, Colour col = Colour())
+            : LineSeg2D(x1, y1, x2, y2, col)
         { }
     };
 
@@ -181,11 +181,18 @@ namespace vvr {
 
     public:
         Triangle2D() { filled = false; }
-        Triangle2D(real x1, real y1, real x2, real y2, real x3, real y3,
-            const Colour &col = Colour()) :
-            x1(x1), y1(y1), x2(x2), y2(y2), x3(x3), y3(y3), Shape(col) {
+        Triangle2D(real x1, real y1, real x2, real y2, real x3, real y3, Colour col = Colour())
+            : Shape(col)
+            , x1(x1)
+            , y1(y1)
+            , x2(x2)
+            , y2(y2)
+            , x3(x3)
+            , y3(y3)
+        {
             filled = false;
         }
+
         void set(real x1, real y1, real x2, real y2, real x3, real y3)
         {
             vvr_setmemb(x1);
@@ -199,24 +206,24 @@ namespace vvr {
 
     struct vvrframework_API Circle2D : public Shape, public C2DCircle
     {
-        vvr_decl_shape(Circle2D, C2DCircle, false);
+        vvr_decl_shape(Circle2D, C2DCircle, false)
 
-        Circle2D(real x, real y, real r, const Colour &col = Colour())
+        Circle2D(real x, real y, real r, Colour col = Colour())
             : Shape(col)
             , C2DCircle(C2DPoint(x,y), r)
-        { 
+        {
             setup();
         }
 
-        void setRange(real from, real to) 
-        { 
-            range_from = from; 
-            range_to = to; 
+        void setRange(real from, real to)
+        {
+            range_from = from;
+            range_to = to;
         }
 
-        void setClosedLoop(bool closed) 
+        void setClosedLoop(bool closed)
         {
-            closed_loop = closed; 
+            closed_loop = closed;
         }
 
         real pickdist(int x, int y) const override
@@ -232,9 +239,9 @@ namespace vvr {
     private:
         void drawShape() const override;
 
-        void setup()
+        void setup() override
         {
-            range_from = 0.0f; 
+            range_from = 0.0f;
             range_to = math::pi * 2.0f;
             closed_loop = true;
         }
@@ -244,11 +251,11 @@ namespace vvr {
 
     struct vvrframework_API Point3D : public Shape, public math::vec
     {
-        vvr_decl_shape(Point3D, math::vec, false);
+        vvr_decl_shape(Point3D, math::vec, false)
 
-        Point3D(real x, real y, real z, const Colour &col = Colour())
+        Point3D(real x, real y, real z, Colour col = Colour())
             : Shape(col)
-            , math::vec(x, y, z) 
+            , math::vec{ x, y, z }
         { }
 
     private:
@@ -257,12 +264,13 @@ namespace vvr {
 
     struct vvrframework_API LineSeg3D : public Shape, public math::LineSegment
     {
-        vvr_decl_shape(LineSeg3D, math::LineSegment, false);
+        vvr_decl_shape(LineSeg3D, math::LineSegment, false)
 
-        LineSeg3D(real x1, real y1, real z1, real x2, real y2, real z2, 
-                  const Colour &col = Colour()) 
-            : Shape(col) 
-            , LineSegment(math::vec{x1, y1, z1}, math::vec{x2, y2, z2})
+        LineSeg3D(real x1, real y1, real z1, real x2, real y2, real z2,
+                  Colour col = Colour())
+            : Shape(col)
+            , LineSegment(math::vec{x1, y1, z1},
+                          math::vec{x2, y2, z2})
         { }
 
     private:
@@ -271,10 +279,10 @@ namespace vvr {
 
     struct vvrframework_API Sphere3D : public Shape, public math::Sphere
     {
-        vvr_decl_shape(Sphere3D, math::Sphere, false);
+        vvr_decl_shape(Sphere3D, math::Sphere, false)
 
-        Sphere3D(real x, real y, real z, real r, const Colour &col = Colour()) 
-            : Shape(col) 
+        Sphere3D(real x, real y, real z, real r, Colour col = Colour())
+            : Shape(col)
             , math::Sphere({x,y,z}, r)
         { }
 
@@ -284,26 +292,26 @@ namespace vvr {
 
     struct vvrframework_API Aabb3D : public Shape, public math::AABB
     {
-        vvr_decl_shape(Aabb3D, math::AABB, false);
+        vvr_decl_shape(Aabb3D, math::AABB, false)
 
-        Aabb3D(real xmin, real ymin, real zmin, 
-               real xmax, real ymax, real zmax, const Colour &col = Colour())
+        Aabb3D(real xmin, real ymin, real zmin,
+               real xmax, real ymax, real zmax, Colour col = Colour())
             : Shape(col)
             , math::AABB(math::vec{ xmin, ymin, zmin }, math::vec{ xmax, ymax, zmax })
         {
             setup();
         }
 
-        Aabb3D(const std::vector<math::vec> vertices, const Colour &col = Colour())
+        Aabb3D(const std::vector<math::vec> vertices, Colour col = Colour())
             : Shape(col)
             , math::AABB(aabbFromVertices(vertices))
         {
             setup();
         }
 
-        void setTransparency(real a) 
-        { 
-            transparency = a; 
+        void setTransparency(real a)
+        {
+            transparency = a;
         }
 
         real transparency;
@@ -329,21 +337,21 @@ namespace vvr {
         const size_t num_triverts;
         math::vec *triverts;
         math::vec *trinorms;
-        math::vec *norms;
         Point3D *cornerpts;
         Colour col_edge;
     };
 
     struct vvrframework_API Triangle3D : public Shape, public math::Triangle
     {
-        vvr_decl_shape(Triangle3D, math::Triangle, true);
+        vvr_decl_shape(Triangle3D, math::Triangle, true)
 
-        Triangle3D(real x1, real y1, real z1, real x2, real y2, real z2,
-                   real x3, real y3, real z3, const Colour &col = Colour()) 
+        Triangle3D(real x1, real y1, real z1,
+                   real x2, real y2, real z2,
+                   real x3, real y3, real z3, Colour col = Colour())
             : Shape(col, true)
             , math::Triangle(
-                math::vec{ x1, y1, z1}, 
-                math::vec{ x2, y2, z2 }, 
+                math::vec{ x1, y1, z1 },
+                math::vec{ x2, y2, z2 },
                 math::vec{ x3, y3, z3 })
         {
             setup();
@@ -360,7 +368,7 @@ namespace vvr {
 
     private:
         void drawShape() const override;
-        
+
         void setup() override
         {
             setColourPerVertex(colour, colour, colour);
@@ -389,7 +397,7 @@ namespace vvr {
         {
             return math::Circle(basecenter, normal, radius);
         }
-        
+
         math::Circle diskTop() const
         {
             return math::Circle(basecenter + normal*height, normal, radius);
@@ -404,7 +412,7 @@ namespace vvr {
     private:
         void drawShape() const override;
 
-        void setup()
+        void setup() override
         {
             sides = true;
             filled = true;
@@ -415,7 +423,7 @@ namespace vvr {
 
     struct vvrframework_API Ground : public Drawable
     {
-        Ground(const real W, const real D, const real B, const real T, const Colour &colour);
+        Ground(const real W, const real D, const real B, const real T, Colour colour);
         void draw() const override;
 
     private:
@@ -448,7 +456,7 @@ namespace vvr {
     {
         struct Frame
         {
-            Frame(bool show_old = true) : show_old(show_old) {}
+            Frame(bool show_old = true) : show_old(show_old) { }
             std::vector<Drawable*> drvec;
             bool show_old;
         };
@@ -479,34 +487,36 @@ namespace vvr {
 
         /* Helpers to directly add GeoLib objects to canvas */
 
-        Drawable* add(const C2DPoint &p, const Colour &col = Colour())
+        Drawable* add(const C2DPoint &p, Colour col = Colour())
         {
             return add(new Point2D(p.x, p.y, col));
         }
 
-        Drawable* add(const C2DPoint &p1, const C2DPoint &p2, const Colour &col = Colour(), bool inf = false)
+        Drawable* add(const C2DPoint &p1, const C2DPoint &p2, Colour col = Colour(), bool inf = false)
         {
-            if (inf)
+            if (inf ){
                 return add(new Line2D(p1.x, p1.y, p2.x, p2.y, col));
-            else
+            }
+            else {
                 return add(new LineSeg2D(p1.x, p1.y, p2.x, p2.y, col));
+            }
         }
 
-        Drawable* add(const C2DLine &line, const Colour &col = Colour(), bool inf_line = false)
+        Drawable* add(const C2DLine &line, Colour col = Colour(), bool inf_line = false)
         {
             const C2DPoint &p1 = line.GetPointFrom();
             const C2DPoint &p2 = line.GetPointTo();
             return add(p1, p2, col, inf_line);
         }
 
-        Drawable* add(const C2DCircle &circle, const Colour &col = Colour(), bool solid = false)
+        Drawable* add(const C2DCircle &circle, Colour col = Colour(), bool solid = false)
         {
             Shape * s = new Circle2D(circle.GetCentre().x, circle.GetCentre().y, circle.GetRadius(), col);
             s->filled = solid;
             return add(s);
         }
 
-        Drawable* add(const C2DTriangle &tri, const Colour &col = Colour(), bool solid = false)
+        Drawable* add(const C2DTriangle &tri, Colour col = Colour(), bool solid = false)
         {
             Shape *s = new Triangle2D(
                 tri.GetPoint1().x,
@@ -523,21 +533,21 @@ namespace vvr {
 
     /*--- [Drawing helpers] -----------------------------------------------------------*/
 
-    vvrframework_API void draw(C2DPointSet &point_set, const Colour &col = Colour());
+    vvrframework_API void draw(C2DPointSet &point_set, Colour col = Colour());
 
-    vvrframework_API void draw(C2DLineSet &line_set, const Colour &col = Colour());
+    vvrframework_API void draw(C2DLineSet &line_set, Colour col = Colour());
 
-    vvrframework_API void draw(C2DPolygon &polygon, const Colour &col = Colour(), bool filled = false);
+    vvrframework_API void draw(C2DPolygon &polygon, Colour col = Colour(), bool filled = false);
 
     /*--- [MathGeoLib => vvr Converters] (Deprecated. Keep for legacy code)------------*/
 
-    vvrframework_API Triangle3D math2vvr(const math::Triangle &t, const Colour &col);
+    vvrframework_API Triangle3D math2vvr(const math::Triangle &t, Colour col);
 
-    vvrframework_API LineSeg3D math2vvr(const math::LineSegment &l, const Colour &col);
+    vvrframework_API LineSeg3D math2vvr(const math::LineSegment &l, Colour col);
 
-    vvrframework_API LineSeg3D math2vvr(const math::Line &l, const Colour &col);
+    vvrframework_API LineSeg3D math2vvr(const math::Line &l, Colour col);
 
-    vvrframework_API Point3D math2vvr(const math::vec &v, const Colour &col);
+    vvrframework_API Point3D math2vvr(const math::vec &v, Colour col);
 
     /*--- [Predefined colours] --------------------------------------------------------*/
 

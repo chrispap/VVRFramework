@@ -12,9 +12,9 @@ namespace tavli
     using namespace vvr;
     using namespace math;
 
-    class Piece;
-    class Region;
-    class Board;
+    struct Piece;
+    struct Region;
+    struct Board;
 
     struct RegionChooser
     {

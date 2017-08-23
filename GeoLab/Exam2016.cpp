@@ -225,7 +225,7 @@ void Task_Edges(const vvr::Mesh &mesh, std::vector<vvr::LineSeg3D> &segments)
             math::Triangle t1, t2;
             t1 = math::Triangle(tris[e.t1].v1(), tris[e.t1].v2(), tris[e.t1].v3());
             t2 = math::Triangle(tris[e.t2].v1(), tris[e.t2].v2(), tris[e.t2].v3());
-            float a = ::abs(t1.NormalCW().AngleBetweenNorm(t2.NormalCW()) / (math::pi / 4));
+            float a = fabs(t1.NormalCW().AngleBetweenNorm(t2.NormalCW()) / (math::pi / 4));
             if (a > 1) a = 1;
             col.r = a * 255;
             col.b = (1.0 - a) * 255;

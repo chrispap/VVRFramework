@@ -28,7 +28,7 @@ class OrigamiScene : public vvr::Scene
 {
 public:
     OrigamiScene();
-    const char* getName() const { return "Origami Scene"; }
+    const char* getName() const override { return "Origami Scene"; }
     void mousePressed(int x, int y, int modif) override;
     void mouseMoved(int x, int y, int modif) override;
     void mouseReleased(int x, int y, int modif) override;
@@ -189,8 +189,7 @@ void OrigamiScene::draw()
 bool OrigamiScene::idle()
 {
     // Check animation alive
-    if (!anim.on)
-        return false;
+    if (!anim.on) return false;
 
     // Find current animation time
     anim.time += (vvr::getSeconds() - anim.last_update);
@@ -203,6 +202,7 @@ bool OrigamiScene::idle()
     math::float4x4 R = math::float3x3::RotateAxisAngle(dir, rad);
     math::float4x4 M = T2*R*T1;
     folds.at(1).M = M;
+    return true;
 }
 
 void OrigamiScene::mousePressed(int x, int y, int modif)
@@ -277,8 +277,6 @@ void OrigamiScene::keyEvent(unsigned char key, bool up, int modif)
 {
     Scene::keyEvent(key, up, modif);
     const bool ctrl_down = ctrlDown(modif);
-    const bool alt_down = altDown(modif);
-    const bool shift_down = shiftDown(modif);
     key = tolower(key);
 
     switch (key)
@@ -323,7 +321,6 @@ void OrigamiScene::newLineSegment(int x, int y, bool shiftDown)
             const vvr::Colour col = vvr::red;
             math::vec p = pol.ClosestPoint(ray.ToLineSegment(10000));
             vector<vvr::Drawable*> &drawables = m_canvas.getDrawables();
-            vvr::Drawable *sh;
 
             // Start new line segment set
             if (drawables.empty() || m_ongoing_slicing_count == 0)
@@ -366,7 +363,6 @@ void OrigamiScene::newLineSegment(int x, int y, bool shiftDown)
 
 void OrigamiScene::smoothSlices()
 {
-    unsigned fid = m_canvas.frameIndex();
     m_canvas.newFrame(false);
     vector<vvr::Drawable*> &drawables = m_canvas.getDrawables(0);
     vector<vvr::Drawable*> &drawables_prev = m_canvas.getDrawables(-1);

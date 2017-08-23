@@ -14,8 +14,8 @@ namespace vvr {
     public:
         Scene();
         virtual ~Scene() {}
-        virtual const char* getName() const { 
-            return "VVRFramework Application"; 
+        virtual const char* getName() const {
+            return "VVRFramework Application";
         }
 
     protected:
@@ -30,7 +30,7 @@ namespace vvr {
         virtual void sliderChanged(int slider_id, float val);
 
         /*--- [Getters / Setters] -----------------------------------------------------*/
-        math::Frustum getFrustum() { return m_frustum; };
+        math::Frustum getFrustum() { return m_frustum; }
         int getViewportWidth() { return m_screen_width; } // In pixels
         int getViewportHeight() { return m_screen_height; } // In pixels
         float getSceneWidth() { return m_scene_width; }

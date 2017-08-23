@@ -16,7 +16,7 @@ class AnimationScene : public vvr::Scene
 {
 public:
     AnimationScene();
-    const char* getName() const { return "Animation Scene"; }
+    const char* getName() const override { return "Animation Scene"; }
 
 protected:
     void draw() override;

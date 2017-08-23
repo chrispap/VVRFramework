@@ -139,7 +139,6 @@ int FullPath(vector<double> &angles, int from, double &dep_start, double &dep_an
 {
     const int size = angles.size();
     const double pi = 3.14159265359;
-    bool badAngle = false;
     double min_angle = 0, max_angle = pi;
     double start_angle = angles[from];
     int current_i = (from + 1) % size;
@@ -180,7 +179,6 @@ bool ValidChain(vector<double> &angles, int from, int to, double &dep_start, dou
 {
     const int size = angles.size();
     const double pi = 3.14159265359;
-    bool badAngle = false;
     double min_angle = 0, max_angle = pi;
     double start_angle = angles[from];
     int current_i = (from + 1) % size;

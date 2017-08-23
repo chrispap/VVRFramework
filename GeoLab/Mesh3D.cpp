@@ -37,7 +37,7 @@ class Mesh3DScene : public vvr::Scene
 
 public:
     Mesh3DScene();
-    const char* getName() const { return "3D Scene"; }
+    const char* getName() const override { return "3D Scene"; }
     void keyEvent(unsigned char key, bool up, int modif) override;
     void arrowEvent(vvr::ArrowDir dir, int modif) override;
 
@@ -66,8 +66,8 @@ private:
 using namespace std;
 using namespace vvr;
 
-#define OBJ_FILENAME "icosahedron.obj"
-#define OBJ_FILENAME "vvrlab.obj"
+//#define OBJ_FILENAME "icosahedron.obj"
+//#define OBJ_FILENAME "vvrlab.obj"
 #define OBJ_FILENAME "pins.obj"
 
 Mesh3DScene::Mesh3DScene()

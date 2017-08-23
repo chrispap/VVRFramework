@@ -18,12 +18,12 @@
 #define FLAG_SHOW_SOLID 8
 #define FLAG_SHOW_NORMALS 16
 
-#define objName "tavli.obj"
-#define objName "cube.obj"
-#define objName "bunny_low.obj"
-#define objName "large/unicorn.obj"
-#define objName "ironman.obj"
-#define objName "unicorn_low.obj"
+//#define objName "tavli.obj"
+//#define objName "cube.obj"
+//#define objName "bunny_low.obj"
+//#define objName "large/unicorn.obj"
+//#define objName "ironman.obj"
+//#define objName "unicorn_low.obj"
 #define objName "dragon_low_low.obj"
 
 using namespace vvr;
@@ -36,8 +36,8 @@ struct CuttingPlane : public math::Plane, vvr::Drawable
 
     math::vec pos;
     math::vec X, Y, Z;
-    vvr::Colour col;
     float halfside;
+    vvr::Colour col;
 
     void draw() const override
     {
@@ -67,7 +67,7 @@ class Simple3DScene : public vvr::Scene
 {
 public:
     Simple3DScene();
-    const char* getName() const { return "Simple 3D Scene"; }
+    const char* getName() const override { return "Simple 3D Scene"; }
 
 protected:
     void draw() override;
@@ -249,8 +249,6 @@ void Simple3DScene::mouseMoved(int x, int y, int modif)
 
 void Simple3DScene::mouseReleased(int x, int y, int modif)
 {
-    const bool shift_down = shiftDown(modif);
-
     ++m_click_counter;
 }
 

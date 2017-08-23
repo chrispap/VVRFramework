@@ -144,9 +144,9 @@ namespace vvr
 
     private:
         Canvas &canvas;
-        Drawable* dr;
         Dragger3D *dragger;
         math::Ray mouseray;
+        Drawable* dr;
     };
 }
 
