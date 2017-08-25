@@ -2,29 +2,97 @@
 #define BSPLINE_H
 
 #include <vector>
+#include <type_traits>
 
-template<typename point_t>
+namespace vvr {
+
+template <typename T>
 class BSpline
 {
+    template<typename G>
+    G& ref(G& obj) { return obj; }
+
+    template<typename G>
+    G& ref(G* obj) { return *obj; }
+
+    typedef typename std::remove_pointer<T>::type point_t;
+    typedef std::vector<std::vector<double>> double_vector_2d;
+
+    size_t mNumPts;
+    std::vector<T> mCps;
     std::vector<double> mKnots;
-    std::vector<point_t> mCps;
     std::vector<point_t> mCurvePts;
-    size_t m_num_pts;
 
 public:
-    BSpline() : m_num_pts(0) {}
-    void setCtrPts(std::vector<point_t> &&cps);
-    void setKnots(std::vector<double> &&knots);
-    size_t getNumPts() { return m_num_pts; }
-    std::pair<double, double> getParamRange();
-    point_t getCurvePoint(const double t);
-    void updateCurve(size_t num_pts, bool force = false);
-    std::vector<point_t>& getCtrlPts() { return mCps; }
+    BSpline() : mNumPts(0) {}
+    void setCtrPts(std::vector<T> &&cps) { mCps = cps; }
+    void setCtrPts(const std::vector<T> &cps) { mCps = cps; }
+    void setKnots(std::vector<double> &&knots) { mKnots = knots; }
+    void setKnots(const std::vector<double> &knots) { mKnots = knots; }
+    size_t getNumPts() { return mNumPts; }
+    std::vector<T>& getCtrlPts() { return mCps; }
     const std::vector<point_t>& getCurvePts() { return mCurvePts; }
 
+    std::pair<double, double> getParamRange()
+    {
+        const int mb = mKnots.size() - mCps.size();
+        std::pair<double, double> range;
+        range.first = mKnots[mb - 1];
+        range.second = *(mKnots.end() - 1);
+        return range;
+    }
+
+    point_t getCurvePoint(const double t)
+    {
+        const auto &X = mKnots;
+        const auto &B = mCps;
+        const int kn = X.size();
+        const int kp = B.size();
+        const int mb = kn - kp;
+        int i = mb - 1;
+        int k = 0;
+        double_vector_2d N(kn, std::vector<double>(mb, 0.0));
+
+        /* Find knot span */
+        while (t > X[i + 1] && i < kn - mb) i++;
+        N[i][k] = 1;
+
+        for (k = 1; k < mb; k++) {
+            for (i = 0; i < kn - k - 1; i++) {
+                const double A_num = (t - X[i]) * N[i][k - 1];
+                const double A_den = X[i + k] - X[i];
+                const double C_num = (X[i + k + 1] - t) * N[i + 1][k - 1];
+                const double C_den = X[i + k + 1] - X[i + 1];
+                const double A = spline_divide(A_num, A_den);
+                const double C = spline_divide(C_num, C_den);
+                N[i][k] = A + C;
+            }
+        }
+
+        point_t p = ref(B[0]) * N[0][mb - 1];
+        for (i = 1; i < kp; i++) {
+            p += ref(B[i]) * N[i][mb - 1];
+        }
+
+        return p;
+    }
+
+    void updateCurvePts(size_t num_pts, bool force = false)
+    {
+        if (num_pts < 2) num_pts = 2;
+        if (mNumPts == num_pts && !force) return;
+        mNumPts = num_pts;
+        mCurvePts.clear();
+        auto range = getParamRange();
+        auto dt = (range.second - range.first) / (num_pts - 1);
+        for (int i = 0; i < num_pts; i++) {
+            mCurvePts.push_back(getCurvePoint(range.first + dt * i));
+        }
+    }
+
 private:
-    template<typename T>
-    static inline T spline_divide(const T& num, const T& den)
+    template <typename G>
+    static inline G spline_divide(const G& num, const G& den)
     {
         if (den != 0.0) return num / den;
         if (num == 1.0) return 1.0;
@@ -32,78 +100,6 @@ private:
     }
 };
 
-template<typename point_t>
-void BSpline<point_t>::setCtrPts(std::vector<point_t> &&cps)
-{
-    mCps = cps;
-}
-
-template<typename point_t>
-void BSpline<point_t>::setKnots(std::vector<double> &&knots)
-{
-    mKnots = knots;
-}
-
-template<typename point_t>
-std::pair<double, double> BSpline<point_t>::getParamRange()
-{
-    const int mb = mKnots.size() - mCps.size();
-    std::pair<double, double> range;
-    range.first = mKnots[mb - 1];
-    range.second = *(mKnots.end() - 1);
-    return range;
-}
-
-template<typename point_t>
-point_t BSpline<point_t>::getCurvePoint(const double t)
-{
-    const auto &X = mKnots;
-    const auto &B = mCps;
-    const int kn = X.size();
-    const int kp = B.size();
-    const int mb = kn - kp;
-    int i;
-    int k;
-    std::vector<std::vector<double>> N(kn, std::vector<double>(mb, 0.0));
-
-    /* Find knot span */
-    i = mb - 1;
-    k = 0;
-    while (t > X[i + 1] && i < kn - mb) i++;
-    N[i][k] = 1;
-
-    for (k = 1; k < mb; k++) {
-        for (i = 0; i < kn - k - 1; i++) {
-            const double A_num = (t - X[i]) * N[i][k - 1];
-            const double A_den = X[i + k] - X[i];
-            const double C_num = (X[i + k + 1] - t) * N[i + 1][k - 1];
-            const double C_den = X[i + k + 1] - X[i + 1];
-            const double A = spline_divide(A_num, A_den);
-            const double C = spline_divide(C_num, C_den);
-            N[i][k] = A + C;
-        }
-    }
-
-    point_t p = B[0] * N[0][mb - 1];
-    for (i = 1; i < kp; i++) {
-        p += B[i] * N[i][mb - 1];
-    }
-
-    return p;
-}
-
-template<typename point_t>
-void BSpline<point_t>::updateCurve(size_t num_pts, bool force)
-{
-    if (num_pts < 2) num_pts = 2;
-    if (m_num_pts == num_pts && !force) return;
-    m_num_pts = num_pts;
-    mCurvePts.clear();
-    auto range = getParamRange();
-    auto dt = (range.second - range.first) / (num_pts - 1);
-    for (int i = 0; i < num_pts; i++) {
-        mCurvePts.push_back(getCurvePoint(range.first + dt * i));
-    }
 }
 
 #endif

@@ -5,9 +5,18 @@
 
 namespace vvr
 {
+
+    /**
+     * @class Dragger2D
+     * @method bool Dragger2D::grab(Drawable*);
+     * @method void Dragger2D::drag(Drawable*, int, int);
+     * @method void Dragger2D::drop(Drawable*);
+     */
     template <class Dragger2D>
     struct MousePicker2D
     {
+        vvr_decl_shared_ptr(MousePicker2D<Dragger2D>)
+
         struct Mousepos { int x, y; };
 
         void mousePressed(int x, int y, int modif)

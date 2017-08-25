@@ -258,6 +258,12 @@ namespace vvr {
             , math::vec{ x, y, z }
         { }
 
+        real pickdist(int x, int y) const override
+        {
+            real d = this->Distance(vec(x,y,0));
+            return (d < PointSize) ? d : -1;
+        }
+
     private:
         void drawShape() const override;
     };
