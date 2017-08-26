@@ -58,7 +58,6 @@ MoldingScene::MoldingScene()
 {
     m_bg_col = vvr::grey;
     m_hide_log = false;
-    m_fullscreen = true;
     reset();
 
     //! Two hardcoded molds.
@@ -165,7 +164,7 @@ bool MoldingScene::isFreeToMove(C2DVector &dv)
     //!
     //!  - Check if the motion is unobstructed
     //
-    //!     1) Sxediaste sto m_canvas ta imikyklia 
+    //!     1) Sxediaste sto m_canvas ta imikyklia
     //!        dieythinsis kathe plevras.
     //!
     //!     2) Kante return an i kinisi einai epitrepri.
@@ -176,7 +175,7 @@ bool MoldingScene::isFreeToMove(C2DVector &dv)
     //!
     //! VARIABLES:
     //!
-    //!  - C2DPolygon poly      // The polygon that represents the molded object 
+    //!  - C2DPolygon poly      // The polygon that represents the molded object
     //!                         // in its current position.
     //!
     //!  - C2DLine side         //Anaparista mia akmi apo to kaloupi

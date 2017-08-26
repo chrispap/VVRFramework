@@ -44,9 +44,8 @@ using namespace math;
 
 HelixScene::HelixScene()
 {
-    m_bg_col = Colour("888888");
+    m_bg_col = vvr::black;
     m_perspective_proj = true;
-    m_fullscreen = true;
     m_style_flag = FLAG_SHOW_SOLID | FLAG_SHOW_WIRE;
 }
 
@@ -72,7 +71,7 @@ void HelixScene::draw()
     const float degs_from = 360 * 2;
     const double phase = m_anim.t;
 
-    for (float degs = -degs_from; degs < degs_from; degs += 10) 
+    for (float degs = -degs_from; degs < degs_from; degs += 10)
     {
         const float t = DegToRad(phase + degs);
 

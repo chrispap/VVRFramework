@@ -20,6 +20,7 @@ using namespace math;
 
 Scene::Scene()
 {
+    m_bg_col = vvr::white;
     m_perspective_proj = false;
     m_fullscreen = false;
     m_create_menus = true;
@@ -264,7 +265,7 @@ void Scene::setSliderVal(int slider_id, float val)
     if (slider_id > 5 || slider_id < 0) return;
     if (val > 1) val = 1;
     else if (val < 0) val = 0;
-    //TODO: Connect scene object backwards to window 
-    //      in order to be able to change 
+    //TODO: Connect scene object backwards to window
+    //      in order to be able to change
     //      slider values from the scene.
 }

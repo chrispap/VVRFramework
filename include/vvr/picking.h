@@ -5,86 +5,112 @@
 
 namespace vvr
 {
+    struct Mousepos
+    {
+        int x, y;
+    };
 
-    /**
-     * @class Dragger2D
-     * @method bool Dragger2D::grab(Drawable*);
-     * @method void Dragger2D::drag(Drawable*, int, int);
-     * @method void Dragger2D::drop(Drawable*);
-     */
-    template <class Dragger2D>
+    template <class D>
+    struct Dragger2D
+    {
+        bool grab(D* d)
+        {
+            std::cerr << "vvr::Dragger2D<" << vvr::typestr(*d) << "> missing." << std::endl;
+            return false;
+        }
+
+        void drag(int dx, int dy) {}
+
+        void drop() {}
+    };
+
+    template <>
+    struct Dragger2D<Point3D>
+    {
+        Point3D* pt;
+        Colour colour_pregrab;
+
+        bool grab(Point3D* pt)
+        {
+            vvr_setmemb(pt);
+            colour_pregrab = pt->colour;
+            pt->colour = vvr::magenta;
+            return true;
+        }
+
+        void drag(int dx, int dy)
+        {
+            pt->x += dx;
+            pt->y += dy;
+        }
+
+        void drop()
+        {
+            pt->colour = colour_pregrab;
+        }
+    };
+
+    template <class D>
     struct MousePicker2D
     {
-        vvr_decl_shared_ptr(MousePicker2D<Dragger2D>)
+        vvr_decl_shared_ptr(MousePicker2D<D>)
 
-        struct Mousepos { int x, y; };
+    private:
+        D* dr;
+        Canvas *canvas;
+        Mousepos mousepos;
+        Dragger2D<D> dragger;
+
+    public:
+        MousePicker2D(Canvas *canvas)
+            : dr(nullptr)
+            , canvas(canvas)
+        { }
+
+        D* query(Mousepos mp)
+        {
+            D* nearest = nullptr;
+            D* d = nullptr;
+            real mindist = std::numeric_limits<real>::max();
+            for (auto dr : canvas->getDrawables()) {
+                if (!(d=dynamic_cast<D*>(dr))) continue;
+                real dist = d->pickdist(mp.x, mp.y);
+                if (dist >= 0 && dist < mindist) {
+                    nearest = d; mindist = dist;
+                }
+            }
+            return nearest;
+        }
 
         void mousePressed(int x, int y, int modif)
         {
-            Drawable *dr_nearest = nullptr;
-            real dmin = std::numeric_limits<real>::max();
-
-            for (auto dr : canvas.getDrawables())
-            {
-                real pd = dr->pickdist(x, y);
-
-                if (pd >= 0 && pd < dmin)
-                {
-                    dr_nearest = dr;
-                    dmin = pd;
-                }
-            }
-
-            if (dr_nearest)
-            {
-                mousepos = { x,y };
-                dr = dr_nearest;
-                if (!dragger->grab(dr)) {
-                    dr = nullptr;
-                }
-            }
+            mousepos = { x,y };
+            D* nearest = query(mousepos);
+            if (!nearest) return;
+            dr = ((dragger.grab(nearest)) ? nearest : nullptr);
         }
 
         void mouseMoved(int x, int y, int modif)
         {
             if (!dr) return;
-            dragger->drag(dr, x - mousepos.x, y - mousepos.y);
+            int dx = x - mousepos.x;
+            int dy = y - mousepos.y;
+            dragger.drag(dx, dy);
             mousepos = { x,y };
         }
 
         void mouseReleased(int x, int y, int modif)
         {
             if (!dr) return;
-            dragger->drag(dr, x - mousepos.x, y - mousepos.y);
-            dragger->drop(dr);
+            int dx = x - mousepos.x;
+            int dy = y - mousepos.y;
+            dragger.drag(dx, dy);
+            dragger.drop();
             mousepos = { x,y };
             dr = nullptr;
         }
-
-        MousePicker2D(Canvas &canvas, Dragger2D *dragger)
-            : dr(nullptr)
-            , canvas(canvas)
-            , dragger(dragger)
-        { }
-
-        ~MousePicker2D()
-        {
-            delete dragger;
-        }
-
-    private:
-        Dragger2D *dragger;
-        Drawable* dr;
-        Canvas &canvas;
-        Mousepos mousepos;
     };
 
-    /**
-     * @class Dragger3D
-     * @method bool Dragger3D::grab(Drawable*);
-     * @method void Dragger3D::drag(Drawable*, Ray, Ray);
-     * @method void Dragger3D::drop(Drawable*);
-     */
     template <class Dragger3D>
     struct MousePicker3D
     {

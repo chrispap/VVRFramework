@@ -464,7 +464,6 @@ MoldingScene::MoldingScene()
 {
     m_bg_col = vvr::grey;
     m_hide_log = false;
-    m_fullscreen = true;
     m_curr_p = NULL;
     HARDCODEDMOLD_01(m_pts);
     m_polygon = C2DPolygon(&m_pts[0], m_pts.size(), false);

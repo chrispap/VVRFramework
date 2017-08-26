@@ -7,6 +7,8 @@
 #include <sstream>
 #include <vector>
 #include <memory>
+#include <string>
+#include <typeinfo>
 
 namespace vvr
 {
@@ -20,6 +22,11 @@ namespace vvr
     void vvrframework_API split(const std::string &s, char delim, std::vector<std::string> &elems);
     std::vector<std::string> vvrframework_API split(const std::string &s, char delim);
     std::string vvrframework_API zpn(int num, int len);
+    std::string demangle(const char* name);
+    template <class T>
+    std::string typestr(const T& t) {
+        return demangle(typeid(t).name());
+    }
 }
 
 #endif
