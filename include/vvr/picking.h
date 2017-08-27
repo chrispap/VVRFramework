@@ -10,7 +10,7 @@ namespace vvr
         int x, y;
     };
 
-    template <class D>
+    template <class D, class M=void>
     struct Dragger2D
     {
         bool grab(D* d)
@@ -24,8 +24,8 @@ namespace vvr
         void drop() {}
     };
 
-    template <>
-    struct Dragger2D<Point3D>
+    template <class M>
+    struct Dragger2D<Point3D, M>
     {
         Point3D* pt;
         Colour colour_pregrab;
@@ -50,21 +50,22 @@ namespace vvr
         }
     };
 
-    template <class D>
+    template <class D, class M=void>
     struct MousePicker2D
     {
-        vvr_decl_shared_ptr(MousePicker2D<D>)
+        vvr_decl_shared_ptr(MousePicker2D)
 
     private:
         D* dr;
         Canvas *canvas;
         Mousepos mousepos;
-        Dragger2D<D> dragger;
+        Dragger2D<D, M> dragger;
 
     public:
-        MousePicker2D(Canvas *canvas)
+        MousePicker2D(Canvas *canvas, Dragger2D<D, M> dragger = Dragger2D<D, M>())
             : dr(nullptr)
             , canvas(canvas)
+            , dragger(dragger)
         { }
 
         D* query(Mousepos mp)

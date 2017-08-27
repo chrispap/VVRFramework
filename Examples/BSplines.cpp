@@ -12,7 +12,36 @@
 #include <cassert>
 #include <functional>
 
-#define col_cps         vvr::darkOrange
+#define col_cps vvr::darkOrange
+
+typedef vvr::BSpline<vvr::Point3D*> spline_t;
+
+template <>
+struct vvr::Dragger2D<vvr::Point3D, int>
+{
+    bool grab(vvr::Point3D* pt)
+    {
+        return _grabber.grab(pt);
+    }
+
+    void drag(int dx, int dy)
+    {
+        _grabber.drag(dx, dy);
+        _spline->update(true);
+    }
+
+    void drop()
+    {
+        _grabber.drop();
+    }
+
+    Dragger2D(spline_t *spline) : _spline(spline) {}
+
+private:
+    vvr::Dragger2D<vvr::Point3D> _grabber;
+    spline_t *_spline;
+
+};
 
 struct BSplineScene : public vvr::Scene
 {
@@ -22,29 +51,29 @@ struct BSplineScene : public vvr::Scene
     void reset() override;
     void arrowEvent(vvr::ArrowDir dir, int modif) override;
     void keyEvent(unsigned char key, bool up, int modif) override;
-    void mousePressed(int x, int y, int modif) override { mPicker->mousePressed(x,y,modif); }
-    void mouseMoved(int x, int y, int modif) override { mPicker->mouseMoved(x,y,modif);}
-    void mouseReleased(int x, int y, int modif) override {mPicker->mouseReleased(x,y,modif); }
+    void mousePressed(int x, int y, int modif) override { mPicker.mousePressed(x,y,modif); }
+    void mouseMoved(int x, int y, int modif) override { mPicker.mouseMoved(x,y,modif);}
+    void mouseReleased(int x, int y, int modif) override {mPicker.mouseReleased(x,y,modif); }
 
-    typedef vvr::BSpline<vvr::Point3D*> spline_t;
-    typedef vvr::MousePicker2D<vvr::Point3D> mouse_picker_t;
+    typedef vvr::MousePicker2D<vvr::Point3D, int> picker_t;
+    typedef vvr::Dragger2D<vvr::Point3D, int> dragger_t;
 
-    mouse_picker_t::Ptr mPicker;
     vvr::Canvas mCpsCanvas;
     spline_t mSpline;
+    picker_t mPicker;
     bool mDispCurvePts;
 };
 
-BSplineScene::BSplineScene()
+BSplineScene::BSplineScene() : mPicker(&mCpsCanvas, dragger_t(&mSpline))
 {
-    mPicker = mouse_picker_t::Make(&mCpsCanvas);
+    vvr::Shape::PointSize *= 4;
     reset();
 }
 
-struct RefLine : public vvr::Drawable
+struct EditableLineSeg : public vvr::Drawable
 {
     vvr::Point3D *p1, *p2;
-    RefLine()
+    EditableLineSeg()
     {
         p1 = new vvr::Point3D;
         p2 = new vvr::Point3D;
@@ -69,7 +98,7 @@ void BSplineScene::reset()
     mSpline.setKnots({ 0, 0, 0, 0, 1, 1, 1, 1 });
     mSpline.setNumPts(16);
 
-    auto ln = new RefLine;
+    auto ln = new EditableLineSeg;
     ln->p1->set({0,100,0});
     ln->p2->set({0,200,0});
     mCpsCanvas.add(ln->p1);
@@ -82,7 +111,6 @@ void BSplineScene::draw()
     enterPixelMode();
 
     /* Draw spline curve */
-    mSpline.update(true);
     auto pts = mSpline.getPts();
     for (auto it = pts.begin(); it < pts.end() - 1; ++it) {
         vvr::LineSeg3D(math::LineSegment(it[0],it[1])).draw();
