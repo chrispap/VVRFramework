@@ -40,7 +40,7 @@ public:
     void setKnots(const std::vector<double> &knots) { mKnots = knots; mFlagDirty = true; }
     size_t getNumPts() { return mNumPts; }
     std::vector<T>& getCtrlPts() { return mCps; }
-    const std::vector<point_t>& getPts() { update(); return mPts; }
+    const std::vector<point_t>& getPts() const { return mPts; }
 
     void setNumPts(int num)
     {

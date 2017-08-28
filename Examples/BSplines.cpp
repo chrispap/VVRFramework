@@ -14,10 +14,25 @@
 
 #define col_cps vvr::darkOrange
 
-typedef vvr::BSpline<vvr::Point3D*> spline_t;
+struct DrawableSpline : public vvr::BSpline<vvr::Point3D*>, public vvr::Drawable
+{
+    vvr_decl_shared_ptr(DrawableSpline)
+
+    bool disp_curve_pts = true;
+
+    void draw() const override
+    {
+        auto pts = getPts();
+        for (auto it = pts.begin(); it < pts.end() - 1; ++it) {
+            vvr::LineSeg3D(math::LineSegment(it[0], it[1])).draw();
+            if (disp_curve_pts) it->draw();
+        }
+        if (disp_curve_pts) pts.back().draw();
+    }
+};
 
 template <>
-struct vvr::Dragger2D<vvr::Point3D, int>
+struct vvr::Dragger2D<vvr::Point3D, DrawableSpline>
 {
     bool grab(vvr::Point3D* pt)
     {
@@ -35,12 +50,11 @@ struct vvr::Dragger2D<vvr::Point3D, int>
         _grabber.drop();
     }
 
-    Dragger2D(spline_t *spline) : _spline(spline) {}
+    Dragger2D(DrawableSpline *spline) : _spline(spline) {}
 
 private:
     vvr::Dragger2D<vvr::Point3D> _grabber;
-    spline_t *_spline;
-
+    DrawableSpline *_spline;
 };
 
 struct BSplineScene : public vvr::Scene
@@ -51,20 +65,19 @@ struct BSplineScene : public vvr::Scene
     void reset() override;
     void arrowEvent(vvr::ArrowDir dir, int modif) override;
     void keyEvent(unsigned char key, bool up, int modif) override;
-    void mousePressed(int x, int y, int modif) override { mPicker.mousePressed(x,y,modif); }
-    void mouseMoved(int x, int y, int modif) override { mPicker.mouseMoved(x,y,modif);}
-    void mouseReleased(int x, int y, int modif) override {mPicker.mouseReleased(x,y,modif); }
+    void mousePressed(int x, int y, int modif) override { mPicker->mousePressed(x,y,modif); }
+    void mouseMoved(int x, int y, int modif) override { mPicker->mouseMoved(x,y,modif);}
+    void mouseReleased(int x, int y, int modif) override {mPicker->mouseReleased(x,y,modif); }
 
-    typedef vvr::MousePicker2D<vvr::Point3D, int> picker_t;
-    typedef vvr::Dragger2D<vvr::Point3D, int> dragger_t;
+    typedef vvr::MousePicker2D<vvr::Point3D, DrawableSpline> picker_t;
+    typedef vvr::Dragger2D<vvr::Point3D, DrawableSpline> dragger_t;
 
-    vvr::Canvas mCpsCanvas;
-    spline_t mSpline;
-    picker_t mPicker;
-    bool mDispCurvePts;
+    picker_t::Ptr mPicker;
+    vvr::Canvas mCanvas;
+    DrawableSpline::Ptr mSpline;
 };
 
-BSplineScene::BSplineScene() : mPicker(&mCpsCanvas, dragger_t(&mSpline))
+BSplineScene::BSplineScene()
 {
     vvr::Shape::PointSize *= 4;
     reset();
@@ -75,8 +88,8 @@ struct EditableLineSeg : public vvr::Drawable
     vvr::Point3D *p1, *p2;
     EditableLineSeg()
     {
-        p1 = new vvr::Point3D;
-        p2 = new vvr::Point3D;
+        p1 = new vvr::Point3D(vvr::red);
+        p2 = new vvr::Point3D(vvr::green);
     }
     void draw() const override
     {
@@ -87,40 +100,34 @@ struct EditableLineSeg : public vvr::Drawable
 void BSplineScene::reset()
 {
     vvr::Scene::reset();
-    mCpsCanvas.clear();
+    mCanvas.clear();
+
     std::vector<vvr::Point3D*> cps;
     cps.push_back(new vvr::Point3D(-150,  100, 0, col_cps));
     cps.push_back(new vvr::Point3D( -50, -100, 0, col_cps));
     cps.push_back(new vvr::Point3D(  50,  100, 0, col_cps));
     cps.push_back(new vvr::Point3D( 150, -100, 0, col_cps));
-    for (auto dr : cps) mCpsCanvas.add(dr);
-    mSpline.setCtrPts(std::move(cps));
-    mSpline.setKnots({ 0, 0, 0, 0, 1, 1, 1, 1 });
-    mSpline.setNumPts(16);
+    for (auto cp : cps) mCanvas.add(cp);
+    mSpline = DrawableSpline::Make();
+    mSpline->setCtrPts(cps);
+    mSpline->setKnots({ 0, 0, 0, 0, 1, 1, 1, 1 });
+    mSpline->setNumPts(16);
 
     auto ln = new EditableLineSeg;
     ln->p1->set({0,100,0});
     ln->p2->set({0,200,0});
-    mCpsCanvas.add(ln->p1);
-    mCpsCanvas.add(ln->p2);
-    mCpsCanvas.add(ln);
+    mCanvas.add(ln);
+    mCanvas.add(ln->p1);
+    mCanvas.add(ln->p2);
+
+    mPicker = picker_t::Make(&mCanvas, dragger_t(mSpline.get()));
 }
 
 void BSplineScene::draw()
 {
     enterPixelMode();
-
-    /* Draw spline curve */
-    auto pts = mSpline.getPts();
-    for (auto it = pts.begin(); it < pts.end() - 1; ++it) {
-        vvr::LineSeg3D(math::LineSegment(it[0],it[1])).draw();
-        if (mDispCurvePts) it->draw();
-    }
-    pts.back().draw();
-
-    /* Draw Control points */
-    mCpsCanvas.drawif();
-
+    mSpline->drawif();
+    mCanvas.drawif();
     exitPixelMode();
 }
 
@@ -128,8 +135,9 @@ void BSplineScene::keyEvent(unsigned char key, bool up, int modif)
 {
     key = ::tolower(key);
     switch (key) {
-    case 'p': mDispCurvePts = !mDispCurvePts; break;
-    case 'c': mCpsCanvas.toggleVisibility(); break;
+    case 'c': for (auto cp : mSpline->getCtrlPts()) cp->toggleVisibility(); break;
+    case 's': mSpline->toggleVisibility(); break;
+    case 'p': mSpline->disp_curve_pts ^= true; break;
     case 'r': reset(); break;
     }
 }
@@ -138,14 +146,14 @@ void BSplineScene::arrowEvent(vvr::ArrowDir dir, int modif)
 {
     if (dir == vvr::ArrowDir::UP)
     {
-        mSpline.setNumPts(mSpline.getNumPts() + 1);
+        mSpline->setNumPts(mSpline->getNumPts() + 1);
     }
     else if (dir == vvr::ArrowDir::DOWN)
     {
-        mSpline.setNumPts(mSpline.getNumPts() - 1);
+        mSpline->setNumPts(mSpline->getNumPts() - 1);
     }
 
-    vvr_echo(mSpline.getNumPts());
+    vvr_echo(mSpline->getNumPts());
 }
 
 int main(int argc, char* argv[])

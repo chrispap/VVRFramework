@@ -70,10 +70,12 @@ namespace vvr
 
         D* query(Mousepos mp)
         {
+            if (!canvas->visible) return nullptr;
             D* nearest = nullptr;
             D* d = nullptr;
             real mindist = std::numeric_limits<real>::max();
             for (auto dr : canvas->getDrawables()) {
+                if (!dr->visible) continue;
                 if (!(d=dynamic_cast<D*>(dr))) continue;
                 real dist = d->pickdist(mp.x, mp.y);
                 if (dist >= 0 && dist < mindist) {
