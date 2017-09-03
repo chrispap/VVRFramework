@@ -54,7 +54,7 @@ math::AABB vvr::aabbFromVertices(const std::vector<vec> &vertices)
 
 /*--- [Shape] Drawing -----------------------------------------------------------------*/
 
-void vvr::Shape::draw() const 
+void vvr::Shape::draw() const
 {
     glPolygonMode(GL_FRONT_AND_BACK, filled ? GL_FILL : GL_LINE);
     glColor4ubv(colour.data);
@@ -119,7 +119,7 @@ void vvr::Circle2D::drawShape() const
     real d_th = (range_to - range_from) / numOfSegments;
     for (real theta = range_from; theta <= range_to; theta += d_th) {
         math::SinCos(theta, y, x);
-        x *= cr; 
+        x *= cr;
         y *= cr;
         glVertex2f(cx + x, cy + y);
     }
@@ -171,10 +171,10 @@ void vvr::Cylinder3D::drawShape() const
     auto m = math::float4x4::RotateFromTo({ 0,0,1 }, normal);
     m.SetTranslatePart(basecenter);
     m.Transpose();
- 
+
     glPushMatrix();
     glMultMatrixf(m.ptr());
-    
+
     /* Base */
     glBegin(GL_POLYGON);
     vec normalinv(-normal);
@@ -234,7 +234,7 @@ void vvr::Aabb3D::drawShape() const
 
 void vvr::Obb3D::drawShape() const
 {
-    if (filled) 
+    if (filled)
     {
         for (size_t i = 0; i < num_triverts; i += 3) {
             math::Triangle t(triverts[i + 0], triverts[i + 1], triverts[i + 2]);
@@ -245,10 +245,10 @@ void vvr::Obb3D::drawShape() const
     for (int i = 0; i < NumEdges(); ++i) {
         math2vvr(Edge(i), col_edge).draw();
     }
-    
+
     auto ptsz_old = vvr::Shape::PointSize;
     vvr::Shape::PointSize = 12;
-    for (int i = 0; i < NumVertices(); ++i) 
+    for (int i = 0; i < NumVertices(); ++i)
         cornerpts[i].draw();
     vvr::Shape::PointSize = ptsz_old;
 }
@@ -275,7 +275,7 @@ void vvr::Obb3D::set(const math::AABB& aabb, const math::float4x4& transform)
     SetFrom(aabb, transform);
     Triangulate(1, 1, 1, triverts, trinorms, nullptr, true);
     for (size_t i = 0; i < NumVertices(); ++i) {
-        cornerpts[i].set(CornerPoint(i));
+        cornerpts[i].setGeom(CornerPoint(i));
     }
 }
 
@@ -345,7 +345,7 @@ void vvr::Canvas::draw() const
 
 void vvr::Canvas::resize(int i)
 {
-    if (i<1 || i > size()-1) 
+    if (i<1 || i > size()-1)
         return;
 
     if (del_on_clear) {
@@ -420,7 +420,7 @@ void vvr::draw(C2DPolygon  &polygon, Colour col, bool filled)
         if (!polygon.IsConvex()) {
             err = !polygon.CreateConvexSubAreas();
         }
-        if (!err) 
+        if (!err)
         {
             C2DPolygonSet polyset;
             polygon.GetConvexSubAreas(polyset);

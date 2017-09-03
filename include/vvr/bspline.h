@@ -38,8 +38,8 @@ public:
     void setCtrPts(const std::vector<T> &cps) { mCps = cps; mFlagDirty = true; }
     void setKnots(std::vector<double> &&knots) { mKnots = knots; mFlagDirty = true; }
     void setKnots(const std::vector<double> &knots) { mKnots = knots; mFlagDirty = true; }
-    size_t getNumPts() { return mNumPts; }
-    std::vector<T>& getCtrlPts() { return mCps; }
+    size_t getNumPts() const { return mNumPts; }
+    const std::vector<T>& getCps() const { return mCps; }
     const std::vector<point_t>& getPts() const { return mPts; }
 
     void setNumPts(int num)

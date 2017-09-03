@@ -42,15 +42,15 @@
 
 /*----[VVR MULTILINE MACRO]------------------------------------------------------------*/
 #define vvr_decl_shape(Name, Base, filled)                                              \
-    void set(const Base& gm) { static_cast<Base&>(*this) = gm; }                        \
+    void setGeom(const Base& gmb) { static_cast<Base&>(*this) = gmb; }                  \
     Name(const vvr::Colour& col=vvr::Colour())                                          \
         : Shape(col, filled)                                                            \
         {                                                                               \
             setup();                                                                    \
         }                                                                               \
-    Name(const Base& gm, const vvr::Colour& col=vvr::Colour())                          \
+    Name(const Base& gmb, const vvr::Colour& col=vvr::Colour())                         \
         : Shape(col, filled)                                                            \
-        , Base(gm)                                                                      \
+        , Base(gmb)                                                                     \
         {                                                                               \
             setup();                                                                    \
         }                                                                               \

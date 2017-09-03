@@ -10,12 +10,17 @@ namespace vvr
         int x, y;
     };
 
-    template <class D, class M=void>
+    /*---[Dragger: Basic (Does nothing)]------------------------------------------------*/
+
+    template <class D, typename ContextT=void>
     struct Dragger2D
     {
         bool grab(D* d)
         {
-            std::cerr << "vvr::Dragger2D<" << vvr::typestr(*d) << "> missing." << std::endl;
+            std::cerr << "vvr::Dragger2D<"
+                      << vvr::typestr(*d)
+                      << "> missing."
+                      << std::endl;
             return false;
         }
 
@@ -24,8 +29,10 @@ namespace vvr
         void drop() {}
     };
 
-    template <class M>
-    struct Dragger2D<Point3D, M>
+    /*---[Dragger: Point]---------------------------------------------------------------*/
+
+    template <typename ContextT>
+    struct Dragger2D<Point3D, ContextT>
     {
         Point3D* pt;
         Colour colour_pregrab;
@@ -50,7 +57,39 @@ namespace vvr
         }
     };
 
-    template <class D, class M=void>
+    /*---[Dragger: Triangle]------------------------------------------------------------*/
+
+    template <typename ContextT>
+    struct vvr::Dragger2D<vvr::Triangle2D, ContextT>
+    {
+        bool grab(vvr::Triangle2D* tri)
+        {
+            vvr_setmemb(tri);
+            return true;
+        }
+
+        void drag(int dx, int dy)
+        {
+            tri->x1 += dx;
+            tri->x2 += dx;
+            tri->x3 += dx;
+            tri->y1 += dy;
+            tri->y2 += dy;
+            tri->y3 += dy;
+        }
+
+        void drop()
+        {
+
+        }
+
+    private:
+        vvr::Triangle2D *tri;
+    };
+
+    /*---[2D Mouse Picker]--------------------------------------------------------------*/
+
+    template <class D, class ContextT=void>
     struct MousePicker2D
     {
         vvr_decl_shared_ptr(MousePicker2D)
@@ -58,15 +97,17 @@ namespace vvr
     private:
         D* dr;
         Canvas *canvas;
+        Dragger2D<D, ContextT> dragger;
         Mousepos mousepos;
-        Dragger2D<D, M> dragger;
 
     public:
-        MousePicker2D(Canvas *canvas, Dragger2D<D, M> dragger = Dragger2D<D, M>())
+        MousePicker2D(Canvas *canvas, Dragger2D<D, ContextT> dragger = Dragger2D<D, ContextT>())
             : dr(nullptr)
             , canvas(canvas)
             , dragger(dragger)
-        { }
+            , mousepos({0,0})
+        {
+        }
 
         D* query(Mousepos mp)
         {
@@ -85,15 +126,14 @@ namespace vvr
             return nearest;
         }
 
-        void mousePressed(int x, int y, int modif)
+        void pick(int x, int y, int modif)
         {
             mousepos = { x,y };
-            D* nearest = query(mousepos);
-            if (!nearest) return;
-            dr = ((dragger.grab(nearest)) ? nearest : nullptr);
+            if (!(dr = query(mousepos))) return;
+            if (!(dragger.grab(dr))) dr = nullptr;
         }
 
-        void mouseMoved(int x, int y, int modif)
+        void move(int x, int y, int modif)
         {
             if (!dr) return;
             int dx = x - mousepos.x;
@@ -102,7 +142,7 @@ namespace vvr
             mousepos = { x,y };
         }
 
-        void mouseReleased(int x, int y, int modif)
+        void drop(int x, int y, int modif)
         {
             if (!dr) return;
             int dx = x - mousepos.x;
@@ -113,6 +153,8 @@ namespace vvr
             dr = nullptr;
         }
     };
+
+    /*---[3D Mouse Picker]--------------------------------------------------------------*/
 
     template <class Dragger3D>
     struct MousePicker3D

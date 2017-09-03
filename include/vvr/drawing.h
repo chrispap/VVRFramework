@@ -193,6 +193,12 @@ namespace vvr {
             filled = false;
         }
 
+        real pickdist(int x, int y) const override
+        {
+            C2DTriangle t(C2DPoint(x1,y1), C2DPoint(x2,y2), C2DPoint(x3,y3));
+            return (t.Contains(C2DPoint(x,y))) ? t.GetInCentre().Distance(C2DPoint(x,y)) : -1;
+        }
+
         void set(real x1, real y1, real x2, real y2, real x3, real y3)
         {
             vvr_setmemb(x1);
