@@ -13,33 +13,45 @@
 #include <cassert>
 #include <functional>
 
-template <class ComponentT, class CompositeT, size_t N>
-struct CompositeShape : public vvr::Drawable
+template <class ComponentT, size_t N, class CompositeT>
+struct Composite : public vvr::Drawable
 {
-    static_assert(N>1, "NumBlocks must be 1+");
+    static_assert(std::is_pointer<ComponentT>::value, "Components should be pointers");
+    static_assert(N>1, "N must be 1+");
 
-    std::array<ComponentT, N> p;
-    vvr::Colour colour;
+    std::array<ComponentT, N> components;
+    CompositeT composite;
 
-    void draw() const override
+    template <typename... T>
+    Composite(std::array<ComponentT, N> comp, vvr::Colour colour) 
+        : components{ comp }
+        , composite(assemble(components, std::make_index_sequence<N>(), colour))
     {
-        update();
-        b.draw();
+    }
+
+    void addToCanvas(vvr::Canvas &canvas)
+    {
+        canvas.add(this);
+        for (auto c : components) canvas.add(c);
     }
 
     template<typename Array, std::size_t... I>
-    void update_impl(const Array& a, std::index_sequence<I...>) const
+    CompositeT assemble(const Array& a, std::index_sequence<I...>, vvr::Colour col) const
     {
-        const_cast<CompositeT&>(b) = CompositeT({*a[I]...}, colour);
+        return CompositeT({ *a[I]... }, col);
     }
 
-    void update() const
+    template<typename Array, std::size_t... I>
+    void update(const Array& a, std::index_sequence<I...>) const
     {
-        return update_impl(p, std::make_index_sequence<N>());
+        const_cast<CompositeT&>(composite).setGeom({ *a[I]... });
     }
 
-private:
-    CompositeT b;
+    void draw() const override
+    {
+        update(components, std::make_index_sequence<N>());
+        composite.draw();
+    }
 };
 
 struct Spline : public vvr::BSpline<vvr::Point3D*>, public vvr::Drawable
@@ -48,6 +60,12 @@ struct Spline : public vvr::BSpline<vvr::Point3D*>, public vvr::Drawable
 
     bool disp_curve_pts = false;
     vvr::Colour colour;
+
+    void addToCanvas(vvr::Canvas &canvas)
+    {
+        canvas.add(this);
+        for (auto cp : getCps()) canvas.add(cp);
+    }
 
     void draw() const override
     {
@@ -118,8 +136,8 @@ public:
     void mouseReleased(int x, int y, int modif) override {mPicker->drop(x,y,modif); }
 
 private:
-    typedef CompositeShape<vvr::Point3D*, vvr::Triangle3D, 3> CompositeTriangle;
-    typedef CompositeShape<vvr::Point3D*, vvr::LineSeg3D, 2> CompositeLine;
+    typedef Composite<vvr::Point3D*, 3,  vvr::Triangle3D> CompositeTriangle;
+    typedef Composite<vvr::Point3D*, 2, vvr::LineSeg3D> CompositeLine;
     typedef vvr::MousePicker2D<vvr::Point3D, Spline> picker_t;
     typedef vvr::Dragger2D<vvr::Point3D, Spline> dragger_t;
     picker_t::Ptr mPicker;
@@ -136,32 +154,26 @@ BSplineScene::BSplineScene()
 void BSplineScene::reset()
 {
     vvr::Scene::reset();
-    mCanvas.clear();
 
-    /* Create & add to canvas: Line */
-    auto lin = new CompositeLine;
-    lin->p[0] = new vvr::Point3D(0,100,0, vvr::darkRed);
-    lin->p[1] = new vvr::Point3D(0,200,0, vvr::darkRed);
-    lin->colour = vvr::darkRed;
-    mCanvas.add(lin);
-    mCanvas.add(lin->p[0]);
-    mCanvas.add(lin->p[1]);
-
-    /* Create & add to canvas: Triangle */
-    auto tri = new CompositeTriangle;
-    tri->p[0] = new vvr::Point3D{-100,0,0, vvr::darkGreen};
-    tri->p[1] = new vvr::Point3D{100,0,0, vvr::darkGreen};
-    tri->p[2] = new vvr::Point3D{200,134,0, vvr::darkGreen};
-    tri->colour = vvr::darkGreen;
-    mCanvas.add(tri);
-    mCanvas.add(tri->p[0]);
-    mCanvas.add(tri->p[1]);
-    mCanvas.add(tri->p[2]);
-
-    /* Create & add to canvas: Spline */
+    /* Make drawables */
     auto spline = Spline::Make(vvr::red, vvr::red);
-    mCanvas.add(spline);
-    for (auto cp : spline->getCps()) mCanvas.add(cp);
+
+    auto lin = new CompositeLine({
+        new vvr::Point3D(0,100,0, vvr::darkRed),
+        new vvr::Point3D(0,200,0, vvr::darkRed)},
+        vvr::darkRed);
+    
+    auto tri = new CompositeTriangle({
+        new vvr::Point3D(-100,0,0, vvr::darkGreen),
+        new vvr::Point3D(100,0,0, vvr::darkGreen),
+        new vvr::Point3D(200,134,0, vvr::darkGreen)},
+        vvr::darkGreen);
+
+    /* Add to canvas */
+    mCanvas.clear();
+    spline->addToCanvas(mCanvas);
+    lin->addToCanvas(mCanvas);
+    tri->addToCanvas(mCanvas);
 
     /* Create a picker on the canvas */
     mSpline = spline;
@@ -195,3 +207,4 @@ int main(int argc, char* argv[])
     try { return vvr::mainLoop(argc, argv, new BSplineScene); }
     catch (std::string exc) { std::cerr << exc << std::endl; return 1; }
 }
+

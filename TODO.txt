@@ -1,22 +1,20 @@
 ~TODO~
 
---- [General] ----------------------------------------------------------------------------
- - Design [correct, complete, flexible] inheritance with the Geometry Libraries used:
-    + MathGeoLib: For every primitive geometric entity that we provide support,
-      inherit from 'namespace math'.
-    + The same for GeoLib for 2D stuff.
- - Design a flexible Scene management class/system.
-    + It should provide some utilities to the client developer, otherwise it does not
-      have reason to exist. These could for example be:
-    + Basic mouse interaction/manipulation of scene, drawables, camera, viewport.
-    + Get rid of the limitations of VVRFramework scene regarding the scene dimensions
-      and the resize event handling.
- - Try to get away from the imperative drawing to a more declarative one.
- - Try to introcude a wider adoption of 'std::shared_ptr' and generally make more
-   automatic and reliable the memory management.
- - Find a smart way to implement the various composite geometric types so that direct
-   editing through their defining entities will emerge naturally. Basically, adopt the
-   point type as the basis for all mouse interaction.
- - The next step is to not limit ourselves to points for picking and manipulation, but
-   offer also, hover capabilities and complex geometry picking and manipulating.
-------------------------------------------------------------------------------------------
+---[Architecture]------------------------------------------------------------------------
+
+ + COMPOSITE: Geometric types composed from simpler ones.
+    - Composites must be able to be conveniently added on canvas along with their 
+      components. Maybe add components only on a vector for picking and let the 
+      composite object draw itself along with the components. 
+
+ + LINK: Support the link of points so that they can be dragger together. 
+    - Could be with the same instant of the linked object 
+    - Or with multiple objects with some kind of soft link.
+
+ + HOVER: Automatic hover on mouse move while btn down.
+
+ + MEMORY:
+    - Canvas should stop deleting 'vvr::Drawable' objects.
+    - A resource management object should be designed.
+    - Investigate the potential of using 'std::shared_ptr'.
+-----------------------------------------------------------------------------------------
