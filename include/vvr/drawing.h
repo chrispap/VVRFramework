@@ -8,6 +8,7 @@
 #include <GeoLib.h>
 #include <string>
 #include <vector>
+#include <array>
 #include <cstdlib>
 
 namespace vvr {

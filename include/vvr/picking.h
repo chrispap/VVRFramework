@@ -2,6 +2,8 @@
 #define VVR_PICKING_H
 
 #include "drawing.h"
+#include "utils.h"
+#include <tuple>
 
 namespace vvr
 {
@@ -194,7 +196,7 @@ namespace vvr
                 return false;
             }
         }
-    
+
         void move(int x, int y, int modif)
         {
             if (!dr) return;
@@ -298,7 +300,7 @@ namespace vvr
     {
         vvr_decl_shared_ptr(CascadePicker2D)
 
-            typedef std::tuple<PickerTypes...> picker_tuple_t;
+        typedef std::tuple<PickerTypes...> picker_tuple_t;
 
         CascadePicker2D(vvr::Canvas &canvas)
             : pickers((sizeof(PickerTypes), canvas)...)
@@ -309,7 +311,7 @@ namespace vvr
         bool pick(int x, int y, int modif)
         {
             bool picked = false;
-            std::_For_each_tuple_element(pickers, [&](auto &p) {
+            apply(pickers, [&](auto &p) {
                 picked = picked || p.pick(x, y, modif);
             });
             return picked;
@@ -317,14 +319,14 @@ namespace vvr
 
         void move(int x, int y, int modif)
         {
-            std::_For_each_tuple_element(pickers, [&](auto &p) {
+            apply(pickers, [&](auto &p) {
                 p.move(x, y, modif);
             });
         }
 
         void drop(int x, int y, int modif)
         {
-            std::_For_each_tuple_element(pickers, [&](auto &p) {
+            apply(pickers, [&](auto &p) {
                 p.drop(x, y, modif);
             });
         }

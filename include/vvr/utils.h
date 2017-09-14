@@ -9,10 +9,8 @@
 #include <memory>
 #include <string>
 #include <typeinfo>
-#ifdef __GNUG__
-#   include <cstdlib>
-#   include <cxxabi.h>
-#endif
+#include <tuple>
+#include <utility>
 
 namespace vvr
 {
@@ -26,28 +24,27 @@ namespace vvr
     void vvrframework_API split(const std::string &s, char delim, std::vector<std::string> &elems);
     std::vector<std::string> vvrframework_API split(const std::string &s, char delim);
     std::string vvrframework_API zpn(int num, int len);
-    std::string vvrframework_API demangle(const char* name);
 
 #ifdef __GNUG__
-
-    std::string vvr::demangle(const char* name)
-    {
-        int status = -123;
-        std::unique_ptr<char, void(*)(void*)> res{
-            abi::__cxa_demangle(name, NULL, NULL, &status), std::free
-        };
-        return (status == 0) ? res.get() : name;
-    }
+    std::string vvrframework_API demangle(const char* name);
 
     template <class T>
     std::string typestr(const T& t) { return demangle(typeid(t).name()); }
-
 #else
-
     template <class T>
     std::string typestr(const T& t) { return typeid(t).name(); }
-
 #endif
+
+    template <class Tuple, class F, size_t... Is>
+    constexpr auto apply_impl(Tuple& t, F f, std::index_sequence<Is...>) {
+        int dummy[] = {0, (f(std::get<Is>(t)), void(), 0)...};
+        static_cast<void>(dummy);
+    }
+
+    template <class Tuple, class F>
+    constexpr auto apply(Tuple& t, F f) {
+        return apply_impl(t, f, std::make_index_sequence<std::tuple_size<Tuple>{}>{});
+    }
 
 }
 

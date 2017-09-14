@@ -16,6 +16,10 @@
 #ifdef __APPLE__
 #   include <mach-o/dyld.h>
 #endif
+#ifdef __GNUG__
+#   include <cstdlib>
+#   include <cxxabi.h>
+#endif
 
 using namespace std;
 
@@ -125,3 +129,14 @@ std::string vvr::zpn(int num, int len)
     ss << std::setw(len) << std::setfill('0') << num;
     return ss.str();
 }
+
+#ifdef __GNUG__
+    std::string vvrframework_API demangle(const char* name)
+    {
+        int status = -123;
+        std::unique_ptr<char, void(*)(void*)> res{
+            abi::__cxa_demangle(name, NULL, NULL, &status), std::free
+        };
+        return (status == 0) ? res.get() : name;
+    }
+#endif

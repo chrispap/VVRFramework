@@ -79,8 +79,6 @@ private:
     Spline *_spline=nullptr;
 };
 
-/*---[Scene]---------------------------------------------------------------------------*/
-
 class BSplineScene : public vvr::Scene
 {
 public:
@@ -120,7 +118,7 @@ void BSplineScene::reset()
         new vvr::Point3D(0,100,0, vvr::darkRed),
         new vvr::Point3D(0,200,0, vvr::darkRed) },
         vvr::darkRed))->addToCanvas(mCanvas);
-    
+
     (new vvr::CompositeTriangle({
         new vvr::Point3D(-100,0,0, vvr::darkGreen),
         new vvr::Point3D(100,0,0, vvr::darkGreen),
