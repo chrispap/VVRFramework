@@ -14,11 +14,11 @@ namespace vvr {
 
     typedef float real;
 
-    /*--- [Helpers] -------------------------------------------------------------------*/
+    /*---[Helpers]---------------------------------------------------------------------*/
 
     math::AABB aabbFromVertices(const std::vector<math::vec> &vertices);
 
-    /*--- [Colour] --------------------------------------------------------------------*/
+    /*---[Colour]----------------------------------------------------------------------*/
 
     struct vvrframework_API Colour
     {
@@ -79,7 +79,7 @@ namespace vvr {
 
     };
 
-    /*--- [Interfaces] ----------------------------------------------------------------*/
+    /*---[Interfaces]------------------------------------------------------------------*/
 
     struct vvrframework_API Drawable
     {
@@ -110,7 +110,7 @@ namespace vvr {
         static real PointSize;
     };
 
-    /*--- [Shapes] 2D -----------------------------------------------------------------*/
+    /*---[Shapes: 2D]------------------------------------------------------------------*/
 
     struct vvrframework_API Point2D : public Shape
     {
@@ -253,7 +253,7 @@ namespace vvr {
         }
     };
 
-    /*--- [Shapes] 3D -----------------------------------------------------------------*/
+    /*---[Shapes: 3D]------------------------------------------------------------------*/
 
     struct vvrframework_API Point3D : public Shape, public math::vec
     {
@@ -369,6 +369,12 @@ namespace vvr {
             setup();
         }
 
+        real pickdist(int x, int y) const override
+        {
+            vec p(x, y, 0);
+            return this->Contains(p)? this->CenterPoint().Distance(p) : -1;
+        }
+
         void setColourPerVertex(const Colour &c1, const Colour &c2, const Colour &c3)
         {
             vertex_col[0] = c1;
@@ -431,7 +437,7 @@ namespace vvr {
         }
     };
 
-    /*--- [Other drawables] -----------------------------------------------------------*/
+    /*---[Drawables: Others]-----------------------------------------------------------*/
 
     struct vvrframework_API Ground : public Drawable
     {
@@ -462,7 +468,7 @@ namespace vvr {
         LineSeg3D x, y, z;
     };
 
-    /*--- [Canvas] --------------------------------------------------------------------*/
+    /*---[Canvas]----------------------------------------------------------------------*/
 
     class vvrframework_API Canvas : public Drawable
     {
@@ -543,7 +549,59 @@ namespace vvr {
         }
     };
 
-    /*--- [Drawing helpers] -----------------------------------------------------------*/
+    /*---[Composite Drawables]---------------------------------------------------------*/
+
+    template <class ComponentT, size_t N, class CompositeT>
+    struct Composite : public Drawable
+    {
+        static_assert(std::is_pointer<ComponentT>::value, "Components should be pointers");
+        static_assert(N>1, "N must be 1+");
+
+        std::array<ComponentT, N> components;
+        CompositeT composite;
+
+        template <typename... T>
+        Composite(std::array<ComponentT, N> comps, Colour colour)
+            : components{ comps }
+            , composite(assemble(components, std::make_index_sequence<N>(), colour))
+        {
+        }
+
+        void addToCanvas(Canvas &canvas)
+        {
+            canvas.add(this);
+            for (auto c : components) canvas.add(c);
+        }
+
+        template<typename Array, std::size_t... I>
+        CompositeT assemble(const Array& a, std::index_sequence<I...>, Colour col) const
+        {
+            return CompositeT({ *a[I]... }, col);
+        }
+
+        template<typename Array, std::size_t... I>
+        void update(const Array& a, std::index_sequence<I...>) const
+        {
+            const_cast<CompositeT&>(composite).setGeom({ *a[I]... });
+        }
+
+        real pickdist(int x, int y) const override
+        {
+            return composite.pickdist(x, y);
+        }
+
+        void draw() const override
+        {
+            update(components, std::make_index_sequence<N>());
+            composite.draw();
+        }
+    };
+
+    typedef Composite<Point3D*, 3, Triangle3D> CompositeTriangle;
+
+    typedef Composite<Point3D*, 2, LineSeg3D> CompositeLine;
+
+    /*---[Drawing helpers]-------------------------------------------------------------*/
 
     vvrframework_API void draw(C2DPointSet &point_set, Colour col = Colour());
 
@@ -551,7 +609,7 @@ namespace vvr {
 
     vvrframework_API void draw(C2DPolygon &polygon, Colour col = Colour(), bool filled = false);
 
-    /*--- [MathGeoLib => vvr Converters] (Deprecated. Keep for legacy code)------------*/
+    /*---[MathGeoLib => vvr Converters] (Deprecated. Keep for legacy code)-------------*/
 
     vvrframework_API Triangle3D math2vvr(const math::Triangle &t, Colour col);
 
@@ -561,7 +619,7 @@ namespace vvr {
 
     vvrframework_API Point3D math2vvr(const math::vec &v, Colour col);
 
-    /*--- [Predefined colours] --------------------------------------------------------*/
+    /*---[Predefined colours]----------------------------------------------------------*/
 
     extern const vvrframework_API Colour white;
     extern const vvrframework_API Colour red;

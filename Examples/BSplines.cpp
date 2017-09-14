@@ -13,52 +13,11 @@
 #include <cassert>
 #include <functional>
 
-template <class ComponentT, size_t N, class CompositeT>
-struct Composite : public vvr::Drawable
-{
-    static_assert(std::is_pointer<ComponentT>::value, "Components should be pointers");
-    static_assert(N>1, "N must be 1+");
-
-    std::array<ComponentT, N> components;
-    CompositeT composite;
-
-    template <typename... T>
-    Composite(std::array<ComponentT, N> comp, vvr::Colour colour) 
-        : components{ comp }
-        , composite(assemble(components, std::make_index_sequence<N>(), colour))
-    {
-    }
-
-    void addToCanvas(vvr::Canvas &canvas)
-    {
-        canvas.add(this);
-        for (auto c : components) canvas.add(c);
-    }
-
-    template<typename Array, std::size_t... I>
-    CompositeT assemble(const Array& a, std::index_sequence<I...>, vvr::Colour col) const
-    {
-        return CompositeT({ *a[I]... }, col);
-    }
-
-    template<typename Array, std::size_t... I>
-    void update(const Array& a, std::index_sequence<I...>) const
-    {
-        const_cast<CompositeT&>(composite).setGeom({ *a[I]... });
-    }
-
-    void draw() const override
-    {
-        update(components, std::make_index_sequence<N>());
-        composite.draw();
-    }
-};
-
 struct Spline : public vvr::BSpline<vvr::Point3D*>, public vvr::Drawable
 {
     vvr_decl_shared_ptr(Spline)
 
-    bool disp_curve_pts = false;
+        bool disp_curve_pts = false;
     vvr::Colour colour;
 
     void addToCanvas(vvr::Canvas &canvas)
@@ -82,10 +41,10 @@ struct Spline : public vvr::BSpline<vvr::Point3D*>, public vvr::Drawable
     {
         auto spline = new Spline;
         std::vector<vvr::Point3D*> cps;
-        cps.push_back(new vvr::Point3D(-150,  100, 0, col_cps));
-        cps.push_back(new vvr::Point3D( -50, -100, 0, col_cps));
-        cps.push_back(new vvr::Point3D(  50,  100, 0, col_cps));
-        cps.push_back(new vvr::Point3D( 150, -100, 0, col_cps));
+        cps.push_back(new vvr::Point3D(-150, 100, 0, col_cps));
+        cps.push_back(new vvr::Point3D(-50, -100, 0, col_cps));
+        cps.push_back(new vvr::Point3D(50, 100, 0, col_cps));
+        cps.push_back(new vvr::Point3D(150, -100, 0, col_cps));
         spline->setCtrPts(cps);
         spline->setKnots({ 0, 0, 0, 0, 1, 1, 1, 1 });
         spline->setNumPts(16);
@@ -113,14 +72,14 @@ struct vvr::Dragger2D<vvr::Point3D, Spline>
         _grabber.drop();
     }
 
-    Dragger2D(Spline *spline) : _spline(spline) {}
+    void setSpline(Spline *spline) { _spline = spline; }
 
 private:
     vvr::Dragger2D<vvr::Point3D> _grabber;
-    Spline *_spline;
+    Spline *_spline=nullptr;
 };
 
-/*---[Scene]----------------------------------------------------------------------------*/
+/*---[Scene]---------------------------------------------------------------------------*/
 
 class BSplineScene : public vvr::Scene
 {
@@ -136,10 +95,11 @@ public:
     void mouseReleased(int x, int y, int modif) override {mPicker->drop(x,y,modif); }
 
 private:
-    typedef Composite<vvr::Point3D*, 3,  vvr::Triangle3D> CompositeTriangle;
-    typedef Composite<vvr::Point3D*, 2, vvr::LineSeg3D> CompositeLine;
-    typedef vvr::MousePicker2D<vvr::Point3D, Spline> picker_t;
-    typedef vvr::Dragger2D<vvr::Point3D, Spline> dragger_t;
+    typedef vvr::CascadePicker2D<
+        vvr::MousePicker2D<vvr::Point3D, Spline>,
+        vvr::MousePicker2D<vvr::CompositeTriangle>
+    > picker_t;
+
     picker_t::Ptr mPicker;
     vvr::Canvas mCanvas;
     Spline* mSpline;
@@ -147,37 +107,32 @@ private:
 
 BSplineScene::BSplineScene()
 {
-    vvr::Shape::PointSize *= 2;
+    vvr::Shape::PointSize *= 3;
     reset();
 }
 
 void BSplineScene::reset()
 {
     vvr::Scene::reset();
+    mCanvas.clear();
 
-    /* Make drawables */
-    auto spline = Spline::Make(vvr::red, vvr::red);
-
-    auto lin = new CompositeLine({
+    (new vvr::CompositeLine({
         new vvr::Point3D(0,100,0, vvr::darkRed),
-        new vvr::Point3D(0,200,0, vvr::darkRed)},
-        vvr::darkRed);
+        new vvr::Point3D(0,200,0, vvr::darkRed) },
+        vvr::darkRed))->addToCanvas(mCanvas);
     
-    auto tri = new CompositeTriangle({
+    (new vvr::CompositeTriangle({
         new vvr::Point3D(-100,0,0, vvr::darkGreen),
         new vvr::Point3D(100,0,0, vvr::darkGreen),
-        new vvr::Point3D(200,134,0, vvr::darkGreen)},
-        vvr::darkGreen);
+        new vvr::Point3D(200,134,0, vvr::darkGreen) },
+        vvr::darkGreen))->addToCanvas(mCanvas);
 
-    /* Add to canvas */
-    mCanvas.clear();
-    spline->addToCanvas(mCanvas);
-    lin->addToCanvas(mCanvas);
-    tri->addToCanvas(mCanvas);
+    mSpline = Spline::Make(vvr::red, vvr::red);
+    mSpline->addToCanvas(mCanvas);
 
-    /* Create a picker on the canvas */
-    mSpline = spline;
-    mPicker = picker_t::Make(&mCanvas, dragger_t(mSpline));
+    /* Create picker */
+    mPicker = picker_t::Make(mCanvas);
+    std::get<0>(mPicker->pickers).getDragger().setSpline(mSpline);
 }
 
 void BSplineScene::draw()
@@ -207,4 +162,3 @@ int main(int argc, char* argv[])
     try { return vvr::mainLoop(argc, argv, new BSplineScene); }
     catch (std::string exc) { std::cerr << exc << std::endl; return 1; }
 }
-
