@@ -13,7 +13,7 @@ namespace vvr
         int x, y;
     };
 
-    /*---[Draggers---------------------------------------------------------------------*/
+    /*---[Draggers----------------------------------------------------------------------*/
 
     template <class D, class ContextT=void>
     struct Dragger2D
@@ -167,7 +167,7 @@ namespace vvr
         }
     };
 
-    /*---[MousePicker: 2D]-------------------------------------------------------------*/
+    /*---[MousePicker: 2D]--------------------------------------------------------------*/
 
     template <class D, class ContextT=void>
     struct MousePicker2D
@@ -217,7 +217,7 @@ namespace vvr
             if (dr = query(mousepos))
             {
                 D* ddr = nullptr;
-                if (dupl) { 
+                if (dupl) {
                     dr = ddr = new D(*dr);
                     canvas.add(ddr);
                 }
@@ -250,7 +250,7 @@ namespace vvr
         }
     };
 
-    /*---[MousePicker: 3D]-------------------------------------------------------------*/
+    /*---[MousePicker: 3D]--------------------------------------------------------------*/
 
     template <class Dragger3D>
     struct MousePicker3D
@@ -325,7 +325,7 @@ namespace vvr
         Drawable* dr;
     };
 
-    /*---[MousePicker: Cascade]--------------------------------------------------------*/
+    /*---[MousePicker: Cascade]---------------------------------------------------------*/
 
     template <class... PickerTypes>
     struct CascadePicker2D

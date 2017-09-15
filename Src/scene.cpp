@@ -94,7 +94,7 @@ Ray Scene::unproject(int x, int y)
         (float)y / getViewportHeight() * 2);
 }
 
-/*--- [OpenGL callbacks] --------------------------------------------------------------*/
+/*--- [OpenGL callbacks] ---------------------------------------------------------------*/
 
 static void glInfo()
 {
@@ -192,7 +192,7 @@ void Scene::glRender()
     draw();
 }
 
-/*--- [Events] ------------------------------------------------------------------------*/
+/*--- [Events] -------------------------------------------------------------------------*/
 
 void Scene::keyEvent(unsigned char key, bool up, int modif)
 {

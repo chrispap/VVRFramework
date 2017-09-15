@@ -23,7 +23,7 @@ namespace vvr {
         static bool altDown(int modif) { return modif & (1 << 2); }
 
     protected:
-        /*--- [Events] ----------------------------------------------------------------*/
+        /*--- [Events] -----------------------------------------------------------------*/
         virtual bool idle() { return false; }
         virtual void keyEvent(unsigned char key, bool up, int modif);
         virtual void arrowEvent(ArrowDir dir, int modif);
@@ -33,7 +33,7 @@ namespace vvr {
         virtual void mouseWheel(int dir, int modif);
         virtual void sliderChanged(int slider_id, float val);
 
-        /*--- [Getters / Setters] -----------------------------------------------------*/
+        /*--- [Getters / Setters] ------------------------------------------------------*/
         math::Frustum getFrustum() { return m_frustum; }
         int getViewportWidth() { return m_screen_width; } // In pixels
         int getViewportHeight() { return m_screen_height; } // In pixels
@@ -48,12 +48,12 @@ namespace vvr {
         void setSliderVal(int slider_id, float val);
         void setCameraPos(const math::vec &pos);
 
-        /*--- [Virtual] ---------------------------------------------------------------*/
+        /*--- [Virtual] ----------------------------------------------------------------*/
         virtual void draw() = 0;
         virtual void reset();
         virtual void resize() {}
 
-        /*--- [Helpers] ---------------------------------------------------------------*/
+        /*--- [Helpers] ----------------------------------------------------------------*/
         math::Ray unproject(int x, int y);
         void mouse2pix(int &x, int &y);
         void enterPixelMode();
@@ -61,7 +61,7 @@ namespace vvr {
         void drawAxes();
 
     private:
-        /*--- [OpenGL Callbacks] ------------------------------------------------------*/
+        /*--- [OpenGL Callbacks] -------------------------------------------------------*/
         void glRender();
         void glInit();
         void glResize(int width, int height);

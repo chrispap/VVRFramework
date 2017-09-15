@@ -15,11 +15,11 @@ namespace vvr {
 
     typedef float real;
 
-    /*---[Helpers]---------------------------------------------------------------------*/
+    /*---[Helpers]----------------------------------------------------------------------*/
 
     math::AABB aabbFromVertices(const std::vector<math::vec> &vertices);
 
-    /*---[Colour]----------------------------------------------------------------------*/
+    /*---[Colour]-----------------------------------------------------------------------*/
 
     struct vvrframework_API Colour
     {
@@ -80,7 +80,7 @@ namespace vvr {
 
     };
 
-    /*---[Interfaces]------------------------------------------------------------------*/
+    /*---[Interfaces]-------------------------------------------------------------------*/
 
     struct vvrframework_API Drawable
     {
@@ -111,7 +111,7 @@ namespace vvr {
         static real PointSize;
     };
 
-    /*---[Shapes: 2D]------------------------------------------------------------------*/
+    /*---[Shapes: 2D]-------------------------------------------------------------------*/
 
     struct vvrframework_API Point2D : public Shape
     {
@@ -254,7 +254,7 @@ namespace vvr {
         }
     };
 
-    /*---[Shapes: 3D]------------------------------------------------------------------*/
+    /*---[Shapes: 3D]-------------------------------------------------------------------*/
 
     struct vvrframework_API Point3D : public Shape, public math::vec
     {
@@ -444,7 +444,7 @@ namespace vvr {
         }
     };
 
-    /*---[Drawables: Others]-----------------------------------------------------------*/
+    /*---[Drawables: Others]------------------------------------------------------------*/
 
     struct vvrframework_API Ground : public Drawable
     {
@@ -475,7 +475,7 @@ namespace vvr {
         LineSeg3D x, y, z;
     };
 
-    /*---[Canvas]----------------------------------------------------------------------*/
+    /*---[Canvas]-----------------------------------------------------------------------*/
 
     class vvrframework_API Canvas : public Drawable
     {
@@ -556,16 +556,13 @@ namespace vvr {
         }
     };
 
-    /*---[Composite Drawables]---------------------------------------------------------*/
+    /*---[Composite Drawables]----------------------------------------------------------*/
 
     template <class ComponentT, size_t N, class CompositeT>
     struct Composite : public Drawable
     {
         static_assert(!std::is_pointer<ComponentT>::value, "Don't declare pointers.");
         static_assert(N>1, "N must be 1+");
-
-        typedef ComponentT ComponentT;
-        typedef CompositeT CompositeT;
 
         std::array<ComponentT*, N> components;
         CompositeT composite;
@@ -610,7 +607,7 @@ namespace vvr {
     typedef Composite<Point3D, 3, Triangle3D> CompositeTriangle;
     typedef Composite<Point3D, 2, LineSeg3D> CompositeLine;
 
-    /*---[Drawing helpers]-------------------------------------------------------------*/
+    /*---[Drawing helpers]--------------------------------------------------------------*/
 
     vvrframework_API void draw(C2DPointSet &point_set, Colour col = Colour());
 
@@ -628,7 +625,7 @@ namespace vvr {
 
     vvrframework_API Point3D math2vvr(const math::vec &v, Colour col);
 
-    /*---[Predefined colours]----------------------------------------------------------*/
+    /*---[Predefined colours]-----------------------------------------------------------*/
 
     extern const vvrframework_API Colour white;
     extern const vvrframework_API Colour red;
@@ -646,7 +643,7 @@ namespace vvr {
     extern const vvrframework_API Colour yellowGreen;
     extern const vvrframework_API Colour lilac;
 
-    /*---------------------------------------------------------------------------------*/
+    /*----------------------------------------------------------------------------------*/
 }
 
 #endif

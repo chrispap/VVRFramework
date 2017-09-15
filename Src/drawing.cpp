@@ -32,7 +32,7 @@ const vvr::Colour vvr::lilac(0xCD, 0xA9, 0xCD);
 static void drawSphere(real r, int lats, int longs);
 static void drawBox(const vec &p1, const vec &p2, vvr::Colour col, char alpha);
 
-/*--- [Helpers] -----------------------------------------------------------------------*/
+/*--- [Helpers] ------------------------------------------------------------------------*/
 
 math::AABB vvr::aabbFromVertices(const std::vector<vec> &vertices)
 {
@@ -52,7 +52,7 @@ math::AABB vvr::aabbFromVertices(const std::vector<vec> &vertices)
     return math::AABB(lo, hi);
 }
 
-/*--- [Shape] Drawing -----------------------------------------------------------------*/
+/*--- [Shape] Drawing ------------------------------------------------------------------*/
 
 void vvr::Shape::draw() const
 {
@@ -61,7 +61,7 @@ void vvr::Shape::draw() const
     drawShape();
 }
 
-/*--- [Shape] Drawing 2D --------------------------------------------------------------*/
+/*--- [Shape] Drawing 2D ---------------------------------------------------------------*/
 
 void vvr::Point2D::drawShape() const
 {
@@ -126,7 +126,7 @@ void vvr::Circle2D::drawShape() const
     glEnd();
 }
 
-/*--- [Shape] Drawing 3D --------------------------------------------------------------*/
+/*--- [Shape] Drawing 3D ---------------------------------------------------------------*/
 
 void vvr::Point3D::drawShape() const
 {
@@ -300,7 +300,7 @@ vvr::Ground::Ground(const real W, const real D, const real B, const real T, Colo
     m_floor_tris.push_back(vvr::Triangle3D(math::Triangle(vF, vA, vB), col));
 }
 
-/*--- [Canvas] ------------------------------------------------------------------------*/
+/*--- [Canvas] -------------------------------------------------------------------------*/
 
 vvr::Canvas::Canvas() : fid(0) , del_on_clear(true)
 {
@@ -386,7 +386,7 @@ void vvr::Canvas::clearFrame()
     frames[fid].drvec.clear();
 }
 
-/*--- [Drawing helpers] ---------------------------------------------------------------*/
+/*--- [Drawing helpers] ----------------------------------------------------------------*/
 
 void vvr::draw(C2DPointSet &point_set, Colour col)
 {
@@ -458,7 +458,7 @@ void vvr::draw(C2DPolygon  &polygon, Colour col, bool filled)
     }
 }
 
-/*--- [MathGeoLib => vvr Converters] --------------------------------------------------*/
+/*--- [MathGeoLib => vvr Converters] ---------------------------------------------------*/
 
 vvr::Triangle3D vvr::math2vvr(const math::Triangle &t, Colour col)
 {
@@ -480,7 +480,7 @@ vvr::Point3D vvr::math2vvr(const vec &v, Colour col)
     return vvr::Point3D(v, col);
 }
 
-/*--- [Static drawing functions] ------------------------------------------------------*/
+/*--- [Static drawing functions] -------------------------------------------------------*/
 
 void drawSphere(real r, int lats, int longs)
 {
@@ -564,4 +564,4 @@ void drawBox(const vec &p1, const vec &p2, vvr::Colour col, char a)
     glEnd();
 }
 
-/*-------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------------------*/
