@@ -2,6 +2,7 @@
 #define VVR_PICKING_H
 
 #include "drawing.h"
+#include "scene.h"
 #include "utils.h"
 #include <tuple>
 
@@ -14,13 +15,13 @@ namespace vvr
 
     /*---[Draggers---------------------------------------------------------------------*/
 
-    template <class D, typename ContextT=void>
+    template <class D, class ContextT=void>
     struct Dragger2D
     {
         bool grab(D* d)
         {
-            std::cerr << "vvr::Dragger2D<"
-                      << vvr::typestr(*d)
+            std::cerr << "Dragger2D<"
+                      << typestr(*d)
                       << "> missing."
                       << std::endl;
             return false;
@@ -31,7 +32,7 @@ namespace vvr
         void drop() {}
     };
 
-    template <typename ContextT>
+    template <class ContextT>
     struct Dragger2D<Point3D, ContextT>
     {
         Point3D* pt;
@@ -41,7 +42,7 @@ namespace vvr
         {
             vvr_setmemb(pt);
             colvirg = pt->colour;
-            pt->colour = vvr::magenta;
+            pt->colour = magenta;
             return true;
         }
 
@@ -56,7 +57,32 @@ namespace vvr
         }
     };
 
-    template <typename ContextT>
+    template <class ContextT>
+    struct Dragger2D<LineSeg3D, ContextT>
+    {
+        LineSeg3D* ln;
+        Colour colvirg;
+
+        bool grab(LineSeg3D* ln)
+        {
+            vvr_setmemb(ln);
+            colvirg = ln->colour;
+            ln->colour = magenta;
+            return true;
+        }
+
+        void drag(int dx, int dy)
+        {
+            ln->Translate(vec(dx, dy, 0));
+        }
+
+        void drop()
+        {
+            ln->colour = colvirg;
+        }
+    };
+
+    template <class ContextT>
     struct Dragger2D<Triangle3D, ContextT>
     {
         Triangle3D* tri;
@@ -66,7 +92,7 @@ namespace vvr
         {
             vvr_setmemb(tri);
             colvirg = tri->colour;
-            tri->colour = vvr::magenta;
+            tri->colour = magenta;
             tri->setColourPerVertex(tri->colour, tri->colour, tri->colour);
             return true;
         }
@@ -83,10 +109,10 @@ namespace vvr
         }
     };
 
-    template <typename ContextT>
-    struct vvr::Dragger2D<vvr::Triangle2D, ContextT>
+    template <class ContextT>
+    struct Dragger2D<Triangle2D, ContextT>
     {
-        bool grab(vvr::Triangle2D* tri)
+        bool grab(Triangle2D* tri)
         {
             vvr_setmemb(tri);
             return true;
@@ -108,35 +134,37 @@ namespace vvr
         }
 
     private:
-        vvr::Triangle2D *tri;
+        Triangle2D *tri;
     };
 
-    template <class ContextT>
-    struct vvr::Dragger2D<CompositeTriangle, ContextT>
+    template <class ComponentT, size_t N, class CompositeT, class ContextT>
+    struct Dragger2D<Composite<ComponentT, N, CompositeT>, ContextT>
     {
-        CompositeTriangle* tri;
+        typedef Composite<ComponentT, N, CompositeT> ConcreteComposite;
+        Dragger2D<CompositeT> _grabber_composite;
+        Dragger2D<ComponentT> _grabber_component;
+        ConcreteComposite* tri;
         Colour colvirg;
 
-        bool grab(CompositeTriangle* tri)
+        bool grab(ConcreteComposite* tri)
         {
             vvr_setmemb(tri);
-            return _grabber.grab(&tri->composite);
+            return _grabber_composite.grab(&tri->composite);
         }
 
         void drag(int dx, int dy)
         {
-            _grabber.drag(dx, dy);
-            tri->components[0]->setGeom(tri->composite.a);
-            tri->components[1]->setGeom(tri->composite.b);
-            tri->components[2]->setGeom(tri->composite.c);
+            for (auto component : tri->components) {
+                _grabber_component.grab(component);
+                _grabber_component.drag(dx, dy);
+                _grabber_component.drop();
+            }
         }
 
         void drop()
         {
-            _grabber.drop();
+            _grabber_composite.drop();
         }
-
-        vvr::Dragger2D<vvr::Triangle3D> _grabber;
     };
 
     /*---[MousePicker: 2D]-------------------------------------------------------------*/
@@ -184,17 +212,21 @@ namespace vvr
 
         bool pick(int x, int y, int modif)
         {
+            const bool dupl = Scene::altDown(modif);
             mousepos = { x,y };
-            if ((dr = query(mousepos)) &&
-                (dragger.grab(dr)))
+            if (dr = query(mousepos))
             {
-                return true;
+                D* ddr = nullptr;
+                if (dupl) { 
+                    dr = ddr = new D(*dr);
+                    canvas.add(ddr);
+                }
+                if (dragger.grab(dr)) return true;
+                delete ddr;
             }
-            else
-            {
-                dr = nullptr;
-                return false;
-            }
+
+            dr = nullptr;
+            return false;
         }
 
         void move(int x, int y, int modif)
@@ -302,7 +334,7 @@ namespace vvr
 
         typedef std::tuple<PickerTypes...> picker_tuple_t;
 
-        CascadePicker2D(vvr::Canvas &canvas)
+        CascadePicker2D(Canvas &canvas)
             : pickers((sizeof(PickerTypes), canvas)...)
         {
 

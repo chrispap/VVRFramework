@@ -18,6 +18,10 @@ namespace vvr {
             return "VVRFramework Application";
         }
 
+        static bool ctrlDown(int modif) { return modif & (1 << 0); }
+        static bool shiftDown(int modif) { return modif & (1 << 1); }
+        static bool altDown(int modif) { return modif & (1 << 2); }
+
     protected:
         /*--- [Events] ----------------------------------------------------------------*/
         virtual bool idle() { return false; }
@@ -52,9 +56,6 @@ namespace vvr {
         /*--- [Helpers] ---------------------------------------------------------------*/
         math::Ray unproject(int x, int y);
         void mouse2pix(int &x, int &y);
-        bool ctrlDown(int modif) { return modif & (1 << 0); }
-        bool shiftDown(int modif) { return modif & (1 << 1); }
-        bool altDown(int modif) { return modif & (1 << 2); }
         void enterPixelMode();
         void exitPixelMode();
         void drawAxes();

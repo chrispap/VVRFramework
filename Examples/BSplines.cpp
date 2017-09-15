@@ -17,7 +17,7 @@ struct Spline : public vvr::BSpline<vvr::Point3D*>, public vvr::Drawable
 {
     vvr_decl_shared_ptr(Spline)
 
-        bool disp_curve_pts = false;
+    bool disp_curve_pts = false;
     vvr::Colour colour;
 
     void addToCanvas(vvr::Canvas &canvas)
@@ -95,7 +95,8 @@ public:
 private:
     typedef vvr::CascadePicker2D<
         vvr::MousePicker2D<vvr::Point3D, Spline>,
-        vvr::MousePicker2D<vvr::CompositeTriangle>
+        vvr::MousePicker2D<vvr::CompositeTriangle>,
+        vvr::MousePicker2D<vvr::CompositeLine>
     > picker_t;
 
     picker_t::Ptr mPicker;
@@ -130,7 +131,8 @@ void BSplineScene::reset()
 
     /* Create picker */
     mPicker = picker_t::Make(mCanvas);
-    std::get<0>(mPicker->pickers).getDragger().setSpline(mSpline);
+    auto &spline_dragger = std::get<vvr::MousePicker2D<vvr::Point3D, Spline>>(mPicker->pickers).getDragger();
+    spline_dragger.setSpline(mSpline);
 }
 
 void BSplineScene::draw()

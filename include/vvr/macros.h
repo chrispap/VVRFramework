@@ -42,18 +42,21 @@
 
 /*----[VVR MULTILINE MACRO]------------------------------------------------------------*/
 #define vvr_decl_shape(Name, Base, filled)                                              \
-    void setGeom(const Base& gmb) { static_cast<Base&>(*this) = gmb; }                  \
+    void setGeom(const Base& gmb)                                                       \
+    {                                                                                   \
+        static_cast<Base&>(*this) = gmb;                                                \
+    }                                                                                   \
     Name(const vvr::Colour& col=vvr::Colour())                                          \
         : Shape(col, filled)                                                            \
-        {                                                                               \
-            setup();                                                                    \
-        }                                                                               \
+    {                                                                                   \
+        setup();                                                                        \
+    }                                                                                   \
     Name(const Base& gmb, const vvr::Colour& col=vvr::Colour())                         \
         : Shape(col, filled)                                                            \
         , Base(gmb)                                                                     \
-        {                                                                               \
-            setup();                                                                    \
-        }                                                                               \
+    {                                                                                   \
+        setup();                                                                        \
+    }                                                                                   \
     typedef Base GeomBase;                                                              \
     vvr_decl_shared_ptr(Name)                                                           \
 

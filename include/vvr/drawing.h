@@ -286,6 +286,12 @@ namespace vvr {
                           math::vec{x2, y2, z2})
         { }
 
+        real pickdist(int x, int y) const override
+        {
+            real d = this->Distance(vec(x, y, 0));
+            return d <= Point3D::PointSize ? d : -1.0f;
+        }
+
     private:
         void drawShape() const override;
     };
@@ -555,14 +561,17 @@ namespace vvr {
     template <class ComponentT, size_t N, class CompositeT>
     struct Composite : public Drawable
     {
-        static_assert(std::is_pointer<ComponentT>::value, "Components should be pointers");
+        static_assert(!std::is_pointer<ComponentT>::value, "Don't declare pointers.");
         static_assert(N>1, "N must be 1+");
 
-        std::array<ComponentT, N> components;
+        typedef ComponentT ComponentT;
+        typedef CompositeT CompositeT;
+
+        std::array<ComponentT*, N> components;
         CompositeT composite;
 
         template <typename... T>
-        Composite(std::array<ComponentT, N> comps, Colour colour)
+        Composite(std::array<ComponentT*, N> comps, Colour colour)
             : components{ comps }
             , composite(assemble(components, std::make_index_sequence<N>(), colour))
         {
@@ -598,9 +607,8 @@ namespace vvr {
         }
     };
 
-    typedef Composite<Point3D*, 3, Triangle3D> CompositeTriangle;
-
-    typedef Composite<Point3D*, 2, LineSeg3D> CompositeLine;
+    typedef Composite<Point3D, 3, Triangle3D> CompositeTriangle;
+    typedef Composite<Point3D, 2, LineSeg3D> CompositeLine;
 
     /*---[Drawing helpers]-------------------------------------------------------------*/
 
