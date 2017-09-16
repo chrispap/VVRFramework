@@ -52,9 +52,9 @@ math::AABB vvr::aabbFromVertices(const std::vector<vec> &vertices)
     return math::AABB(lo, hi);
 }
 
-void vvr::Drawable::addToCanvas(Canvas *canvas)
+void vvr::Drawable::addToCanvas(Canvas &canvas)
 {
-    canvas->add(this);
+    canvas.add(this);
 }
 
 /*--- [Shape] Drawing ------------------------------------------------------------------*/

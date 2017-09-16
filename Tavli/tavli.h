@@ -18,9 +18,9 @@ namespace tavli
 
     struct RegionChooser
     {
-        bool grab(Drawable* dr);
-        void drag(Drawable* dr, Ray ray0, Ray ray1);
-        void drop(Drawable* dr);
+        bool grab(Drawable* drw);
+        void drag(Drawable* drw, Ray ray0, Ray ray1);
+        void drop(Drawable* drw);
 
     private:
         Colour colour;
@@ -29,9 +29,9 @@ namespace tavli
 
     struct PieceDragger
     {
-        bool grab(Drawable* dr);
-        void drag(Drawable* dr, Ray ray0, Ray ray1);
-        void drop(Drawable* dr);
+        bool grab(Drawable* drw);
+        void drag(Drawable* drw, Ray ray0, Ray ray1);
+        void drop(Drawable* drw);
 
         PieceDragger(Canvas &canvas, RegionChooser *rc) 
             : regionPicker(canvas, rc) { }

@@ -101,19 +101,19 @@ public:
     void mousePressed(int x, int y, int modif) override
     {
         if (ctrlDown(modif)) Scene::mousePressed(x, y, modif);
-        mBoard->piecePicker->mousePressed(unproject(x, y), modif);
+        mBoard->piecePicker->pick(unproject(x, y), modif);
     }
 
     void mouseMoved(int x, int y, int modif) override
     {
         if (ctrlDown(modif)) Scene::mouseMoved(x, y, modif);
-        mBoard->piecePicker->mouseMoved(unproject(x, y), modif);
+        mBoard->piecePicker->move(unproject(x, y), modif);
     }
 
     void mouseReleased(int x, int y, int modif) override
     {
         if (ctrlDown(modif)) Scene::mouseReleased(x, y, modif);
-        mBoard->piecePicker->mouseReleased(unproject(x, y), modif);
+        mBoard->piecePicker->drop(unproject(x, y), modif);
     }
 
 private:
@@ -493,9 +493,9 @@ void tavli::Board::draw() const
 
 /*---[tavli::PieceDragger]-------------------------------------------------------------*/
 
-bool tavli::PieceDragger::grab(Drawable* dr)
+bool tavli::PieceDragger::grab(Drawable* drw)
 {
-    if (auto piece = dynamic_cast<Piece*>(dr))
+    if (auto piece = dynamic_cast<Piece*>(drw))
     {
         colour = piece->colour;
         piece->colour.mul(1.4);
@@ -505,9 +505,9 @@ bool tavli::PieceDragger::grab(Drawable* dr)
     else return false;
 }
 
-void tavli::PieceDragger::drag(Drawable* dr, Ray ray0, Ray ray1)
+void tavli::PieceDragger::drag(Drawable* drw, Ray ray0, Ray ray1)
 {
-    if (auto piece = dynamic_cast<Piece*>(dr))
+    if (auto piece = dynamic_cast<Piece*>(drw))
     {
         float d0, d1;
         Plane boardplane(piece->diskBase().ContainingPlane());
@@ -515,29 +515,29 @@ void tavli::PieceDragger::drag(Drawable* dr, Ray ray0, Ray ray1)
         boardplane.Intersects(ray1, &d1);
         vec dv(ray1.GetPoint(d1) - ray0.GetPoint(d0));
         piece->basecenter += dv;
-        regionPicker.mouseReleased(ray1, 0);
-        regionPicker.mousePressed(ray1, 0);
+        regionPicker.drop(ray1, 0);
+        regionPicker.pick(ray1, 0);
         ray = ray1;
     }
 }
 
-void tavli::PieceDragger::drop(Drawable* dr)
+void tavli::PieceDragger::drop(Drawable* drw)
 {
-    assert(dynamic_cast<Piece*>(dr));
-    auto piece = static_cast<Piece*>(dr);
+    assert(dynamic_cast<Piece*>(drw));
+    auto piece = static_cast<Piece*>(drw);
     piece->colour = colour;
     Region* region = static_cast<Region*>(regionPicker.getDrawable());
     piece->region->removePiece(piece);
     region->addPiece(piece);
-    regionPicker.mouseReleased(ray, 0);
+    regionPicker.drop(ray, 0);
 }
 
 /*---[tavli::RegionChooser]------------------------------------------------------------*/
 
-bool tavli::RegionChooser::grab(Drawable* dr)
+bool tavli::RegionChooser::grab(Drawable* drw)
 {
-    assert(dynamic_cast<Region*>(dr));
-    auto reg = static_cast<Region*>(dr);
+    assert(dynamic_cast<Region*>(drw));
+    auto reg = static_cast<Region*>(drw);
     colour = reg->colour;
     visible = reg->visible;
     reg->colour.mul(1.4);
@@ -546,15 +546,15 @@ bool tavli::RegionChooser::grab(Drawable* dr)
     return true;
 }
 
-void tavli::RegionChooser::drag(Drawable* dr, Ray ray0, Ray ray1)
+void tavli::RegionChooser::drag(Drawable* drw, Ray ray0, Ray ray1)
 {
 
 }
 
-void tavli::RegionChooser::drop(Drawable* dr)
+void tavli::RegionChooser::drop(Drawable* drw)
 {
-    assert(dynamic_cast<Region*>(dr));
-    auto reg = static_cast<Region*>(dr);
+    assert(dynamic_cast<Region*>(drw));
+    auto reg = static_cast<Region*>(drw);
     reg->colour = colour;
     reg->setColourPerVertex(colour, colour, colour);
     reg->visible = visible;

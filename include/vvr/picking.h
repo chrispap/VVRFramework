@@ -35,78 +35,81 @@ namespace vvr
     template <class ContextT>
     struct Dragger2D<Point3D, ContextT>
     {
-        Point3D* pt;
-        Colour colvirg;
-
         bool grab(Point3D* pt)
         {
-            vvr_setmemb(pt);
-            colvirg = pt->colour;
+            _pt = pt;
+            _colvirg = pt->colour;
             pt->colour = magenta;
             return true;
         }
 
         void drag(int dx, int dy)
         {
-            (*pt) += vec(dx, dy, 0);
+            (*_pt) += vec(dx, dy, 0);
         }
 
         void drop()
         {
-            pt->colour = colvirg;
+            _pt->colour = _colvirg;
         }
+
+    private:
+        Point3D* _pt;
+        Colour _colvirg;
     };
 
     template <class ContextT>
     struct Dragger2D<LineSeg3D, ContextT>
     {
-        LineSeg3D* ln;
-        Colour colvirg;
-
         bool grab(LineSeg3D* ln)
         {
-            vvr_setmemb(ln);
-            colvirg = ln->colour;
-            ln->colour = magenta;
+            _drw = ln;
+            _colvirg = ln->colour;
+            _drw->colour = magenta;
             return true;
         }
 
         void drag(int dx, int dy)
         {
-            ln->Translate(vec(dx, dy, 0));
+            _drw->Translate(vec(dx, dy, 0));
         }
 
         void drop()
         {
-            ln->colour = colvirg;
+            _drw->colour = _colvirg;
         }
+
+    private:
+        LineSeg3D* _drw;
+        Colour _colvirg;
     };
 
     template <class ContextT>
     struct Dragger2D<Triangle3D, ContextT>
     {
-        Triangle3D* tri;
-        Colour colvirg;
-
         bool grab(Triangle3D* tri)
         {
-            vvr_setmemb(tri);
-            colvirg = tri->colour;
-            tri->colour = magenta;
-            tri->setColourPerVertex(tri->colour, tri->colour, tri->colour);
+            _drw = tri;
+            _colvirg = _drw->colour;
+            _drw->colour = magenta;
+            _drw->setColourPerVertex(_drw->colour, _drw->colour, _drw->colour);
             return true;
         }
 
         void drag(int dx, int dy)
         {
-            tri->Translate(vec(dx, dy, 0));
+            _drw->Translate(vec(dx, dy, 0));
         }
 
         void drop()
         {
-            tri->colour = colvirg;
-            tri->setColourPerVertex(tri->colour, tri->colour, tri->colour);
+            _drw->colour = _colvirg;
+            _drw->setColourPerVertex(_drw->colour, _drw->colour, _drw->colour);
         }
+
+    private:
+        Triangle3D* _drw;
+        Colour _colvirg;
     };
 
     template <class ContextT>
@@ -114,18 +117,18 @@ namespace vvr
     {
         bool grab(Triangle2D* tri)
         {
-            vvr_setmemb(tri);
+            _drw = tri;
             return true;
         }
 
         void drag(int dx, int dy)
         {
-            tri->x1 += dx;
-            tri->x2 += dx;
-            tri->x3 += dx;
-            tri->y1 += dy;
-            tri->y2 += dy;
-            tri->y3 += dy;
+            _drw->x1 += dx;
+            _drw->x2 += dx;
+            _drw->x3 += dx;
+            _drw->y1 += dy;
+            _drw->y2 += dy;
+            _drw->y3 += dy;
         }
 
         void drop()
@@ -134,37 +137,39 @@ namespace vvr
         }
 
     private:
-        Triangle2D *tri;
+        Triangle2D *_drw;
     };
 
-    template <class ComponentT, size_t N, class CompositeT, class ContextT>
-    struct Dragger2D<Composite<ComponentT, N, CompositeT>, ContextT>
+    template <class WholeT, class BlockT, size_t N, class ContextT>
+    struct Dragger2D<Composite<WholeT, BlockT, N>, ContextT>
     {
-        typedef Composite<ComponentT, N, CompositeT> ConcreteComposite;
-        Dragger2D<CompositeT> _grabber_composite;
-        Dragger2D<ComponentT> _grabber_component;
-        ConcreteComposite* tri;
-        Colour colvirg;
+        typedef Composite<WholeT, BlockT, N> CompositeDrawable;
 
-        bool grab(ConcreteComposite* tri)
+        bool grab(CompositeDrawable* drw)
         {
-            vvr_setmemb(tri);
-            return _grabber_composite.grab(&tri->composite);
+            _drw = drw;
+            return _grabber_whole.grab(&drw->whole);
         }
 
         void drag(int dx, int dy)
         {
-            for (auto component : tri->components) {
-                _grabber_component.grab(component);
-                _grabber_component.drag(dx, dy);
-                _grabber_component.drop();
+            for (auto component : _drw->blocks) {
+                _grabber_block.grab(component);
+                _grabber_block.drag(dx, dy);
+                _grabber_block.drop();
             }
         }
 
         void drop()
         {
-            _grabber_composite.drop();
+            _grabber_whole.drop();
         }
+
+private:
+        Dragger2D<WholeT> _grabber_whole;
+        Dragger2D<BlockT> _grabber_block;
+        CompositeDrawable* _drw;
+        Colour _colvirg;
     };
 
     /*---[MousePicker: 2D]--------------------------------------------------------------*/
@@ -176,32 +181,25 @@ namespace vvr
 
         typedef Dragger2D<D, ContextT> dragger_t;
 
-    private:
-        D* dr;
-        Canvas &canvas;
-        dragger_t dragger;
-        Mousepos mousepos;
-
-    public:
         MousePicker2D(Canvas &canvas, dragger_t dragger = dragger_t())
-            : dr(nullptr)
-            , canvas(canvas)
-            , dragger(dragger)
-            , mousepos({0,0})
+            : _drw(nullptr)
+            , _canvas(canvas)
+            , _dragger(dragger)
+            , _mousepos({0,0})
         {
         }
 
-        dragger_t& getDragger() { return dragger; }
+        dragger_t& getDragger() { return _dragger; }
 
         D* query(Mousepos mp)
         {
-            if (!canvas.visible) return nullptr;
+            if (!_canvas.visible) return nullptr;
             D* nearest = nullptr;
             D* d = nullptr;
             real mindist = std::numeric_limits<real>::max();
-            for (auto dr : canvas.getDrawables()) {
-                if (!dr->visible) continue;
-                if (!(d=dynamic_cast<D*>(dr))) continue;
+            for (auto drw : _canvas.getDrawables()) {
+                if (!drw->visible) continue;
+                if (!(d=dynamic_cast<D*>(drw))) continue;
                 real dist = d->pickdist(mp.x, mp.y);
                 if (dist >= 0 && dist < mindist) {
                     nearest = d; mindist = dist;
@@ -213,41 +211,47 @@ namespace vvr
         bool pick(int x, int y, int modif)
         {
             const bool dupl = Scene::altDown(modif);
-            mousepos = { x,y };
-            if ((dr = query(mousepos)))
+            _mousepos = { x,y };
+            if ((_drw = query(_mousepos)))
             {
                 D* ddr = nullptr;
                 if (dupl) {
-                    dr = ddr = new D(*dr);
-                    ddr->addToCanvas(&canvas);
+                    _drw = ddr = new D(*_drw);
+                    ddr->addToCanvas(_canvas);
                 }
-                if (dragger.grab(dr)) return true;
+                if (_dragger.grab(_drw)) return true;
                 delete ddr;
             }
 
-            dr = nullptr;
+            _drw = nullptr;
             return false;
         }
 
         void move(int x, int y, int modif)
         {
-            if (!dr) return;
-            int dx = x - mousepos.x;
-            int dy = y - mousepos.y;
-            dragger.drag(dx, dy);
-            mousepos = { x,y };
+            if (!_drw) return;
+            int dx = x - _mousepos.x;
+            int dy = y - _mousepos.y;
+            _dragger.drag(dx, dy);
+            _mousepos = { x,y };
         }
 
         void drop(int x, int y, int modif)
         {
-            if (!dr) return;
-            int dx = x - mousepos.x;
-            int dy = y - mousepos.y;
-            dragger.drag(dx, dy);
-            dragger.drop();
-            mousepos = { x,y };
-            dr = nullptr;
+            if (!_drw) return;
+            int dx = x - _mousepos.x;
+            int dy = y - _mousepos.y;
+            _dragger.drag(dx, dy);
+            _dragger.drop();
+            _mousepos = { x,y };
+            _drw = nullptr;
         }
+
+    private:
+        D* _drw;
+        Canvas &_canvas;
+        dragger_t _dragger;
+        Mousepos _mousepos;
     };
 
     /*---[MousePicker: 3D]--------------------------------------------------------------*/
@@ -255,74 +259,65 @@ namespace vvr
     template <class Dragger3D>
     struct MousePicker3D
     {
-        /**
-         * Pick the closest drawable.
-         */
-        void mousePressed(math::Ray ray, int modif)
+        void pick(math::Ray ray, int modif)
         {
             Drawable *dr_nearest = nullptr;
             real dmin = std::numeric_limits<real>::max();
 
-            for (auto dr : canvas.getDrawables()) {
-                real pickdist = dr->pickdist(ray);
+            for (auto drw : _canvas.getDrawables()) {
+                real pickdist = drw->pickdist(ray);
                 if (pickdist >= 0 && pickdist < dmin) {
-                    dr_nearest = dr;
+                    dr_nearest = drw;
                     dmin = pickdist;
                 }
             }
 
             if (dr_nearest) {
-                mouseray = ray;
-                dr = dr_nearest;
-                if (!dragger->grab(dr)) {
-                    dr = nullptr;
+                _mouseray = ray;
+                _drw = dr_nearest;
+                if (!_dragger->grab(_drw)) {
+                    _drw = nullptr;
                 }
             }
         }
 
-        /**
-         * Move the picked drawing if any.
-         */
-        void mouseMoved(math::Ray ray, int modif)
+        void move(math::Ray ray, int modif)
         {
-            if (!dr) return;
-            dragger->drag(dr, mouseray, ray);
-            mouseray = ray;
+            if (!_drw) return;
+            _dragger->drag(_drw, _mouseray, ray);
+            _mouseray = ray;
         }
 
-        /**
-         * Drop the picked drawing if any.
-         */
-        void mouseReleased(math::Ray ray, int modif)
+        void drop(math::Ray ray, int modif)
         {
-            if (!dr) return;
-            dragger->drag(dr, mouseray, ray);
-            dragger->drop(dr);
-            mouseray = ray;
-            dr = nullptr;
+            if (!_drw) return;
+            _dragger->drag(_drw, _mouseray, ray);
+            _dragger->drop(_drw);
+            _mouseray = ray;
+            _drw = nullptr;
         }
 
         Drawable* getDrawable()
         {
-            return dr;
+            return _drw;
         }
 
         MousePicker3D(Canvas &canvas, Dragger3D *dragger)
-            : canvas(canvas)
-            , dragger(dragger)
-            , dr(nullptr)
+            : _canvas(canvas)
+            , _dragger(dragger)
+            , _drw(nullptr)
         { }
 
         ~MousePicker3D()
         {
-            delete dragger;
+            delete _dragger;
         }
 
     private:
-        Canvas &canvas;
-        Dragger3D *dragger;
-        math::Ray mouseray;
-        Drawable* dr;
+        Canvas &_canvas;
+        Dragger3D *_dragger;
+        math::Ray _mouseray;
+        Drawable* _drw;
     };
 
     /*---[MousePicker: Cascade]---------------------------------------------------------*/
@@ -333,6 +328,8 @@ namespace vvr
         vvr_decl_shared_ptr(CascadePicker2D)
 
         typedef std::tuple<PickerTypes...> picker_tuple_t;
+
+        picker_tuple_t pickers;
 
         CascadePicker2D(Canvas &canvas)
             : pickers((sizeof(PickerTypes), canvas)...)
@@ -362,8 +359,6 @@ namespace vvr
                 p.drop(x, y, modif);
             });
         }
-
-        picker_tuple_t pickers;
     };
 
 }

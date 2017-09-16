@@ -89,7 +89,7 @@ namespace vvr {
         virtual void draw() const = 0;
         virtual real pickdist(int x, int y) const { return -1.0f; }
         virtual real pickdist(const math::Ray&) const { return -1.0f; }
-        virtual void addToCanvas(Canvas *canvas);
+        virtual void addToCanvas(Canvas &canvas);
         void drawif() { if (visible) draw(); }
         bool isVisible() { return visible; }
         bool setVisibility(bool viz) { visible = viz; return visible; }
@@ -560,62 +560,62 @@ namespace vvr {
 
     /*---[Composite Drawables]----------------------------------------------------------*/
 
-    template <class ComponentT, size_t N, class CompositeT>
+    template <class WholeT, class BlockT, size_t N>
     struct Composite : public Drawable
     {
-        static_assert(!std::is_pointer<ComponentT>::value, "Don't declare pointers.");
+        static_assert(!std::is_pointer<BlockT>::value, "Don't declare pointers.");
         static_assert(N>1, "N must be 1+");
 
-        std::array<ComponentT*, N> components;
-        CompositeT composite;
+        std::array<BlockT*, N> blocks;
+        WholeT whole;
 
         template <typename... T>
-        Composite(std::array<ComponentT*, N> comps, Colour colour)
-            : components{ comps }
-            , composite(assemble(components, std::make_index_sequence<N>(), colour))
+        Composite(std::array<BlockT*, N> comps, Colour colour)
+            : blocks{ comps }
+            , whole(assemble(blocks, std::make_index_sequence<N>(), colour))
         {
         }
 
         Composite(const Composite &other)
-            : composite{other.composite}
+            : whole{other.whole}
         {
             for (int i=0; i<N; i++) {
-                components[i] = new ComponentT(*other.components[i]);
+                blocks[i] = new BlockT(*other.blocks[i]);
             }
         }
 
-        void addToCanvas(Canvas *canvas) override
+        void addToCanvas(Canvas &canvas) override
         {
-            canvas->add(this);
-            for (auto c : components) canvas->add(c);
+            canvas.add(this);
+            for (auto c : blocks) canvas.add(c);
         }
 
         template<typename Array, std::size_t... I>
-        CompositeT assemble(const Array& a, std::index_sequence<I...>, Colour col) const
+        WholeT assemble(const Array& a, std::index_sequence<I...>, Colour col) const
         {
-            return CompositeT({ *a[I]... }, col);
+            return WholeT({ *a[I]... }, col);
         }
 
         template<typename Array, std::size_t... I>
         void update(const Array& a, std::index_sequence<I...>) const
         {
-            const_cast<CompositeT&>(composite).setGeom({ *a[I]... });
+            const_cast<WholeT&>(whole).setGeom({ *a[I]... });
         }
 
         real pickdist(int x, int y) const override
         {
-            return composite.pickdist(x, y);
+            return whole.pickdist(x, y);
         }
 
         void draw() const override
         {
-            update(components, std::make_index_sequence<N>());
-            composite.draw();
+            update(blocks, std::make_index_sequence<N>());
+            whole.draw();
         }
     };
 
-    typedef Composite<Point3D, 3, Triangle3D> CompositeTriangle;
-    typedef Composite<Point3D, 2, LineSeg3D> CompositeLine;
+    typedef Composite<Triangle3D, Point3D, 3> CompositeTriangle;
+    typedef Composite<LineSeg3D, Point3D, 2> CompositeLine;
 
     /*---[Drawing helpers]--------------------------------------------------------------*/
 
