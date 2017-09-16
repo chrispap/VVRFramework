@@ -14,7 +14,7 @@
 namespace vvr {
 
     typedef float real;
-    struct Canvas;
+    class Canvas;
 
     /*---[Helpers]----------------------------------------------------------------------*/
 
