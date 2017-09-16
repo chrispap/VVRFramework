@@ -214,12 +214,12 @@ namespace vvr
         {
             const bool dupl = Scene::altDown(modif);
             mousepos = { x,y };
-            if (dr = query(mousepos))
+            if ((dr = query(mousepos)))
             {
                 D* ddr = nullptr;
                 if (dupl) {
                     dr = ddr = new D(*dr);
-                    canvas.add(ddr);
+                    ddr->addToCanvas(&canvas);
                 }
                 if (dragger.grab(dr)) return true;
                 delete ddr;

@@ -20,10 +20,10 @@ struct Spline : public vvr::BSpline<vvr::Point3D*>, public vvr::Drawable
     bool disp_curve_pts = false;
     vvr::Colour colour;
 
-    void addToCanvas(vvr::Canvas &canvas)
+    void addToCanvas(vvr::Canvas *canvas)
     {
-        canvas.add(this);
-        for (auto cp : getCps()) canvas.add(cp);
+        canvas->add(this);
+        for (auto cp : getCps()) canvas->add(cp);
     }
 
     void draw() const override
@@ -118,16 +118,16 @@ void BSplineScene::reset()
     (new vvr::CompositeLine({
         new vvr::Point3D(0,100,0, vvr::darkRed),
         new vvr::Point3D(0,200,0, vvr::darkRed) },
-        vvr::darkRed))->addToCanvas(mCanvas);
+        vvr::darkRed))->addToCanvas(&mCanvas);
 
     (new vvr::CompositeTriangle({
         new vvr::Point3D(-100,0,0, vvr::darkGreen),
         new vvr::Point3D(100,0,0, vvr::darkGreen),
         new vvr::Point3D(200,134,0, vvr::darkGreen) },
-        vvr::darkGreen))->addToCanvas(mCanvas);
+        vvr::darkGreen))->addToCanvas(&mCanvas);
 
     mSpline = Spline::Make(vvr::red, vvr::red);
-    mSpline->addToCanvas(mCanvas);
+    mSpline->addToCanvas(&mCanvas);
 
     /* Create picker */
     mPicker = picker_t::Make(mCanvas);

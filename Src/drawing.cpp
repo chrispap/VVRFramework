@@ -52,6 +52,11 @@ math::AABB vvr::aabbFromVertices(const std::vector<vec> &vertices)
     return math::AABB(lo, hi);
 }
 
+void vvr::Drawable::addToCanvas(Canvas *canvas)
+{
+    canvas->add(this);
+}
+
 /*--- [Shape] Drawing ------------------------------------------------------------------*/
 
 void vvr::Shape::draw() const

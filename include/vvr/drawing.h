@@ -14,6 +14,7 @@
 namespace vvr {
 
     typedef float real;
+    struct Canvas;
 
     /*---[Helpers]----------------------------------------------------------------------*/
 
@@ -88,6 +89,7 @@ namespace vvr {
         virtual void draw() const = 0;
         virtual real pickdist(int x, int y) const { return -1.0f; }
         virtual real pickdist(const math::Ray&) const { return -1.0f; }
+        virtual void addToCanvas(Canvas *canvas);
         void drawif() { if (visible) draw(); }
         bool isVisible() { return visible; }
         bool setVisibility(bool viz) { visible = viz; return visible; }
@@ -574,10 +576,18 @@ namespace vvr {
         {
         }
 
-        void addToCanvas(Canvas &canvas)
+        Composite(const Composite &other)
+            : composite{other.composite}
         {
-            canvas.add(this);
-            for (auto c : components) canvas.add(c);
+            for (int i=0; i<N; i++) {
+                components[i] = new ComponentT(*other.components[i]);
+            }
+        }
+
+        void addToCanvas(Canvas *canvas) override
+        {
+            canvas->add(this);
+            for (auto c : components) canvas->add(c);
         }
 
         template<typename Array, std::size_t... I>
