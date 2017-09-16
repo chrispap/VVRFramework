@@ -13,9 +13,9 @@
 #include <cassert>
 #include <functional>
 
-struct Spline : public vvr::BSpline<vvr::Point3D*>, public vvr::Drawable
+struct DrawableSpline : public vvr::BSpline<vvr::Point3D*>, public vvr::Drawable
 {
-    vvr_decl_shared_ptr(Spline)
+    vvr_decl_shared_ptr(DrawableSpline)
 
     bool disp_curve_pts = false;
     vvr::Colour colour;
@@ -39,7 +39,7 @@ struct Spline : public vvr::BSpline<vvr::Point3D*>, public vvr::Drawable
 
     static auto Make(vvr::Colour col_curve, vvr::Colour col_cps)
     {
-        auto spline = new Spline;
+        auto spline = new DrawableSpline;
         std::vector<vvr::Point3D*> cps;
         cps.push_back(new vvr::Point3D(-150, 100, 0, col_cps));
         cps.push_back(new vvr::Point3D(-50, -100, 0, col_cps));
@@ -54,7 +54,7 @@ struct Spline : public vvr::BSpline<vvr::Point3D*>, public vvr::Drawable
 };
 
 template <>
-struct vvr::Dragger2D<vvr::Point3D, Spline>
+struct vvr::Dragger2D<vvr::Point3D, DrawableSpline>
 {
     bool grab(vvr::Point3D* pt)
     {
@@ -65,6 +65,7 @@ struct vvr::Dragger2D<vvr::Point3D, Spline>
     {
         _grabber.drag(dx, dy);
         _spline->update(true);
+        vvr_msg("update spline...");
     }
 
     void drop()
@@ -72,11 +73,11 @@ struct vvr::Dragger2D<vvr::Point3D, Spline>
         _grabber.drop();
     }
 
-    void setSpline(Spline *spline) { _spline = spline; }
+    void setSpline(DrawableSpline *spline) { _spline = spline; }
 
 private:
     vvr::Dragger2D<vvr::Point3D> _grabber;
-    Spline *_spline=nullptr;
+    DrawableSpline *_spline=nullptr;
 };
 
 class BSplineScene : public vvr::Scene
@@ -94,14 +95,14 @@ public:
 
 private:
     typedef vvr::CascadePicker2D<
-        vvr::MousePicker2D<vvr::Point3D, Spline>,
+        vvr::MousePicker2D<vvr::Point3D, DrawableSpline>,
         vvr::MousePicker2D<vvr::CompositeTriangle>,
         vvr::MousePicker2D<vvr::CompositeLine>
     > picker_t;
 
     picker_t::Ptr mPicker;
     vvr::Canvas mCanvas;
-    Spline* mSpline;
+    DrawableSpline* mSpline;
 };
 
 BSplineScene::BSplineScene()
@@ -126,12 +127,12 @@ void BSplineScene::reset()
          new vvr::Point3D(200,134,0, vvr::darkGreen)} },
         vvr::darkGreen))->addToCanvas(mCanvas);
 
-    mSpline = Spline::Make(vvr::red, vvr::red);
+    mSpline = DrawableSpline::Make(vvr::red, vvr::red);
     mSpline->addToCanvas(mCanvas);
 
     /* Create picker */
     mPicker = picker_t::Make(mCanvas);
-    auto &spline_dragger = std::get<vvr::MousePicker2D<vvr::Point3D, Spline>>(mPicker->pickers).getDragger();
+    auto &spline_dragger = std::get<vvr::MousePicker2D<vvr::Point3D, DrawableSpline>>(mPicker->pickers).getDragger();
     spline_dragger.setSpline(mSpline);
 }
 

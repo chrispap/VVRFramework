@@ -3,6 +3,7 @@
 #include <vvr/mesh.h>
 #include <vvr/utils.h>
 #include <vvr/drawing.h>
+#include <vvr/picking.h>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -12,37 +13,34 @@ class Simple2DScene : public vvr::Scene
 public:
     Simple2DScene();
 
-    const char* getName() const override {
-        return "Simple 2D Drawing";
-    }
-
-protected:
+private:
     void draw() override;
     void reset() override;
-    void mousePressed(int x, int y, int modif) override;
-    void mouseMoved(int x, int y, int modif) override;
-    void mouseWheel(int dir, int modif) override;
-    void arrowEvent(vvr::ArrowDir dir, int modif) override;
+    void mousePressed(int x, int y, int modif) override  { m_picker->pick(x,y,modif); }
+    void mouseMoved(int x, int y, int modif) override    { m_picker->move(x,y,modif); }
+    void mouseReleased(int x, int y, int modif) override { m_picker->drop(x,y,modif); }
+    const char* getName() const override { return "Simple 2D Drawing"; }
 
 private:
-    float m_rad;
+    typedef vvr::CascadePicker2D<
+    vvr::MousePicker2D<vvr::Point3D>,
+    vvr::MousePicker2D<vvr::Circle2D>
+    > picker_t;
+
+    picker_t::Ptr m_picker;
     vvr::Canvas m_canvas;
 };
-
-using namespace std;
 
 Simple2DScene::Simple2DScene()
 {
     m_bg_col = vvr::grey;
-    m_rad = 20;
-
-    // Add 5 circles to our canvas.
     m_canvas.add(new vvr::Circle2D( -40, -20, 40, vvr::red));
     m_canvas.add(new vvr::Circle2D( -20,  20, 40, vvr::green));
     m_canvas.add(new vvr::Circle2D(   0, -20, 40, vvr::blue));
     m_canvas.add(new vvr::Circle2D(  20,  20, 40, vvr::black));
     m_canvas.add(new vvr::Circle2D(  40, -20, 40, vvr::yellow));
-    m_canvas.newFrame(true);
+    m_canvas.add(new vvr::Point3D(40, -20, 0 , vvr::white));
+    m_picker = picker_t::Make(m_canvas);
 }
 
 void Simple2DScene::draw()
@@ -52,45 +50,10 @@ void Simple2DScene::draw()
     exitPixelMode();
 }
 
-void Simple2DScene::mousePressed(int x, int y, int modif)
-{
-    m_canvas.newFrame();
-    m_canvas.add(new vvr::Circle2D(x, y, m_rad, vvr::black));
-}
-
-void Simple2DScene::mouseMoved(int x, int y, int modif)
-{
-    m_canvas.add(new vvr::Circle2D(x, y, m_rad, vvr::red));
-}
-
-void Simple2DScene::mouseWheel(int dir, int modif)
-{
-    if (dir>0) {
-        m_rad += 1;
-    }
-    else {
-        m_rad -= 1;
-        if (m_rad<=0) m_rad = 1;
-    }
-
-}
-
-void Simple2DScene::arrowEvent(vvr::ArrowDir dir, int modif)
-{
-    if (dir==vvr::LEFT) {
-        m_canvas.prev();
-    }
-    else if (dir==vvr::RIGHT) {
-        m_canvas.next();
-    }
-
-}
-
 void Simple2DScene::reset()
 {
     vvr::Scene::reset();
-    m_canvas.resize(1);
-    m_canvas.newFrame();
+    m_canvas.clear();
 }
 
 int main(int argc, char* argv[])
@@ -101,7 +64,7 @@ int main(int argc, char* argv[])
     }
     catch (std::string exc)
     {
-        cerr << exc << endl;
-        return 1;
+        std::cerr << exc << std::endl;
     }
+    return 1;
 }

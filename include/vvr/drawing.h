@@ -558,65 +558,6 @@ namespace vvr {
         }
     };
 
-    /*---[Composite Drawables]----------------------------------------------------------*/
-
-    template <class WholeT, class BlockT, size_t N>
-    struct Composite : public Drawable
-    {
-        static_assert(!std::is_pointer<BlockT>::value, "Don't declare pointers.");
-        static_assert(N>1, "N must be 1+");
-
-        std::array<BlockT*, N> blocks;
-        WholeT whole;
-
-        template <typename... T>
-        Composite(std::array<BlockT*, N> comps, Colour colour)
-            : blocks{ comps }
-            , whole(assemble(blocks, std::make_index_sequence<N>(), colour))
-        {
-        }
-
-        Composite(const Composite &other)
-            : whole{other.whole}
-        {
-            for (int i=0; i<N; i++) {
-                blocks[i] = new BlockT(*other.blocks[i]);
-            }
-        }
-
-        void addToCanvas(Canvas &canvas) override
-        {
-            canvas.add(this);
-            for (auto c : blocks) canvas.add(c);
-        }
-
-        template<typename Array, std::size_t... I>
-        WholeT assemble(const Array& a, std::index_sequence<I...>, Colour col) const
-        {
-            return WholeT({ *a[I]... }, col);
-        }
-
-        template<typename Array, std::size_t... I>
-        void update(const Array& a, std::index_sequence<I...>) const
-        {
-            const_cast<WholeT&>(whole).setGeom({ *a[I]... });
-        }
-
-        real pickdist(int x, int y) const override
-        {
-            return whole.pickdist(x, y);
-        }
-
-        void draw() const override
-        {
-            update(blocks, std::make_index_sequence<N>());
-            whole.draw();
-        }
-    };
-
-    typedef Composite<Triangle3D, Point3D, 3> CompositeTriangle;
-    typedef Composite<LineSeg3D, Point3D, 2> CompositeLine;
-
     /*---[Drawing helpers]--------------------------------------------------------------*/
 
     vvrframework_API void draw(C2DPointSet &point_set, Colour col = Colour());
@@ -652,6 +593,65 @@ namespace vvr {
     extern const vvrframework_API Colour darkGreen;
     extern const vvrframework_API Colour yellowGreen;
     extern const vvrframework_API Colour lilac;
+
+    /*---[Composite Drawables]----------------------------------------------------------*/
+
+    template <class WholeT, class BlockT, size_t N>
+    struct Composite : public Drawable
+    {
+        static_assert(!std::is_pointer<BlockT>::value, "Don't declare pointers.");
+        static_assert(N>1, "N must be 1+");
+
+        std::array<BlockT*, N> blocks;
+        WholeT whole;
+
+        template <typename... T>
+        Composite(std::array<BlockT*, N> comps, Colour colour)
+            : blocks{ comps }
+            , whole(assemble(std::make_index_sequence<N>(), colour))
+        {
+        }
+
+        Composite(const Composite &other) : whole{other.whole}
+        {
+            for (int i=0; i<N; i++) {
+                blocks[i] = new BlockT(*other.blocks[i]);
+            }
+        }
+
+        template<std::size_t... I>
+        WholeT assemble(std::index_sequence<I...>, Colour col) const
+        {
+            return WholeT({ *blocks[I]... }, col);
+        }
+
+        template<std::size_t... I>
+        void update(std::index_sequence<I...>) const
+        {
+            const_cast<WholeT&>(whole).setGeom({ *blocks[I]... });
+        }
+
+        real pickdist(int x, int y) const override
+        {
+            return whole.pickdist(x, y);
+        }
+
+        void draw() const override
+        {
+            update(std::make_index_sequence<N>());
+            whole.draw();
+        }
+
+        void addToCanvas(Canvas &canvas) override
+        {
+            canvas.add(this);
+            for (auto c : blocks) canvas.add(c);
+        }
+    };
+
+    typedef Composite<Triangle3D, Point3D, 3> CompositeTriangle;
+
+    typedef Composite<LineSeg3D, Point3D, 2> CompositeLine;
 
     /*----------------------------------------------------------------------------------*/
 }

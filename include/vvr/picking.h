@@ -140,6 +140,30 @@ namespace vvr
         Triangle2D *_drw;
     };
 
+    template <class ContextT>
+    struct Dragger2D<Circle2D, ContextT>
+    {
+        bool grab(Circle2D* cir)
+        {
+            _drw = cir;
+            return true;
+        }
+
+        void drag(int dx, int dy)
+        {
+            _drw->Move(C2DVector(dx,dy));
+        }
+
+        void drop()
+        {
+
+        }
+
+    private:
+        Circle2D *_drw;
+    };
+
+
     template <class WholeT, class BlockT, size_t N, class ContextT>
     struct Dragger2D<Composite<WholeT, BlockT, N>, ContextT>
     {
@@ -332,7 +356,7 @@ private:
         picker_tuple_t pickers;
 
         CascadePicker2D(Canvas &canvas)
-            : pickers((sizeof(PickerTypes), canvas)...)
+            : pickers(std::make_tuple(std::forward<PickerTypes>(canvas)...))
         {
 
         }
