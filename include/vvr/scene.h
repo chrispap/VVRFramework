@@ -18,9 +18,9 @@ namespace vvr {
             return "VVRFramework Application";
         }
 
-        static bool ctrlDown(int modif) { return modif & (1 << 0); }
-        static bool shiftDown(int modif) { return modif & (1 << 1); }
-        static bool altDown(int modif) { return modif & (1 << 2); }
+        static inline bool ctrlDown(int modif) { return modif & (1 << 0); }
+        static inline bool shiftDown(int modif) { return modif & (1 << 1); }
+        static inline bool altDown(int modif) { return modif & (1 << 2); }
 
     protected:
         /*--- [Events] -----------------------------------------------------------------*/

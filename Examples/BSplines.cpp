@@ -89,17 +89,20 @@ public:
     void arrowEvent(vvr::ArrowDir dir, int modif) override;
     void keyEvent(unsigned char key, bool up, int modif) override;
     void mousePressed(int x, int y, int modif) override { mPicker->pick(x,y,modif); }
-    void mouseMoved(int x, int y, int modif) override { mPicker->move(x,y,modif);}
+    void mouseMoved(int x, int y, int modif) override { mPicker->drag(x,y,modif);}
     void mouseReleased(int x, int y, int modif) override {mPicker->drop(x,y,modif); }
 
 private:
+    typedef vvr::MousePicker2D<vvr::Point3D, DrawableSpline>            PickerT1;
+    typedef vvr::MousePicker2D<vvr::CompositeTriangle, DrawableSpline>  PickerT2;
+    typedef vvr::MousePicker2D<vvr::CompositeLine, DrawableSpline>      PickerT3;
     typedef vvr::CascadePicker2D<
-        vvr::MousePicker2D<vvr::Point3D, DrawableSpline>,
-        vvr::MousePicker2D<vvr::CompositeTriangle>,
-        vvr::MousePicker2D<vvr::CompositeLine>
-    > picker_t;
+        PickerT1,
+        PickerT2,
+        PickerT3
+    > PickerT;
 
-    picker_t::Ptr mPicker;
+    PickerT::Ptr mPicker;
     vvr::Canvas mCanvas;
     DrawableSpline* mSpline;
 };
@@ -130,8 +133,8 @@ void BSplineScene::reset()
     mSpline->addToCanvas(mCanvas);
 
     /* Create picker */
-    mPicker = picker_t::Make(mCanvas);
-    auto &spline_dragger = std::get<vvr::MousePicker2D<vvr::Point3D, DrawableSpline>>(mPicker->pickers).getDragger();
+    mPicker = PickerT::Make(mCanvas);
+    auto &spline_dragger = std::get<PickerT1>(mPicker->pickers).getDragger();
     spline_dragger.setSpline(mSpline);
 }
 

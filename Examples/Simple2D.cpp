@@ -26,10 +26,10 @@ private:
     typedef vvr::CascadePicker2D<
     vvr::MousePicker2D<vvr::Point3D>,
     vvr::MousePicker2D<vvr::Circle2D>
-    > picker_t;
+    > PickerT;
    
     vvr::Canvas _canvas;
-    picker_t::Ptr _picker;
+    PickerT::Ptr _picker;
 };
 
 Simple2DScene::Simple2DScene()
@@ -42,7 +42,7 @@ Simple2DScene::Simple2DScene()
     _canvas.add(new vvr::Circle2D(20, 20, 40, vvr::black));
     _canvas.add(new vvr::Circle2D(40, -20, 40, vvr::yellow));
     _canvas.add(new vvr::Point3D(40, -20, 0, vvr::white));
-    _picker = picker_t::Make(_canvas);
+    _picker = PickerT::Make(_canvas);
 }
 
 void Simple2DScene::mousePressed(int x, int y, int modif)  
@@ -52,7 +52,7 @@ void Simple2DScene::mousePressed(int x, int y, int modif)
 
 void Simple2DScene::mouseMoved(int x, int y, int modif)  
 {
-    _picker->move(x, y, modif); 
+    _picker->drag(x, y, modif); 
 }
 
 void Simple2DScene::mouseReleased(int x, int y, int modif)  

@@ -47,31 +47,46 @@ void vvr::GlWidget::idle()
 
 void vvr::GlWidget::mousePressEvent(QMouseEvent *event)
 {
-    setFocus();
-    int x = event->x();
-    int y = event->y();
-    mScene->mouse2pix(x,y);
-    mScene->mousePressed(x, y, mkModif(event));
-    idle();
+    if (event->button() == Qt::LeftButton)
+    {
+        int x = event->x();
+        int y = event->y();
+        mScene->mouse2pix(x, y);
+        mScene->mousePressed(x, y, mkModif(event));
+        setFocus();
+        idle();
+    }
 }
 
 void vvr::GlWidget::mouseReleaseEvent(QMouseEvent *event)
 {
-    setFocus();
-    int x = event->x();
-    int y = event->y();
-    mScene->mouse2pix(x,y);
-    mScene->mouseReleased(x, y, mkModif(event));
-    idle();
+    if (event->button() == Qt::LeftButton)
+    {
+        int x = event->x();
+        int y = event->y();
+        mScene->mouse2pix(x, y);
+        mScene->mouseReleased(x, y, mkModif(event));
+        setFocus();
+        idle();
+    }
 }
 
 void vvr::GlWidget::mouseMoveEvent(QMouseEvent *event)
 {
     int x = event->x();
     int y = event->y();
-    mScene->mouse2pix(x,y);
-    if (event->buttons()) mScene->mouseMoved(x, y, mkModif(event));
-    else mScene->mouseHovered(x, y, mkModif(event));
+    mScene->mouse2pix(x, y);
+
+    if (event->buttons() & Qt::LeftButton)
+    {
+        mScene->mouseMoved(x, y, mkModif(event));
+    }
+    else if (event->buttons() == Qt::NoButton)
+    {
+        mScene->mouseHovered(x, y, mkModif(event));
+    }
+    else return;
+
     update();
 }
 

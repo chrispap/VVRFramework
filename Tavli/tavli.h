@@ -18,9 +18,11 @@ namespace tavli
 
     struct RegionHlter
     {
-        bool grab(Drawable* drw);
-        void drag(Drawable* drw, Ray ray0, Ray ray1) {};
-        void drop(Drawable* drw);
+        vvr_decl_shared_ptr(RegionHlter)
+
+        bool on_pick(Drawable* drw);
+        void on_drag(Drawable* drw, Ray ray0, Ray ray1) {};
+        void on_drop(Drawable* drw);
 
     private:
         Colour _colour;
@@ -30,9 +32,11 @@ namespace tavli
 
     struct PieceDragger
     {
-        bool grab(Drawable* drw);
-        void drag(Drawable* drw, Ray ray0, Ray ray1);
-        void drop(Drawable* drw);
+        vvr_decl_shared_ptr(PieceDragger)
+
+        bool on_pick(Drawable* drw);
+        void on_drag(Drawable* drw, Ray ray0, Ray ray1);
+        void on_drop(Drawable* drw);
 
         PieceDragger(RegionPicker* rp) 
             : _regionPicker{ rp } {}
@@ -88,15 +92,16 @@ namespace tavli
         void setupGameFevga();
         void draw() const override;
         void resize(const float width, const float height);
+        
+        RegionHlter::Ptr        region_hlter;
+        RegionPicker::Ptr       region_picker;
+        PieceDragger::Ptr       piece_dragger;
+        PiecePicker::Ptr        piece_picker;
 
-        /* Data [Logic] */
+    private:
+        std::vector<Colour>     _colours;
         std::vector<Piece*>     _pieces;
         std::vector<Region*>    _regions;
-        PiecePicker*            _piecePicker;
-        RegionPicker*           _regionPicker;
-
-        /* Data [Drawing] */
-        std::vector<Colour>     _colours;
         Mesh::Ptr               _3DBoard;
         Canvas                  _pieceCanvas;
         Canvas                  _regionCanvas;
