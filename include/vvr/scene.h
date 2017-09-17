@@ -30,6 +30,7 @@ namespace vvr {
         virtual void mousePressed(int x, int y, int modif);
         virtual void mouseReleased(int x, int y, int modif);
         virtual void mouseMoved(int x, int y, int modif);
+        virtual void mouseHovered(int x, int y, int modif);
         virtual void mouseWheel(int dir, int modif);
         virtual void sliderChanged(int slider_id, float val);
 

@@ -13,6 +13,7 @@ vvr::GlWidget::GlWidget(vvr::Scene *scene, QWidget *parent) : QGLWidget(parent)
     mScene = scene;
     connect(&mTimer, SIGNAL(timeout()), this, SLOT(idle()));
     mTimer.start(ANIM_INTERVAL);
+    setMouseTracking(true);
 }
 
 vvr::GlWidget::~GlWidget()
@@ -69,7 +70,8 @@ void vvr::GlWidget::mouseMoveEvent(QMouseEvent *event)
     int x = event->x();
     int y = event->y();
     mScene->mouse2pix(x,y);
-    mScene->mouseMoved(x, y, mkModif(event));
+    if (event->buttons()) mScene->mouseMoved(x, y, mkModif(event));
+    else mScene->mouseHovered(x, y, mkModif(event));
     update();
 }
 

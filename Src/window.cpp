@@ -175,6 +175,8 @@ void vvr::Window::do_log_cerr(const QString &str)
     }
 }
 
+//! Entry point of vvr applications.
+
 int vvr::mainLoop(int argc, char* argv[], vvr::Scene *scene)
 {
     QApplication app(argc, argv);

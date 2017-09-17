@@ -163,7 +163,6 @@ namespace vvr
         Circle2D *_drw;
     };
 
-
     template <class WholeT, class BlockT, size_t N, class ContextT>
     struct Dragger2D<Composite<WholeT, BlockT, N>, ContextT>
     {
@@ -234,6 +233,10 @@ private:
 
         bool pick(int x, int y, int modif)
         {
+            if (_drw) {
+                drop(x, y, modif);
+                _drw = nullptr;
+            }
             const bool dupl = Scene::altDown(modif);
             _mousepos = { x,y };
             if ((_drw = query(_mousepos)))
@@ -285,6 +288,11 @@ private:
     {
         void pick(math::Ray ray, int modif)
         {
+            if (_drw) {
+                drop(ray, modif);
+                _drw = nullptr;
+            }
+
             Drawable *dr_nearest = nullptr;
             real dmin = std::numeric_limits<real>::max();
 

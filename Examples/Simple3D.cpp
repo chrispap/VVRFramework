@@ -319,15 +319,4 @@ void Simple3DScene::pick(int x, int y)
     }
 }
 
-int main(int argc, char* argv[])
-{
-    try
-    {
-        return vvr::mainLoop(argc, argv, new Simple3DScene);
-    }
-    catch (std::string exc)
-    {
-        cerr << exc << endl;
-        return 1;
-    }
-}
+vvr_invoke_main_with_scene(Simple3DScene)

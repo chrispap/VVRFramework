@@ -16,16 +16,17 @@ namespace tavli
     struct Region;
     struct Board;
 
-    struct RegionChooser
+    struct RegionHlter
     {
         bool grab(Drawable* drw);
-        void drag(Drawable* drw, Ray ray0, Ray ray1);
+        void drag(Drawable* drw, Ray ray0, Ray ray1) {};
         void drop(Drawable* drw);
 
     private:
-        Colour colour;
-        bool visible;
+        Colour _colour;
     };
+
+    typedef MousePicker3D<RegionHlter> RegionPicker;
 
     struct PieceDragger
     {
@@ -33,14 +34,16 @@ namespace tavli
         void drag(Drawable* drw, Ray ray0, Ray ray1);
         void drop(Drawable* drw);
 
-        PieceDragger(Canvas &canvas, RegionChooser *rc) 
-            : regionPicker(canvas, rc) { }
+        PieceDragger(RegionPicker* rp) 
+            : _regionPicker{ rp } {}
 
     private:
-        Ray ray;
-        Colour colour;
-        MousePicker3D<RegionChooser> regionPicker;
+        Ray _ray;
+        Colour _colour;
+        RegionPicker* _regionPicker;
     };
+
+    typedef MousePicker3D<PieceDragger> PiecePicker;
 
     struct Piece : public Cylinder3D
     {
@@ -86,20 +89,19 @@ namespace tavli
         void draw() const override;
         void resize(const float width, const float height);
 
-        typedef MousePicker3D<PieceDragger> PiecePicker;
-        typedef MousePicker3D<RegionChooser> RegionPicker;
-
         /* Data [Logic] */
-        float width, height;
-        std::vector<Piece*> pieces;
-        std::vector<Region*> regions;
-        PiecePicker *piecePicker;
+        std::vector<Piece*>     _pieces;
+        std::vector<Region*>    _regions;
+        PiecePicker*            _piecePicker;
+        RegionPicker*           _regionPicker;
 
         /* Data [Drawing] */
-        std::vector<Colour> colours;
-        Canvas pieceCanvas;
-        Canvas regionCanvas;
-        Mesh::Ptr m3DBoard;
+        std::vector<Colour>     _colours;
+        Mesh::Ptr               _3DBoard;
+        Canvas                  _pieceCanvas;
+        Canvas                  _regionCanvas;
+        float                   _width;
+        float                   _height;
     };
 }
 

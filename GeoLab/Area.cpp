@@ -105,8 +105,4 @@ void SceneArea::mouseWheel(int dir, int modif)
 }
 
 /* Application entry point */
-
-int main(int argc, char* argv[])
-{
-    return vvr::mainLoop(argc, argv, new SceneArea());
-}
+vvr_invoke_main_with_scene(SceneArea)

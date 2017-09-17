@@ -60,4 +60,19 @@
     typedef Base GeomBase;                                                              \
     vvr_decl_shared_ptr(Name)                                                           \
 
+/*----[VVR MULTILINE MACRO]-------------------------------------------------------------*/
+#define vvr_invoke_main_with_scene(SceneClassName)                                      \
+int main(int argc, char* argv[])                                                        \
+{                                                                                       \
+    try                                                                                 \
+    {                                                                                   \
+        return vvr::mainLoop(argc, argv, new SceneClassName);                           \
+    }                                                                                   \
+    catch (std::string exc)                                                             \
+    {                                                                                   \
+        std::cerr << exc << std::endl;                                                  \
+    }                                                                                   \
+    return 1;                                                                           \
+}                                                                                       \
+
 #endif

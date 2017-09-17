@@ -17,23 +17,24 @@ public:
     GlWidget(vvr::Scene *scene, QWidget *parent = 0);
     ~GlWidget();
 
-    public slots:
-    void onKeyPressed(QKeyEvent *event);
+public slots:
     void idle();
+    void onKeyPressed(QKeyEvent *event);
 
 protected:
-    void initializeGL();
-    void paintGL();
-    void resizeGL(int width, int height);
-    void mousePressEvent(QMouseEvent *event);
-    void mouseReleaseEvent(QMouseEvent *event);
-    void mouseMoveEvent(QMouseEvent *event);
-    void wheelEvent(QWheelEvent *event);
-    void keyPressEvent(QKeyEvent *event);
+    void initializeGL() override;
+    void paintGL() override;
+    void resizeGL(int w, int h) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
+    void wheelEvent(QWheelEvent *event) override;
+    void keyPressEvent(QKeyEvent *event) override;
 
 private:
     static int mkModif(QInputEvent *event);
 
+private:
     Scene *mScene;
     QTimer mTimer;
 };

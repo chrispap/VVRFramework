@@ -242,6 +242,11 @@ void Scene::mouseMoved(int x, int y, int modif)
     m_frustum.SetFrame(newpos, newfront, newup);
 }
 
+void Scene::mouseHovered(int x, int y, int modif)
+{
+
+}
+
 void Scene::mouseReleased(int x, int y, int modif)
 {
 

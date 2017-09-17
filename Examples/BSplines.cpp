@@ -65,7 +65,6 @@ struct vvr::Dragger2D<vvr::Point3D, DrawableSpline>
     {
         _grabber.drag(dx, dy);
         _spline->update(true);
-        vvr_msg("update spline...");
     }
 
     void drop()
