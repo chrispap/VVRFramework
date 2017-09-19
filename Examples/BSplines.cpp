@@ -17,7 +17,7 @@ struct DrawableSpline : public vvr::BSpline<vvr::Point3D*>, public vvr::Drawable
 {
     vvr_decl_shared_ptr(DrawableSpline)
 
-    bool disp_curve_pts = false;
+    bool drawCurvePts = false;
     vvr::Colour colour;
 
     void addToCanvas(vvr::Canvas &canvas) override
@@ -32,9 +32,9 @@ struct DrawableSpline : public vvr::BSpline<vvr::Point3D*>, public vvr::Drawable
         auto pts(getPts());
         for (auto it = pts.begin(); it < pts.end() - 1; ++it) {
             vvr::LineSeg3D(math::LineSegment(it[0], it[1]), colour).draw();
-            if (disp_curve_pts) it->draw();
+            if (drawCurvePts) it->draw();
         }
-        if (disp_curve_pts) pts.back().draw();
+        if (drawCurvePts) pts.back().draw();
     }
 
     static auto Make(vvr::Colour col_curve, vvr::Colour col_cps)
@@ -53,111 +53,128 @@ struct DrawableSpline : public vvr::BSpline<vvr::Point3D*>, public vvr::Drawable
     }
 };
 
-template <>
-struct vvr::Dragger2D<vvr::Point3D, DrawableSpline>
-{
-    bool grab(vvr::Point3D* pt)
-    {
-        return _grabber.grab(pt);
-    }
-
-    void drag(int dx, int dy)
-    {
-        _grabber.drag(dx, dy);
-        _spline->update(true);
-    }
-
-    void drop()
-    {
-        _grabber.drop();
-    }
-
-    void setSpline(DrawableSpline *spline) { _spline = spline; }
-
-private:
-    vvr::Dragger2D<vvr::Point3D> _grabber;
-    DrawableSpline *_spline=nullptr;
-};
-
 class BSplineScene : public vvr::Scene
 {
 public:
     BSplineScene();
+
+private:
     const char* getName() const override { return "BSpline Scene"; }
     void draw() override;
     void reset() override;
+    void resize() override;
     void arrowEvent(vvr::ArrowDir dir, int modif) override;
     void keyEvent(unsigned char key, bool up, int modif) override;
-    void mousePressed(int x, int y, int modif) override { mPicker->pick(x,y,modif); }
-    void mouseMoved(int x, int y, int modif) override { mPicker->drag(x,y,modif);}
-    void mouseReleased(int x, int y, int modif) override {mPicker->drop(x,y,modif); }
+    void mousePressed(int x, int y, int modif) override { _picker->pick(x, y, modif); }
+    void mouseMoved(int x, int y, int modif) override { _picker->drag(x, y, modif); }
+    void mouseReleased(int x, int y, int modif) override { _picker->drop(x, y, modif); }
+    void mouseHovered(int x, int y, int modif) override { _picker->pick(x, y, modif); }
+    void appendGrid(float dx, float dy, vvr::Colour);
 
-private:
-    typedef vvr::MousePicker2D<vvr::Point3D, DrawableSpline>            PickerT1;
-    typedef vvr::MousePicker2D<vvr::CompositeTriangle, DrawableSpline>  PickerT2;
-    typedef vvr::MousePicker2D<vvr::CompositeLine, DrawableSpline>      PickerT3;
-    typedef vvr::CascadePicker2D<
-        PickerT1,
-        PickerT2,
-        PickerT3
-    > PickerT;
+    typedef vvr::MousePicker2D<vvr::Point3D>                    PickerT1;
+    typedef vvr::MousePicker2D<vvr::CompositeTriangle>          PickerT2;
+    typedef vvr::MousePicker2D<vvr::CompositeLine>              PickerT3;
+    typedef vvr::CascadePicker2D<PickerT1, PickerT2,PickerT3>   PickerT;
+    typedef vvr::MousePicker2D<vvr::LineSeg3D>                  HlterT;
 
-    PickerT::Ptr mPicker;
-    vvr::Canvas mCanvas;
-    DrawableSpline* mSpline;
+    PickerT::Ptr    _picker;
+    HlterT::Ptr     _hlter;
+    DrawableSpline* _spline;
+    vvr::Canvas     _canvas;
+    vvr::Canvas     _canvas_grid;
 };
 
 BSplineScene::BSplineScene()
 {
-    vvr::Shape::PointSize *= 3;
+    vvr::Shape::PointSize *= 2;
     reset();
 }
 
 void BSplineScene::reset()
 {
     vvr::Scene::reset();
-    mCanvas.clear();
+    _canvas.clear();
 
-    (new vvr::CompositeLine({
-        {new vvr::Point3D(0,100,0, vvr::darkRed),
-         new vvr::Point3D(0,200,0, vvr::darkRed)} },
-        vvr::darkRed))->addToCanvas(mCanvas);
+    /* Create objects */
+    _spline = DrawableSpline::Make(vvr::red, vvr::red);
+    _spline->addToCanvas(_canvas);
 
-    (new vvr::CompositeTriangle({
-        {new vvr::Point3D(-100,0,0, vvr::darkGreen),
-         new vvr::Point3D(100,0,0, vvr::darkGreen),
-         new vvr::Point3D(200,134,0, vvr::darkGreen)} },
-        vvr::darkGreen))->addToCanvas(mCanvas);
+    auto line = new vvr::CompositeLine({
+        new vvr::Point3D(0, 100, 0, vvr::darkRed),
+        new vvr::Point3D(100, 200, 0, vvr::darkRed) },
+        vvr::darkRed);
+    line->addToCanvas(_canvas);
 
-    mSpline = DrawableSpline::Make(vvr::red, vvr::red);
-    mSpline->addToCanvas(mCanvas);
+    auto triangle = new vvr::CompositeTriangle({
+        new vvr::Point3D(0,0,0, vvr::darkGreen),
+        new vvr::Point3D(300,0,0, vvr::darkGreen),
+        new vvr::Point3D(200,150,0, vvr::darkGreen) },
+        vvr::darkGreen);
+    triangle->addToCanvas(_canvas);
 
     /* Create picker */
-    mPicker = PickerT::Make(mCanvas);
-    auto &spline_dragger = std::get<PickerT1>(mPicker->pickers).getDragger();
-    spline_dragger.setSpline(mSpline);
+    _picker = PickerT::Make(_canvas);
+
+    /* Create hlter */
+    _hlter = HlterT::Make(_canvas_grid);
+}
+
+void BSplineScene::resize()
+{
+    vvr::Colour col_1 = "EEEEEE";
+    vvr::Colour col_2 = "666666";
+    vvr::Colour col_3 = "000000";
+    _canvas_grid.clear();
+    appendGrid(10, 10, col_1);
+    appendGrid(100, 100, col_2);
+    appendGrid(1000, 1000, col_3);
+}
+
+void BSplineScene::appendGrid(float dx, float dy, vvr::Colour colour)
+{
+    const float sx = getViewportWidth();
+    const float sy = getViewportHeight();
+    const float nx = sx / dx;
+    const float ny = sy / dy;
+    const math::LineSegment lnx{ vec{ 0,-sy,0 }, vec{ 0,sy,0 } };
+    const math::LineSegment lny{ vec{ -sx,0,0 }, vec{ sx,0,0 } };
+
+    for (int i = -nx / 2; i <= nx / 2; i++) {
+        auto l{ lnx };
+        l.Translate({ dx*i, 0, 0 });
+        _canvas_grid.add(new vvr::LineSeg3D{ l, colour });
+    }
+
+    for (int i = -ny / 2; i <= ny / 2; i++) {
+        auto l{ lny };
+        l.Translate({ 0, dy*i, 0 });
+        _canvas_grid.add(new vvr::LineSeg3D{ l, colour });
+    }
 }
 
 void BSplineScene::draw()
 {
     enterPixelMode();
-    mCanvas.draw();
+    _spline->update(true);
+    _canvas_grid.drawif();
+    _canvas.draw();
     exitPixelMode();
 }
 
 void BSplineScene::keyEvent(unsigned char key, bool up, int modif)
 {
     switch (tolower(key)) {
-    case 's': mSpline->toggleVisibility(); break;
-    case 'p': mSpline->disp_curve_pts ^= true; break;
+    case 's': _spline->toggleVisibility(); break;
+    case 'p': _spline->drawCurvePts ^= true; break;
+    case 'g': _canvas_grid.toggleVisibility(); break;
     case 'r': reset(); break;
     }
 }
 
 void BSplineScene::arrowEvent(vvr::ArrowDir dir, int modif)
 {
-    if (dir == vvr::ArrowDir::UP) mSpline->setNumPts(mSpline->getNumPts() + 1);
-    else if (dir == vvr::ArrowDir::DOWN) mSpline->setNumPts(mSpline->getNumPts() - 1);
+    if (dir == vvr::ArrowDir::UP) _spline->setNumPts(_spline->getNumPts() + 1);
+    else if (dir == vvr::ArrowDir::DOWN) _spline->setNumPts(_spline->getNumPts() - 1);
 }
 
 int main(int argc, char* argv[])

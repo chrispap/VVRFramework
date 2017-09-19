@@ -18,21 +18,21 @@ namespace vvr
     template <class DrawableT, class ContextT=void>
     struct Dragger2D
     {
-        bool grab(DrawableT* d)
+        bool on_pick(DrawableT* d)
         {
             std::cerr << "Dragger2D<" << typestr(*d) << "> missing." << std::endl;
             return false;
         }
 
-        void drag(int dx, int dy) { }
+        void on_drag(int dx, int dy) { }
 
-        void drop() { }
+        void on_drop() { }
     };
 
     template <class ContextT>
     struct Dragger2D<Point3D, ContextT>
     {
-        bool grab(Point3D* pt)
+        bool on_pick(Point3D* pt)
         {
             _pt = pt;
             _colvirg = pt->colour;
@@ -40,12 +40,12 @@ namespace vvr
             return true;
         }
 
-        void drag(int dx, int dy)
+        void on_drag(int dx, int dy)
         {
             (*_pt) += vec(dx, dy, 0);
         }
 
-        void drop()
+        void on_drop()
         {
             _pt->colour = _colvirg;
         }
@@ -58,106 +58,106 @@ namespace vvr
     template <class ContextT>
     struct Dragger2D<LineSeg3D, ContextT>
     {
-        bool grab(LineSeg3D* ln)
+        bool on_pick(LineSeg3D* ln)
         {
-            _drw = ln;
+            _picked = ln;
             _colvirg = ln->colour;
-            _drw->colour = magenta;
+            _picked->colour = magenta;
             return true;
         }
 
-        void drag(int dx, int dy)
+        void on_drag(int dx, int dy)
         {
-            _drw->Translate(vec(dx, dy, 0));
+            _picked->Translate(vec(dx, dy, 0));
         }
 
-        void drop()
+        void on_drop()
         {
-            _drw->colour = _colvirg;
+            _picked->colour = _colvirg;
         }
 
     private:
-        LineSeg3D* _drw;
+        LineSeg3D* _picked;
         Colour _colvirg;
     };
 
     template <class ContextT>
     struct Dragger2D<Triangle3D, ContextT>
     {
-        bool grab(Triangle3D* tri)
+        bool on_pick(Triangle3D* tri)
         {
-            _drw = tri;
-            _colvirg = _drw->colour;
-            _drw->colour = magenta;
-            _drw->setColourPerVertex(_drw->colour, _drw->colour, _drw->colour);
+            _picked = tri;
+            _colvirg = _picked->colour;
+            _picked->colour = magenta;
+            _picked->setColourPerVertex(_picked->colour, _picked->colour, _picked->colour);
             return true;
         }
 
-        void drag(int dx, int dy)
+        void on_drag(int dx, int dy)
         {
-            _drw->Translate(vec(dx, dy, 0));
+            _picked->Translate(vec(dx, dy, 0));
         }
 
-        void drop()
+        void on_drop()
         {
-            _drw->colour = _colvirg;
-            _drw->setColourPerVertex(_drw->colour, _drw->colour, _drw->colour);
+            _picked->colour = _colvirg;
+            _picked->setColourPerVertex(_picked->colour, _picked->colour, _picked->colour);
         }
 
     private:
-        Triangle3D* _drw;
+        Triangle3D* _picked;
         Colour _colvirg;
     };
 
     template <class ContextT>
     struct Dragger2D<Triangle2D, ContextT>
     {
-        bool grab(Triangle2D* tri)
+        bool on_pick(Triangle2D* tri)
         {
-            _drw = tri;
+            _picked = tri;
             return true;
         }
 
-        void drag(int dx, int dy)
+        void on_drag(int dx, int dy)
         {
-            _drw->x1 += dx;
-            _drw->x2 += dx;
-            _drw->x3 += dx;
-            _drw->y1 += dy;
-            _drw->y2 += dy;
-            _drw->y3 += dy;
+            _picked->x1 += dx;
+            _picked->x2 += dx;
+            _picked->x3 += dx;
+            _picked->y1 += dy;
+            _picked->y2 += dy;
+            _picked->y3 += dy;
         }
 
-        void drop()
+        void on_drop()
         {
 
         }
 
     private:
-        Triangle2D *_drw;
+        Triangle2D *_picked;
     };
 
     template <class ContextT>
     struct Dragger2D<Circle2D, ContextT>
     {
-        bool grab(Circle2D* cir)
+        bool on_pick(Circle2D* cir)
         {
-            _drw = cir;
+            _picked = cir;
             return true;
         }
 
-        void drag(int dx, int dy)
+        void on_drag(int dx, int dy)
         {
-            _drw->Move(C2DVector(dx,dy));
+            _picked->Move(C2DVector(dx,dy));
         }
 
-        void drop()
+        void on_drop()
         {
 
         }
 
     private:
-        Circle2D *_drw;
+        Circle2D *_picked;
     };
 
     template <class WholeT, class BlockT, size_t N, class ContextT>
@@ -165,30 +165,30 @@ namespace vvr
     {
         typedef Composite<WholeT, BlockT, N> CompositeT;
 
-        bool grab(CompositeT* drw)
+        bool on_pick(CompositeT* drw)
         {
-            _drw = drw;
-            return _grabber_whole.grab(&drw->whole);
+            _picked = drw;
+            return _grabber_whole.on_pick(&drw->whole);
         }
 
-        void drag(int dx, int dy)
+        void on_drag(int dx, int dy)
         {
-            for (auto component : _drw->blocks) {
-                _grabber_block.grab(component);
-                _grabber_block.drag(dx, dy);
-                _grabber_block.drop();
+            for (auto component : _picked->blocks) {
+                _grabber_block.on_pick(component);
+                _grabber_block.on_drag(dx, dy);
+                _grabber_block.on_drop();
             }
         }
 
-        void drop()
+        void on_drop()
         {
-            _grabber_whole.drop();
+            _grabber_whole.on_drop();
         }
 
 private:
         Dragger2D<WholeT>   _grabber_whole;
         Dragger2D<BlockT>   _grabber_block;
-        CompositeT*         _drw;
+        CompositeT*         _picked;
         Colour              _colvirg;
     };
 
@@ -200,14 +200,49 @@ private:
 
         typedef Dragger2D<DrawableT, ContextT> DraggerT;
 
-        MousePicker2D(Canvas &canvas, DraggerT dragger = DraggerT())
-            : _drw(nullptr)
-            , _canvas(canvas)
-            , _dragger(dragger)
-            , _mousepos({ 0,0 })
-        { }
+        bool pick(int x, int y, int modif)
+        {
+            if (_picked) {
+                drop(x, y, modif);
+                _picked = nullptr;
+            }
 
-        DraggerT& getDragger() { return _dragger; }
+            const bool dupl = Scene::altDown(modif);
+            _mousepos = { x,y };
+
+            if ((_picked = query(_mousepos)))
+            {
+                DrawableT* ddr = nullptr;
+                if (dupl) {
+                    _picked = ddr = new DrawableT(*_picked);
+                    ddr->addToCanvas(_canvas);
+                }
+                if (_dragger.on_pick(_picked)) return true;
+                else delete ddr;
+            }
+
+            _picked = nullptr;
+            return false;
+        }
+
+        void drag(int x, int y, int modif)
+        {
+            if (!_picked) return;
+            int dx = x - _mousepos.x;
+            int dy = y - _mousepos.y;
+            _dragger.on_drag(dx, dy);
+            _mousepos = { x,y };
+        }
+
+        void drop(int x, int y, int modif)
+        {
+            if (!_picked) return;
+            int dx = x - _mousepos.x;
+            int dy = y - _mousepos.y;
+            _dragger.on_drop();
+            _mousepos = { x,y };
+            _picked = nullptr;
+        }
 
         DrawableT* query(Mousepos mp) const
         {
@@ -217,7 +252,7 @@ private:
             real mindist = std::numeric_limits<real>::max();
             for (auto drw : _canvas.getDrawables()) {
                 if (!drw->visible) continue;
-                if (!(d=dynamic_cast<DrawableT*>(drw))) continue;
+                if (!(d = dynamic_cast<DrawableT*>(drw))) continue;
                 real dist = d->pickdist(mp.x, mp.y);
                 if (dist >= 0 && dist < mindist) {
                     nearest = d; mindist = dist;
@@ -226,51 +261,19 @@ private:
             return nearest;
         }
 
-        bool pick(int x, int y, int modif)
-        {
-            if (_drw) {
-                drop(x, y, modif);
-                _drw = nullptr;
-            }
-            const bool dupl = Scene::altDown(modif);
-            _mousepos = { x,y };
-            if ((_drw = query(_mousepos)))
-            {
-                DrawableT* ddr = nullptr;
-                if (dupl) {
-                    _drw = ddr = new DrawableT(*_drw);
-                    ddr->addToCanvas(_canvas);
-                }
-                if (_dragger.grab(_drw)) return true;
-                delete ddr;
-            }
+        DrawableT* picked() { return _picked; }
 
-            _drw = nullptr;
-            return false;
-        }
+        DraggerT& dragger() { return _dragger; }
 
-        void drag(int x, int y, int modif)
-        {
-            if (!_drw) return;
-            int dx = x - _mousepos.x;
-            int dy = y - _mousepos.y;
-            _dragger.drag(dx, dy);
-            _mousepos = { x,y };
-        }
-
-        void drop(int x, int y, int modif)
-        {
-            if (!_drw) return;
-            int dx = x - _mousepos.x;
-            int dy = y - _mousepos.y;
-            _dragger.drag(dx, dy);
-            _dragger.drop();
-            _mousepos = { x,y };
-            _drw = nullptr;
-        }
+        MousePicker2D(Canvas &canvas, DraggerT dragger = DraggerT())
+            : _picked(nullptr)
+            , _canvas(canvas)
+            , _dragger(dragger)
+            , _mousepos({ 0,0 })
+        { }
 
     private:
-        DrawableT*  _drw;
+        DrawableT*  _picked;
         Canvas&     _canvas;
         DraggerT    _dragger;
         Mousepos    _mousepos;
@@ -284,62 +287,65 @@ private:
 
         void pick(math::Ray ray, int modif)
         {
-            if (_drw) {
+            if (_picked) {
                 drop(ray, modif);
-                _drw = nullptr;
+                _picked = nullptr;
             }
-
-            Drawable *dr_nearest = nullptr;
-            real dmin = std::numeric_limits<real>::max();
-
-            for (auto drw : _canvas.getDrawables()) {
-                real pickdist = drw->pickdist(ray);
-                if (pickdist >= 0 && pickdist < dmin) {
-                    dr_nearest = drw;
-                    dmin = pickdist;
-                }
-            }
-
-            if (dr_nearest) {
+            
+            if ((_picked = query(ray))) {
                 _mouseray = ray;
-                _drw = dr_nearest;
-                if (!_dragger->on_pick(_drw)) {
-                    _drw = nullptr;
+                if (!_dragger->on_pick(_picked)) {
+                    _picked = nullptr;
                 }
             }
         }
 
         void drag(math::Ray ray, int modif)
         {
-            if (!_drw) return;
-            _dragger->on_drag(_drw, _mouseray, ray);
+            if (!_picked) return;
+            _dragger->on_drag(_picked, _mouseray, ray);
             _mouseray = ray;
         }
 
         void drop(math::Ray ray, int modif)
         {
-            if (!_drw) return;
-            _dragger->on_drag(_drw, _mouseray, ray);
-            _dragger->on_drop(_drw);
+            if (!_picked) return;
+            _dragger->on_drop(_picked);
             _mouseray = ray;
-            _drw = nullptr;
+            _picked = nullptr;
         }
 
-        Drawable* picked()
+        Drawable* query(const math::Ray& ray)
         {
-            return _drw;
+            if (!_canvas.visible) return nullptr;
+            Drawable *nearest = nullptr;
+            real dmin = std::numeric_limits<real>::max();
+
+            for (auto drw : _canvas.getDrawables()) {
+                real pickdist = drw->pickdist(ray);
+                if (pickdist >= 0 && pickdist < dmin) {
+                    nearest = drw;
+                    dmin = pickdist;
+                }
+            }
+
+            return nearest;
         }
+
+        Drawable* picked() { return _picked; }
+
+        DraggerT* dragger() { return _dragger; }
 
         MousePicker3D(Canvas &canvas, DraggerT *dragger)
             : _canvas(canvas)
             , _dragger(dragger)
-            , _drw(nullptr)
+            , _picked(nullptr)
         { }
 
     private:
         Canvas&     _canvas;
         DraggerT*   _dragger;
-        Drawable*   _drw;
+        Drawable*   _picked;
         math::Ray   _mouseray;
     };
 
@@ -359,6 +365,10 @@ private:
 
         bool pick(int x, int y, int modif)
         {
+            apply(pickers, [&](auto &p) {
+                p.drop(x, y, modif);
+            });
+
             bool picked = false;
             apply(pickers, [&](auto &p) {
                 picked = picked || p.pick(x, y, modif);
