@@ -20,15 +20,17 @@ namespace vvr
     {
         bool on_pick(Mousepos, DrawableT*)
         {
-            return true;
+            static_assert(sizeof(DrawableT)==0, "Should provide specialization");
         }
 
         void on_drag(Mousepos)
         {
+            static_assert(sizeof(DrawableT)==0, "Should provide specialization");
         }
 
         void on_drop()
         {
+            static_assert(sizeof(DrawableT)==0, "Should provide specialization");
         }
     };
 
