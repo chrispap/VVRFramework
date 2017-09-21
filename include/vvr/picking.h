@@ -18,9 +18,17 @@ namespace vvr
     template <class DrawableT, class ContextT = void>
     struct Dragger2D
     {
-        bool on_pick(Mousepos mp, int, int, DrawableT* d)
+        bool on_pick(Mousepos, DrawableT*)
         {
-            static_assert(false, "template specialization missing.");
+            return true;
+        }
+
+        void on_drag(Mousepos)
+        {
+        }
+
+        void on_drop()
+        {
         }
     };
 
@@ -188,8 +196,8 @@ namespace vvr
         {
             for (auto comp : _picked->blocks) {
                 Mousepos dmp {
-                    mp.x - _mp.x + comp->x,
-                    mp.y - _mp.y + comp->y
+                    mp.x - _mp.x + (int)comp->x,
+                    mp.y - _mp.y + (int)comp->y
                 };
                 _grabber_block.on_pick(dmp, comp);
                 _grabber_block.on_drag(dmp);

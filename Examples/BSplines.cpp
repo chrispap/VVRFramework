@@ -138,9 +138,9 @@ void BSplineScene::reset()
 
 void BSplineScene::resize()
 {
-    vvr::Colour col_1 = "CCCCCC";
-    vvr::Colour col_2 = "666666";
-    vvr::Colour col_3 = "000000";
+    vvr::Colour col_1 ("CCCCCC");
+    vvr::Colour col_2 ("666666");
+    vvr::Colour col_3 ("000000");
     _canvas_grid.clear();
     append2Grid(_grid_size, _grid_size, col_1);
     append2Grid(_grid_size * 10, _grid_size * 10, col_2);
@@ -157,13 +157,13 @@ void BSplineScene::append2Grid(float dx, float dy, vvr::Colour colour)
     const math::LineSegment lny{ vec{ -sx,0,0 }, vec{ sx,0,0 } };
 
     for (int i = -nx / 2; i <= nx / 2; i++) {
-        auto l{ lnx };
+        auto l = lnx;
         l.Translate({ dx*i, 0, 0 });
         _canvas_grid.add(new vvr::LineSeg3D{ l, colour });
     }
 
     for (int i = -ny / 2; i <= ny / 2; i++) {
-        auto l{ lny };
+        auto l = lny;
         l.Translate({ 0, dy*i, 0 });
         _canvas_grid.add(new vvr::LineSeg3D{ l, colour });
     }
