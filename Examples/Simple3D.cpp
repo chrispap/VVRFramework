@@ -186,7 +186,7 @@ void Simple3DScene::load3DModels()
 
     m_mesh_2 = Mesh::Make(*m_mesh_1);
     m_mesh_3 = Mesh::Make(*m_mesh_1);
-    
+
     m_mesh_2->setBigSize(m_mesh_1->getMaxSize() * 1.5);
     m_mesh_3->setBigSize(m_mesh_1->getMaxSize() / 1.5);
 
@@ -292,7 +292,7 @@ void Simple3DScene::pick(int x, int y)
                 );
 
             if (tri.Intersects(ray, NULL, &intr)) {
-                tris_sel.push_back(new Triangle3D(math2vvr(tri, vvr::magenta)));
+                tris_sel.push_back(new Triangle3D(tri, vvr::magenta));
                 float d;
                 if ((d = tri.DistanceSq(ray.pos)) < tri_min_dist) {
                     tri_min_dist = d;
@@ -303,12 +303,12 @@ void Simple3DScene::pick(int x, int y)
             }
         }
 
-        if (tri_min_index != -1)  
+        if (tri_min_index != -1)
         {
 #if 0
             m_canvas.add(tris_sel.at(tri_min_index));
             defineCuttingPlane(tri_sel.CenterPoint(), tri_sel.NormalCW());
-#endif      
+#endif
             if (m_click_counter % 2 == 0) {
                 m_box->minPoint = intr;
             }

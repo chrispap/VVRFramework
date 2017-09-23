@@ -13,15 +13,13 @@
 
 namespace vvr {
 
+    /*------------------------------------------------------------------------[types]---*/
+
     typedef float real;
     using math::vec;
     class Canvas;
 
-    /*---[Helpers]----------------------------------------------------------------------*/
-
-    math::AABB aabbFromVertices(const std::vector<math::vec> &vertices);
-
-    /*---[Colour]-----------------------------------------------------------------------*/
+    /*-----------------------------------------------------------------------[Colour]---*/
 
     struct vvrframework_API Colour
     {
@@ -82,48 +80,114 @@ namespace vvr {
 
     };
 
-    /*---[Interfaces]-------------------------------------------------------------------*/
+    extern const vvrframework_API Colour white;
+    extern const vvrframework_API Colour red;
+    extern const vvrframework_API Colour green;
+    extern const vvrframework_API Colour blue;
+    extern const vvrframework_API Colour black;
+    extern const vvrframework_API Colour yellow;
+    extern const vvrframework_API Colour grey;
+    extern const vvrframework_API Colour orange;
+    extern const vvrframework_API Colour cyan;
+    extern const vvrframework_API Colour magenta;
+    extern const vvrframework_API Colour darkOrange;
+    extern const vvrframework_API Colour darkRed;
+    extern const vvrframework_API Colour darkGreen;
+    extern const vvrframework_API Colour yellowGreen;
+    extern const vvrframework_API Colour lilac;
+
+    /*----------------------------------------------------------------------[Helpers]---*/
+
+    math::AABB aabbFromVertices(const std::vector<vec> &vertices);
+
+    vvrframework_API void draw(C2DPointSet &point_set, Colour col = Colour());
+
+    vvrframework_API void draw(C2DLineSet &line_set, Colour col = Colour());
+
+    vvrframework_API void draw(C2DPolygon &polygon, Colour col = Colour(), bool filled = false);
+
+    /*--------------------------------------------------------------------[Drawables]---*/
 
     struct vvrframework_API Drawable
     {
         virtual ~Drawable() { }
         virtual void draw() const = 0;
-        virtual real pickdist(int x, int y) const { return -1.0f; }
-        virtual real pickdist(const math::Ray&) const { return -1.0f; }
+        virtual real pickdist(int x, int y) const { return real(-1); }
+        virtual real pickdist(const math::Ray&) const { return real(-1); }
+        virtual Drawable* clone() { return  nullptr; }
         virtual void addToCanvas(Canvas &canvas);
-        void drawif() { if (visible) draw(); }
-        bool isVisible() { return visible; }
-        bool setVisibility(bool viz) { visible = viz; return visible; }
-        bool toggleVisibility() { visible = !visible; return visible; }
-        bool show() { visible = true; return visible; }
-        bool hide() { visible = false; return visible; }
+
+        void drawif()                   { if (visible) draw();                  }
+        bool show()                     { visible = true;       return visible; }
+        bool hide()                     { visible = false;      return visible; }
+        bool toggleVisibility()         { visible = !visible;   return visible; }
+
         bool visible = true;
     };
 
-    struct vvrframework_API Shape : public Drawable
+    struct vvrframework_API Shape       : Drawable
     {
-        Shape() { }
-        Shape(Colour col, bool filled=false) : colour(col), filled(filled) { }
+        Shape() : filled(false) { }
+        Shape(Colour col, bool filled=false) : filled(filled), colour(col) { }
         virtual ~Shape() { }
         virtual void drawShape() const = 0;
         virtual void setup() { }
         void draw() const override;
+
+        bool filled;
         Colour colour;
-        bool filled = false;
         static real LineWidth;
         static real PointSize;
     };
 
-    /*---[Shapes: 2D]-------------------------------------------------------------------*/
+    struct vvrframework_API Canvas      : Drawable
+    {
+    private:
+        struct Frame
+        {
+            Frame(bool show_old = true) : show_old(show_old) { }
+            std::vector<Drawable*> drvec;
+            bool show_old;
+        };
 
-    struct vvrframework_API Point2D : public Shape
+        size_t fid;
+        bool del_on_clear;
+        std::vector<Frame> frames;
+
+    public:
+        Canvas();
+        ~Canvas();
+        void draw() const override;
+        Drawable* add(Drawable *drawable_ptr);
+        std::vector<Drawable*>& getDrawables(int offs = 0) { return frames[fid + offs].drvec; }
+        size_t size() const { return frames.size(); }
+        size_t frameIndex() const { return fid; }
+        void setDelOnClear(bool del) { del_on_clear = del; }
+        bool isAtStart() const { return fid == 0; }
+        bool isAtEnd() const { return fid == frames.size() - 1; }
+        void newFrame(bool show_old_frames = true);
+        void next() { if (fid < frames.size() - 1) fid++; }
+        void prev() { if (fid > 0) fid--; }
+        void rew() { fid = 0; }
+        void ff() { fid = frames.size() - 1; }
+        void resize(int i);
+        void clear();
+        void clearFrame();
+
+        /* 4 easy add */
+        Drawable* add(const C2DPoint &p, Colour col = Colour());
+        Drawable* add(const C2DPoint &p1, const C2DPoint &p2, Colour col = Colour(), bool inf = false);
+        Drawable* add(const C2DLine &line, Colour col = Colour(), bool inf_line = false);
+        Drawable* add(const C2DCircle &circle, Colour col = Colour(), bool solid = false);
+        Drawable* add(const C2DTriangle &tri, Colour col = Colour(), bool solid = false);
+    };
+
+    /*---[Shapes: 2D]---*/
+
+    struct vvrframework_API Point2D     : Shape
     {
         real x, y;
 
-    protected:
-        void drawShape() const override;
-
-    public:
         Point2D() { }
 
         Point2D(real x, real y, Colour col = Colour())
@@ -131,16 +195,15 @@ namespace vvr {
             , x(x)
             , y(y)
         { }
+
+    private:
+        void drawShape() const override;
     };
 
-    struct vvrframework_API LineSeg2D : public Shape
+    struct vvrframework_API LineSeg2D   : Shape
     {
         real x1, y1;
         real x2, y2;
-
-    protected:
-
-        void drawShape() const override;
 
     public:
         LineSeg2D() { }
@@ -160,28 +223,35 @@ namespace vvr {
             vvr_setmemb(x2);
             vvr_setmemb(y2);
         }
+
+    private:
+        void drawShape() const override;
     };
 
-    struct vvrframework_API Line2D : public LineSeg2D
+    struct vvrframework_API Line2D      : Shape
     {
-    protected:
+        real x1, y1;
+        real x2, y2;
+
+    private:
         void drawShape() const override;
 
     public:
         Line2D() { }
         Line2D(real x1, real y1, real x2, real y2, Colour col = Colour())
-            : LineSeg2D(x1, y1, x2, y2, col)
+            : Shape(col)
+            , x1(x1)
+            , y1(y1)
+            , x2(x2)
+            , y2(y2)
         { }
     };
 
-    struct vvrframework_API Triangle2D : public Shape
+    struct vvrframework_API Triangle2D  : Shape
     {
         real x1, y1;
         real x2, y2;
         real x3, y3;
-
-    protected:
-        void drawShape() const override;
 
     public:
         Triangle2D() { filled = false; }
@@ -212,9 +282,12 @@ namespace vvr {
             vvr_setmemb(x3);
             vvr_setmemb(y3);
         }
+
+    private:
+        void drawShape() const override;
     };
 
-    struct vvrframework_API Circle2D : public Shape, public C2DCircle
+    struct vvrframework_API Circle2D    : Shape, C2DCircle
     {
         vvr_decl_shape(Circle2D, C2DCircle, false)
 
@@ -257,15 +330,15 @@ namespace vvr {
         }
     };
 
-    /*---[Shapes: 3D]-------------------------------------------------------------------*/
+    /*---[Shapes: 3D]---*/
 
-    struct vvrframework_API Point3D : public Shape, public math::vec
+    struct vvrframework_API Point3D     : Shape, vec
     {
-        vvr_decl_shape(Point3D, math::vec, false)
+        vvr_decl_shape(Point3D, vec, false)
 
         Point3D(real x, real y, real z, Colour col = Colour())
             : Shape(col)
-            , math::vec{ x, y, z }
+            , vec{ x, y, z }
         { }
 
         real pickdist(int x, int y) const override
@@ -278,15 +351,15 @@ namespace vvr {
         void drawShape() const override;
     };
 
-    struct vvrframework_API LineSeg3D : public Shape, public math::LineSegment
+    struct vvrframework_API LineSeg3D   : Shape, math::LineSegment
     {
         vvr_decl_shape(LineSeg3D, math::LineSegment, false)
 
         LineSeg3D(real x1, real y1, real z1, real x2, real y2, real z2,
                   Colour col = Colour())
             : Shape(col)
-            , LineSegment(math::vec{x1, y1, z1},
-                          math::vec{x2, y2, z2})
+            , LineSegment(vec{x1, y1, z1},
+                          vec{x2, y2, z2})
         { }
 
         real pickdist(int x, int y) const override
@@ -299,7 +372,7 @@ namespace vvr {
         void drawShape() const override;
     };
 
-    struct vvrframework_API Sphere3D : public Shape, public math::Sphere
+    struct vvrframework_API Sphere3D    : Shape, math::Sphere
     {
         vvr_decl_shape(Sphere3D, math::Sphere, false)
 
@@ -312,19 +385,19 @@ namespace vvr {
         void drawShape() const override;
     };
 
-    struct vvrframework_API Aabb3D : public Shape, public math::AABB
+    struct vvrframework_API Aabb3D      : Shape, math::AABB
     {
         vvr_decl_shape(Aabb3D, math::AABB, false)
 
         Aabb3D(real xmin, real ymin, real zmin,
                real xmax, real ymax, real zmax, Colour col = Colour())
             : Shape(col)
-            , math::AABB(math::vec{ xmin, ymin, zmin }, math::vec{ xmax, ymax, zmax })
+            , math::AABB(vec{ xmin, ymin, zmin }, vec{ xmax, ymax, zmax })
         {
             setup();
         }
 
-        Aabb3D(const std::vector<math::vec> vertices, Colour col = Colour())
+        Aabb3D(const std::vector<vec> vertices, Colour col = Colour())
             : Shape(col)
             , math::AABB(aabbFromVertices(vertices))
         {
@@ -347,7 +420,7 @@ namespace vvr {
         }
     };
 
-    struct vvrframework_API Obb3D : public Shape, private math::OBB
+    struct vvrframework_API Obb3D       : Shape, math::OBB
     {
         Obb3D();
         ~Obb3D();
@@ -357,13 +430,13 @@ namespace vvr {
 
     private:
         const size_t num_triverts;
-        math::vec *triverts;
-        math::vec *trinorms;
+        vec *triverts;
+        vec *trinorms;
         Point3D *cornerpts;
         Colour col_edge;
     };
 
-    struct vvrframework_API Triangle3D : public Shape, public math::Triangle
+    struct vvrframework_API Triangle3D  : Shape, math::Triangle
     {
         vvr_decl_shape(Triangle3D, math::Triangle, true)
 
@@ -372,9 +445,9 @@ namespace vvr {
                    real x3, real y3, real z3, Colour col = Colour())
             : Shape(col, true)
             , math::Triangle(
-                math::vec{ x1, y1, z1 },
-                math::vec{ x2, y2, z2 },
-                math::vec{ x3, y3, z3 })
+                vec{ x1, y1, z1 },
+                vec{ x2, y2, z2 },
+                vec{ x3, y3, z3 })
         {
             setup();
         }
@@ -383,6 +456,13 @@ namespace vvr {
         {
             vec p(x, y, 0);
             return this->Contains(p)? this->CenterPoint().Distance(p) : -1;
+        }
+
+        real pickdist(const math::Ray &ray) const override
+        {
+            vec ip;
+            bool intr = Intersects(ray, nullptr, &ip);
+            return intr ? Distance(ip) : real(-1);
         }
 
         void setColourPerVertex(const Colour &c1, const Colour &c2, const Colour &c3)
@@ -403,7 +483,7 @@ namespace vvr {
         }
     };
 
-    struct vvrframework_API Cylinder3D : public Shape
+    struct vvrframework_API Cylinder3D  : Shape
     {
         Cylinder3D(Colour col=Colour())
             : Shape(col)
@@ -447,9 +527,9 @@ namespace vvr {
         }
     };
 
-    /*---[Drawables: Others]------------------------------------------------------------*/
+    /*---[Widgets]---*/
 
-    struct vvrframework_API Ground : public Drawable
+    struct vvrframework_API Ground      : Drawable
     {
         Ground(const real W, const real D, const real B, const real T, Colour colour);
         void draw() const override;
@@ -459,7 +539,7 @@ namespace vvr {
         Colour m_col;
     };
 
-    struct vvrframework_API Axes : Drawable
+    struct vvrframework_API Axes        : Drawable
     {
         Axes(real d)
             : x(0, 0, 0, d, 0, 0, Colour(1.0f, 0.0f, 0.0f))
@@ -478,124 +558,7 @@ namespace vvr {
         LineSeg3D x, y, z;
     };
 
-    /*---[Canvas]-----------------------------------------------------------------------*/
-
-    class vvrframework_API Canvas : public Drawable
-    {
-        struct Frame
-        {
-            Frame(bool show_old = true) : show_old(show_old) { }
-            std::vector<Drawable*> drvec;
-            bool show_old;
-        };
-
-        size_t fid;
-        bool del_on_clear;
-        std::vector<Frame> frames;
-
-    public:
-        Canvas();
-        ~Canvas();
-        void draw() const override;
-        Drawable* add(Drawable *drawable_ptr);
-        std::vector<Drawable*>& getDrawables(int offs = 0) { return frames[fid + offs].drvec; }
-        size_t size() const { return frames.size(); }
-        size_t frameIndex() const { return fid; }
-        void setDelOnClear(bool del) { del_on_clear = del; }
-        bool isAtStart() const { return fid == 0; }
-        bool isAtEnd() const { return fid == frames.size() - 1; }
-        void newFrame(bool show_old_frames = true);
-        void next() { if (fid < frames.size() - 1) fid++; }
-        void prev() { if (fid > 0) fid--; }
-        void rew() { fid = 0; }
-        void ff() { fid = frames.size() - 1; }
-        void resize(int i);
-        void clear();
-        void clearFrame();
-
-        /* Helpers to directly add GeoLib objects to canvas */
-
-        Drawable* add(const C2DPoint &p, Colour col = Colour())
-        {
-            return add(new Point2D(p.x, p.y, col));
-        }
-
-        Drawable* add(const C2DPoint &p1, const C2DPoint &p2, Colour col = Colour(), bool inf = false)
-        {
-            if (inf ){
-                return add(new Line2D(p1.x, p1.y, p2.x, p2.y, col));
-            }
-            else {
-                return add(new LineSeg2D(p1.x, p1.y, p2.x, p2.y, col));
-            }
-        }
-
-        Drawable* add(const C2DLine &line, Colour col = Colour(), bool inf_line = false)
-        {
-            const C2DPoint &p1 = line.GetPointFrom();
-            const C2DPoint &p2 = line.GetPointTo();
-            return add(p1, p2, col, inf_line);
-        }
-
-        Drawable* add(const C2DCircle &circle, Colour col = Colour(), bool solid = false)
-        {
-            Shape * s = new Circle2D(circle.GetCentre().x, circle.GetCentre().y, circle.GetRadius(), col);
-            s->filled = solid;
-            return add(s);
-        }
-
-        Drawable* add(const C2DTriangle &tri, Colour col = Colour(), bool solid = false)
-        {
-            Shape *s = new Triangle2D(
-                tri.GetPoint1().x,
-                tri.GetPoint1().y,
-                tri.GetPoint2().x,
-                tri.GetPoint2().y,
-                tri.GetPoint3().x,
-                tri.GetPoint3().y,
-                col);
-            s->filled = solid;
-            return add(s);
-        }
-    };
-
-    /*---[Drawing helpers]--------------------------------------------------------------*/
-
-    vvrframework_API void draw(C2DPointSet &point_set, Colour col = Colour());
-
-    vvrframework_API void draw(C2DLineSet &line_set, Colour col = Colour());
-
-    vvrframework_API void draw(C2DPolygon &polygon, Colour col = Colour(), bool filled = false);
-
-    /*---[MathGeoLib => vvr Converters] (Deprecated. Keep for legacy code)-------------*/
-
-    vvrframework_API Triangle3D math2vvr(const math::Triangle &t, Colour col);
-
-    vvrframework_API LineSeg3D math2vvr(const math::LineSegment &l, Colour col);
-
-    vvrframework_API LineSeg3D math2vvr(const math::Line &l, Colour col);
-
-    vvrframework_API Point3D math2vvr(const math::vec &v, Colour col);
-
-    /*---[Predefined colours]-----------------------------------------------------------*/
-
-    extern const vvrframework_API Colour white;
-    extern const vvrframework_API Colour red;
-    extern const vvrframework_API Colour green;
-    extern const vvrframework_API Colour blue;
-    extern const vvrframework_API Colour black;
-    extern const vvrframework_API Colour yellow;
-    extern const vvrframework_API Colour grey;
-    extern const vvrframework_API Colour orange;
-    extern const vvrframework_API Colour cyan;
-    extern const vvrframework_API Colour magenta;
-    extern const vvrframework_API Colour darkOrange;
-    extern const vvrframework_API Colour darkRed;
-    extern const vvrframework_API Colour darkGreen;
-    extern const vvrframework_API Colour yellowGreen;
-    extern const vvrframework_API Colour lilac;
-
-    /*---[Composite Drawables]----------------------------------------------------------*/
+    /*---[Composite]---*/
 
     template <class WholeT, class BlockT, size_t N>
     struct Composite : public Drawable

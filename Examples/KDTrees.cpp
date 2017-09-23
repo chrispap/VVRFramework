@@ -230,7 +230,7 @@ void KDTreeScene::draw()
     if (vvr_flag_on(m_flag, SHOW_PTS_ALL)) {
         for (size_t i = 0; i < m_pts.size(); i++) {
             vvr::Shape::PointSize = vvr::Shape::PointSize = POINT_SIZE;
-            math2vvr(m_pts[i], vvr::white).draw();
+            vvr::Point3D(m_pts[i], vvr::white).draw();
             vvr::Shape::PointSize = POINT_SIZE_SAVE;
         }
     }
@@ -250,7 +250,7 @@ void KDTreeScene::draw()
         }
         vvr::Shape::PointSize = vvr::Shape::PointSize = POINT_SIZE;
         for (size_t i = 0; i < pts_in.size(); i++) {
-            math2vvr(pts_in[i], vvr::magenta).draw();
+            vvr::Point3D(pts_in[i], vvr::magenta).draw();
         }
         vvr::Shape::PointSize = POINT_SIZE_SAVE;
     }
@@ -262,8 +262,8 @@ void KDTreeScene::draw()
         Task_02_Nearest(sc, m_KDTree->root(), &nearest, &dist);
         math::vec nn = nearest->split_point;
         vvr::Shape::PointSize = vvr::Shape::PointSize = POINT_SIZE;
-        math2vvr(sc, vvr::blue).draw();
-        math2vvr(nn, vvr::green).draw();
+        vvr::Point3D(sc, vvr::blue).draw();
+        vvr::Point3D(nn, vvr::green).draw();
         vvr::Shape::PointSize = POINT_SIZE_SAVE;
     }
 
@@ -277,8 +277,8 @@ void KDTreeScene::draw()
             if (!nearests[i]) continue;
             math::vec nn = nearests[i]->split_point;
             vvr::Shape::PointSize = vvr::Shape::PointSize = POINT_SIZE;
-            math2vvr(sc, vvr::blue).draw();
-            math2vvr(nn, vvr::green).draw();
+            vvr::Point3D(sc, vvr::blue).draw();
+            vvr::Point3D(nn, vvr::green).draw();
             vvr::Shape::PointSize = POINT_SIZE_SAVE;
         }
         delete[] nearests;
@@ -294,7 +294,7 @@ void KDTreeScene::draw()
                     Task_01_FindPtsOfNode(levelNodes[i], pts);
                     vvr::Shape::PointSize = vvr::Shape::PointSize = POINT_SIZE;
                     for (int pi = 0; pi < pts.size(); pi++) {
-                        math2vvr(pts[pi], Pallete[i % 6]).draw();
+                        vvr::Point3D(pts[pi], Pallete[i % 6]).draw();
                     }
                     vvr::Shape::PointSize = POINT_SIZE_SAVE;
                 }

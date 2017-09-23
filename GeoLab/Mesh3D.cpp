@@ -122,7 +122,7 @@ void Mesh3DScene::resize()
 void Mesh3DScene::Tasks()
 {
     //!//////////////////////////////////////////////////////////////////////////////////
-    //! Task 1 
+    //! Task 1
     //!//////////////////////////////////////////////////////////////////////////////////
 
     m_center_mass = vec(-10, 0, 0);
@@ -144,7 +144,7 @@ void Mesh3DScene::Tasks()
     m_model->update(true);
 
     //!//////////////////////////////////////////////////////////////////////////////////
-    //! Task 4 
+    //! Task 4
     //!//////////////////////////////////////////////////////////////////////////////////
 
     pca(m_model->getVertices(), m_pca_cen, m_pca_dir);
@@ -152,7 +152,7 @@ void Mesh3DScene::Tasks()
     //!//////////////////////////////////////////////////////////////////////////////////
     //! Homework
     //!//////////////////////////////////////////////////////////////////////////////////
-    
+
     float t = vvr::getSeconds();
     FindSubMeshes(*m_model, m_canvas);
     t = vvr::getSeconds() - t;
@@ -168,7 +168,7 @@ void Mesh3DScene::Tasks()
     {
         Task_5_Intersect(m_model->getTriangles(), m_plane, m_intersections);
     }
-    else 
+    else
     {
         m_intersections.clear();
         m_model = Mesh::Make(*m_model_original);
@@ -186,8 +186,8 @@ void Mesh3DScene::draw()
         math::vec p1(m_plane.Point(-u, v, math::vec(0, 0, 0)));
         math::vec p2(m_plane.Point(u, -v, math::vec(0, 0, 0)));
         math::vec p3(m_plane.Point(u, v, math::vec(0, 0, 0)));
-        math2vvr(math::Triangle(p0, p1, p2), colPlane).draw();
-        math2vvr(math::Triangle(p2, p1, p3), colPlane).draw();
+        vvr::Triangle3D(math::Triangle(p0, p1, p2), colPlane).draw();
+        vvr::Triangle3D(math::Triangle(p2, p1, p3), colPlane).draw();
     }
 
     if (FLAG_ON(m_flag, SHOW_SOLID)) m_model->draw(m_obj_col, SOLID);
@@ -231,7 +231,7 @@ void Mesh3DScene::draw()
 
 void Mesh3DScene::arrowEvent(ArrowDir dir, int modif)
 {
-    if (FLAG_ON(m_flag, MODE_PARTITION)) 
+    if (FLAG_ON(m_flag, MODE_PARTITION))
     {
         if (dir == UP) m_canvas.next();
         else if (dir == DOWN) m_canvas.prev();
@@ -245,11 +245,11 @@ void Mesh3DScene::arrowEvent(ArrowDir dir, int modif)
     else if (dir == RIGHT) n = math::float3x3::RotateY(DegToRad(-1)).Transform(n);
     m_plane = Plane(n.Normalized(), m_plane_d);
 
-    if (!FLAG_ON(m_flag, SPLIT_INSTEAD_OF_INTERSECT)) 
+    if (!FLAG_ON(m_flag, SPLIT_INSTEAD_OF_INTERSECT))
     {
         Task_5_Intersect(m_model_original->getTriangles(), m_plane, m_intersections);
     }
-    else 
+    else
     {
         m_intersections.clear();
         m_model = Mesh::Make(*m_model_original);
@@ -425,7 +425,7 @@ void Task_2_FindAABB(vector<vec> &vertices, Aabb3D &aabb)
 vec Mesh3DScene::Task_3_Pick_Origin()
 {
     return vec(0.5f * (m_aabb.MinX() + m_aabb.MaxX()),
-               0.5f * (m_aabb.MinY() + m_aabb.MaxY()), 
+               0.5f * (m_aabb.MinY() + m_aabb.MaxY()),
                0.5f * (m_aabb.MinZ() + m_aabb.MaxZ()));
     return m_center_mass;
 }
@@ -576,8 +576,8 @@ void FindSubMeshes(vvr::Mesh &mesh, vvr::Canvas &canvas)
 
     int i = 0;
     vector<set<int> > vectris(vecs.size());
-    for (vector<vvr::Triangle>::const_iterator ti = tris.cbegin(); 
-        ti != tris.cend(); 
+    for (vector<vvr::Triangle>::const_iterator ti = tris.cbegin();
+        ti != tris.cend();
         ++ti)
     {
         vectris[ti->vi1].insert(i);
@@ -624,9 +624,9 @@ void FindSubMeshes(vvr::Mesh &mesh, vvr::Canvas &canvas)
         }
 
         vvr::Aabb3D* bb = new vvr::Aabb3D(vs);
-        
-        if (bb->MaxX() - bb->MinX() < 1 || 
-            bb->MaxY() - bb->MinY() < 1 || 
+
+        if (bb->MaxX() - bb->MinX() < 1 ||
+            bb->MaxY() - bb->MinY() < 1 ||
             bb->MaxZ() - bb->MinZ() < 1)
         {
 

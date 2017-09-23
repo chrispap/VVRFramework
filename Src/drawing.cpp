@@ -29,10 +29,7 @@ const vvr::Colour vvr::darkGreen(0x00, 0x64, 0x00);
 const vvr::Colour vvr::yellowGreen(0x9A, 0xCD, 0x32);
 const vvr::Colour vvr::lilac(0xCD, 0xA9, 0xCD);
 
-static void drawSphere(real r, int lats, int longs);
-static void drawBox(const vec &p1, const vec &p2, vvr::Colour col, char alpha);
-
-/*--- [Helpers] ------------------------------------------------------------------------*/
+/*---[Helpers]---*/
 
 math::AABB vvr::aabbFromVertices(const std::vector<vec> &vertices)
 {
@@ -52,12 +49,164 @@ math::AABB vvr::aabbFromVertices(const std::vector<vec> &vertices)
     return math::AABB(lo, hi);
 }
 
+void drawSphere(real r, int lats, int longs)
+{
+    int i, j;
+    for (i = 0; i <= lats; i++) {
+        real lat0 = M_PI * (-0.5 + (real)(i - 1) / lats);
+        real z0 = sin(lat0);
+        real zr0 = cos(lat0);
+
+        real lat1 = M_PI * (-0.5 + (real)i / lats);
+        real z1 = sin(lat1);
+        real zr1 = cos(lat1);
+        glBegin(GL_QUAD_STRIP);
+        for (j = 0; j <= longs; j++) {
+            real lng = 2 * M_PI * (real)(j - 1) / longs;
+            real x = cos(lng);
+            real y = sin(lng);
+            glNormal3f(x * zr0, y * zr0, z0);
+            glVertex3f(x * zr0, y * zr0, z0);
+            glNormal3f(x * zr1, y * zr1, z1);
+            glVertex3f(x * zr1, y * zr1, z1);
+        }
+        glEnd();
+    }
+}
+
+void drawBox(const vec &p1, const vec &p2, vvr::Colour col, char a)
+{
+    static vec p[8];
+    vec *v = p;
+
+    *v++ = vec(p1.x, p1.y, p1.z); //0
+    *v++ = vec(p1.x, p2.y, p1.z); //1
+    *v++ = vec(p1.x, p2.y, p2.z); //2
+    *v++ = vec(p1.x, p1.y, p2.z); //3
+    *v++ = vec(p2.x, p1.y, p1.z); //4
+    *v++ = vec(p2.x, p2.y, p1.z); //5
+    *v++ = vec(p2.x, p2.y, p2.z); //6
+    *v++ = vec(p2.x, p1.y, p2.z); //7
+
+    glPolygonMode(GL_FRONT_AND_BACK, a ? GL_FILL : GL_LINE);
+    glBegin(GL_QUADS);
+
+    if (a) {
+        glColor4ub(col.r, col.g, col.b, a);
+    }
+    else {
+        glColor3ubv(col.data);
+    }
+
+    glVertex3fv(p[0].ptr());
+    glVertex3fv(p[1].ptr());
+    glVertex3fv(p[2].ptr());
+    glVertex3fv(p[3].ptr());
+
+    glVertex3fv(p[1].ptr());
+    glVertex3fv(p[2].ptr());
+    glVertex3fv(p[6].ptr());
+    glVertex3fv(p[5].ptr());
+
+    glVertex3fv(p[4].ptr());
+    glVertex3fv(p[5].ptr());
+    glVertex3fv(p[6].ptr());
+    glVertex3fv(p[7].ptr());
+
+    glVertex3fv(p[0].ptr());
+    glVertex3fv(p[4].ptr());
+    glVertex3fv(p[7].ptr());
+    glVertex3fv(p[3].ptr());
+
+    glVertex3fv(p[2].ptr());
+    glVertex3fv(p[3].ptr());
+    glVertex3fv(p[7].ptr());
+    glVertex3fv(p[6].ptr());
+
+    glVertex3fv(p[0].ptr());
+    glVertex3fv(p[1].ptr());
+    glVertex3fv(p[5].ptr());
+    glVertex3fv(p[4].ptr());
+
+    glEnd();
+}
+
+void vvr::draw(C2DPointSet &point_set, Colour col)
+{
+    /* Draw point cloud */
+    for (size_t i = 0; i < point_set.size(); i++) {
+        Point2D(
+            point_set.GetAt(i)->x,
+            point_set.GetAt(i)->y,
+            col).draw();
+    }
+}
+
+void vvr::draw(C2DLineSet  &line_set, Colour col)
+{
+    for (size_t i = 0; i < line_set.size(); i++) {
+        LineSeg2D(
+            line_set.GetAt(i)->GetPointFrom().x,
+            line_set.GetAt(i)->GetPointFrom().y,
+            line_set.GetAt(i)->GetPointTo().x,
+            line_set.GetAt(i)->GetPointTo().y,
+            col).draw();
+    }
+}
+
+void vvr::draw(C2DPolygon  &polygon, Colour col, bool filled)
+{
+    bool err = false;
+
+    if (filled)
+    {
+        if (!polygon.IsConvex()) {
+            err = !polygon.CreateConvexSubAreas();
+        }
+        if (!err)
+        {
+            C2DPolygonSet polyset;
+            polygon.GetConvexSubAreas(polyset);
+            for (size_t i = 0; i < polyset.size(); i++) {
+                C2DPolygon &convpoly = *polyset.GetAt(i);
+                C2DPoint convpoly_centroid = convpoly.GetCentroid();
+                for (size_t j = 0; j < convpoly.GetLines().size(); j++) {
+                    Triangle2D t(
+                        convpoly.GetLines().GetAt(j)->GetPointFrom().x,
+                        convpoly.GetLines().GetAt(j)->GetPointFrom().y,
+                        convpoly.GetLines().GetAt(j)->GetPointTo().x,
+                        convpoly.GetLines().GetAt(j)->GetPointTo().y,
+                        convpoly_centroid.x, convpoly_centroid.y);
+                    t.filled = true;
+                    t.colour = col;
+                    t.draw();
+                }
+            }
+        }
+    }
+    else
+    {
+        for (size_t i = 0; i < polygon.GetLines().size(); i++) {
+            LineSeg2D(
+                polygon.GetLines().GetAt(i)->GetPointFrom().x,
+                polygon.GetLines().GetAt(i)->GetPointFrom().y,
+                polygon.GetLines().GetAt(i)->GetPointTo().x,
+                polygon.GetLines().GetAt(i)->GetPointTo().y,
+                col).draw();
+        }
+    }
+
+    if (err) {
+        std::cerr << "Polygon Invalid. Cannot render." << std::endl;
+    }
+}
+
 void vvr::Drawable::addToCanvas(Canvas &canvas)
 {
     canvas.add(this);
 }
 
-/*--- [Shape] Drawing ------------------------------------------------------------------*/
+/*---[Shape: Drawing]---*/
 
 void vvr::Shape::draw() const
 {
@@ -65,8 +214,6 @@ void vvr::Shape::draw() const
     glColor4ubv(colour.data);
     drawShape();
 }
-
-/*--- [Shape] Drawing 2D ---------------------------------------------------------------*/
 
 void vvr::Point2D::drawShape() const
 {
@@ -130,8 +277,6 @@ void vvr::Circle2D::drawShape() const
     }
     glEnd();
 }
-
-/*--- [Shape] Drawing 3D ---------------------------------------------------------------*/
 
 void vvr::Point3D::drawShape() const
 {
@@ -242,13 +387,14 @@ void vvr::Obb3D::drawShape() const
     if (filled)
     {
         for (size_t i = 0; i < num_triverts; i += 3) {
-            math::Triangle t(triverts[i + 0], triverts[i + 1], triverts[i + 2]);
-            math2vvr(t, colour).draw();
+            vvr::Triangle3D t(math::Triangle(triverts[i + 0], triverts[i + 1], triverts[i + 2]));
+            t.colour = colour;
+            t.draw();
         }
     }
 
     for (int i = 0; i < NumEdges(); ++i) {
-        math2vvr(Edge(i), col_edge).draw();
+        LineSeg3D(Edge(i), col_edge).draw();
     }
 
     auto ptsz_old = vvr::Shape::PointSize;
@@ -290,8 +436,9 @@ void vvr::Ground::draw() const
 }
 
 vvr::Ground::Ground(const real W, const real D, const real B, const real T, Colour col)
-    : m_col(col)
 {
+    m_col = col;
+
     const vec vA(-W / 2, B, -D / 2);
     const vec vB(+W / 2, B, -D / 2);
     const vec vC(+W / 2, B, +D / 2);
@@ -305,7 +452,7 @@ vvr::Ground::Ground(const real W, const real D, const real B, const real T, Colo
     m_floor_tris.push_back(vvr::Triangle3D(math::Triangle(vF, vA, vB), col));
 }
 
-/*--- [Canvas] -------------------------------------------------------------------------*/
+/*---[Canvas]---*/
 
 vvr::Canvas::Canvas() : fid(0) , del_on_clear(true)
 {
@@ -391,182 +538,47 @@ void vvr::Canvas::clearFrame()
     frames[fid].drvec.clear();
 }
 
-/*--- [Drawing helpers] ----------------------------------------------------------------*/
-
-void vvr::draw(C2DPointSet &point_set, Colour col)
+vvr::Drawable* vvr::Canvas::add(const C2DPoint &p, Colour col)
 {
-    /* Draw point cloud */
-    for (size_t i = 0; i < point_set.size(); i++) {
-        Point2D(
-            point_set.GetAt(i)->x,
-            point_set.GetAt(i)->y,
-            col).draw();
-    }
+    return add(new Point2D(p.x, p.y, col));
 }
 
-void vvr::draw(C2DLineSet  &line_set, Colour col)
+vvr::Drawable* vvr::Canvas::add(const C2DPoint &p1, const C2DPoint &p2, Colour col, bool inf)
 {
-    for (size_t i = 0; i < line_set.size(); i++) {
-        LineSeg2D(
-            line_set.GetAt(i)->GetPointFrom().x,
-            line_set.GetAt(i)->GetPointFrom().y,
-            line_set.GetAt(i)->GetPointTo().x,
-            line_set.GetAt(i)->GetPointTo().y,
-            col).draw();
-    }
-}
-
-void vvr::draw(C2DPolygon  &polygon, Colour col, bool filled)
-{
-    bool err = false;
-
-    if (filled)
-    {
-        if (!polygon.IsConvex()) {
-            err = !polygon.CreateConvexSubAreas();
-        }
-        if (!err)
-        {
-            C2DPolygonSet polyset;
-            polygon.GetConvexSubAreas(polyset);
-            for (size_t i = 0; i < polyset.size(); i++) {
-                C2DPolygon &convpoly = *polyset.GetAt(i);
-                C2DPoint convpoly_centroid = convpoly.GetCentroid();
-                for (size_t j = 0; j < convpoly.GetLines().size(); j++) {
-                    Triangle2D t(
-                        convpoly.GetLines().GetAt(j)->GetPointFrom().x,
-                        convpoly.GetLines().GetAt(j)->GetPointFrom().y,
-                        convpoly.GetLines().GetAt(j)->GetPointTo().x,
-                        convpoly.GetLines().GetAt(j)->GetPointTo().y,
-                        convpoly_centroid.x, convpoly_centroid.y);
-                    t.filled = true;
-                    t.colour = col;
-                    t.draw();
-                }
-            }
-        }
-    }
-    else
-    {
-        for (size_t i = 0; i < polygon.GetLines().size(); i++) {
-            LineSeg2D(
-                polygon.GetLines().GetAt(i)->GetPointFrom().x,
-                polygon.GetLines().GetAt(i)->GetPointFrom().y,
-                polygon.GetLines().GetAt(i)->GetPointTo().x,
-                polygon.GetLines().GetAt(i)->GetPointTo().y,
-                col).draw();
-        }
-    }
-
-    if (err) {
-        std::cerr << "Polygon Invalid. Cannot render." << std::endl;
-    }
-}
-
-/*--- [MathGeoLib => vvr Converters] ---------------------------------------------------*/
-
-vvr::Triangle3D vvr::math2vvr(const math::Triangle &t, Colour col)
-{
-    return vvr::Triangle3D(t, col);
-}
-
-vvr::LineSeg3D vvr::math2vvr(const math::LineSegment &l, Colour col)
-{
-    return vvr::LineSeg3D(l, col);
-}
-
-vvr::LineSeg3D vvr::math2vvr(const math::Line &l, Colour col)
-{
-    return vvr::LineSeg3D(l.ToLineSegment(1000), col);
-}
-
-vvr::Point3D vvr::math2vvr(const vec &v, Colour col)
-{
-    return vvr::Point3D(v, col);
-}
-
-/*--- [Static drawing functions] -------------------------------------------------------*/
-
-void drawSphere(real r, int lats, int longs)
-{
-    int i, j;
-    for (i = 0; i <= lats; i++) {
-        real lat0 = M_PI * (-0.5 + (real)(i - 1) / lats);
-        real z0 = sin(lat0);
-        real zr0 = cos(lat0);
-
-        real lat1 = M_PI * (-0.5 + (real)i / lats);
-        real z1 = sin(lat1);
-        real zr1 = cos(lat1);
-        glBegin(GL_QUAD_STRIP);
-        for (j = 0; j <= longs; j++) {
-            real lng = 2 * M_PI * (real)(j - 1) / longs;
-            real x = cos(lng);
-            real y = sin(lng);
-            glNormal3f(x * zr0, y * zr0, z0);
-            glVertex3f(x * zr0, y * zr0, z0);
-            glNormal3f(x * zr1, y * zr1, z1);
-            glVertex3f(x * zr1, y * zr1, z1);
-        }
-        glEnd();
-    }
-}
-
-void drawBox(const vec &p1, const vec &p2, vvr::Colour col, char a)
-{
-    static vec p[8];
-    vec *v = p;
-
-    *v++ = vec(p1.x, p1.y, p1.z); //0
-    *v++ = vec(p1.x, p2.y, p1.z); //1
-    *v++ = vec(p1.x, p2.y, p2.z); //2
-    *v++ = vec(p1.x, p1.y, p2.z); //3
-    *v++ = vec(p2.x, p1.y, p1.z); //4
-    *v++ = vec(p2.x, p2.y, p1.z); //5
-    *v++ = vec(p2.x, p2.y, p2.z); //6
-    *v++ = vec(p2.x, p1.y, p2.z); //7
-
-    glPolygonMode(GL_FRONT_AND_BACK, a ? GL_FILL : GL_LINE);
-    glBegin(GL_QUADS);
-
-    if (a) {
-        glColor4ub(col.r, col.g, col.b, a);
+    if (inf ){
+        return add(new Line2D(p1.x, p1.y, p2.x, p2.y, col));
     }
     else {
-        glColor3ubv(col.data);
+        return add(new LineSeg2D(p1.x, p1.y, p2.x, p2.y, col));
     }
+}
 
-    glVertex3fv(p[0].ptr());
-    glVertex3fv(p[1].ptr());
-    glVertex3fv(p[2].ptr());
-    glVertex3fv(p[3].ptr());
+vvr::Drawable* vvr::Canvas::add(const C2DLine &line, Colour col, bool inf_line)
+{
+    const C2DPoint &p1 = line.GetPointFrom();
+    const C2DPoint &p2 = line.GetPointTo();
+    return add(p1, p2, col, inf_line);
+}
 
-    glVertex3fv(p[1].ptr());
-    glVertex3fv(p[2].ptr());
-    glVertex3fv(p[6].ptr());
-    glVertex3fv(p[5].ptr());
+vvr::Drawable* vvr::Canvas::add(const C2DCircle &circle, Colour col, bool solid)
+{
+    auto drw = new Circle2D(circle.GetCentre().x, circle.GetCentre().y, circle.GetRadius(), col);
+    drw->filled = solid;
+    return add(drw);
+}
 
-    glVertex3fv(p[4].ptr());
-    glVertex3fv(p[5].ptr());
-    glVertex3fv(p[6].ptr());
-    glVertex3fv(p[7].ptr());
-
-    glVertex3fv(p[0].ptr());
-    glVertex3fv(p[4].ptr());
-    glVertex3fv(p[7].ptr());
-    glVertex3fv(p[3].ptr());
-
-    glVertex3fv(p[2].ptr());
-    glVertex3fv(p[3].ptr());
-    glVertex3fv(p[7].ptr());
-    glVertex3fv(p[6].ptr());
-
-    glVertex3fv(p[0].ptr());
-    glVertex3fv(p[1].ptr());
-    glVertex3fv(p[5].ptr());
-    glVertex3fv(p[4].ptr());
-
-    glEnd();
+vvr::Drawable* vvr::Canvas::add(const C2DTriangle &tri, Colour col, bool solid)
+{
+    auto drw = new Triangle2D(
+        tri.GetPoint1().x,
+        tri.GetPoint1().y,
+        tri.GetPoint2().x,
+        tri.GetPoint2().y,
+        tri.GetPoint3().x,
+        tri.GetPoint3().y,
+        col);
+    drw->filled = solid;
+    return add(drw);
 }
 
 /*--------------------------------------------------------------------------------------*/

@@ -13,7 +13,7 @@
 #include <cassert>
 #include <functional>
 
-using math::vec;
+using vvr::vec;
 
 template <class T>
 void snap2grid(T& x, T& y, T gs)
@@ -102,7 +102,7 @@ private:
 BSplineScene::BSplineScene()
 {
     vvr::Shape::PointSize *= 2;
-    m_bg_col = vvr::Colour("EEFFFF");
+    m_bg_col = vvr::Colour("FFFFFF");
     reset();
 }
 

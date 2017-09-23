@@ -165,14 +165,14 @@ void OrigamiScene::draw()
         //! Outline
         if (m_style_flag & SHOW_WIRE) {
             for (int i = 0; i < pol.NumEdges(); ++i) {
-                math2vvr(pol.Edge(i), vvr::black).draw();
+                vvr::LineSeg3D(pol.Edge(i), vvr::black).draw();
             }
         }
 
         //! Points
         if (m_style_flag & SHOW_POINTS) {
             for (int i = 0; i < pol.NumVertices(); ++i) {
-                math2vvr(pol.Vertex(i), vvr::black).draw();
+                vvr::Point3D(pol.Vertex(i), vvr::black).draw();
             }
         }
     }
@@ -413,7 +413,7 @@ void OrigamiScene::triangulate()
 
 int main(int argc, char* argv[])
 {
-    try 
+    try
     {
         return vvr::mainLoop(argc, argv, new OrigamiScene);
     }

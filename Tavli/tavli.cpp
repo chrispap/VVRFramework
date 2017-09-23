@@ -500,7 +500,7 @@ real tavli::Region::pickdist(const Ray &ray) const
 
 bool tavli::PieceDragger::on_pick(Drawable* drw)
 {
-    assert(dynamic_cast<Piece*>(drw));
+    assert(typeid(Piece)==typeid(*drw));
     auto piece = static_cast<Piece*>(drw);
     _colour = piece->colour;
     piece->colour.mul(1.4);
@@ -537,7 +537,7 @@ void tavli::PieceDragger::on_drop(Drawable* drw)
 
 bool tavli::RegionHlter::on_pick(Drawable* drw)
 {
-    assert(dynamic_cast<Region*>(drw));
+    assert(typeid(Region)==typeid(*drw));
     auto reg = static_cast<Region*>(drw);
     _colour = reg->colour;
     reg->colour.mul(1.30);

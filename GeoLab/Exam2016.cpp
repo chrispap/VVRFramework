@@ -185,7 +185,7 @@ void Task_Edges(const vvr::Mesh &mesh, std::vector<vvr::LineSeg3D> &segments)
     //          int ei = findEdge(edges, edge);                                        //
     //                                                                                 //
     //    - Gia na prosthesete mia akmi sto teoiko vector apo segments:                //
-    //          segments.push_back(math2vvr(math::LineSegment(v1, v2), col));          //
+    //          segments.push_back(vvr::LineSeg3D(math::LineSegment(v1, v2), col));    //
     //                                                                                 //
     /////////////////////////////////////////////////////////////////////////////////////
 
@@ -231,7 +231,7 @@ void Task_Edges(const vvr::Mesh &mesh, std::vector<vvr::LineSeg3D> &segments)
             col.b = (1.0 - a) * 255;
         }
 
-        segments.push_back(math2vvr(math::LineSegment(verts[e.v1], verts[e.v2]), col));
+        segments.push_back(vvr::LineSeg3D(math::LineSegment(verts[e.v1], verts[e.v2]), col));
     }
 
     /* Alternative */
@@ -277,7 +277,7 @@ void Task_Edges(const vvr::Mesh &mesh, std::vector<vvr::LineSeg3D> &segments)
     col.b = (1.0 - a) * 255;
     }
 
-    segments.push_back(math2vvr(math::LineSegment(verts[e.v1], verts[e.v2]), col));
+    segments.push_back(vvr::LineSeg3D(math::LineSegment(verts[e.v1], verts[e.v2]), col));
     }*/
 
 }
@@ -306,7 +306,7 @@ void RandomPts(C2DPointSet &ptset, int ptnum, int W0, int W1, int H0, int H1)
 
 Exam2016Scene::Exam2016Scene()
 {
-    //! Setup: Scene 
+    //! Setup: Scene
     m_perspective_proj = true;
     m_style_flag = FLAG_SHOW_SOLID;
     m_bg_col = Colour(0x76, 0x8E, 0x77);

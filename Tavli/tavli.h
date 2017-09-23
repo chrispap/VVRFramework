@@ -7,21 +7,17 @@
 #include <vvr/mesh.h>
 #include <vector>
 
-namespace vvr 
+namespace vvr
 {
-
     /*---[MousePicker: 3D]--------------------------------------------------------------*/
     template <class DraggerT>
     struct MousePicker3D
     {
         vvr_decl_shared_ptr(MousePicker3D)
 
-            void pick(math::Ray ray, int modif)
+        void pick(math::Ray ray, int modif)
         {
-            if (_picked) {
-                drop(ray, modif);
-                _picked = nullptr;
-            }
+            drop(ray, modif);
 
             if ((_picked = query(ray))) {
                 _mouseray = ray;
@@ -79,7 +75,6 @@ namespace vvr
         Drawable*   _picked;
         math::Ray   _mouseray;
     };
-
 }
 
 namespace tavli
@@ -96,7 +91,7 @@ namespace tavli
         vvr_decl_shared_ptr(RegionHlter)
 
         bool on_pick(Drawable* drw);
-        void on_drag(Drawable* drw, Ray ray0, Ray ray1) {};
+        void on_drag(Drawable* drw, Ray ray0, Ray ray1) {}
         void on_drop(Drawable* drw);
 
     private:
@@ -113,7 +108,7 @@ namespace tavli
         void on_drag(Drawable* drw, Ray ray0, Ray ray1);
         void on_drop(Drawable* drw);
 
-        PieceDragger(RegionPicker* rp) 
+        PieceDragger(RegionPicker* rp)
             : _regionPicker{ rp } {}
 
     private:
@@ -139,12 +134,12 @@ namespace tavli
     struct Region : public Triangle3D
     {
         Region(Board* board, int reg, Colour colour);
-        real pickdist(const Ray& ray) const override;
         void addPiece(Piece *piece);
         void removePiece(Piece *piece);
         void resize(float diam, float boardheight);
         void arrangePieces(size_t index_from=0);
-        
+        real pickdist(const Ray& ray) const override;
+
         /* Data [Logic] */
         Board* board;
         std::vector<Piece*> pieces;
@@ -167,7 +162,7 @@ namespace tavli
         void setupGameFevga();
         void draw() const override;
         void resize(const float width, const float height);
-        
+
         RegionHlter::Ptr        region_hlter;
         RegionPicker::Ptr       region_picker;
         PieceDragger::Ptr       piece_dragger;
