@@ -13,6 +13,8 @@
 #include <cassert>
 #include <functional>
 
+using math::vec;
+
 template <class T>
 void snap2grid(T& x, T& y, T gs)
 {
@@ -79,6 +81,7 @@ private:
     void mouseReleased(int x, int y, int modif) override;
     void mouseHovered(int x, int y, int modif) override;
     void append2Grid(float dx, float dy, vvr::Colour);
+    void saveScene();
 
     typedef vvr::CascadePicker2D<
         vvr::MousePicker2D<vvr::Point3D>,
@@ -99,7 +102,7 @@ private:
 BSplineScene::BSplineScene()
 {
     vvr::Shape::PointSize *= 2;
-    m_bg_col = vvr::Colour("EEEEEE");
+    m_bg_col = vvr::Colour("EEFFFF");
     reset();
 }
 
@@ -176,7 +179,7 @@ void BSplineScene::mousePressed(int x, int y, int modif)
 
 void BSplineScene::mouseMoved(int x, int y, int modif)
 {
-    if (shiftDown(modif)) {
+    if (!shiftDown(modif)) {
         snap2grid(x, y, _grid_size);
     }
     _picker->drag(vvr::Mousepos{ x, y }, modif);
@@ -203,12 +206,33 @@ void BSplineScene::draw()
     exitPixelMode();
 }
 
+void BSplineScene::saveScene()
+{
+    for (vvr::Drawable* drw : _canvas.getDrawables())
+    {
+
+        if (auto x = dynamic_cast<math::vec*>(drw))
+        {
+            vvr_msg(*x);
+        }
+        else if (auto x = dynamic_cast<math::Triangle*>(drw))
+        {
+            vvr_msg(*x);
+        }
+        else if (auto x = dynamic_cast<math::LineSegment*>(drw))
+        {
+            vvr_msg(*x);
+        }
+
+    }
+}
+
 void BSplineScene::keyEvent(unsigned char key, bool up, int modif)
 {
     switch (tolower(key)) {
-    case 's': _spline->toggleVisibility(); break;
     case 'p': _spline->drawCurvePts ^= true; break;
     case 'g': _canvas_grid.toggleVisibility(); break;
+    case 's': if (ctrlDown(modif)) saveScene(); break;
     case 'r': reset(); break;
     }
 }

@@ -14,6 +14,7 @@
 namespace vvr {
 
     typedef float real;
+    using math::vec;
     class Canvas;
 
     /*---[Helpers]----------------------------------------------------------------------*/
