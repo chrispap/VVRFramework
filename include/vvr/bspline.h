@@ -15,10 +15,16 @@ static inline G spline_divide(const G& num, const G& den)
 }
 
 template<typename G>
-G& ref(G& obj) { return obj; }
+G& ref(G& obj) 
+{
+    return obj; 
+}
 
 template<typename G>
-G& ref(G* obj) { return *obj; }
+G& ref(G* obj) 
+{
+    return *obj; 
+}
 
 template <typename T>
 class BSpline
@@ -26,43 +32,22 @@ class BSpline
     typedef typename std::remove_pointer<T>::type point_t;
     typedef std::vector<std::vector<double>> double_vector_2d;
 
-    size_t mNumPts;
-    std::vector<T> mCps;
-    std::vector<double> mKnots;
-    std::vector<point_t> mPts;
-    bool mFlagDirty;
+    std::vector<point_t>    _pts;
+    std::vector<T>          _cps;
+    std::vector<double>     _knots;
+    size_t                  _num_pts;
+    bool                    _dirty;
 
 public:
-    BSpline() : mNumPts(2) { mFlagDirty = true; }
-    void setCtrPts(std::vector<T> &&cps) { mCps = cps; mFlagDirty = true; }
-    void setCtrPts(const std::vector<T> &cps) { mCps = cps; mFlagDirty = true; }
-    void setKnots(std::vector<double> &&knots) { mKnots = knots; mFlagDirty = true; }
-    void setKnots(const std::vector<double> &knots) { mKnots = knots; mFlagDirty = true; }
-    size_t getNumPts() const { return mNumPts; }
-    const std::vector<T>& getCps() const { return mCps; }
-    const std::vector<point_t>& getPts() const { return mPts; }
+    BSpline() 
+        : _num_pts(2)
+        , _dirty(true) 
+    { }
 
-    void setNumPts(int num)
+    point_t get_point(const double t)
     {
-        bool force = num != mNumPts;
-        if (num < 2) num = 2;
-        mNumPts = num;
-        update(force);
-    }
-
-    std::pair<double, double> getParamRange()
-    {
-        const int mb = mKnots.size() - mCps.size();
-        std::pair<double, double> range;
-        range.first = mKnots[mb - 1];
-        range.second = *(mKnots.end() - 1);
-        return range;
-    }
-
-    point_t curvePoint(const double t)
-    {
-        const auto &X = mKnots;
-        const auto &B = mCps;
+        const auto &X = _knots;
+        const auto &B = _cps;
         const int kn = X.size();
         const int kp = B.size();
         const int mb = kn - kp;
@@ -96,15 +81,67 @@ public:
 
     void update(bool force = false)
     {
-        if (!mFlagDirty && !force) return;
-        mPts.clear();
-        auto range = getParamRange();
-        auto dt = (range.second - range.first) / (mNumPts - 1);
-        for (int i = 0; i < mNumPts; i++) {
-            mPts.push_back(curvePoint(range.first + dt * i));
+        if (!_dirty && !force) return;
+        _pts.clear();
+        auto range = param_range();
+        auto dt = (range.second - range.first) / (_num_pts - 1);
+        for (int i = 0; i < _num_pts; i++) {
+            _pts.push_back(get_point(range.first + dt * i));
         }
-        mFlagDirty = false;
+        _dirty = false;
     }
+
+    void set_num_pts(int num)
+    {
+        bool force = num != _num_pts;
+        if (num < 2) num = 2;
+        _num_pts = num;
+        update(force);
+    }
+
+    void set_cps(std::vector<T> &&cps)
+    {
+        _cps = cps;
+        _dirty = true;
+    }
+
+    void set_cps(const std::vector<T> &cps)
+    {
+        _cps = cps;
+        _dirty = true;
+    }
+
+    void set_knots(std::vector<double> &&knots)
+    {
+        _knots = knots;
+        _dirty = true;
+    }
+
+    void set_knots(const std::vector<double> &knots)
+    {
+        _knots = knots;
+        _dirty = true;
+    }
+
+    const auto param_range()
+    {
+        const int mb = _knots.size() - _cps.size();
+        std::pair<double, double> range;
+        range.first = _knots[mb - 1];
+        range.second = *(_knots.end() - 1);
+        return range;
+    }
+
+    const auto& get_pts() const
+    {
+        return _pts;
+    }
+
+    const auto& get_cps() const
+    {
+        return _cps;
+    }
+
 };
 
 }

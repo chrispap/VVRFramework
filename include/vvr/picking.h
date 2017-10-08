@@ -40,8 +40,8 @@ namespace vvr
         bool on_pick(Mousepos mp, Point3D* pt)
         {
             _picked = pt;
-            _colvirg = vvr::magenta;
-            std::swap(_colvirg, _picked->colour);
+            _colvirg = _picked->colour;
+            _picked->colour = vvr::magenta;
             return true;
         }
 
@@ -67,8 +67,8 @@ namespace vvr
         {
             _picked = ln;
             _mp = mp;
-            _colvirg = vvr::magenta;
-            std::swap(_colvirg, _picked->colour);
+            _colvirg = _picked->colour;
+            _picked->colour = vvr::magenta;
             return true;
         }
 
@@ -96,8 +96,8 @@ namespace vvr
         {
             _picked = tri;
             _mp = mp;
-            _colvirg = vvr::magenta;
-            std::swap(_colvirg, _picked->colour);
+            _colvirg = _picked->colour;
+            _picked->colour = vvr::magenta;
             _picked->setColourPerVertex(_picked->colour, _picked->colour, _picked->colour);
             return true;
         }
@@ -127,8 +127,8 @@ namespace vvr
         {
             _mp = mp;
             _picked = tri;
-            _colvirg = vvr::magenta;
-            std::swap(_colvirg, _picked->colour);
+            _colvirg = _picked->colour;
+            _picked->colour = vvr::magenta;
             return true;
         }
 
@@ -162,8 +162,8 @@ namespace vvr
         bool on_pick(Mousepos mp, Circle2D* cir)
         {
             _picked = cir;
-            _colvirg = vvr::magenta;
-            std::swap(_colvirg, _picked->colour);
+            _colvirg = _picked->colour;
+            _picked->colour = vvr::magenta;
             return true;
         }
 
@@ -174,7 +174,7 @@ namespace vvr
 
         void on_drop()
         {
-            std::swap(_colvirg, _picked->colour);
+            _picked->colour = _colvirg;
         }
 
     private:

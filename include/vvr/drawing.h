@@ -51,18 +51,18 @@ namespace vvr {
             , a(255)
         { }
 
-        void lighther()
+        void add(unsigned char val)
         {
-            r = std::min((int)(1.2f * r), 0xFF);
-            g = std::min((int)(1.2f * g), 0xFF);
-            b = std::min((int)(1.2f * b), 0xFF);
+            r = std::min(0xFF, (int)r + val);
+            g = std::min(0xFF, (int)g + val);
+            b = std::min(0xFF, (int)b + val);
         }
 
-        void darker()
+        void sub(unsigned char val)
         {
-            r = (unsigned char)(0.9f * r);
-            g = (unsigned char)(0.9f * g);
-            b = (unsigned char)(0.9f * b);
+            r = std::max(0x00, (int)r - val);
+            g = std::max(0x00, (int)g - val);
+            b = std::max(0x00, (int)b - val);
         }
 
         void mul(float c)
@@ -70,6 +70,16 @@ namespace vvr {
             r = std::min((int)(c * r), 0xFF);
             g = std::min((int)(c * g), 0xFF);
             b = std::min((int)(c * b), 0xFF);
+        }
+
+        void lighter()
+        {
+            add(55);
+        }
+
+        void darker()
+        {
+            sub(55);
         }
 
         union
@@ -205,7 +215,6 @@ namespace vvr {
         real x1, y1;
         real x2, y2;
 
-    public:
         LineSeg2D() { }
 
         LineSeg2D(real x1, real y1, real x2, real y2, Colour col = Colour())
@@ -233,11 +242,8 @@ namespace vvr {
         real x1, y1;
         real x2, y2;
 
-    private:
-        void drawShape() const override;
-
-    public:
         Line2D() { }
+
         Line2D(real x1, real y1, real x2, real y2, Colour col = Colour())
             : Shape(col)
             , x1(x1)
@@ -245,6 +251,17 @@ namespace vvr {
             , x2(x2)
             , y2(y2)
         { }
+
+        void set(real x1, real y1, real x2, real y2)
+        {
+            vvr_setmemb(x1);
+            vvr_setmemb(y1);
+            vvr_setmemb(x2);
+            vvr_setmemb(y2);
+        }
+
+    private:
+        void drawShape() const override;
     };
 
     struct vvrframework_API Triangle2D  : Shape
@@ -253,8 +270,11 @@ namespace vvr {
         real x2, y2;
         real x3, y3;
 
-    public:
-        Triangle2D() { filled = false; }
+        Triangle2D() 
+        {
+            filled = false; 
+        }
+
         Triangle2D(real x1, real y1, real x2, real y2, real x3, real y3, Colour col = Colour())
             : Shape(col)
             , x1(x1)
@@ -332,7 +352,7 @@ namespace vvr {
 
     /*---[Shapes: 3D]---*/
 
-    struct vvrframework_API Point3D     : Shape, vec
+    struct vvrframework_API Point3D     : Shape, math::vec
     {
         vvr_decl_shape(Point3D, vec, false)
 
@@ -563,7 +583,7 @@ namespace vvr {
     template <class WholeT, class BlockT, size_t N>
     struct Composite : public Drawable
     {
-        static_assert(!std::is_pointer<BlockT>::value, "Don't declare pointers.");
+        static_assert(!std::is_pointer<BlockT>::value, "Don't declare block type as pointer.");
         static_assert(N>1, "N must be 1+");
 
         std::array<BlockT*, N> blocks;
@@ -572,7 +592,7 @@ namespace vvr {
         template <typename... T>
         Composite(std::array<BlockT*, N> comps, Colour colour)
             : blocks{ comps }
-            , whole(assemble(std::make_index_sequence<N>(), colour))
+            , whole{ assemble(std::make_index_sequence<N>(), colour) }
         {
         }
 
@@ -595,15 +615,15 @@ namespace vvr {
             const_cast<WholeT&>(whole).setGeom({ *blocks[I]... });
         }
 
-        real pickdist(int x, int y) const override
-        {
-            return whole.pickdist(x, y);
-        }
-
         void draw() const override
         {
             update(std::make_index_sequence<N>());
             whole.draw();
+        }
+
+        real pickdist(int x, int y) const override
+        {
+            return whole.pickdist(x, y);
         }
 
         void addToCanvas(Canvas &canvas) override

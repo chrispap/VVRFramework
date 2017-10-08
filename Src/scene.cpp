@@ -66,9 +66,12 @@ void Scene::exitPixelMode()
 
 void Scene::mouse2pix(int &x, int &y)
 {
+    /* o: Center
+    *  X: Rightwards
+    *  Y: Upwards
+    */
     x -= m_screen_width / 2;
     y -= m_screen_height / 2;
-    // Reverse the default window coordinate system so that y grows upwards.
     y = -y;
 }
 

@@ -240,8 +240,8 @@ void vvr::Line2D::drawShape() const
 
     glLineWidth(LineWidth);
     glBegin(GL_LINES);
-    glVertex2f(x1 - 1000*dx, y1 - 1000*dy);
-    glVertex2f(x2 + 1000*dx, y2 + 1000*dy);
+    glVertex2f(x1 - 999999 * dx, y1 - 999999 * dy);
+    glVertex2f(x2 + 999999 * dx, y2 + 999999 * dy);
     glEnd();
 }
 
