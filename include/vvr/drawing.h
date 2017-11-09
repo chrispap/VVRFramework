@@ -30,6 +30,13 @@ namespace vvr {
             , a(255)
         { }
 
+        Colour(unsigned val)
+            : r((unsigned char)((val & 0xFF0000) >> 16))
+            , g((unsigned char)((val & 0x00FF00) >>  8))
+            , b((unsigned char)((val & 0x0000FF) >>  0))
+            , a(255)
+        { }
+
         Colour(int r, int g, int b)
             : r((unsigned char)r)
             , g((unsigned char)g)

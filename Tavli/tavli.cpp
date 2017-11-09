@@ -4,6 +4,7 @@
 #include <vvr/settings.h>
 #include <vvr/scene.h>
 #include <vvr/mesh.h>
+#include <vvr/palette.h>
 #include <iostream>
 #include <fstream>
 #include <iostream>
@@ -564,10 +565,10 @@ int main(int argc, char* argv[])
         int coli = 0;
 
         /* Default colors */
-        colours[coli++] = Colour("443322");
-        colours[coli++] = Colour("242622");
-        colours[coli++] = Colour("550000");
-        colours[coli++] = Colour("BBBBBB");
+        colours[coli++] = Colour(0x443322);
+        colours[coli++] = Colour(0x242622);
+        colours[coli++] = Colour(0x550000);
+        colours[coli++] = Colour(0xBBBBBB);
 
 #ifndef __APPLE__
         /* Load from CLI */

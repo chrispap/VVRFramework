@@ -13,18 +13,6 @@
 #include <cassert>
 #include <functional>
 
-/**
- * NOTES:
- *  - Make an array Command* command_map[24];
- *    Each element is the command ptr of the respective letter.
- *    e.g.: command of letter 'a' => command_map[c - 'a'];
- *
- *  - Make a queue of mouse consumers.
- *    They can be stacked. (pushed, popped).
- *    They can be executed consecutively.
- *    Any of them has the power to stop the execution after them.
- */
-
 struct Command
 {
     virtual ~Command() { }
@@ -55,18 +43,8 @@ class MacroCommand
     std::vector<Command*> _commands;
 
 public:
-    void add(Command* cmd)
-    {
-        _commands.push_back(cmd);
-    }
-
-    void operator()()
-    {
-        for (auto cmd : _commands)
-        {
-            (*cmd)();
-        }
-    }
+    void add(Command* cmd) { _commands.push_back(cmd); }
+    void operator()() { for (auto cmd : _commands) (*cmd)(); }
 };
 
 struct MouseInputConsumer
@@ -123,8 +101,6 @@ struct CurveBsp : public vvr::BSpline<vvr::Point3D*>, public vvr::Drawable
     vvr::Colour colour;
 };
 
-using vvr::vec;
-
 class BSplineScene : public vvr::Scene
 {
 public:
@@ -142,7 +118,7 @@ private:
     void mouseReleased(int x, int y, int modif) override;
     void mouseHovered(int x, int y, int modif) override;
     void append_to_grid(float dx, float dy, vvr::Colour);
-    void save_scene();
+    void saveScene();
 
     typedef vvr::CascadePicker2D<
         vvr::MousePicker2D<vvr::Point3D>,
@@ -200,7 +176,7 @@ void BSplineScene::reset()
     triangle->addToCanvas(_canvas);
     triangle->whole.filled = true;
 
-    auto cir = new vvr::Circle2D(0, 0, 5);
+    auto cir = new vvr::Circle2D(0, 0, 55);
     _canvas.add(cir);
 
     /* Create picker */
@@ -274,7 +250,7 @@ void BSplineScene::draw()
 {
     enterPixelMode();
     {
-        _spline->update(true);
+        _spline->do_update(true);
         _canvas_grid.drawif();
         _canvas.draw();
         _hl->drawif();
@@ -283,7 +259,7 @@ void BSplineScene::draw()
     exitPixelMode();
 }
 
-void BSplineScene::save_scene()
+void BSplineScene::saveScene()
 {
     for (vvr::Drawable* drw : _canvas.getDrawables())
     {
@@ -309,7 +285,7 @@ void BSplineScene::keyEvent(unsigned char key, bool up, int modif)
     switch (tolower(key)) {
     case 'p': _spline->drawCurvePts ^= true; break;
     case 'g': _canvas_grid.toggleVisibility(); break;
-    case 's': if (ctrlDown(modif)) save_scene(); break;
+    case 's': if (ctrlDown(modif)) saveScene(); break;
     case ' ': _hl->toggleVisibility(); _vl->toggleVisibility(); break;
     case 'r': _cmd_reset(); break;
     }

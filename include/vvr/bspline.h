@@ -44,7 +44,7 @@ public:
         , _dirty(true) 
     { }
 
-    point_t get_point(const double t)
+    point_t do_eval(const double t)
     {
         const auto &X = _knots;
         const auto &B = _cps;
@@ -79,14 +79,14 @@ public:
         return p;
     }
 
-    void update(bool force = false)
+    void do_update(bool force = false)
     {
         if (!_dirty && !force) return;
         _pts.clear();
-        auto range = param_range();
+        auto range = get_param_range();
         auto dt = (range.second - range.first) / (_num_pts - 1);
         for (int i = 0; i < _num_pts; i++) {
-            _pts.push_back(get_point(range.first + dt * i));
+            _pts.push_back(do_eval(range.first + dt * i));
         }
         _dirty = false;
     }
@@ -96,7 +96,7 @@ public:
         bool force = num != _num_pts;
         if (num < 2) num = 2;
         _num_pts = num;
-        update(force);
+        do_update(force);
     }
 
     void set_cps(std::vector<T> &&cps)
@@ -123,7 +123,7 @@ public:
         _dirty = true;
     }
 
-    const auto param_range()
+    const auto get_param_range()
     {
         const int mb = _knots.size() - _cps.size();
         std::pair<double, double> range;

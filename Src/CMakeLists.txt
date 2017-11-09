@@ -18,6 +18,7 @@ set(IMPL_FILES
   glwidget.cpp
   scene.cpp
   drawing.cpp
+  palette.cpp
   mesh.cpp
   kdtree.cpp
   utils.cpp
@@ -31,6 +32,7 @@ set(INCL_FILES
   ../include/vvr/glwidget.h
   ../include/vvr/scene.h
   ../include/vvr/drawing.h
+  ../include/vvr/palette.h
   ../include/vvr/picking.h
   ../include/vvr/mesh.h
   ../include/vvr/kdtree.h
