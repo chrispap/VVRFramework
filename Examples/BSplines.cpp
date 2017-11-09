@@ -13,6 +13,18 @@
 #include <cassert>
 #include <functional>
 
+/**
+ * NOTES:
+ *  - Make an array Command* command_map[24];
+ *    Each element is the command ptr of the respective letter.
+ *    e.g.: command of letter 'a' => command_map[c - 'a'];
+ *
+ *  - Make a queue of mouse consumers.
+ *    They can be stacked. (pushed, popped).
+ *    They can be executed consecutively.
+ *    Any of them has the power to stop the execution after them.
+ */
+
 struct Command
 {
     virtual ~Command() { }
@@ -43,8 +55,18 @@ class MacroCommand
     std::vector<Command*> _commands;
 
 public:
-    void add(Command* cmd) { _commands.push_back(cmd); }
-    void operator()() { for (auto cmd : _commands) (*cmd)(); }
+    void add(Command* cmd)
+    {
+        _commands.push_back(cmd);
+    }
+
+    void operator()()
+    {
+        for (auto cmd : _commands)
+        {
+            (*cmd)();
+        }
+    }
 };
 
 struct MouseInputConsumer
@@ -100,6 +122,8 @@ struct CurveBsp : public vvr::BSpline<vvr::Point3D*>, public vvr::Drawable
     bool drawCurvePts = false;
     vvr::Colour colour;
 };
+
+using vvr::vec;
 
 class BSplineScene : public vvr::Scene
 {
@@ -242,12 +266,12 @@ void BSplineScene::mouseReleased(int x, int y, int modif)
 void BSplineScene::mouseHovered(int x, int y, int modif)
 {
     _picker->pick(vvr::Mousepos{ x, y }, 0);
-    _hl->set(x, y, x + 1, y); 
+    _hl->set(x, y, x + 1, y);
     _vl->set(x, y, x, y + 1);
 }
 
 void BSplineScene::draw()
-{    
+{
     enterPixelMode();
     {
         _spline->update(true);
