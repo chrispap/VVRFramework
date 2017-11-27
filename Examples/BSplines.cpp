@@ -13,18 +13,6 @@
 #include <cassert>
 #include <functional>
 
-/*****************************************************************************************
- * NOTES:
- *  - Make an array Command* command_map[24];
- *    Each element is the command ptr of the respective letter.
- *    e.g.: command of letter 'a' => command_map[c - 'a'];
- *
- *  - Make a queue of mouse consumers.
- *    They can be stacked. (pushed, popped).
- *    They can be executed consecutively.
- *    Any of them has the power to stop the execution after them.
- ****************************************************************************************/
-
 struct Command
 {
     virtual ~Command() { }
