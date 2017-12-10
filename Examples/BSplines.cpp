@@ -15,14 +15,19 @@
 
 /*****************************************************************************************
  * NOTES:
- *  - Make an array Command* command_map[24];
- *    Each element is the command ptr of the respective letter.
- *    e.g.: command of letter 'a' => command_map[c - 'a'];
- *
- *  - Make a queue of mouse consumers.
+ *  - Make an array of commands, one for ever letter [a-z]: 
+ *      Command *keymap['z'-'a'+1]; //24
+ *    Each element is the command ptr of the respective letter. 
+ *    Example:
+ *      char c;
+ *      c = tolower(c);
+ *      assert(c>='a'&&c<='z');
+ *      keymap[c-'a'];
+ *  - Make a queue of MouseConsumer: 
+ *      std::queue<MouseConsumer> toolqueue;
  *    They can be stacked. (pushed, popped).
  *    They can be executed consecutively.
- *    Any of them has the power to stop the execution after them.
+ *    Any of them has the power to stop the execution of the rest.
  ****************************************************************************************/
 
 struct Command
@@ -59,12 +64,6 @@ public:
     void operator()() { for (auto cmd : _commands) (*cmd)(); }
 };
 
-struct MouseInputConsumer
-{
-    virtual ~MouseInputConsumer() = 0;
-    virtual bool consume(int x, int y, int modif) = 0;
-};
-
 using vvr::vec;
 
 template <class T>
@@ -76,25 +75,22 @@ void snap2grid(T& x, T& y, T gs)
     y = (y < 0) ? (-dyn * gs) : (dyn * gs);
 }
 
-struct CurveBsp : public vvr::BSpline<vvr::Point3D*>, public vvr::Drawable
+struct CurveBsp4 : public vvr::BSpline<vvr::Point3D*>, public vvr::Drawable
 {
-    vvr_decl_shared_ptr(CurveBsp)
+    vvr_decl_shared_ptr(CurveBsp4)
 
-    CurveBsp(vvr::Colour col_curve, vvr::Colour col_cps)
+    CurveBsp4(const std::vector<vvr::Point3D*> &cps, vvr::Colour col_curve)
     {
-        std::vector<vvr::Point3D*> cps;
-        cps.push_back(new vvr::Point3D(-150, 100, 0, col_cps));
-        cps.push_back(new vvr::Point3D(-50, -100, 0, col_cps));
-        cps.push_back(new vvr::Point3D(50, 100, 0, col_cps));
-        cps.push_back(new vvr::Point3D(150, -100, 0, col_cps));
         set_cps(cps);
         set_knots({ 0, 0, 0, 0, 1, 1, 1, 1 });
-        set_num_pts(16);
+        set_num_pts(32);
         colour = col_curve;
     }
 
     void draw() const override
     {
+        const_cast<CurveBsp4*>(this)->update(true);
+
         /* Draw curve and|or sample points. */
         for (auto it = get_pts().begin(); it < get_pts().end() - 1; ++it) {
             vvr::LineSeg3D(math::LineSegment(it[0], it[1]), colour).draw();
@@ -109,9 +105,11 @@ struct CurveBsp : public vvr::BSpline<vvr::Point3D*>, public vvr::Drawable
         for (auto cp : get_cps()) canvas.add(cp);
     }
 
-    bool drawCurvePts = false;
+    static bool drawCurvePts;
     vvr::Colour colour;
 };
+
+bool CurveBsp4::drawCurvePts = false;
 
 class BSplineScene : public vvr::Scene
 {
@@ -141,58 +139,74 @@ private:
         vvr::MousePicker2D<vvr::CompositeLine>
     > PickerT;
 
-    int             _grid_size = 40;
-    PickerT::Ptr    _picker;
-    vvr::Canvas     _canvas;
-    vvr::Canvas     _canvas_grid;
-    CurveBsp*       _spline;
-    vvr::Line2D*    _hl;
-    vvr::Line2D*    _vl;
+    int             m_grid_size = 40;
+    PickerT::Ptr    m_picker;
+    vvr::Canvas     m_canvas;
+    vvr::Canvas     m_canvas_grid;
+    CurveBsp4*      m_splines[2];
+    vvr::Line2D*    m_hl;
+    vvr::Line2D*    m_vl;
 
-    MacroCommand _cmd_reset;
+    MacroCommand m_cmd_reset;
 };
 
 BSplineScene::BSplineScene()
 {
     vvr::Shape::PointSize *= 2;
     m_bg_col = vvr::Colour("FFFFFF");
+    m_cmd_reset.add(new SimpleCommand<BSplineScene>(this, &BSplineScene::reset));
+    m_canvas.setDelOnClear(false);
     reset();
-    _cmd_reset.add(new SimpleCommand<BSplineScene>(this, &BSplineScene::reset));
 }
 
 void BSplineScene::reset()
 {
     vvr::Scene::reset();
-    _canvas.clear();
+    m_canvas.clear();
 
     /* Create objects */
-    _spline = new CurveBsp(vvr::red, vvr::red);
-    _spline->addToCanvas(_canvas);
+    std::vector<vvr::Point3D*> cps;
+    cps.push_back(new vvr::Point3D(250, 100, 0, vvr::red));
+    cps.push_back(new vvr::Point3D( 50, 100, 0, vvr::red));
+    cps.push_back(new vvr::Point3D( 20, 100, 0, vvr::red));
+    cps.push_back(new vvr::Point3D(  0,   0, 0, vvr::red));
+    m_splines[0] = new CurveBsp4(cps, vvr::red);
+    m_splines[0]->addToCanvas(m_canvas);
+ 
+    cps.clear();
+    cps.push_back(m_splines[0]->get_cps().back());
+    for (int i = m_splines[0]->get_cps().size()-2; i >= 0; i--) {
+        cps.push_back(new vvr::Point3D(*m_splines[0]->get_cps()[i]));
+        cps.back()->x *= -1;
+        cps.back()->y *= -1;
+    }
+    m_splines[1] = new CurveBsp4(cps, vvr::red);
+    m_splines[1]->addToCanvas(m_canvas);
 
-    _hl = new vvr::Line2D(0, 0, 0, 0, vvr::red);
-    _vl = new vvr::Line2D(0, 0, 0, 0, vvr::red);
-    _hl->hide();
-    _vl->hide();
+    m_hl = new vvr::Line2D(0, 0, 0, 0, vvr::red);
+    m_vl = new vvr::Line2D(0, 0, 0, 0, vvr::red);
+    m_hl->hide();
+    m_vl->hide();
 
     auto line = new vvr::CompositeLine({
         new vvr::Point3D(0, 100, 0, vvr::darkRed),
         new vvr::Point3D(100, 200, 0, vvr::darkRed) },
         vvr::darkRed);
-    line->addToCanvas(_canvas);
+    line->addToCanvas(m_canvas);
 
     auto triangle = new vvr::CompositeTriangle({
         new vvr::Point3D(0,0,0, vvr::darkGreen),
         new vvr::Point3D(300,0,0, vvr::darkGreen),
         new vvr::Point3D(200,150,0, vvr::darkGreen) },
         vvr::darkGreen);
-    triangle->addToCanvas(_canvas);
+    triangle->addToCanvas(m_canvas);
     triangle->whole.filled = true;
 
     auto cir = new vvr::Circle2D(0, 0, 55);
-    _canvas.add(cir);
+    m_canvas.add(cir);
 
     /* Create picker */
-    _picker = PickerT::Make(_canvas);
+    m_picker = PickerT::Make(m_canvas);
 
     m_perspective_proj = false;
     setCameraPos({0,0,50});
@@ -203,10 +217,10 @@ void BSplineScene::resize()
     vvr::Colour col_1 ("CCCCCC");
     vvr::Colour col_2 ("666666");
     vvr::Colour col_3 ("000000");
-    _canvas_grid.clear();
-    append_to_grid((float)_grid_size,       (float)_grid_size,       col_1);
-    append_to_grid((float)_grid_size * 10,  (float)_grid_size * 10,  col_2);
-    append_to_grid((float)_grid_size * 100, (float)_grid_size * 100, col_3);
+    m_canvas_grid.clear();
+    append_to_grid((float)m_grid_size,       (float)m_grid_size,       col_1);
+    append_to_grid((float)m_grid_size * 10,  (float)m_grid_size * 10,  col_2);
+    append_to_grid((float)m_grid_size * 100, (float)m_grid_size * 100, col_3);
 }
 
 void BSplineScene::append_to_grid(float dx, float dy, vvr::Colour colour)
@@ -221,59 +235,56 @@ void BSplineScene::append_to_grid(float dx, float dy, vvr::Colour colour)
     for (int i = -nx / 2; i <= nx / 2; i++) {
         auto l = lnx;
         l.Translate({ dx*i, 0, 0 });
-        _canvas_grid.add(new vvr::LineSeg3D{ l, colour });
+        m_canvas_grid.add(new vvr::LineSeg3D{ l, colour });
     }
 
     for (int i = -ny / 2; i <= ny / 2; i++) {
         auto l = lny;
         l.Translate({ 0, dy*i, 0 });
-        _canvas_grid.add(new vvr::LineSeg3D{ l, colour });
+        m_canvas_grid.add(new vvr::LineSeg3D{ l, colour });
     }
 }
 
 void BSplineScene::mousePressed(int x, int y, int modif)
 {
-    _picker->pick(vvr::Mousepos{ x, y }, modif);
+    m_picker->pick(vvr::Mousepos{ x, y }, modif);
 }
 
 void BSplineScene::mouseMoved(int x, int y, int modif)
 {
-    if (!shiftDown(modif)) {
-        snap2grid(x, y, _grid_size);
+    if (m_canvas_grid.visible && !shiftDown(modif)) {
+        snap2grid(x, y, m_grid_size);
     }
-    _hl->set(x, y, x + 1, y);
-    _vl->set(x, y, x, y + 1);
-    _picker->drag(vvr::Mousepos{ x, y }, modif);
+    m_hl->set(x, y, x + 1, y);
+    m_vl->set(x, y, x, y + 1);
+    m_picker->drag(vvr::Mousepos{ x, y }, modif);
 }
 
 void BSplineScene::mouseReleased(int x, int y, int modif)
 {
-    _picker->drop();
+    m_picker->drop();
 }
 
 void BSplineScene::mouseHovered(int x, int y, int modif)
 {
-    _picker->pick(vvr::Mousepos{ x, y }, 0);
-    _hl->set(x, y, x + 1, y);
-    _vl->set(x, y, x, y + 1);
+    m_picker->pick(vvr::Mousepos{ x, y }, 0);
+    m_hl->set(x, y, x + 1, y);
+    m_vl->set(x, y, x, y + 1);
 }
 
 void BSplineScene::draw()
 {
     enterPixelMode();
-    {
-        _spline->do_update(true);
-        _canvas_grid.drawif();
-        _canvas.draw();
-        _hl->drawif();
-        _vl->drawif();
-    }
+    m_canvas_grid.drawif();
+    m_canvas.draw();
+    m_hl->drawif();
+    m_vl->drawif();
     exitPixelMode();
 }
 
 void BSplineScene::saveScene()
 {
-    for (vvr::Drawable* drw : _canvas.getDrawables())
+    for (vvr::Drawable* drw : m_canvas.getDrawables())
     {
 
         if (auto x = dynamic_cast<math::vec*>(drw))
@@ -295,18 +306,24 @@ void BSplineScene::saveScene()
 void BSplineScene::keyEvent(unsigned char key, bool up, int modif)
 {
     switch (tolower(key)) {
-    case 'p': _spline->drawCurvePts ^= true; break;
-    case 'g': _canvas_grid.toggleVisibility(); break;
+    case 'p': CurveBsp4::drawCurvePts ^= true; break;
+    case 'g': m_canvas_grid.toggleVisibility(); break;
     case 's': if (ctrlDown(modif)) saveScene(); break;
-    case ' ': _hl->toggleVisibility(); _vl->toggleVisibility(); break;
-    case 'r': _cmd_reset(); break;
+    case ' ': m_hl->toggleVisibility(); m_vl->toggleVisibility(); break;
+    case 'r': m_cmd_reset(); break;
     }
 }
 
 void BSplineScene::arrowEvent(vvr::ArrowDir dir, int modif)
 {
-    if (dir == vvr::ArrowDir::UP) _spline->set_num_pts(_spline->get_pts().size() + 1);
-    else if (dir == vvr::ArrowDir::DOWN) _spline->set_num_pts(_spline->get_pts().size() - 1);
+    if (dir == vvr::ArrowDir::UP) {
+        m_splines[0]->set_num_pts(m_splines[0]->get_pts().size() + 1);
+        m_splines[1]->set_num_pts(m_splines[0]->get_pts().size() + 1);
+    }
+    else if (dir == vvr::ArrowDir::DOWN) {
+        m_splines[0]->set_num_pts(m_splines[0]->get_pts().size() - 1);
+        m_splines[1]->set_num_pts(m_splines[0]->get_pts().size() - 1);
+    }
 }
 
 vvr_invoke_main_with_scene(BSplineScene)

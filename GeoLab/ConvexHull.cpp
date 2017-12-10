@@ -1,6 +1,3 @@
-#ifndef SCENE_CONVEX_HULL_H
-#define SCENE_CONVEX_HULL_H
-
 #include <vvr/scene.h>
 #include <vvr/drawing.h>
 #include <vvr/utils.h>
@@ -30,23 +27,152 @@ protected:
     void arrowEvent(vvr::ArrowDir dir, int modif) override;
 
 private:
-    void ConvexHull_Slow();
-    void ConvexHull_Fast();
+    void ComputeConvexHull();
 
 private:
-    C2DPolygon m_convex_hull_polygon;
-    C2DPointSet m_point_cloud;
-    vvr::Canvas m_canvas, m_canvas_algo_steps;
-    vvr::Point2D* m_mouse_pos;
+    vvr::Canvas m_canvas;
+    std::vector<vvr::Point2D> m_pts;
+    std::vector<vvr::Point2D> m_hull;
+    vvr::Point2D* m_mousepos;
 };
 
-#endif // SCENE_CONVEX_HULL_H
+/*---[Convex Hull/Diameter/Width]-------------------------------------------------------*/
 
-#define MAX_NUM_PTS 50
-//#define ConvexHull ConvexHull_Slow
-#define ConvexHull ConvexHull_Fast
+bool operator==(const vvr::Point2D &lhs, const vvr::Point2D &rhs)
+{
+    return (lhs.x == rhs.x) && (lhs.y == rhs.y);
+}
 
-using namespace std;
+template <typename point>
+bool ccw(const point &a, const point &b, const point &c) 
+{
+    return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x) > 0;
+}
+
+template <typename point>
+auto area(const point &a, const point &b, const point &c)
+{
+    return abs((b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x));
+}
+
+template <typename point, typename real = decltype(point::x)>
+auto dist(const point &a, const point &b)
+{
+    return (real)hypot(a.x - b.x, a.y - b.y);
+}
+
+template <typename point>
+std::vector<point> convex_hull(std::vector<point> p)
+{
+    int n = p.size();
+    if (n <= 1) return p;
+    int k = 0;
+    std::sort(p.begin(), p.end(), [](auto &lhs, auto &rhs) {
+        return (lhs.x < rhs.x) || ((lhs.x == rhs.x) && (lhs.y < rhs.y));
+    });
+    std::vector<point> q(n * 2);
+    for (int i = 0; i < n; q[k++] = p[i++]) {
+        for (; k >= 2 && !ccw(q[k - 2], q[k - 1], p[i]); --k);
+    }
+    for (int i = n - 2, t = k; i >= 0; q[k++] = p[i--]) {
+        for (; k > t && !ccw(q[k - 2], q[k - 1], p[i]); --k);
+    }
+    q.resize(k - 1 - (q[0] == q[1]));
+    return q;
+}
+
+template <typename point, typename real=decltype(point::x)>
+real convex_diameter(const std::vector<point> &h, size_t &i1, size_t &i2)
+{
+    size_t n = h.size();
+    if (n == 1) return 0;
+    if (n == 2) return dist(h[0], h[1]);
+    size_t k = 1;
+    while (area(h[n - 1], h[0], h[(k + 1) % n]) > area(h[n - 1], h[0], h[k])) k++;
+    real res = 0, d;
+    for (size_t i = 0, j = k; i <= k && j < n; i++) {
+        if ((d = dist(h[i], h[j])) > res) {
+            res = d; 
+            i1 = i;
+            i2 = j;
+        }
+        while (j < n && area(h[i], h[(i + 1) % n], h[(j + 1) % n]) > area(h[i], h[(i + 1) % n], h[j])) {
+            if ((d = dist(h[i], h[(j + 1) % n])) > res) {
+                res = d; 
+                i1 = i;
+                i2 = j+1;
+            }
+            ++j;
+        }
+    }
+    return res;
+}
+
+template <typename point, typename real = decltype(point::x)>
+real convex_width(const std::vector<point> &h, size_t &i1, size_t &i2)
+{
+    const size_t n = h.size();
+    if (n < 3) return 0;
+
+    auto cmp = [](const point &lhs, const point &rhs) -> bool {
+        return (lhs.x < rhs.x) || ((lhs.x == rhs.x) && (lhs.y > rhs.y));
+    };
+
+    C2DLine calipera, caliperb;
+    size_t ia = std::min_element(h.begin(), h.end(), cmp) - h.begin();
+    size_t ib = std::max_element(h.begin(), h.end(), cmp) - h.begin();
+    calipera.vector = C2DVector(0, -1);
+    caliperb.vector = C2DVector(0, +1);
+
+    real rot = 0, minwidth = std::numeric_limits<real>::max();
+    while (rot < math::pi)
+    {
+        C2DPoint pa(h[ia].x, h[ia].y);
+        C2DPoint pb(h[ib].x, h[ib].y);
+        C2DPoint paa(h[(ia+1)%n].x, h[(ia+1)%n].y);
+        C2DPoint pbb(h[(ib+1)%n].x, h[(ib+1)%n].y);
+        C2DVector edgea = paa - pa; edgea.MakeUnit();
+        C2DVector edgeb = pbb - pb; edgeb.MakeUnit();
+        real cosa = calipera.vector.Dot(edgea);
+        real cosb = caliperb.vector.Dot(edgeb);
+        calipera.point = pa;
+        caliperb.point = pb;
+
+        real width;
+        size_t min_i1, min_i2;
+        if (cosa > cosb)
+        {
+            calipera.vector = edgea;
+            caliperb.vector = calipera.vector * -1;
+            width = calipera.DistanceAsRay(caliperb.point);
+            min_i1 = ia;
+            min_i2 = ib;
+            ia = (ia + 1) % n;
+            rot += acos(cosa);
+        }
+        else
+        {
+            caliperb.vector = edgeb;
+            calipera.vector = caliperb.vector * -1;
+            width = caliperb.DistanceAsRay(calipera.point);
+            min_i1 = ib;
+            min_i2 = ia;
+            ib = (ib + 1) % n;
+            rot += acos(cosb);
+        }
+
+        if (width < minwidth)
+        {
+            minwidth = width;
+            i1 = min_i1;
+            i2 = min_i2;
+        }
+    }
+
+    return minwidth;
+}
+
+/*--------------------------------------------------------------------------------------*/
 
 ConvexHullScene::ConvexHullScene()
 {
@@ -54,226 +180,130 @@ ConvexHullScene::ConvexHullScene()
     m_hide_log = false;
     m_hide_sliders = true;
     reset();
+    m_canvas.clear();
+    m_pts.clear();
+    m_pts.push_back({100,140});
+    m_pts.push_back({100,-100});
+    m_pts.push_back({100,50});
+    m_pts.push_back({-200,100});
+    m_pts.push_back({-200,-100});
+    m_pts.push_back({-250,40});
+    m_pts.push_back({-250,80});
+    ComputeConvexHull();
 }
 
 void ConvexHullScene::reset()
 {
     Scene::reset();
-    m_mouse_pos = new vvr::Point2D();
-    m_canvas_algo_steps.clear();
+    m_mousepos = new vvr::Point2D();
     m_canvas.clear();
-    m_canvas.add(m_mouse_pos);
-    m_convex_hull_polygon.Clear();
-    const int BW = 100;
-    const int BH = 100;
-    C2DRect bound(-BW, BH, BW, -BH);
-    C2DPolygon rand_poly;
-    rand_poly.CreateRandom(bound, MAX_NUM_PTS, MAX_NUM_PTS);
-    m_point_cloud.DeleteAll();
-    rand_poly.GetPointsCopy(m_point_cloud);
+    m_canvas.add(m_mousepos);
 
-    cout << "Computing Convex Hull..." << endl;
-    float duration = vvr::getSeconds();
-    ConvexHull();
-    duration = vvr::getSeconds() - duration;
-    cout << "Duration: " << duration << " sec" << endl;
+    /* Create random pts */
+    m_pts.clear();
+    math::LCG lcg;
+    for (int i = 0; i < 500; ++i) {
+        float x = -300 + 600 * (lcg.Float() - 0.5f);
+        float y = -200 + 400 * 0.8 * (lcg.Float() + 0.1);
+        m_pts.push_back(vvr::Point2D(x,y));
+    }
+    
+    /* Compute & Measure time */
+    float sec = vvr::getSeconds();
+    ComputeConvexHull();
+    sec = vvr::getSeconds() - sec;
+    std::cout << "Computed in " << sec << "\"" << std::endl;
 }
 
 void ConvexHullScene::mousePressed(int x, int y, int modif)
 {
     Scene::mousePressed(x, y, modif);
-    m_mouse_pos->colour = vvr::magenta;
-    m_mouse_pos->x = x; m_mouse_pos->y = y;
-
-    C2DPoint p(x, y);
-    bool inside;
-
-    // If we wanted to use GeoLib instead of doing it customly.
-    // inside = m_convex_hull_polygon.Contains(p);
-
-    inside = true;
-    for (int i = 0; i < m_convex_hull_polygon.GetPointsCount(); i++) {
-        C2DLine line(*m_convex_hull_polygon.GetLine(i));
-        if (!line.IsOnRight(p)) {
-            inside = false;
-            break;
-        }
-    }
-
-    m_canvas.clear();
-    m_canvas.add(new vvr::Point2D(x, y, inside ? vvr::yellow : vvr::red));
-
-    if (!inside)
-    {
-        vvr::LineSeg2D *l1 = new vvr::LineSeg2D(x, y, 0, 0, vvr::blue);
-        vvr::LineSeg2D *l2 = new vvr::LineSeg2D(*l1);
-        const C2DLine *poly_seg;
-        int i = 0;
-
-        // Find the first vissible segment
-        while (!m_convex_hull_polygon.GetLine(i++)->IsOnRight(p));
-        while (m_convex_hull_polygon.GetLine(i++)->IsOnRight(p));
-
-        // Create the first line
-        poly_seg = m_convex_hull_polygon.GetLine(--i);
-        l1->x2 = poly_seg->GetPointFrom().x;
-        l1->y2 = poly_seg->GetPointFrom().y;
-
-        // vvr::Colour the vissisble segments
-        do
-        {
-            auto from = poly_seg->GetPointFrom();
-            auto to = poly_seg->GetPointTo();
-            auto ls = new vvr::LineSeg2D(from.x, from.y, to.x, to.y, vvr::blue);
-            m_canvas.add(ls);
-            poly_seg = m_convex_hull_polygon.GetLine(++i);
-        } while (!poly_seg->IsOnRight(p));
-
-        // Create the second line
-        poly_seg = m_convex_hull_polygon.GetLine(--i);
-        l2->x2 = poly_seg->GetPointTo().x;
-        l2->y2 = poly_seg->GetPointTo().y;
-
-        m_canvas.add(l1);
-        m_canvas.add(l2);
-    }
-
+    m_mousepos->colour = vvr::magenta;
+    m_mousepos->x = x; m_mousepos->y = y;
 }
 
 void ConvexHullScene::mouseReleased(int x, int y, int modif)
 {
-    m_mouse_pos->colour = vvr::white;
-    m_mouse_pos->x = x; m_mouse_pos->y = y;
+    m_mousepos->colour = vvr::white;
+    m_mousepos->x = x; m_mousepos->y = y;
 }
 
 void ConvexHullScene::mouseMoved(int x, int y, int modif)
 {
     Scene::mouseMoved(x, y, modif);
     mousePressed(x, y, modif);
+
+    auto &h = m_hull;
+    const size_t n = h.size();
+    
+    m_mousepos->colour = vvr::green;
+    for (size_t i=0; i<n; ++i) {
+        if (!ccw(*m_mousepos, h[i], h[(i+1)%n])) { 
+            m_mousepos->colour = vvr::red;
+            break;
+        }
+    }
 }
 
 void ConvexHullScene::arrowEvent(vvr::ArrowDir dir, int modif)
 {
     if (dir == vvr::LEFT) {
-        if (m_canvas_algo_steps.isAtStart()) m_canvas_algo_steps.ff();
-        else m_canvas_algo_steps.prev();
+        m_canvas.prev();
     }
     else if (dir == vvr::RIGHT) {
-        if (m_canvas_algo_steps.isAtEnd()) m_canvas_algo_steps.rew();
-        else m_canvas_algo_steps.next();
+        m_canvas.next();
     }
 }
 
 void ConvexHullScene::draw()
 {
     enterPixelMode();
-
-    // Do any drawing here.
-    vvr::draw(m_convex_hull_polygon, vvr::green);
-    vvr::draw(m_point_cloud, vvr::black);
-    m_canvas_algo_steps.draw();
-    m_canvas.draw();
-
+    {
+        vvr::Shape::PointSize = 12;
+        m_canvas.draw();
+        for (const auto &p : m_pts) p.draw();
+    }
     exitPixelMode();
 }
 
-void ConvexHullScene::ConvexHull_Slow()
+void ConvexHullScene::ComputeConvexHull()
 {
-    //!//////////////////////////////////////////////////////////////////////////////////
-    //! TASK: 
-    //!
-    //!  - Breite to kyrto polygwno twn simeinwn `m_point_cloud`.
-    //!
-    //! HINTS:
-    //!
-    //!  - An `p` einai C2DPoint* tote gia na parete to `N` simeio tou point cloud 
-    //!    grafete to eksis:
-    //!      p = m_point_cloud.GetAt(N);
-    //! 
-    //!  - Dimiourgia euthigrammou tmimatos apo 2 simeia:
-    //!      C2DLine line(p1,  p2);
-    //! 
-    //!  - To idio, alla me pointers sta simeia:
-    //!      C2DLine line(*p1, *p2); 
-    //! 
-    //!  - Stin metavliti `lineset` prepei na apothikeysete ta eythigramma tmimata
-    //!    pou vriskete oti anikoun sto Convex Hull.
-    //!
-    //!  - An `pq` einai ena C2DLine, etsi to prosthetete sto lineset:
-    //!      lineset.AddCopy(pq);
-    //!
-    //!//////////////////////////////////////////////////////////////////////////////////
+    /* Compute hull */
+    m_hull = convex_hull(m_pts);
+    auto &h = m_hull;
+    const size_t n = h.size();
 
-    const int num_pts = m_point_cloud.size(); // To plithos twn simeiwn.
-    C2DPoint *p, *q, *t;
-    C2DLineSet lineset;
+    /* Display: Hull edges */
+    for (size_t i=0; i<n; i++) {
+        m_canvas.newFrame(true);
+        m_canvas.add(new vvr::LineSeg2D(h[i].x, h[i].y, h[(i+1)%n].x, h[(i+1)%n].y, vvr::orange));
+    }
 
-    for (int pi = 0; pi < num_pts; pi++)
+    /* Display: Hull Diameter */
     {
-        p = m_point_cloud.GetAt(pi);
-
-        for (int qi = 0; qi < num_pts; qi++)
-        {
-            if (pi == qi) continue;
-            q = m_point_cloud.GetAt(qi);
-            C2DLine line(*p, *q);
-
-            m_canvas_algo_steps.newFrame(false);
-
-            bool keep = true;
-            for (int ti = 0; ti < num_pts; ti++)
-            {
-                if (ti == pi || ti == qi) continue;
-                t = m_point_cloud.GetAt(ti);
-
-                if (line.IsOnRight(*t)) {
-                    keep = false;
-                    m_canvas_algo_steps.add(new vvr::Point2D(t->x, t->y, vvr::red));
-                }
-                else {
-                    m_canvas_algo_steps.add(new vvr::Point2D(t->x, t->y, vvr::green));
-                }
-
-            }
-
-            m_canvas_algo_steps.add(new vvr::Point2D(p->x, p->y, vvr::yellow));
-            m_canvas_algo_steps.add(new vvr::Point2D(q->x, q->y, vvr::blue));
-            m_canvas_algo_steps.add(new vvr::Line2D(p->x, p->y, q->x, q->y, keep ? vvr::magenta : vvr::black));
-
-            if (keep) {
-                lineset.AddCopy(line);
-            }
-        }
+        size_t i1, i2;
+        const auto diam = convex_diameter(h, i1, i2);
+        m_canvas.add(new vvr::LineSeg2D(h[i1].x, h[i1].y, h[i2].x, h[i2].y, vvr::blue));
+        vvr_echo(diam);
     }
 
-    m_canvas_algo_steps.rew();
-
-    // Convert line-set to polygon
-    C2DPointSet pointset;
-    for (int i = 0; i < lineset.size(); i++) {
-        pointset.AddCopy(lineset.GetAt(i)->GetPointFrom());
+    /* Display: Hull Width */
+    {
+        size_t i1, i2;
+        const auto width = convex_width(h, i1, i2);
+        C2DPoint p1(h[i1].x, h[i1].y);
+        C2DPoint p11(h[(i1+1)%n].x, h[(i1+1)%n].y);
+        C2DPoint p2(h[i2].x, h[i2].y);
+        C2DVector slimdir = p11 - p1;
+        C2DLine calipera(C2DPoint(h[i1].x, h[i1].y), slimdir);
+        C2DLine caliperb(C2DPoint(h[i2].x, h[i2].y), slimdir);
+        m_canvas.add(calipera, vvr::magenta, true);
+        m_canvas.add(caliperb, vvr::cyan, true);
+        m_canvas.add(p1, vvr::magenta);
+        m_canvas.add(p11, vvr::magenta);
+        m_canvas.add(p2, vvr::cyan);
+        vvr_echo(width);
     }
-    m_convex_hull_polygon.Create(pointset, true);
-    m_convex_hull_polygon.RemoveNullLines();
-}
-
-void ConvexHullScene::ConvexHull_Fast()
-{
-    // Copy the points to a temporary array,
-    // to be compatible with GeoLib's functions.
-    C2DPoint *pts = new C2DPoint[m_point_cloud.size()];
-    for (int i = 0; i < m_point_cloud.size(); i++)
-        pts[i] = *m_point_cloud.GetAt(i);
-
-    // Create polygon from points/
-    C2DPolygon cloud_polygon;
-    cloud_polygon.Create(pts, m_point_cloud.size());
-
-    // Create Convex Hull
-    m_convex_hull_polygon.CreateConvexHull(cloud_polygon);
-
-    // Don't forget to delete the array.
-    delete[] pts;
 }
 
 int main(int argc, char* argv[])
@@ -284,7 +314,7 @@ int main(int argc, char* argv[])
     }
     catch (std::string exc)
     {
-        cerr << exc << endl;
+        std::cerr << exc << std::endl;
         return 1;
     }
 }
