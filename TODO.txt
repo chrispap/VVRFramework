@@ -18,3 +18,8 @@
     - A resource management object should be designed.
     - Investigate the potential of using 'std::shared_ptr'.
 -----------------------------------------------------------------------------------------
+
+ + TOOLS:
+    - Create points in space.
+    - Link set of points to form a higher-level entity. {Line, Triangle, Curve}.
+    

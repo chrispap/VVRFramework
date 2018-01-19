@@ -454,13 +454,13 @@ namespace vvr {
         Obb3D(const Obb3D&) = delete;
         void set(const math::AABB& aabb, const math::float4x4& transform);
         void drawShape() const override;
+        Colour col_edge;
 
     private:
         const size_t num_triverts;
-        vec *triverts;
-        vec *trinorms;
-        Point3D *cornerpts;
-        Colour col_edge;
+        vec *tv;        // triangle vertices
+        vec *tn;        // triangle normals
+        Point3D *cp;    // corner points
     };
 
     struct vvrframework_API Triangle3D  : Shape, math::Triangle
@@ -476,6 +476,9 @@ namespace vvr {
                 vec{ x2, y2, z2 },
                 vec{ x3, y3, z3 })
         {
+            vertex_col[0] = col;
+            vertex_col[1] = col;
+            vertex_col[2] = col;
             setup();
         }
 

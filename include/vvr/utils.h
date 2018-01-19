@@ -45,7 +45,6 @@ namespace vvr
     constexpr auto apply(Tuple& t, F f) {
         return apply_impl(t, f, std::make_index_sequence<std::tuple_size<Tuple>{}>{});
     }
-
 }
-
+    
 #endif

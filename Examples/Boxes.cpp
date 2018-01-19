@@ -3,6 +3,7 @@
 #include <vvr/settings.h>
 #include <vvr/scene.h>
 #include <vvr/mesh.h>
+#include <vvr/palette.h>
 #include <iostream>
 #include <fstream>
 #include <iostream>
@@ -25,11 +26,11 @@ public:
     void resize() override;
     void keyEvent(unsigned char key, bool up, int modif) override;
     void setBoxFromCurrentView();
-    vvr::Canvas mCanvas;
-    vvr::Axes *mAxes;
-    vvr::Aabb3D *mAabb1;
-    vvr::Aabb3D *mAabb2;
-    vvr::Obb3D* mBox;
+    vvr::Canvas     mCanvas;
+    vvr::Axes*      mAxes;
+    vvr::Aabb3D*    mAabb1;
+    vvr::Aabb3D*    mAabb2;
+    vvr::Obb3D*     mBox;
 };
 
 BoxesScene::BoxesScene()
@@ -41,13 +42,15 @@ BoxesScene::BoxesScene()
     mAabb1 = new vvr::Aabb3D(0, 0, 0, 10, 10, 10, vvr::red);
     mAabb2 = new vvr::Aabb3D(-10, -10, -10, 5, 5, 5, vvr::green);
     mBox->filled = true;
+    mBox->colour = vvr::BurlyWood;
+    mBox->col_edge = vvr::BurlyWood;
     mAabb1->setTransparency(0.5);
     mAabb2->setTransparency(0.5);
 }
 
 void BoxesScene::resize()
 {
-    if (m_first_resize) 
+    if (m_first_resize)
     {
         mAxes = getGlobalAxes();
         mCanvas.add(mAxes)->show();
@@ -80,20 +83,20 @@ void BoxesScene::keyEvent(unsigned char key, bool up, int modif)
 
     switch (key)
     {
-    case 'a': 
+    case 'a':
         mAxes->toggleVisibility();
         break;
-    
-    case 'b': 
+
+    case 'b':
         mAabb1->toggleVisibility();
         mAabb2->toggleVisibility();
         break;
-    
+
     case 'o':
         mBox->toggleVisibility();
-    
-    case 'm': 
-        setBoxFromCurrentView(); 
+
+    case 'm':
+        setBoxFromCurrentView();
         break;
     }
 }
