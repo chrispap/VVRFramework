@@ -23,7 +23,7 @@ private:
     const char* getName() const override { return "Simple 2D Drawing"; }
 
 private:
-    typedef vvr::CascadePicker2D<
+    typedef vvr::PriorityPicker2D<
     vvr::MousePicker2D<vvr::Point3D>,
     vvr::MousePicker2D<vvr::Circle2D>
     > PickerT;

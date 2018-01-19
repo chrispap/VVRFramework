@@ -31,6 +31,7 @@ set(INCL_FILES
   ../include/vvr/macros.h
   ../include/vvr/glwidget.h
   ../include/vvr/scene.h
+  ../include/vvr/geom.h
   ../include/vvr/drawing.h
   ../include/vvr/palette.h
   ../include/vvr/picking.h
@@ -41,6 +42,7 @@ set(INCL_FILES
   ../include/vvr/settings.h
   ../include/vvr/animation.h
   ../include/vvr/dsp.h
+  ../include/vvr/command.h
   ../include/vvr/vvrframework_DLL.h
 )
 set(SOURCE ${IMPL_FILES} ${INCL_FILES})

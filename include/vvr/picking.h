@@ -299,11 +299,11 @@ namespace vvr
         DraggerT    _dragger;
     };
 
-    /*---[MousePicker: 2D-Cascade]------------------------------------------------------*/
+    /*---[MousePicker: 2D-Priority]-----------------------------------------------------*/
     template <class... PickerTs>
-    struct CascadePicker2D
+    struct PriorityPicker2D
     {
-        vvr_decl_shared_ptr(CascadePicker2D)
+        vvr_decl_shared_ptr(PriorityPicker2D)
 
         typedef std::tuple<PickerTs...> picker_tuple_t;
 
@@ -338,14 +338,13 @@ namespace vvr
 
         bool picked() const { return _picked; }
 
-        CascadePicker2D(Canvas &canvas)
+        PriorityPicker2D(Canvas &canvas)
             : pickers(std::make_tuple(std::forward<PickerTs>(canvas)...))
         { }
 
     private:
         bool _picked;
     };
-
 }
 
 #endif

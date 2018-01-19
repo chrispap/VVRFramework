@@ -387,8 +387,8 @@ void vvr::Obb3D::drawShape() const
     if (filled)
     {
         for (size_t i = 0; i < num_triverts; i += 3) {
-            vvr::Triangle3D t(math::Triangle(triverts[i + 0], triverts[i + 1], triverts[i + 2]));
-            t.colour = colour;
+            vvr::Triangle3D t(math::Triangle(tv[i + 0], 
+                tv[i + 1], tv[i + 2]), colour);
             t.draw();
         }
     }
@@ -397,10 +397,11 @@ void vvr::Obb3D::drawShape() const
         LineSeg3D(Edge(i), col_edge).draw();
     }
 
-    auto ptsz_old = vvr::Shape::PointSize;
+    const auto ptsz_old = vvr::Shape::PointSize;
     vvr::Shape::PointSize = 12;
-    for (int i = 0; i < NumVertices(); ++i)
-        cornerpts[i].draw();
+    for (int i = 0; i < NumVertices(); ++i) {
+        cp[i].draw();
+    }
     vvr::Shape::PointSize = ptsz_old;
 }
 
@@ -408,25 +409,25 @@ vvr::Obb3D::Obb3D() : num_triverts(NumVerticesInTriangulation(1, 1, 1))
 {
     colour = vvr::Colour("dd4311");
     col_edge = vvr::Colour();
-    triverts = new vec[num_triverts];
-    trinorms = new vec[num_triverts];
-    cornerpts = new vvr::Point3D[NumVertices()];
+    tv = new vec[num_triverts];
+    tn = new vec[num_triverts];
+    cp = new vvr::Point3D[NumVertices()];
     SetFrom(math::AABB{ vec{ 0, 0, 0 }, vec{ 0, 0, 0 } }, math::float4x4::identity);
 }
 
 vvr::Obb3D::~Obb3D()
 {
-    delete[] triverts;
-    delete[] trinorms;
-    delete[] cornerpts;
+    delete[] tv;
+    delete[] tn;
+    delete[] cp;
 }
 
 void vvr::Obb3D::set(const math::AABB& aabb, const math::float4x4& transform)
 {
     SetFrom(aabb, transform);
-    Triangulate(1, 1, 1, triverts, trinorms, nullptr, true);
+    Triangulate(1, 1, 1, tv, tn, nullptr, true);
     for (size_t i = 0; i < NumVertices(); ++i) {
-        cornerpts[i].setGeom(CornerPoint(i));
+        cp[i].setGeom(CornerPoint(i));
     }
 }
 

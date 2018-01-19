@@ -121,37 +121,49 @@ namespace tavli
 
     struct Piece : public Cylinder3D
     {
+        Region* region;
         Piece(Colour col);
+        void pick();
         void draw() const override;
         real pickdist(const Ray& ray) const override;
-        void pick();
-        void drop();
-
-        /* Data */
-        Region* region;
     };
 
     struct Region : public Triangle3D
     {
+        /* Data [Logic] */
+        Board* board;
+        std::vector<Piece*> pieces;
+
+        /* Data [Drawing] */
+        float piecediam, boardheight;
+        int id, rows;
+        vec base, top, dir;
+
         Region(Board* board, int reg, Colour colour);
         void addPiece(Piece *piece);
         void removePiece(Piece *piece);
         void resize(float diam, float boardheight);
         void arrangePieces(size_t index_from=0);
         real pickdist(const Ray& ray) const override;
-
-        /* Data [Logic] */
-        Board* board;
-        std::vector<Piece*> pieces;
-
-        /* Data [Drawing] */
-        int id, rows;
-        vec base, top, dir;
-        float piecediam, boardheight;
     };
 
-    struct Board : public Drawable
+    class Board : public Drawable
     {
+        std::vector<Colour>     _colours;
+        std::vector<Piece*>     _pieces;
+        std::vector<Region*>    _regions;
+        Mesh::Ptr               _3DBoard;
+        Canvas                  _pieceCanvas;
+        Canvas                  _regionCanvas;
+        float                   _width;
+        float                   _height;
+
+    public:
+        RegionHlter::Ptr        region_hlter;
+        RegionPicker::Ptr       region_picker;
+        PieceDragger::Ptr       piece_dragger;
+        PiecePicker::Ptr        piece_picker;
+
         Board(std::vector<Colour> &cols);
         ~Board();
         void load3DModels();
@@ -162,21 +174,6 @@ namespace tavli
         void setupGameFevga();
         void draw() const override;
         void resize(const float width, const float height);
-
-        RegionHlter::Ptr        region_hlter;
-        RegionPicker::Ptr       region_picker;
-        PieceDragger::Ptr       piece_dragger;
-        PiecePicker::Ptr        piece_picker;
-
-    private:
-        std::vector<Colour>     _colours;
-        std::vector<Piece*>     _pieces;
-        std::vector<Region*>    _regions;
-        Mesh::Ptr               _3DBoard;
-        Canvas                  _pieceCanvas;
-        Canvas                  _regionCanvas;
-        float                   _width;
-        float                   _height;
     };
 }
 
