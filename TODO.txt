@@ -30,6 +30,9 @@
 -----------------------------------------------------------------------------------------
 
 ---[Tools:]------------------------------------------------------------------------------
-    - Create points in space.
-    - Link set of points to form a higher-level entity. {Line, Triangle, Curve}.
+ + Create points in space.
+ + Link set of points to form a higher-level entity. {Line, Triangle, Curve}.
 -----------------------------------------------------------------------------------------
+
+---[Apps:]-------------------------------------------------------------------------------
+ + Animate Hilbert Curve.
