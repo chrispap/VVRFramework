@@ -1,25 +1,33 @@
-~TODO~
-
----[Architecture:]-----------------------------------------------------------------------
- + COMPOSITE: Geometric types composed from simpler ones.
+------------------------------------------------------------------------------------------
+[Composite geometric shapes]:
+  Geometric types composed from simpler ones.
     - Composites must be able to be conveniently added on canvas along with their
       components. Maybe add components only on a vector for picking and let the
       composite object draw itself along with the components.
- + LINK: Support the link of points so that they can be dragger together.
+
+------------------------------------------------------------------------------------------
+[Linked shapes]:
+  Support the link of points so that they can be dragger together.
     - Could be with the same instant of the linked object
     - Or with multiple objects with some kind of soft link.
- + HOVER: Automatic hover on mouse move while btn down.
- + MEMORY:
+
+------------------------------------------------------------------------------------------
+[Hover/Highlight]:
+    - Automatic hover on mouse move while btn down.
+
+------------------------------------------------------------------------------------------
+[Memory management]:
     - Canvas should stop deleting 'vvr::Drawable' objects.
     - A resource management object should be designed.
     - Investigate the potential of using 'std::shared_ptr'.
- + COMMANDS:
+
+------------------------------------------------------------------------------------------
+[Commands]:
     - Make an array of commands, one for ever letter [a-z]:
         Command *keymap['z'-'a'+1]; //24
       Each element is the command ptr of the respective letter.
       Example:
-        char c;
-        c = tolower(c);
+        char c = tolower(c);
         assert(c>='a'&&c<='z');
         keymap[c-'a'];
     - Make a queue of MouseConsumer:
@@ -27,12 +35,14 @@
       They can be stacked. (pushed, popped).
       They can be executed consecutively.
       Any of them has the power to stop the execution of the rest.
------------------------------------------------------------------------------------------
 
----[Tools:]------------------------------------------------------------------------------
- + Create points in space.
- + Link set of points to form a higher-level entity. {Line, Triangle, Curve}.
------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------
+[Tools]:
+    - Create points in space.
+    - Link set of points to form a higher-level entity. {Line, Triangle, Curve}.
 
----[Apps:]-------------------------------------------------------------------------------
- + Animate Hilbert Curve.
+------------------------------------------------------------------------------------------
+[Apps]:
+   - Animate Hilbert Curve.
+
+------------------------------------------------------------------------------------------
