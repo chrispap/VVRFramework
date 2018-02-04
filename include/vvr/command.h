@@ -2,8 +2,9 @@
 #define VVR_COMMAND_H
 
 #include "vvrframework_DLL.h"
+#include <vvr/macros.h>
 
-namespace vvr 
+namespace vvr
 {
 
     struct Command
@@ -12,30 +13,31 @@ namespace vvr
         virtual void operator()() = 0;
     };
 
-    template <typename Receiver, typename Ret=void>
+    template <typename RecT, typename RetT=void>
     class SimpleCommand : public Command
     {
-        typedef Ret(Receiver::*Action)();
-        Receiver* _receiver;
-        Action _action;
+        typedef RetT(RecT::*ActT)();
+        RecT* _receiver;
+        ActT _action;
 
     public:
-        SimpleCommand(Receiver* rec, Action action)
+        SimpleCommand(RecT* rec, ActT act)
             : _receiver{rec}
-            , _action{action}
+            , _action{act}
         { }
 
-        Ret operator()()
+        RetT operator()()
         {
             (_receiver->*_action)();
         }
     };
 
-    class MacroCommand
+    class MacroCommand : public Command
     {
         std::vector<Command*> _commands;
 
     public:
+        ~MacroCommand() { for (auto cmd : _commands) delete cmd; }
         void add(Command* cmd) { _commands.push_back(cmd); }
         void operator()() { for (auto cmd : _commands) (*cmd)(); }
     };

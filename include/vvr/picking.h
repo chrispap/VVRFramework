@@ -311,13 +311,13 @@ namespace vvr
 
         bool pick(Mousepos mp, int modif)
         {
-            apply(pickers, [&](auto &p) {
-                p.drop();
-            });
+           drop();
 
-            _picked = false;
+            _picked = nullptr;
             apply(pickers, [&](auto &p) {
-                _picked = _picked || p.pick(mp, modif);
+                if (!_picked && p.pick(mp, modif)) {
+                    _picked = p.picked();
+                }
             });
             return _picked;
         }
@@ -331,19 +331,22 @@ namespace vvr
 
         void drop()
         {
-            apply(pickers, [&](auto &p) {
+            apply(pickers, [](auto &p) {
                 p.drop();
             });
         }
 
-        bool picked() const { return _picked; }
+        Drawable* picked() const { return _picked; }
+
+        template <size_t I>
+        auto picked() { return std::get<I>(pickers).picked(); }
 
         PriorityPicker2D(Canvas &canvas)
             : pickers(std::make_tuple(std::forward<PickerTs>(canvas)...))
         { }
 
     private:
-        bool _picked;
+        Drawable* _picked;
     };
 }
 

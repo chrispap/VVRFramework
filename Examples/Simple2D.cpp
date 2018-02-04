@@ -28,7 +28,7 @@ private:
     vvr::MousePicker2D<vvr::Point3D>,
     vvr::MousePicker2D<vvr::Circle2D>
     > PickerT;
-   
+
     vvr::Canvas m_canvas;
     PickerT::Ptr m_picker;
 };
@@ -37,39 +37,43 @@ Simple2DScene::Simple2DScene()
 {
     using namespace std::placeholders;
     m_bg_col = vvr::grey;
-    m_canvas.add(new vvr::Circle2D(-40, -20, 40, vvr::red));
-    m_canvas.add(new vvr::Circle2D(-20, 20, 40, vvr::green));
-    m_canvas.add(new vvr::Circle2D(0, -20, 40, vvr::blue));
-    m_canvas.add(new vvr::Circle2D(20, 20, 40, vvr::black));
-    m_canvas.add(new vvr::Circle2D(40, -20, 40, vvr::yellow));
-    m_canvas.add(new vvr::Point3D(40, -20, 0, vvr::white));
+
+    /* Create circles in random positions. */
+    for (int i=0; i<111; i++) {
+        int x = rand() % 800 - 400;
+        int y = rand() % 600 - 300;
+        m_canvas.add(new vvr::Circle2D(x, y, 20, vvr::white));
+    }
+
     m_picker = PickerT::Make(m_canvas);
 }
 
-void Simple2DScene::mouseHovered(int x, int y, int modif)  
+void Simple2DScene::mouseHovered(int x, int y, int modif)
 {
     m_picker->pick(vvr::Mousepos{ x, y }, modif);
 }
 
-void Simple2DScene::mousePressed(int x, int y, int modif)  
+void Simple2DScene::mousePressed(int x, int y, int modif)
 {
     m_picker->pick(vvr::Mousepos{ x, y }, modif);
 }
 
-void Simple2DScene::mouseMoved(int x, int y, int modif)  
+void Simple2DScene::mouseMoved(int x, int y, int modif)
 {
     m_picker->drag(vvr::Mousepos{ x, y }, modif);
 }
 
-void Simple2DScene::mouseReleased(int x, int y, int modif)  
+void Simple2DScene::mouseReleased(int x, int y, int modif)
 {
-    m_picker->drop(); 
+    m_picker->drop();
 }
 
 void Simple2DScene::draw()
 {
     enterPixelMode();
     m_canvas.draw();
+    vvr::Circle2D* c = m_picker->picked<1>();
+    if (c) c->draw();
     exitPixelMode();
 }
 

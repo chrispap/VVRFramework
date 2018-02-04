@@ -1,48 +1,17 @@
-------------------------------------------------------------------------------------------
-[Composite geometric shapes]:
-  Geometric types composed from simpler ones.
-    - Composites must be able to be conveniently added on canvas along with their
-      components. Maybe add components only on a vector for picking and let the
-      composite object draw itself along with the components.
-
-------------------------------------------------------------------------------------------
-[Linked shapes]:
-  Support the link of points so that they can be dragger together.
-    - Could be with the same instant of the linked object
-    - Or with multiple objects with some kind of soft link.
-
-------------------------------------------------------------------------------------------
-[Hover/Highlight]:
-    - Automatic hover on mouse move while btn down.
-
-------------------------------------------------------------------------------------------
-[Memory management]:
-    - Canvas should stop deleting 'vvr::Drawable' objects.
+[DATA]:
+    - Canvas should stop deleting 'vvr::Drawable' objects! {NOT SAFE / NOT SCALABLE}
     - A resource management object should be designed.
     - Investigate the potential of using 'std::shared_ptr'.
+    - A serialization process should be engineered.
+    - A file format for storing/exporting/exchanging scenes should be introduced.
 
-------------------------------------------------------------------------------------------
-[Commands]:
-    - Make an array of commands, one for ever letter [a-z]:
-        Command *keymap['z'-'a'+1]; //24
-      Each element is the command ptr of the respective letter.
-      Example:
-        char c = tolower(c);
-        assert(c>='a'&&c<='z');
-        keymap[c-'a'];
-    - Make a queue of MouseConsumer:
-        std::queue<MouseConsumer> toolqueue;
-      They can be stacked. (pushed, popped).
-      They can be executed consecutively.
-      Any of them has the power to stop the execution of the rest.
+[TOOLS]:
+    - Geometry creation.
+    - Geometry manipulation.
+    - Support smart interactions of shapes:
+      - Snap, Align, Tangent, Equidistant, Parallel.
+    - Make an editable queue of tools:
 
-------------------------------------------------------------------------------------------
-[Tools]:
-    - Create points in space.
-    - Link set of points to form a higher-level entity. {Line, Triangle, Curve}.
+[APPS]:
+   - Animation of iterative refinement of a Hilbert Curve.
 
-------------------------------------------------------------------------------------------
-[Apps]:
-   - Animate Hilbert Curve.
-
-------------------------------------------------------------------------------------------

@@ -9,6 +9,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <unordered_map>
 #include <array>
 #include <numeric>
 #include <algorithm>
@@ -54,8 +55,6 @@ public:
 };
 
 /*---[Sketcher]-------------------------------------------------------------------------*/
-using vvr::vec;
-
 class Sketcher : public vvr::Scene
 {
 public:
@@ -72,45 +71,54 @@ private:
     void mouseMoved(int x, int y, int modif) override;
     void mouseReleased(int x, int y, int modif) override;
     void mouseHovered(int x, int y, int modif) override;
-    void append_to_grid(float dx, float dy, vvr::Colour);
-    void saveScene();
+    void add_spacing_to_grid(float dx, float dy, vvr::Colour);
+    void make_grid();
+    void save_scene();
+    void toggle_points();
+    void toggle_grid();
+    void toggle_croshair();
 
     typedef vvr::PriorityPicker2D<
-        vvr::MousePicker2D<vvr::Point3D>,
-        vvr::MousePicker2D<vvr::LineSeg3D>,
-        vvr::MousePicker2D<vvr::Triangle3D>,
-        vvr::MousePicker2D<vvr::Circle2D>,
-        vvr::MousePicker2D<vvr::CompositeTriangle>,
-        vvr::MousePicker2D<vvr::CompositeLine>
+    vvr::MousePicker2D<vvr::Point3D>,
+    vvr::MousePicker2D<vvr::LineSeg3D>,
+    vvr::MousePicker2D<vvr::Triangle3D>,
+    vvr::MousePicker2D<vvr::Circle2D>,
+    vvr::MousePicker2D<vvr::CompositeTriangle>,
+    vvr::MousePicker2D<vvr::CompositeLine>
     > PickerT;
 
     int             m_gs = 40;
     PickerT::Ptr    m_picker;
     vvr::Canvas     m_canvas;
-    vvr::Canvas     m_canvas_grid;
+    vvr::Canvas     m_grid;
     CurveBsp4*      m_splines[2];
     vvr::Line2D*    m_hl;
     vvr::Line2D*    m_vl;
-    std::vector<vvr::Point2D> m_p, m_h;
 
-    vvr::MacroCommand m_cmd_reset;
+    std::unordered_map<char, vvr::MacroCommand> m_key_map;
 };
 
 Sketcher::Sketcher()
 {
     vvr::Shape::PointSize *= 2;
     m_bg_col = vvr::Colour("FFFFFF");
-    m_cmd_reset.add(new vvr::SimpleCommand<Sketcher>(this, &Sketcher::reset));
+    m_perspective_proj = false;
     m_canvas.setDelOnClear(false);
+
+    m_key_map['p'].add((new vvr::SimpleCommand<Sketcher>(this, &Sketcher::toggle_points)));
+    m_key_map['g'].add((new vvr::SimpleCommand<Sketcher>(this, &Sketcher::toggle_grid)));
+    m_key_map['s'].add((new vvr::SimpleCommand<Sketcher>(this, &Sketcher::save_scene)));
+    m_key_map['v'].add((new vvr::SimpleCommand<Sketcher>(this, &Sketcher::toggle_croshair)));
+
     reset();
 }
+
+//! [Overrides]:
 
 void Sketcher::reset()
 {
     vvr::Scene::reset();
     m_canvas.clear();
-    m_p.clear();
-    m_h.clear();
 
     /* Create objects */
     std::vector<vvr::Point3D*> cps;
@@ -156,41 +164,14 @@ void Sketcher::reset()
     /* Create picker */
     m_picker = PickerT::Make(m_canvas);
 
-    m_perspective_proj = false;
     setCameraPos({0,0,50});
 }
 
 void Sketcher::resize()
 {
-    vvr::Colour col_1 ("CCCCCC");
-    vvr::Colour col_2 ("666666");
-    vvr::Colour col_3 ("000000");
-    m_canvas_grid.clear();
-    append_to_grid((float)m_gs,       (float)m_gs,       col_1);
-    append_to_grid((float)m_gs * 10,  (float)m_gs * 10,  col_2);
-    append_to_grid((float)m_gs * 100, (float)m_gs * 100, col_3);
-}
-
-void Sketcher::append_to_grid(float dx, float dy, vvr::Colour colour)
-{
-    const float sx = getViewportWidth();
-    const float sy = getViewportHeight();
-    const float nx = sx / dx;
-    const float ny = sy / dy;
-    const math::LineSegment lnx{ vec{ 0,-sy,0 }, vec{ 0,sy,0 } };
-    const math::LineSegment lny{ vec{ -sx,0,0 }, vec{ sx,0,0 } };
-
-    for (int i = -nx / 2; i <= nx / 2; i++) {
-        auto l = lnx;
-        l.Translate({ dx*i, 0, 0 });
-        m_canvas_grid.add(new vvr::LineSeg3D{ l, colour });
-    }
-
-    for (int i = -ny / 2; i <= ny / 2; i++) {
-        auto l = lny;
-        l.Translate({ 0, dy*i, 0 });
-        m_canvas_grid.add(new vvr::LineSeg3D{ l, colour });
-    }
+    static bool first_pass = true;
+    make_grid();
+    first_pass = false;
 }
 
 void Sketcher::mousePressed(int x, int y, int modif)
@@ -200,20 +181,15 @@ void Sketcher::mousePressed(int x, int y, int modif)
 
 void Sketcher::mouseMoved(int x, int y, int modif)
 {
-    if (m_canvas_grid.visible && !shiftDown(modif)) {
+    if (m_grid.visible && !shiftDown(modif)) {
         vvr::snap_to_grid(x, y, m_gs);
     }
+
     m_hl->set(x, y, x + 1, y);
     m_vl->set(x, y, x, y + 1);
 
-    if (m_picker->picked())
-    {
+    if (m_picker->picked()) {
         m_picker->drag(vvr::Mousepos{ x, y }, modif);
-    }
-    else
-    {
-        m_p.push_back({(float)x,(float)y});
-        m_p = m_h = vvr::convex_hull(m_p);
     }
 }
 
@@ -229,55 +205,12 @@ void Sketcher::mouseHovered(int x, int y, int modif)
     m_vl->set(x, y, x, y + 1);
 }
 
-void Sketcher::draw()
-{
-    enterPixelMode();
-    m_canvas_grid.drawif();
-    m_canvas.draw();
-    m_hl->drawif();
-    m_vl->drawif();
-
-    for (int i=0; i<m_h.size(); i++) {
-        int j = (i+1)%m_h.size();
-        const auto &p = m_h[i];
-        const auto &q = m_h[j];
-        vvr::LineSeg2D(p.x, p.y, q.x, q.y, vvr::red).draw();
-        p.draw();
-    }
-
-    exitPixelMode();
-}
-
-void Sketcher::saveScene()
-{
-    for (vvr::Drawable* drw : m_canvas.getDrawables())
-    {
-
-        if (auto x = dynamic_cast<math::vec*>(drw))
-        {
-            vvr_msg(*x);
-        }
-        else if (auto x = dynamic_cast<math::Triangle*>(drw))
-        {
-            vvr_msg(*x);
-        }
-        else if (auto x = dynamic_cast<math::LineSegment*>(drw))
-        {
-            vvr_msg(*x);
-        }
-
-    }
-}
-
 void Sketcher::keyEvent(unsigned char key, bool up, int modif)
 {
-    switch (tolower(key)) {
-    case 'p': for (auto s:m_splines) s->disp_pts ^= true; break;
-    case 'g': m_canvas_grid.toggleVisibility(); break;
-    case 's': if (ctrlDown(modif)) saveScene(); break;
-    case ' ': m_hl->toggleVisibility(); m_vl->toggleVisibility(); break;
-    case 'r': m_cmd_reset(); break;
-    }
+    unsigned char k = tolower(key);
+    if (m_key_map.find(k) != m_key_map.end()) {
+        m_key_map[k]();
+    } else Scene::keyEvent(key, up, modif);
 }
 
 void Sketcher::arrowEvent(vvr::ArrowDir dir, int modif)
@@ -299,6 +232,90 @@ void Sketcher::arrowEvent(vvr::ArrowDir dir, int modif)
         m_gs++;
         resize();
     }
+}
+
+void Sketcher::draw()
+{
+    enterPixelMode();
+    m_grid.drawif();
+    m_canvas.draw();
+    m_hl->drawif();
+    m_vl->drawif();
+    exitPixelMode();
+}
+
+//! [Helpers]:
+
+void Sketcher::make_grid()
+{
+    m_grid.clear();
+    vvr::Colour col_1 ("CCCCCC");
+    vvr::Colour col_2 ("666666");
+    vvr::Colour col_3 ("000000");
+    add_spacing_to_grid((float)m_gs,       (float)m_gs,       col_1);
+    add_spacing_to_grid((float)m_gs * 10,  (float)m_gs * 10,  col_2);
+    add_spacing_to_grid((float)m_gs * 100, (float)m_gs * 100, col_3);
+}
+
+void Sketcher::add_spacing_to_grid(float dx, float dy, vvr::Colour colour)
+{
+    const float sx = getViewportWidth();
+    const float sy = getViewportHeight();
+    const float nx = sx / dx;
+    const float ny = sy / dy;
+    const math::LineSegment lnx{ vec{ 0,-sy,0 }, vec{ 0,sy,0 } };
+    const math::LineSegment lny{ vec{ -sx,0,0 }, vec{ sx,0,0 } };
+
+    for (int i = -nx / 2; i <= nx / 2; i++) {
+        auto l = lnx;
+        l.Translate({ dx*i, 0, 0 });
+        m_grid.add(new vvr::LineSeg3D{ l, colour });
+    }
+
+    for (int i = -ny / 2; i <= ny / 2; i++) {
+        auto l = lny;
+        l.Translate({ 0, dy*i, 0 });
+        m_grid.add(new vvr::LineSeg3D{ l, colour });
+    }
+}
+
+void Sketcher::save_scene()
+{
+    for (vvr::Drawable* drw : m_canvas.getDrawables())
+    {
+
+        if (auto x = dynamic_cast<math::vec*>(drw))
+        {
+            vvr_msg(*x);
+        }
+        else if (auto x = dynamic_cast<math::Triangle*>(drw))
+        {
+            vvr_msg(*x);
+        }
+        else if (auto x = dynamic_cast<math::LineSegment*>(drw))
+        {
+            vvr_msg(*x);
+        }
+
+    }
+}
+
+void Sketcher::toggle_points()
+{
+    for (auto s:m_splines) {
+        s->disp_pts = !s->disp_pts;
+    }
+}
+
+void Sketcher::toggle_grid()
+{
+    m_grid.toggleVisibility();
+}
+
+void Sketcher::toggle_croshair()
+{
+    m_hl->toggleVisibility();
+    m_vl->toggleVisibility();
 }
 
 vvr_invoke_main_with_scene(Sketcher)
