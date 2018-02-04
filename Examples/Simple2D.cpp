@@ -17,6 +17,7 @@ public:
 private:
     void draw() override;
     void reset() override;
+    void mouseHovered(int x, int y, int modif) override;
     void mousePressed(int x, int y, int modif) override;
     void mouseMoved(int x, int y, int modif) override;
     void mouseReleased(int x, int y, int modif) override;
@@ -43,6 +44,11 @@ Simple2DScene::Simple2DScene()
     m_canvas.add(new vvr::Circle2D(40, -20, 40, vvr::yellow));
     m_canvas.add(new vvr::Point3D(40, -20, 0, vvr::white));
     m_picker = PickerT::Make(m_canvas);
+}
+
+void Simple2DScene::mouseHovered(int x, int y, int modif)  
+{
+    m_picker->pick(vvr::Mousepos{ x, y }, modif);
 }
 
 void Simple2DScene::mousePressed(int x, int y, int modif)  
