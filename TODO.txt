@@ -13,5 +13,14 @@
     - Make an editable queue of tools:
 
 [APPS]:
-   - Animation of iterative refinement of a Hilbert Curve.
+    - Animation of iterative refinement of a Hilbert Curve.
 
+[JSON]:
+    - Sample:
+        {
+          "vvr::Point3D": [133,233,456],
+          "vvr::Circle2D": {
+            "center": [20,30],
+            "radius": 50
+          }
+        }

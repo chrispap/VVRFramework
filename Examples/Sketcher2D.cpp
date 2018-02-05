@@ -61,7 +61,7 @@ public:
     Sketcher();
 
 private:
-    const char* getName() const override { return "BSpline Scene"; }
+    const char* getName() const override { return "2D Sketcher"; }
     void draw() override;
     void reset() override;
     void resize() override;
