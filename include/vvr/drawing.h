@@ -17,7 +17,7 @@ namespace vvr {
 
     typedef float real;
     using math::vec;
-    class Canvas;
+    struct Canvas;
 
     /*-----------------------------------------------------------------------[Colour]---*/
 

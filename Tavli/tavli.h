@@ -84,7 +84,7 @@ namespace tavli
 
     struct Piece;
     struct Region;
-    struct Board;
+    class  Board;
 
     struct RegionHlter
     {

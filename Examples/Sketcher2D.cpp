@@ -145,15 +145,15 @@ void Sketcher::reset()
     m_vl->hide();
 
     auto line = new vvr::CompositeLine({
-        new vvr::Point3D(0, 100, 0, vvr::darkRed),
-        new vvr::Point3D(100, 200, 0, vvr::darkRed) },
+        {new vvr::Point3D(0, 100, 0, vvr::darkRed),
+        new vvr::Point3D(100, 200, 0, vvr::darkRed)} },
         vvr::darkRed);
     line->addToCanvas(m_canvas);
 
-    auto triangle = new vvr::CompositeTriangle({
+    auto triangle = new vvr::CompositeTriangle({{
         new vvr::Point3D(0,0,0, vvr::darkGreen),
         new vvr::Point3D(300,0,0, vvr::darkGreen),
-        new vvr::Point3D(200,150,0, vvr::darkGreen) },
+        new vvr::Point3D(200,150,0, vvr::darkGreen) }},
         vvr::darkGreen);
     triangle->addToCanvas(m_canvas);
     triangle->whole.filled = true;

@@ -35,7 +35,7 @@ namespace vvr
     template <typename point>
     auto area(const point &a, const point &b, const point &c)
     {
-        return abs((b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x));
+        return std::abs((b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x));
     }
 
     template <typename point, typename real = decltype(point::x)>
