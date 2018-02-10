@@ -8,7 +8,7 @@ foreach(srcFile ${APP_SRC_FILES})
   string(REPLACE ".cpp" "" appName ${srcFile})
   add_executable(${appName} MACOSX_BUNDLE ${appName}.cpp)
   target_link_libraries(${appName} 
-    optimized vvrframework debug vvrframework_d
+    optimized VVRFramework debug vvrframework_d
     optimized GeoLib debug GeoLib_d
     optimized MathGeoLib debug MathGeoLib_d)
   set_property(TARGET ${appName} PROPERTY FOLDER "GeoLab")

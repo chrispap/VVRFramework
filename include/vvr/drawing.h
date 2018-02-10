@@ -10,6 +10,7 @@
 #include <vector>
 #include <array>
 #include <cstdlib>
+#include <utility>
 
 namespace vvr {
 
@@ -151,10 +152,14 @@ namespace vvr {
         virtual void setup() { }
         void draw() const override;
 
-        bool filled;
-        Colour colour;
+        static real SetLineWidth(real v) { std::swap(v, LineWidth); return v; }
+        static real SetPointSize(real v) { std::swap(v, LineWidth); return v; }
+
         static real LineWidth;
         static real PointSize;
+
+        bool filled;
+        Colour colour;
     };
 
     struct vvrframework_API Canvas      : Drawable
@@ -277,9 +282,9 @@ namespace vvr {
         real x2, y2;
         real x3, y3;
 
-        Triangle2D() 
+        Triangle2D()
         {
-            filled = false; 
+            filled = false;
         }
 
         Triangle2D(real x1, real y1, real x2, real y2, real x3, real y3, Colour col = Colour())

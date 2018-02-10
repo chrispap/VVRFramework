@@ -46,5 +46,5 @@ namespace vvr
         return apply_impl(t, f, std::make_index_sequence<std::tuple_size<Tuple>{}>{});
     }
 }
-    
+
 #endif

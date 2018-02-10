@@ -1,5 +1,3 @@
-project(Tavli)
-
 option(HIDE_CONSOLE_WINDOW "Show only gui window and not the the console" OFF)
 link_directories(${CMAKE_BINARY_DIR}/lib)
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
@@ -9,7 +7,7 @@ file(GLOB APP_SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}
 
 add_executable(Tavli MACOSX_BUNDLE ${APP_SRC_FILES})
 target_link_libraries(Tavli
-  optimized vvrframework debug vvrframework_d
+  optimized VVRFramework debug vvrframework_d
   optimized GeoLib debug GeoLib_d
   optimized MathGeoLib debug MathGeoLib_d)
 set_property(TARGET Tavli PROPERTY FOLDER "Games")

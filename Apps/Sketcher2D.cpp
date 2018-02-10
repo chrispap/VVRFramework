@@ -2,6 +2,7 @@
 #include <vvr/scene.h>
 #include <vvr/utils.h>
 #include <vvr/drawing.h>
+#include <vvr/palette.h>
 #include <vvr/geom.h>
 #include <vvr/picking.h>
 #include <vvr/command.h>
@@ -27,7 +28,7 @@ public:
         set_cps(cps);
         set_knots({ 0, 0, 0, 0, 1, 1, 1, 1 });
         set_num_pts(32);
-        disp_pts = true;
+        disp_pts = false;
         colour = col_curve;
     }
 
@@ -79,12 +80,12 @@ private:
     void toggle_croshair();
 
     typedef vvr::PriorityPicker2D<
-    vvr::MousePicker2D<vvr::Point3D>,
-    vvr::MousePicker2D<vvr::LineSeg3D>,
-    vvr::MousePicker2D<vvr::Triangle3D>,
-    vvr::MousePicker2D<vvr::Circle2D>,
-    vvr::MousePicker2D<vvr::CompositeTriangle>,
-    vvr::MousePicker2D<vvr::CompositeLine>
+    /*0*/vvr::MousePicker2D<vvr::Point3D>,
+    /*1*/vvr::MousePicker2D<vvr::LineSeg3D>,
+    /*2*/vvr::MousePicker2D<vvr::Triangle3D>,
+    /*3*/vvr::MousePicker2D<vvr::Circle2D>,
+    /*4*/vvr::MousePicker2D<vvr::CompositeTriangle>,
+    /*5*/vvr::MousePicker2D<vvr::CompositeLine>
     > PickerT;
 
     int             m_gs = 40;
@@ -110,14 +111,18 @@ Sketcher::Sketcher()
     m_key_map['s'].add((new vvr::SimpleCommand<Sketcher>(this, &Sketcher::save_scene)));
     m_key_map['v'].add((new vvr::SimpleCommand<Sketcher>(this, &Sketcher::toggle_croshair)));
 
+    /* Create picker */
+    m_picker = PickerT::Make(m_canvas);
+    m_picker->get<0>().dragger().col_hover = vvr::Blue;
+
     reset();
 }
-
-//! [Overrides]:
 
 void Sketcher::reset()
 {
     vvr::Scene::reset();
+
+    m_picker->drop();
     m_canvas.clear();
 
     /* Create objects */
@@ -126,7 +131,7 @@ void Sketcher::reset()
     cps.push_back(new vvr::Point3D( 50, 100, 0, vvr::red));
     cps.push_back(new vvr::Point3D( 20, 100, 0, vvr::red));
     cps.push_back(new vvr::Point3D(  0,   0, 0, vvr::red));
-    m_splines[0] = new CurveBsp4(cps, vvr::red);
+    m_splines[0] = new CurveBsp4(cps, vvr::black);
     m_splines[0]->addToCanvas(m_canvas);
 
     cps.clear();
@@ -136,7 +141,7 @@ void Sketcher::reset()
         cps.back()->x *= -1;
         cps.back()->y *= -1;
     }
-    m_splines[1] = new CurveBsp4(cps, vvr::red);
+    m_splines[1] = new CurveBsp4(cps, vvr::black);
     m_splines[1]->addToCanvas(m_canvas);
 
     m_hl = new vvr::Line2D(0, 0, 0, 0, vvr::red);
@@ -161,9 +166,6 @@ void Sketcher::reset()
     auto cir = new vvr::Circle2D(0, 0, 55);
     m_canvas.add(cir);
 
-    /* Create picker */
-    m_picker = PickerT::Make(m_canvas);
-
     setCameraPos({0,0,50});
 }
 
@@ -174,9 +176,16 @@ void Sketcher::resize()
     first_pass = false;
 }
 
+void Sketcher::mouseHovered(int x, int y, int modif)
+{
+    m_picker->pick(vvr::Mousepos{ x, y }, 0, false);
+    m_hl->set(x, y, x + 1, y);
+    m_vl->set(x, y, x, y + 1);
+}
+
 void Sketcher::mousePressed(int x, int y, int modif)
 {
-    m_picker->pick(vvr::Mousepos{ x, y }, modif);
+    m_picker->pick(vvr::Mousepos{ x, y }, modif, true);
 }
 
 void Sketcher::mouseMoved(int x, int y, int modif)
@@ -196,13 +205,6 @@ void Sketcher::mouseMoved(int x, int y, int modif)
 void Sketcher::mouseReleased(int x, int y, int modif)
 {
     m_picker->drop();
-}
-
-void Sketcher::mouseHovered(int x, int y, int modif)
-{
-    m_picker->pick(vvr::Mousepos{ x, y }, 0);
-    m_hl->set(x, y, x + 1, y);
-    m_vl->set(x, y, x, y + 1);
 }
 
 void Sketcher::keyEvent(unsigned char key, bool up, int modif)
@@ -237,10 +239,17 @@ void Sketcher::arrowEvent(vvr::ArrowDir dir, int modif)
 void Sketcher::draw()
 {
     enterPixelMode();
-    m_grid.drawif();
-    m_canvas.draw();
-    m_hl->drawif();
-    m_vl->drawif();
+    {
+        m_grid.drawif();
+        m_canvas.draw();
+        if (auto p=m_picker->picked()) {
+            p->draw();
+        }
+        vvr::real lw = vvr::Shape::SetLineWidth(1);
+        m_hl->drawif();
+        m_vl->drawif();
+        lw = vvr::Shape::SetLineWidth(lw);
+    }
     exitPixelMode();
 }
 

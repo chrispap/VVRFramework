@@ -6,24 +6,18 @@
 
 namespace vvr {
 
+template<typename G>
+G& ref(G& obj) { return obj; }
+
+template<typename G>
+G& ref(G* obj) { return *obj; }
+
 template <typename G>
-static inline G spline_divide(const G& num, const G& den)
+static inline G spline_division(const G& num, const G& den)
 {
-    if (den != 0.0) return num / den;
-    if (num == 1.0) return 1.0;
+    if (den!=0.0) return num / den;
+    if (num==1.0) return 1.0;
     else return 0.0;
-}
-
-template<typename G>
-G& ref(G& obj) 
-{
-    return obj; 
-}
-
-template<typename G>
-G& ref(G* obj) 
-{
-    return *obj; 
 }
 
 template <typename T>
@@ -32,22 +26,22 @@ class BSpline
     typedef typename std::remove_pointer<T>::type point_t;
     typedef std::vector<std::vector<double>> double_vector_2d;
 
-    std::vector<point_t>    _pts;
-    std::vector<T>          _cps;
-    std::vector<double>     _knots;
-    size_t                  _num_pts;
-    bool                    _dirty;
+    std::vector<point_t> pts;   // Points of curve path.
+    std::vector<T> cps;         // Control points
+    std::vector<double> knv;    // Knot vector
+    size_t num_pts;             // Number of points
+    bool dirty;                 // Needs update
 
 public:
     BSpline() 
-        : _num_pts(2)
-        , _dirty(true) 
+        : num_pts(2)
+        , dirty(true)
     { }
 
     point_t eval(const double t)
     {
-        const auto &X = _knots;
-        const auto &B = _cps;
+        const auto &X = knv;
+        const auto &B = cps;
         const int kn = X.size();
         const int kp = B.size();
         const int mb = kn - kp;
@@ -65,8 +59,8 @@ public:
                 const double A_den = X[i + k] - X[i];
                 const double C_num = (X[i + k + 1] - t) * N[i + 1][k - 1];
                 const double C_den = X[i + k + 1] - X[i + 1];
-                const double A = spline_divide(A_num, A_den);
-                const double C = spline_divide(C_num, C_den);
+                const double A = spline_division(A_num, A_den);
+                const double C = spline_division(C_num, C_den);
                 N[i][k] = A + C;
             }
         }
@@ -81,67 +75,66 @@ public:
 
     void update(bool force = false)
     {
-        if (!_dirty && !force) return;
+        if (!dirty && !force) return;
         auto range = get_param_range();
-        auto dt = (range.second - range.first) / (_num_pts - 1);
-        _pts.clear();
-        for (int i = 0; i < _num_pts; i++) {
-            _pts.push_back(eval(range.first + dt * i));
+        auto dt = (range.second - range.first) / (num_pts - 1);
+        pts.resize(num_pts);
+        for (int i = 0; i < num_pts; i++) {
+            pts[i] = eval(range.first + dt * i);
         }
-        _dirty = false;
+        dirty = false;
     }
 
     void set_num_pts(int num)
     {
-        bool force = num != _num_pts;
+        bool force = num != num_pts;
         if (num < 2) num = 2;
-        _num_pts = num;
+        num_pts = num;
         update(force);
     }
 
-    void set_cps(std::vector<T> &&cps)
+    void set_cps(std::vector<T> &&control_pts)
     {
-        _cps = cps;
-        _dirty = true;
+        cps = control_pts;
+        dirty = true;
     }
 
-    void set_cps(const std::vector<T> &cps)
+    void set_cps(const std::vector<T> &control_pts)
     {
-        _cps = cps;
-        _dirty = true;
+        cps = control_pts;
+        dirty = true;
     }
 
-    void set_knots(std::vector<double> &&knots)
+    void set_knots(std::vector<double> &&knot_vec)
     {
-        _knots = knots;
-        _dirty = true;
+        knv = knot_vec;
+        dirty = true;
     }
 
-    void set_knots(const std::vector<double> &knots)
+    void set_knots(const std::vector<double> &knot_vec)
     {
-        _knots = knots;
-        _dirty = true;
+        knv = knot_vec;
+        dirty = true;
     }
 
     const auto get_param_range()
     {
-        const int mb = _knots.size() - _cps.size();
+        const int mb = knv.size() - cps.size();
         std::pair<double, double> range;
-        range.first = _knots[mb - 1];
-        range.second = *(_knots.end() - 1);
+        range.first = knv[mb - 1];
+        range.second = *(knv.end() - 1);
         return range;
     }
 
     const auto& get_pts() const
     {
-        return _pts;
+        return pts;
     }
 
     const auto& get_cps() const
     {
-        return _cps;
+        return cps;
     }
-
 };
 
 }

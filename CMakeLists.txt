@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 2.8.11)
 project(VVRFramework)
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED on)
+
 ### Target Locations ####################################################################
 SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
@@ -11,20 +14,20 @@ SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 add_subdirectory(3rdParty/GeoLib)
 add_subdirectory(3rdParty/MathGeoLib)
 add_subdirectory(src)
-add_subdirectory(Examples)
 add_subdirectory(GeoLab)
-add_subdirectory(Tavli)
+add_subdirectory(Apps)
+add_subdirectory(Games)
 #########################################################################################
 
 #### Group (Visual Studio only) #########################################################
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-set_property(TARGET vvrframework PROPERTY FOLDER "Libraries")
+set_property(TARGET VVRFramework PROPERTY FOLDER "Libraries")
 set_property(TARGET GeoLib PROPERTY FOLDER "Libraries")
 set_property(TARGET MathGeoLib PROPERTY FOLDER "Libraries")
 #########################################################################################
 
 #########################################################################################
-set_target_properties(vvrframework PROPERTIES DEBUG_POSTFIX _d)
+set_target_properties(VVRFramework PROPERTIES DEBUG_POSTFIX _d)
 set_target_properties(MathGeoLib PROPERTIES DEBUG_POSTFIX _d)
 set_target_properties(GeoLib PROPERTIES DEBUG_POSTFIX _d)
 #########################################################################################

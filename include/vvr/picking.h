@@ -4,6 +4,7 @@
 #include "drawing.h"
 #include "scene.h"
 #include "utils.h"
+#include "palette.h"
 #include <tuple>
 
 namespace vvr
@@ -13,8 +14,12 @@ namespace vvr
         int x, y;
     };
 
-    /*---[Draggers: 2D]-----------------------------------------------------------------*/
+    struct DraggerBase
+    {
+        vvr::Colour col_hover = vvr::LightSeaGreen;
+    };
 
+    /*---[Draggers: 2D]-----------------------------------------------------------------*/
     template <class DrawableT, class ContextT = void>
     struct Dragger2D
     {
@@ -35,13 +40,13 @@ namespace vvr
     };
 
     template <class ContextT>
-    struct Dragger2D<Point3D, ContextT>
+    struct Dragger2D<Point3D, ContextT> : DraggerBase
     {
         bool on_pick(Mousepos mp, Point3D* pt)
         {
             _picked = pt;
-            _colvirg = _picked->colour;
-            _picked->colour = vvr::magenta;
+            _col_virgin = _picked->colour;
+            _picked->colour = col_hover;
             return true;
         }
 
@@ -52,23 +57,23 @@ namespace vvr
 
         void on_drop()
         {
-            _picked->colour = _colvirg;
+            _picked->colour = _col_virgin;
         }
 
     private:
         Point3D* _picked;
-        Colour _colvirg;
+        Colour _col_virgin;
     };
 
     template <class ContextT>
-    struct Dragger2D<LineSeg3D, ContextT>
+    struct Dragger2D<LineSeg3D, ContextT> : DraggerBase
     {
         bool on_pick(Mousepos mp, LineSeg3D* ln)
         {
             _picked = ln;
             _mp = mp;
-            _colvirg = _picked->colour;
-            _picked->colour = vvr::magenta;
+            _col_virgin = _picked->colour;
+            _picked->colour = col_hover;
             return true;
         }
 
@@ -80,24 +85,24 @@ namespace vvr
 
         void on_drop()
         {
-            _picked->colour = _colvirg;
+            _picked->colour = _col_virgin;
         }
 
     private:
         LineSeg3D* _picked;
         Mousepos _mp;
-        Colour _colvirg;
+        Colour _col_virgin;
     };
 
     template <class ContextT>
-    struct Dragger2D<Triangle3D, ContextT>
+    struct Dragger2D<Triangle3D, ContextT> : DraggerBase
     {
         bool on_pick(Mousepos mp, Triangle3D* tri)
         {
             _picked = tri;
             _mp = mp;
-            _colvirg = _picked->colour;
-            _picked->colour = vvr::magenta;
+            _col_virgin = _picked->colour;
+            _picked->colour = col_hover;
             _picked->setColourPerVertex(_picked->colour, _picked->colour, _picked->colour);
             return true;
         }
@@ -110,25 +115,25 @@ namespace vvr
 
         void on_drop()
         {
-            _picked->colour = _colvirg;
+            _picked->colour = _col_virgin;
             _picked->setColourPerVertex(_picked->colour, _picked->colour, _picked->colour);
         }
 
     private:
         Triangle3D* _picked;
         Mousepos _mp;
-        Colour _colvirg;
+        Colour _col_virgin;
     };
 
     template <class ContextT>
-    struct Dragger2D<Triangle2D, ContextT>
+    struct Dragger2D<Triangle2D, ContextT> : DraggerBase
     {
         bool on_pick(Mousepos mp, Triangle2D* tri)
         {
             _mp = mp;
             _picked = tri;
-            _colvirg = _picked->colour;
-            _picked->colour = vvr::magenta;
+            _col_virgin = _picked->colour;
+            _picked->colour = col_hover;
             return true;
         }
 
@@ -147,23 +152,23 @@ namespace vvr
 
         void on_drop()
         {
-            _picked->colour = _colvirg;
+            _picked->colour = _col_virgin;
         }
 
     private:
         Triangle2D *_picked;
         Mousepos _mp;
-        Colour _colvirg;
+        Colour _col_virgin;
     };
 
     template <class ContextT>
-    struct Dragger2D<Circle2D, ContextT>
+    struct Dragger2D<Circle2D, ContextT> : DraggerBase
     {
         bool on_pick(Mousepos mp, Circle2D* cir)
         {
             _picked = cir;
-            _colvirg = _picked->colour;
-            _picked->colour = vvr::magenta;
+            _col_virgin = _picked->colour;
+            _picked->colour = col_hover;
             return true;
         }
 
@@ -174,16 +179,16 @@ namespace vvr
 
         void on_drop()
         {
-            _picked->colour = _colvirg;
+            _picked->colour = _col_virgin;
         }
 
     private:
         Circle2D *_picked;
-        Colour _colvirg;
+        Colour _col_virgin;
     };
 
     template <class WholeT, class BlockT, size_t N, class ContextT>
-    struct Dragger2D<Composite<WholeT, BlockT, N>, ContextT>
+    struct Dragger2D<Composite<WholeT, BlockT, N>, ContextT> : DraggerBase
     {
         typedef Composite<WholeT, BlockT, N> CompositeT;
 
@@ -197,10 +202,9 @@ namespace vvr
         void on_drag(Mousepos mp)
         {
             for (auto comp : _picked->blocks) {
-                Mousepos dmp {
-                    mp.x - _mp.x + (int)comp->x,
-                    mp.y - _mp.y + (int)comp->y
-                };
+                Mousepos dmp;
+                dmp.x = mp.x - _mp.x + comp->x;
+                dmp.y = mp.y - _mp.y + comp->y;
                 _grabber_block.on_pick(dmp, comp);
                 _grabber_block.on_drag(dmp);
                 _grabber_block.on_drop();
@@ -218,7 +222,6 @@ namespace vvr
         Dragger2D<BlockT>   _grabber_block;
         CompositeT*         _picked;
         Mousepos            _mp;
-        Colour              _colvirg;
     };
 
     /*---[MousePicker: 2D]--------------------------------------------------------------*/
@@ -229,14 +232,14 @@ namespace vvr
 
         typedef Dragger2D<DrawableT, ContextT> DraggerT;
 
-        bool pick(Mousepos mp, int modif)
+        bool pick(Mousepos mp, int modif, bool allow_dupl=false)
         {
             if (_picked) {
                 drop();
                 _picked = nullptr;
             }
 
-            const bool dupl = Scene::ctrlDown(modif);
+            const bool dupl = allow_dupl && Scene::ctrlDown(modif);
 
             if ((_picked = query(mp)))
             {
@@ -309,13 +312,13 @@ namespace vvr
 
         picker_tuple_t pickers;
 
-        bool pick(Mousepos mp, int modif)
+        bool pick(Mousepos mp, int modif, bool allow_dupl=false)
         {
            drop();
 
             _picked = nullptr;
             apply(pickers, [&](auto &p) {
-                if (!_picked && p.pick(mp, modif)) {
+                if (!_picked && p.pick(mp, modif, allow_dupl)) {
                     _picked = p.picked();
                 }
             });
@@ -334,6 +337,7 @@ namespace vvr
             apply(pickers, [](auto &p) {
                 p.drop();
             });
+            _picked = nullptr;
         }
 
         Drawable* picked() const { return _picked; }
@@ -341,12 +345,15 @@ namespace vvr
         template <size_t I>
         auto picked() { return std::get<I>(pickers).picked(); }
 
+        template <size_t I>
+        auto& get() { return std::get<I>(pickers); }
+
         PriorityPicker2D(Canvas &canvas)
             : pickers(std::make_tuple(std::forward<PickerTs>(canvas)...))
         { }
 
     private:
-        Drawable* _picked;
+        Drawable* _picked = nullptr;
     };
 }
 
