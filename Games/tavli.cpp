@@ -68,7 +68,7 @@ public:
     {
         if (m_first_resize)
         {
-            _axes = getGlobalAxes();
+            _axes = &getGlobalAxes();
             _axes->hide();
         }
 
@@ -124,7 +124,7 @@ public:
     }
 
 private:
-    Axes *_axes;
+    Axes* _axes;
     tavli::Board *_board;
     std::vector<Colour> _colours;
 };

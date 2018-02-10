@@ -179,6 +179,7 @@ void Scene::glResize(int w, int h)
     float4x4 pjm = m_frustum.ProjectionMatrix();
     pjm.Transpose(); // Covert to colunm major for OpenGL
     glMultMatrixf(pjm.ptr());
+    m_axes = Axes(getSceneWidth());
     resize();
     m_first_resize = false;
 }

@@ -135,7 +135,7 @@ namespace vvr {
         virtual Drawable* clone() { return  nullptr; }
         virtual void addToCanvas(Canvas &canvas);
 
-        void drawif()                   { if (visible) draw();                  }
+        void drawif() const             { if (visible) draw();                  }
         bool show()                     { visible = true;       return visible; }
         bool hide()                     { visible = false;      return visible; }
         bool toggleVisibility()         { visible = !visible;   return visible; }
@@ -576,7 +576,9 @@ namespace vvr {
 
     struct vvrframework_API Axes        : Drawable
     {
-        Axes(real d)
+        vvr_decl_shared_ptr(Axes)
+
+        Axes(real d=1)
             : x(0, 0, 0, d, 0, 0, Colour(1.0f, 0.0f, 0.0f))
             , y(0, 0, 0, 0, d, 0, Colour(0.0f, 1.0f, 0.0f))
             , z(0, 0, 0, 0, 0, d, Colour(0.0f, 0.0f, 1.0f))
@@ -587,7 +589,7 @@ namespace vvr {
             x.draw();
             y.draw();
             z.draw();
-        };
+        }
 
     private:
         LineSeg3D x, y, z;

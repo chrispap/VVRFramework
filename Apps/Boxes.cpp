@@ -13,7 +13,7 @@
 #include <vector>
 #include <MathGeoLib.h>
 
-/*--- Scene Implementation ------------------------------------------------------------*/
+/*--- Scene Implementation -------------------------------------------------------------*/
 
 using math::vec;
 
@@ -27,7 +27,6 @@ public:
     void keyEvent(unsigned char key, bool up, int modif) override;
     void setBoxFromCurrentView();
     vvr::Canvas     mCanvas;
-    vvr::Axes*      mAxes;
     vvr::Aabb3D*    mAabb1;
     vvr::Aabb3D*    mAabb2;
     vvr::Obb3D*     mBox;
@@ -52,8 +51,6 @@ void BoxesScene::resize()
 {
     if (m_first_resize)
     {
-        mAxes = getGlobalAxes();
-        mCanvas.add(mAxes)->show();
         mCanvas.add(mAabb1)->hide();
         mCanvas.add(mAabb2)->hide();
         mCanvas.add(mBox)->show();
@@ -63,6 +60,7 @@ void BoxesScene::resize()
 
 void BoxesScene::draw()
 {
+    getGlobalAxes().drawif();
     mCanvas.draw();
 }
 
@@ -84,7 +82,7 @@ void BoxesScene::keyEvent(unsigned char key, bool up, int modif)
     switch (key)
     {
     case 'a':
-        mAxes->toggleVisibility();
+        getGlobalAxes().toggleVisibility();
         break;
 
     case 'b':
@@ -101,7 +99,7 @@ void BoxesScene::keyEvent(unsigned char key, bool up, int modif)
     }
 }
 
-/*-------------------------------------------------------------------------------------*/
+/*--------------------------------------------------------------------------------------*/
 
 int main(int argc, char* argv[])
 {

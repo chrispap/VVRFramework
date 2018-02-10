@@ -35,16 +35,16 @@ namespace vvr {
         virtual void sliderChanged(int slider_id, float val);
 
         /*--- [Getters / Setters] ------------------------------------------------------*/
-        math::Frustum getFrustum() { return m_frustum; }
-        int getViewportWidth() { return m_screen_width; } // In pixels
-        int getViewportHeight() { return m_screen_height; } // In pixels
-        float getSceneWidth() { return m_scene_width; }
-        float getSceneHeight() { return m_scene_height; }
-        bool getFullScreen() { return m_fullscreen; }
-        bool getCreateMenus() { return m_create_menus; }
-        bool getHideLog() { return m_hide_log; }
-        bool getHideSliders() { return m_hide_sliders; }
-        Axes* getGlobalAxes() { return new Axes(2.0 *getSceneWidth()); }
+        Axes& getGlobalAxes()       { return m_axes; }
+        math::Frustum getFrustum()  { return m_frustum; }
+        int getViewportWidth()      { return m_screen_width; } // In pixels
+        int getViewportHeight()     { return m_screen_height; } // In pixels
+        float getSceneWidth()       { return m_scene_width; }
+        float getSceneHeight()      { return m_scene_height; }
+        bool getFullScreen()        { return m_fullscreen; }
+        bool getCreateMenus()       { return m_create_menus; }
+        bool getHideLog()           { return m_hide_log; }
+        bool getHideSliders()       { return m_hide_sliders; }
         void setFrustum(const math::Frustum &frustum) { m_frustum = frustum; }
         void setSliderVal(int slider_id, float val);
         void setCameraPos(const math::vec &pos);
@@ -77,6 +77,7 @@ namespace vvr {
         bool m_first_resize;
 
     private:
+        Axes m_axes;
         math::Frustum m_frustum;
         float m_fov;
         float m_camera_dist;

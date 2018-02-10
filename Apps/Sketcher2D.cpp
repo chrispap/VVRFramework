@@ -96,7 +96,7 @@ private:
     vvr::Line2D*    m_hl;
     vvr::Line2D*    m_vl;
 
-    std::unordered_map<char, vvr::MacroCommand> m_key_map;
+    std::unordered_map<char, vvr::MacroCmd> m_key_map;
 };
 
 Sketcher::Sketcher()
@@ -106,10 +106,10 @@ Sketcher::Sketcher()
     m_perspective_proj = false;
     m_canvas.setDelOnClear(false);
 
-    m_key_map['p'].add((new vvr::SimpleCommand<Sketcher>(this, &Sketcher::toggle_points)));
-    m_key_map['g'].add((new vvr::SimpleCommand<Sketcher>(this, &Sketcher::toggle_grid)));
-    m_key_map['s'].add((new vvr::SimpleCommand<Sketcher>(this, &Sketcher::save_scene)));
-    m_key_map['v'].add((new vvr::SimpleCommand<Sketcher>(this, &Sketcher::toggle_croshair)));
+    m_key_map['p'].add((new vvr::SimpleCmd<Sketcher>(this, &Sketcher::toggle_points)));
+    m_key_map['g'].add((new vvr::SimpleCmd<Sketcher>(this, &Sketcher::toggle_grid)));
+    m_key_map['s'].add((new vvr::SimpleCmd<Sketcher>(this, &Sketcher::save_scene)));
+    m_key_map['v'].add((new vvr::SimpleCmd<Sketcher>(this, &Sketcher::toggle_croshair)));
 
     /* Create picker */
     m_picker = PickerT::Make(m_canvas);
@@ -252,8 +252,6 @@ void Sketcher::draw()
     }
     exitPixelMode();
 }
-
-//! [Helpers]:
 
 void Sketcher::make_grid()
 {

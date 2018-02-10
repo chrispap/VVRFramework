@@ -2,6 +2,7 @@
 #define VVR_ANIMATION_H
 
 #include "vvrframework_DLL.h"
+#include "utils.h"
 
 namespace vvr
 {
@@ -50,20 +51,29 @@ namespace vvr
             return !m_paused;
         }
 
-        void update(bool force_resume = false)
+        bool update(bool start=false)
         {
-            const float sec = getSeconds();
-            if (m_paused) { if (force_resume) m_last_update = sec; else return; }
-            m_paused = false;
+            float sec;
+            if (m_paused) {
+                if (!start) return false;
+                m_last_update = sec = getSeconds();
+            } else sec = getSeconds();
             m_time += ((sec - m_last_update) * m_speed);
             m_last_update = sec;
+            m_paused = false;
+            return true;
         }
 
         void setTime(float time)
         {
-            const float sec = getSeconds();
             m_time = time;
-            m_last_update = sec;
+            m_last_update = getSeconds();
+        }
+
+        void reset()
+        {
+            pause();
+            setTime(0);
         }
 
     private:

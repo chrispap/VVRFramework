@@ -186,6 +186,7 @@ int vvr::mainLoop(int argc, char* argv[], vvr::Scene *scene)
     app.processEvents();
     Window window(scene);
     window.showMaximized();
+    //window.show();
     splash.close();
     app.exec();
     return 0;

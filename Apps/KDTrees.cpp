@@ -125,7 +125,7 @@ void KDTreeScene::reset()
     //! Define scene objects
     m_sphere = vvr::Sphere3D::Make(-GND_WIDTH / 2, 0, 0, SPHERE_RAD, vvr::white);
 
-    if (vvr_flag_on(m_flag, POINTS_ON_SURFACE)) {
+    if (vvr_flag_test(m_flag, POINTS_ON_SURFACE)) {
         createSurfacePts(m_pts.empty() ? NUM_PTS_DEFAULT : m_pts.size());
     }
     else {
@@ -227,7 +227,7 @@ void KDTreeScene::draw()
     if (sphere_moved.pos.x > GND_WIDTH / 2) m_anim.setTime(0); // Bring back to start
 
     //! Draw points
-    if (vvr_flag_on(m_flag, SHOW_PTS_ALL)) {
+    if (vvr_flag_test(m_flag, SHOW_PTS_ALL)) {
         for (size_t i = 0; i < m_pts.size(); i++) {
             vvr::Shape::PointSize = vvr::Shape::PointSize = POINT_SIZE;
             vvr::Point3D(m_pts[i], vvr::white).draw();
@@ -236,12 +236,12 @@ void KDTreeScene::draw()
     }
 
     //! Draw points in sphere
-    if (vvr_flag_on(m_flag, SHOW_PTS_IN_SPHERE)) {
-        if (vvr_flag_on(m_flag, SHOW_SPHERE)) {
+    if (vvr_flag_test(m_flag, SHOW_PTS_IN_SPHERE)) {
+        if (vvr_flag_test(m_flag, SHOW_SPHERE)) {
             sphere_moved.draw();
         }
         math::VecArray pts_in;
-        if (vvr_flag_on(m_flag, BRUTEFORCE)) {
+        if (vvr_flag_test(m_flag, BRUTEFORCE)) {
             for (size_t i = 0; i < m_KDTree->pts.size(); i++)
                 if (sphere.Contains(m_KDTree->pts.at(i))) pts_in.push_back(m_KDTree->pts.at(i));
         }
@@ -256,7 +256,7 @@ void KDTreeScene::draw()
     }
 
     //! Find and Draw Nearest Neighbour
-    if (vvr_flag_on(m_flag, SHOW_NN)) {
+    if (vvr_flag_test(m_flag, SHOW_NN)) {
         float dist;
         const vvr::KDNode *nearest = NULL;
         Task_02_Nearest(sc, m_KDTree->root(), &nearest, &dist);
@@ -268,7 +268,7 @@ void KDTreeScene::draw()
     }
 
     //! Find and Draw K Nearest Neighbour
-    if (vvr_flag_on(m_flag, SHOW_KNN)) {
+    if (vvr_flag_test(m_flag, SHOW_KNN)) {
         float dist;
         const vvr::KDNode **nearests = new const vvr::KDNode*[m_kn];
         memset(nearests, 0, m_kn * sizeof(vvr::KDNode*));
@@ -285,7 +285,7 @@ void KDTreeScene::draw()
     }
 
     //! Draw vvr::KDTree
-    if (vvr_flag_on(m_flag, SHOW_KDTREE)) {
+    if (vvr_flag_test(m_flag, SHOW_KDTREE)) {
         for (int level = m_current_tree_level; level <= m_current_tree_level; level++) {
             std::vector<vvr::KDNode*> levelNodes = m_KDTree->getNodesOfLevel(level);
             for (int i = 0; i < levelNodes.size(); i++) {
@@ -316,7 +316,7 @@ void KDTreeScene::draw()
     const float dt_show = sec - last_show;
     int FPS = 1.0 / dt;
     last_update = sec;
-    if (vvr_flag_on(m_flag, SHOW_FPS) && dt_show >= 1) {
+    if (vvr_flag_test(m_flag, SHOW_FPS) && dt_show >= 1) {
         vvr_echo(FPS);
         last_show = sec;
     }
@@ -368,7 +368,7 @@ void KDTreeScene::keyEvent(unsigned char key, bool up, int modif)
     }
     else if (key == 'u')
     {
-        if (vvr_flag_on(m_flag, POINTS_ON_SURFACE)) {
+        if (vvr_flag_test(m_flag, POINTS_ON_SURFACE)) {
             createSurfacePts(m_pts.size());
         }
         else {
@@ -418,7 +418,7 @@ void KDTreeScene::sliderChanged(int slider_id, float v)
     {
         int num_pts = NUM_PTS_DEFAULT * (((100 * v)*(100 * v)) + 1);
         if (num_pts <= 3) num_pts = 3;
-        if (vvr_flag_on(m_flag, POINTS_ON_SURFACE)) {
+        if (vvr_flag_test(m_flag, POINTS_ON_SURFACE)) {
             createSurfacePts(num_pts);
         }
         else {

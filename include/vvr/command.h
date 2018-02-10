@@ -6,39 +6,36 @@
 
 namespace vvr
 {
-
-    struct Command
+    struct Cmd
     {
-        virtual ~Command() { }
+        virtual ~Cmd() { }
         virtual void operator()() = 0;
     };
 
     template <typename RecT, typename RetT=void>
-    class SimpleCommand : public Command
+    class SimpleCmd : public Cmd
     {
         typedef RetT(RecT::*ActT)();
         RecT* _receiver;
         ActT _action;
 
     public:
-        SimpleCommand(RecT* rec, ActT act)
+        SimpleCmd(RecT* rec, ActT act)
             : _receiver{rec}
             , _action{act}
         { }
 
-        RetT operator()()
-        {
-            (_receiver->*_action)();
-        }
+        void operator()() override { (_receiver->*_action)(); }
     };
 
-    class MacroCommand : public Command
+    class MacroCmd : public Cmd
     {
-        std::vector<Command*> _commands;
+        std::vector<Cmd*> _commands;
 
     public:
-        ~MacroCommand() { for (auto cmd : _commands) delete cmd; }
-        void add(Command* cmd) { _commands.push_back(cmd); }
+        ~MacroCmd() { clear(); }
+        void add(Cmd* cmd) { _commands.push_back(cmd); }
+        void clear() { for (auto cmd : _commands) delete cmd; _commands.clear(); }
         void operator()() { for (auto cmd : _commands) (*cmd)(); }
     };
 }
