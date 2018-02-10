@@ -60,15 +60,12 @@ vvr::Window::Window(vvr::Scene *scene) : scene(scene)
         delete layout;
         delete slider_groupbox;
     }
-
     if (scene->getFullScreen()) {
         QTimer::singleShot(150, this, SLOT(showFullScreen()));
     }
     else {
         showNormal();
     }
-
-    glWidget->setFocus();
 }
 
 void vvr::Window::createActions()
@@ -111,6 +108,11 @@ void vvr::Window::keyPressEvent(QKeyEvent* event)
 {
     std::string str = event->text().toStdString();
     if (str.length() > 0) emit keyPressed(event);
+}
+
+void vvr::Window::focusToGlWidget()
+{
+    glWidget->setFocus();
 }
 
 //! Console output redirecting
@@ -186,8 +188,8 @@ int vvr::mainLoop(int argc, char* argv[], vvr::Scene *scene)
     app.processEvents();
     Window window(scene);
     window.showMaximized();
-    //window.show();
     splash.close();
+    window.focusToGlWidget();
     app.exec();
     return 0;
 }

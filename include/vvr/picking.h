@@ -302,6 +302,73 @@ namespace vvr
         DraggerT    _dragger;
     };
 
+    /*---[MousePicker: 3D]--------------------------------------------------------------*/
+    template <class DraggerT>
+    struct MousePicker3D
+    {
+        vvr_decl_shared_ptr(MousePicker3D)
+
+        void pick(math::Ray ray, int modif)
+        {
+            drop(ray, modif);
+
+            if ((_picked = query(ray))) {
+                _mouseray = ray;
+                if (!_dragger->on_pick(_picked)) {
+                    _picked = nullptr;
+                }
+            }
+        }
+
+        void drag(math::Ray ray, int modif)
+        {
+            if (!_picked) return;
+            _dragger->on_drag(_picked, _mouseray, ray);
+            _mouseray = ray;
+        }
+
+        void drop(math::Ray ray, int modif)
+        {
+            if (!_picked) return;
+            _dragger->on_drop(_picked);
+            _mouseray = ray;
+            _picked = nullptr;
+        }
+
+        Drawable* query(const math::Ray& ray)
+        {
+            if (!_canvas.visible) return nullptr;
+            Drawable *nearest = nullptr;
+            real dmin = std::numeric_limits<real>::max();
+
+            for (auto drw : _canvas.getDrawables()) {
+                real pickdist = drw->pickdist(ray);
+                if (pickdist >= 0 && pickdist < dmin) {
+                    nearest = drw;
+                    dmin = pickdist;
+                }
+            }
+
+            return nearest;
+        }
+
+        Drawable* picked() { return _picked; }
+
+        DraggerT* dragger() { return _dragger; }
+
+        MousePicker3D(Canvas &canvas, DraggerT *dragger)
+            : _canvas(canvas)
+            , _dragger(dragger)
+            , _picked(nullptr)
+        { }
+
+    private:
+        Canvas&     _canvas;
+        DraggerT*   _dragger;
+        Drawable*   _picked;
+        math::Ray   _mouseray;
+    };
+
     /*---[MousePicker: 2D-Priority]-----------------------------------------------------*/
     template <class... PickerTs>
     struct PriorityPicker2D

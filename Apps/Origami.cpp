@@ -44,9 +44,9 @@ public:
 private:
     void draw() override;
     void reset() override;
-    void append(int x, int y, bool shiftDown);
-    void updateAllCanvas();
-    void smooth();
+    void append(math::Ray &&ray, bool shift_down);
+    void update();
+    void smoothen();
     void triangulate();
 
 private:
@@ -57,7 +57,6 @@ private:
     unsigned m_num_pts;
 
 private:
-    vvr::Axes*  m_axes;
     vvr::Canvas m_sketch;
     vvr::Canvas m_wire;
     vvr::Canvas m_fill;
@@ -73,18 +72,14 @@ OrigamiScene::OrigamiScene()
 {
     m_bg_col = vvr::grey;
     m_fullscreen = false;
-    m_hide_log = false;
-    m_hide_sliders = false;
-    m_perspective_proj = false;
-    m_axes = &getGlobalAxes();
-    m_keymap['a'].add((new vvr::SimpleCmd<vvr::Axes, bool>(m_axes, &vvr::Axes::toggleVisibility)));
+    m_perspective_proj = true;
+    m_keymap['a'].add((new vvr::SimpleCmd<vvr::Axes, bool>(&getGlobalAxes(), &vvr::Axes::toggleVisibility)));
     m_keymap['s'].add((new vvr::SimpleCmd<vvr::Canvas, bool>(&m_fill, &vvr::Canvas::toggleVisibility)));
     m_keymap['w'].add((new vvr::SimpleCmd<vvr::Canvas, bool>(&m_wire, &vvr::Canvas::toggleVisibility)));
     m_keymap['p'].add((new vvr::SimpleCmd<vvr::Canvas, bool>(&m_points, &vvr::Canvas::toggleVisibility)));
     m_keymap['x'].add((new vvr::SimpleCmd<vvr::Canvas, void>(&m_sketch, &vvr::Canvas::clear)));
     m_keymap['x'].add((new vvr::SimpleCmd<C2DPolygon, void>(&m_polygon, &C2DPolygon::Clear)));
-    m_keymap['f'].add((new vvr::SimpleCmd<OrigamiScene, void>(this, &OrigamiScene::smooth)));
-    m_keymap['t'].add((new vvr::SimpleCmd<OrigamiScene, void>(this, &OrigamiScene::triangulate)));
+    m_keymap['f'].add((new vvr::SimpleCmd<OrigamiScene, void>(this, &OrigamiScene::smoothen)));
     m_keymap[' '].add((new vvr::SimpleCmd<vvr::Animation, bool>(&m_anim, &vvr::Animation::toggle)));
     reset();
 }
@@ -95,14 +90,13 @@ void OrigamiScene::reset()
     m_num_pts = 0;
     papers.clear();
     papers.push_back(Paper(12, 12*math::Sqrt(2)));
+    update();
     m_anim.reset();
 }
 
 void OrigamiScene::draw()
 {
-    updateAllCanvas();
-
-    m_axes->drawif();
+    getGlobalAxes().drawif();
     m_fill.drawif();
     m_wire.drawif();
     m_points.drawif();
@@ -112,14 +106,10 @@ void OrigamiScene::draw()
 void OrigamiScene::mousePressed(int x, int y, int modif)
 {
     const bool shift_down = shiftDown(modif);
-
-    if (!shift_down) {
-        append(x, y, shift_down);
-    }
-    else {
+    if (shift_down) {
         m_num_pts = 0;
         Scene::mousePressed(x, y, modif);
-    }
+    } else append(unproject(x,y), shift_down);
 }
 
 void OrigamiScene::mouseReleased(int x, int y, int modif)
@@ -131,24 +121,17 @@ void OrigamiScene::mouseReleased(int x, int y, int modif)
 void OrigamiScene::mouseMoved(int x, int y, int modif)
 {
     const bool shift_down = shiftDown(modif);
-
     if (m_num_pts) {
-        append(x, y, shift_down);
-    } else {
-        Scene::mouseMoved(x, y, modif);
-    }
+        append(unproject(x,y), shift_down);
+    } else Scene::mouseMoved(x, y, modif);
 }
 
 void OrigamiScene::mouseWheel(int dir, int modif)
 {
     const bool shift_down = shiftDown(modif);
-
-    if (!shift_down) {
-        Scene::mouseWheel(dir, modif);
-    }
-    else {
+    if (shift_down) {
         vvr::Shape::LineWidth += 0.2f*dir;
-    }
+    } else Scene::mouseWheel(dir, modif);
 }
 
 void OrigamiScene::keyEvent(unsigned char key, bool up, int modif)
@@ -163,7 +146,7 @@ void OrigamiScene::keyEvent(unsigned char key, bool up, int modif)
 
 //! Functionality
 
-void OrigamiScene::updateAllCanvas()
+void OrigamiScene::update()
 {
     m_fill.clear();
     m_wire.clear();
@@ -186,10 +169,8 @@ void OrigamiScene::updateAllCanvas()
     }
 }
 
-void OrigamiScene::append(int x, int y, bool shiftDown)
+void OrigamiScene::append(math::Ray &&ray, bool shift_down)
 {
-    auto ray = unproject(x, y);
-
     for (auto &paper : papers)
     {
         auto pol = paper.pol;
@@ -211,14 +192,13 @@ void OrigamiScene::append(int x, int y, bool shiftDown)
                 auto last_seg = static_cast<vvr::LineSeg3D*>(drawables.back());
                 math::vec last_point(last_seg->b);
 
-                if (last_point.Distance(p) < 0.3) break;
+                if (last_point.Distance(p) < 0.3) continue;
 
                 m_sketch.add(new vvr::LineSeg3D(math::LineSegment(last_seg->b, p), col));
-#if 0
                 //! Smoothen slice
                 const unsigned n = 4;
                 const unsigned sn = drawables.size();
-                if (shiftDown && sn > n && m_num_pts > n + 1)
+                if (shift_down && sn > n && m_num_pts > n + 1)
                 {
                     math::vec v(0,0,0);
                     for (int i = 0; i < n; ++i) {
@@ -230,16 +210,15 @@ void OrigamiScene::append(int x, int y, bool shiftDown)
                     ls1->a = v / n;
                     ls0->b = ls1->a;
                 }
-#endif
             }
 
             ++m_num_pts;
-            break;
+            continue;
         }
     }
 }
 
-void OrigamiScene::smooth()
+void OrigamiScene::smoothen()
 {
     if (!m_sketch.size()) return;
 
@@ -273,3 +252,4 @@ void OrigamiScene::triangulate()
 }
 
 vvr_invoke_main_with_scene(OrigamiScene)
+

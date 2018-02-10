@@ -82,10 +82,9 @@ private:
     typedef vvr::PriorityPicker2D<
     /*0*/vvr::MousePicker2D<vvr::Point3D>,
     /*1*/vvr::MousePicker2D<vvr::LineSeg3D>,
-    /*2*/vvr::MousePicker2D<vvr::Triangle3D>,
-    /*3*/vvr::MousePicker2D<vvr::Circle2D>,
-    /*4*/vvr::MousePicker2D<vvr::CompositeTriangle>,
-    /*5*/vvr::MousePicker2D<vvr::CompositeLine>
+    /*2*/vvr::MousePicker2D<vvr::Circle2D>,
+    /*3*/vvr::MousePicker2D<vvr::CompositeTriangle>,
+    /*4*/vvr::MousePicker2D<vvr::CompositeLine>
     > PickerT;
 
     int             m_gs = 40;
@@ -106,6 +105,7 @@ Sketcher::Sketcher()
     m_perspective_proj = false;
     m_canvas.setDelOnClear(false);
 
+    /* Create keyboard mapping */
     m_key_map['p'].add((new vvr::SimpleCmd<Sketcher>(this, &Sketcher::toggle_points)));
     m_key_map['g'].add((new vvr::SimpleCmd<Sketcher>(this, &Sketcher::toggle_grid)));
     m_key_map['s'].add((new vvr::SimpleCmd<Sketcher>(this, &Sketcher::save_scene)));
@@ -114,7 +114,6 @@ Sketcher::Sketcher()
     /* Create picker */
     m_picker = PickerT::Make(m_canvas);
     m_picker->get<0>().dragger().col_hover = vvr::Blue;
-
     reset();
 }
 

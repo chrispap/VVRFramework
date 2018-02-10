@@ -13,7 +13,7 @@ SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 ### Build subdirs #######################################################################
 add_subdirectory(3rdParty/GeoLib)
 add_subdirectory(3rdParty/MathGeoLib)
-add_subdirectory(src)
+add_subdirectory(source)
 add_subdirectory(GeoLab)
 add_subdirectory(Apps)
 add_subdirectory(Games)

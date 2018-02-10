@@ -14,6 +14,7 @@ class vvrframework_API Window : public QMainWindow, private Ui::MainWindow
 
 public:
     Window(vvr::Scene *scene);
+    void focusToGlWidget();
 
 private slots:
     void about();
