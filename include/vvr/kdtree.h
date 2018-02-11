@@ -6,7 +6,7 @@ namespace vvr {
     /**
      * A node of a KD-Tree
      */
-    struct vvrframework_API KDNode
+    struct VVRFramework_API KDNode
     {
         KDNode() : child_left(NULL), child_right(NULL) {}
         ~KDNode() { delete child_left; delete child_right; }
@@ -21,7 +21,7 @@ namespace vvr {
     /**
      * KD-Tree wrapper. Holds a ptr to tree root.
      */
-    class vvrframework_API KDTree
+    class VVRFramework_API KDTree
     {
     public:
         KDTree(math::VecArray &pts, int dimensions = 3);

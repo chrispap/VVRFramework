@@ -8,7 +8,7 @@
 
 namespace vvr {
 
-class vvrframework_API Window : public QMainWindow, private Ui::MainWindow
+class VVRFramework_API Window : public QMainWindow, private Ui::MainWindow
 {
     Q_OBJECT
 

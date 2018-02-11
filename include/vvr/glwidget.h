@@ -9,7 +9,7 @@
 
 namespace vvr {
 
-class vvrframework_API GlWidget : public QGLWidget
+class VVRFramework_API GlWidget : public QGLWidget
 {
     Q_OBJECT
 

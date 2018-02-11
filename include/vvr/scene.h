@@ -9,7 +9,7 @@ namespace vvr {
 
     enum ArrowDir { UP = 0, DOWN, RIGHT, LEFT };
 
-    class vvrframework_API Scene
+    class VVRFramework_API Scene
     {
     public:
         Scene();
@@ -92,7 +92,7 @@ namespace vvr {
         friend class Window;
     };
 
-    int vvrframework_API mainLoop(int argc, char* argv[], Scene *scene);
+    int VVRFramework_API mainLoop(int argc, char* argv[], Scene *scene);
 }
 
 #endif

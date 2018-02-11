@@ -131,7 +131,7 @@ std::string vvr::zpn(int num, int len)
 }
 
 #ifdef __GNUG__
-    std::string vvrframework_API demangle(const char* name)
+    std::string VVRFramework_API demangle(const char* name)
     {
         int status = -123;
         std::unique_ptr<char, void(*)(void*)> res{

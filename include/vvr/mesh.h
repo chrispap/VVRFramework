@@ -16,7 +16,7 @@ namespace vvr {
 /**
  * Enum used to control what to draw in a call of draw()
  */
-enum vvrframework_API Style {
+enum VVRFramework_API Style {
     SOLID = (1 << 0),
     WIRE = (1 << 1),
     NORMALS = (1 << 2),
@@ -24,7 +24,7 @@ enum vvrframework_API Style {
     AXES = (1 << 4),
 };
 
-struct vvrframework_API Triangle
+struct VVRFramework_API Triangle
 {
     /**
      * Indices to the veclist
@@ -84,7 +84,7 @@ struct vvrframework_API Triangle
 /** 
  * Class that handles a 3D model.
  */
-class vvrframework_API Mesh
+class VVRFramework_API Mesh
 {
 public:
     vvr_decl_shared_ptr(Mesh)

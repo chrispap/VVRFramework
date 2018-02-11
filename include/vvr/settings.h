@@ -8,7 +8,7 @@
 
 namespace vvr {
 
-class vvrframework_API Settings
+class VVRFramework_API Settings
 {
     std::map<std::string, std::string> m_map;
 
