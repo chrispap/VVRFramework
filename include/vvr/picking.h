@@ -314,7 +314,7 @@ namespace vvr
 
             if ((_picked = query(ray))) {
                 _mouseray = ray;
-                if (!_dragger->on_pick(_picked)) {
+                if (!_dragger->on_pick(_picked, ray)) {
                     _picked = nullptr;
                 }
             }

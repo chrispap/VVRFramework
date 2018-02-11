@@ -101,15 +101,4 @@ void BoxesScene::keyEvent(unsigned char key, bool up, int modif)
 
 /*--------------------------------------------------------------------------------------*/
 
-int main(int argc, char* argv[])
-{
-    try
-    {
-        return vvr::mainLoop(argc, argv, new BoxesScene);
-    }
-    catch (std::string exc)
-    {
-        std::cerr << exc << std::endl;
-        return 1;
-    }
-}
+vvr_invoke_main_with_scene(BoxesScene)

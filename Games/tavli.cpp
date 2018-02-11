@@ -499,7 +499,7 @@ real tavli::Region::pickdist(const Ray &ray) const
 
 /*---[tavli::PieceDragger]--------------------------------------------------------------*/
 
-bool tavli::PieceDragger::on_pick(Drawable* drw)
+bool tavli::PieceDragger::on_pick(Drawable* drw, Ray ray)
 {
     assert(typeid(Piece)==typeid(*drw));
     auto piece = static_cast<Piece*>(drw);
@@ -536,7 +536,7 @@ void tavli::PieceDragger::on_drop(Drawable* drw)
 
 /*---[tavli::RegionHlter]---------------------------------------------------------------*/
 
-bool tavli::RegionHlter::on_pick(Drawable* drw)
+bool tavli::RegionHlter::on_pick(Drawable* drw, Ray ray)
 {
     assert(typeid(Region)==typeid(*drw));
     auto reg = static_cast<Region*>(drw);

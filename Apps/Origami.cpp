@@ -52,31 +52,52 @@ struct Paper : vvr::Drawable
 {
     vvr_decl_shared_ptr(Paper)
 
-    Paper(float w, float h);
+    Paper(float w, float h, const float3x4 &sys=math::float3x4::identity);
     void draw() const override;
     real pickdist(const Ray &) const override;
-    vec Intersects(math::Ray &&ray) const;
+    vec Intersect(math::Ray &&ray) const;
     void toggleFill() { disp_fill ^= true; }
     void toggleWire() { disp_wire ^= true; }
     void togglePts() { disp_pts ^= true; }
+    const math::Polygon& getPolygon() const { return pol; }
+    math::float2 getSize() { return {w*2, h*2}; }
 
 private:
-    math::TriangleArray tris;
+    void update();
+    void setLocsys(const float3x4 &aSys);
+
+private:
+    real w,h;
+    math::float3x4 sys;
     math::Polygon pol;
-    math::float4x4 mat = math::float4x4::identity;
-    vvr::Colour col = vvr::Colour("F0E8B6");
+    math::TriangleArray tris;
+    vvr::Colour colour;
     bool disp_fill = true;
     bool disp_wire = true;
     bool disp_pts = true;
 };
 
-Paper::Paper(float w, float h)
+Paper::Paper(float w, float h, const math::float3x4& sys) : w(w), h(h), sys(sys)
 {
-    pol.p.push_back(math::vec(-w, -h, 0));
-    pol.p.push_back(math::vec(-w, +h, 0));
-    pol.p.push_back(math::vec(+w, +h, 0));
-    pol.p.push_back(math::vec(+w, -h, 0));
-    pol.Transform(mat);
+    colour = {"F0E8B6"};
+    update();
+}
+
+void Paper::setLocsys(const float3x4 &aSys)
+{
+    sys = aSys;
+    update();
+}
+
+void Paper::update()
+{
+    pol.p.clear();
+    pol.p.reserve(4);
+    pol.p.push_back(vec(-w, +h, 0));
+    pol.p.push_back(vec(+w, +h, 0));
+    pol.p.push_back(vec(+w, -h, 0));
+    pol.p.push_back(vec(-w, -h, 0));
+    pol.Transform(sys);
     tris = pol.Triangulate();
 }
 
@@ -86,7 +107,7 @@ real Paper::pickdist(const Ray &ray) const
     else return pol.Distance(ray.pos);
 }
 
-vec Paper::Intersects(math::Ray &&ray) const
+vec Paper::Intersect(math::Ray &&ray) const
 {
     if (!pol.Intersects(ray)) return vec::inf;
     return pol.ClosestPoint(ray.ToLineSegment(10000));
@@ -96,7 +117,7 @@ void Paper::draw() const
 {
     if (disp_fill) {
         for (auto &tri : tris) {
-            vvr::Triangle3D(tri, col).draw();
+            vvr::Triangle3D(tri, colour).draw();
         }
     }
 
@@ -113,40 +134,70 @@ void Paper::draw() const
     }
 }
 
-/*---[Picking]--------------------------------------------------------------------------*/
-
+/*---[PaperDragger]---------------------------------------------------------------------*/
 struct PaperDragger
 {
     vvr_decl_shared_ptr(PaperDragger)
-    PaperDragger(vvr::Canvas &sketch) : sketch(sketch) {}
-    bool on_pick(vvr::Drawable* drw);
+    PaperDragger(vvr::Canvas &sketch);
+    bool on_pick(vvr::Drawable* drw, Ray ray);
     void on_drag(vvr::Drawable* drw, Ray ray0, Ray ray1);
     void on_drop(vvr::Drawable* drw);
     vvr::Canvas &sketch;
+    vvr::LineSeg3D hl,vl;
+
+private:
+    void updateCrosshair(Paper *paper, const vec &p);
 };
 
-bool PaperDragger::on_pick(vvr::Drawable *drw)
+PaperDragger::PaperDragger(vvr::Canvas &sketch) : sketch(sketch)
 {
+    hl.colour = vvr::Gray;
+    vl.colour = vvr::Gray;
+    hl.hide();
+    vl.hide();
+}
+
+void PaperDragger::updateCrosshair(Paper *paper, const vec& p)
+{
+    auto pol = paper->getPolygon();
+    math::float2 uv = pol.MapTo2D(p);
+    math::float2 sz = paper->getSize();
+    hl.a = pol.MapFrom2D({    0, uv[1]});
+    hl.b = pol.MapFrom2D({sz[0], uv[1]});
+    vl.a = pol.MapFrom2D({uv[0],    0});
+    vl.b = pol.MapFrom2D({uv[0], sz[1]});
+    hl.show();
+    vl.show();
+}
+
+bool PaperDragger::on_pick(vvr::Drawable *drw, Ray ray)
+{
+    auto paper = static_cast<Paper*>(drw);
+    vec ip = paper->Intersect(std::move(ray));
+    updateCrosshair(paper, ip);
     return true;
 }
 
 void PaperDragger::on_drag(vvr::Drawable *drw, Ray ray0, Ray ray1)
 {
     auto paper = static_cast<Paper*>(drw);
-    const vec ip = paper->Intersects(std::move(ray1));
-    if (ip.IsFinite()) ::append(sketch, ip);
+    const vec ip = paper->Intersect(std::move(ray1));
+    if (ip.IsFinite()) append(sketch, ip);
+    updateCrosshair(paper, ip);
 }
 
 void PaperDragger::on_drop(vvr::Drawable *drw)
 {
-    ::smoothen(sketch);
+    smoothen(sketch);
     for (auto d : sketch.getDrawables()) {
         static_cast<vvr::Shape*>(d)->colour = vvr::LightSeaGreen;
     }
     sketch.newFrame();
+    hl.hide();
+    vl.hide();
 }
 
-/*---[Scene]----------------------------------------------------------------------------*/
+/*---[OrigamiScene]---------------------------------------------------------------------*/
 class OrigamiScene : public vvr::Scene
 {
 public:
@@ -179,7 +230,10 @@ OrigamiScene::OrigamiScene()
     m_perspective_proj = true;
 
     /* Create drawables and populate canvas. */
-    m_paper = Paper::Make(12, 12*math::Sqrt(2));
+    math::float3x4 sys;
+    sys.SetTranslatePart(vec(0,0,10));
+    sys.SetRotatePart(math::Quat(float3x3::RotateY(math::DegToRad(45))));
+    m_paper = Paper::Make(10*math::Sqrt(2), 10, sys);
     m_papers.add(m_paper.get());
     m_papers.setDelOnClear(false);
     m_dragger = PaperDragger::Make(m_sketch);
@@ -193,7 +247,7 @@ OrigamiScene::OrigamiScene()
     m_keymap['p'].add((new vvr::SimpleCmd<Paper>(m_paper.get(), &Paper::togglePts)));
 
     /* Default visibility */
-    getGlobalAxes().hide();
+    getGlobalAxes().show();
 }
 
 void OrigamiScene::draw()
@@ -201,6 +255,8 @@ void OrigamiScene::draw()
     getGlobalAxes().drawif();
     m_paper->draw();
     m_sketch.draw();
+    m_dragger->hl.drawif();
+    m_dragger->vl.drawif();
 }
 
 void OrigamiScene::mouseHovered(int x, int y, int modif)
@@ -239,4 +295,5 @@ void OrigamiScene::keyEvent(unsigned char key, bool up, int modif)
     } else Scene::keyEvent(key, up, modif);
 }
 
+/*--------------------------------------------------------------------------------------*/
 vvr_invoke_main_with_scene(OrigamiScene)

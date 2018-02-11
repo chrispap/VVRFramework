@@ -29,7 +29,7 @@ namespace tavli
     {
         vvr_decl_shared_ptr(RegionHlter)
 
-        bool on_pick(Drawable* drw);
+        bool on_pick(Drawable* drw, Ray ray);
         void on_drag(Drawable* drw, Ray ray0, Ray ray1) {}
         void on_drop(Drawable* drw);
 
@@ -41,7 +41,7 @@ namespace tavli
     {
         vvr_decl_shared_ptr(PieceDragger)
 
-        bool on_pick(Drawable* drw);
+        bool on_pick(Drawable* drw, Ray ray);
         void on_drag(Drawable* drw, Ray ray0, Ray ray1);
         void on_drop(Drawable* drw);
 
