@@ -12,9 +12,18 @@ namespace tavli
     using namespace vvr;
     using namespace math;
 
+    struct RegionHlter;
+    struct PieceDragger;
     struct Piece;
     struct Region;
     class  Board;
+
+    //! Pickers
+
+    typedef MousePicker3D<RegionHlter> RegionPicker;
+    typedef MousePicker3D<PieceDragger> PiecePicker;
+
+    //! Draggers
 
     struct RegionHlter
     {
@@ -27,8 +36,6 @@ namespace tavli
     private:
         Colour _colour;
     };
-
-    typedef MousePicker3D<RegionHlter> RegionPicker;
 
     struct PieceDragger
     {
@@ -47,7 +54,7 @@ namespace tavli
         RegionPicker* _regionPicker;
     };
 
-    typedef MousePicker3D<PieceDragger> PiecePicker;
+    //! Game entities
 
     struct Piece : public Cylinder3D
     {

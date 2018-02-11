@@ -578,11 +578,14 @@ namespace vvr {
     {
         vvr_decl_shared_ptr(Axes)
 
-        Axes(real d=1)
-            : x(0, 0, 0, d, 0, 0, Colour(1.0f, 0.0f, 0.0f))
-            , y(0, 0, 0, 0, d, 0, Colour(0.0f, 1.0f, 0.0f))
-            , z(0, 0, 0, 0, 0, d, Colour(0.0f, 0.0f, 1.0f))
-        { }
+        Axes(real d=1) { setSize(d); }
+
+        void setSize(real d)
+        {
+            x = vvr::LineSeg3D(0, 0, 0, d, 0, 0, vvr::red);
+            y = vvr::LineSeg3D(0, 0, 0, 0, d, 0, vvr::green);
+            z = vvr::LineSeg3D(0, 0, 0, 0, 0, d, vvr::blue);
+        }
 
         virtual void draw() const override
         {

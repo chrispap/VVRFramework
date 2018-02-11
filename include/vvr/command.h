@@ -2,7 +2,8 @@
 #define VVR_COMMAND_H
 
 #include "vvrframework_DLL.h"
-#include <vvr/macros.h>
+#include "macros.h"
+#include <unordered_map>
 
 namespace vvr
 {
@@ -38,6 +39,8 @@ namespace vvr
         void clear() { for (auto cmd : _commands) delete cmd; _commands.clear(); }
         void operator()() { for (auto cmd : _commands) (*cmd)(); }
     };
+
+    typedef std::unordered_map<char, vvr::MacroCmd> KeyMap;
 }
 
 #endif

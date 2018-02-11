@@ -3,253 +3,240 @@
 #include <vvr/drawing.h>
 #include <vvr/animation.h>
 #include <vvr/command.h>
+#include <vvr/picking.h>
 #include <MathGeoLib.h>
-#include <iostream>
-#include <fstream>
-#include <iostream>
-#include <cstring>
-#include <string>
-#include <set>
-#include <unordered_map>
 
-using namespace std;
+using vvr::vec;
+using vvr::real;
 
-struct Paper
+/*---[Functions]------------------------------------------------------------------------*/
+static void smoothen(vvr::Canvas &sketch)
 {
+    if (!sketch.size())
+        return;
+
+    for (int i=0; i<1; ++i) {
+        auto &drw = sketch.getDrawables(i);
+        if (drw.size() < 3) continue;
+
+        for (size_t i=1; i<drw.size()-1; ++i) {
+            auto ls0 = static_cast<vvr::LineSeg3D*>(drw.at(i-1));
+            auto ls1 = static_cast<vvr::LineSeg3D*>(drw.at(i));
+            auto ls2 = static_cast<vvr::LineSeg3D*>(drw.at(i+1));
+            ls1->a = (ls0->a + ls1->a + ls2->a) / 3;
+        }
+
+        for (unsigned i=0; i<drw.size()-1; ++i) {
+            auto ls1 = static_cast<vvr::LineSeg3D*>(drw.at(i));
+            auto ls2 = static_cast<vvr::LineSeg3D*>(drw.at(i + 1));
+            ls1->b = ls2->a;
+        }
+    }
+}
+
+static void append(vvr::Canvas &sketch, const vec &p)
+{
+    const vvr::Colour &col = vvr::red;
+    std::vector<vvr::Drawable*> &drw = sketch.getDrawables();
+
+    if (drw.size()) {
+        auto ls_prev = static_cast<vvr::LineSeg3D*>(drw.back());
+        if (ls_prev->Distance(p) > 0.01) {
+            sketch.add(new vvr::LineSeg3D({ls_prev->b, p}, col));
+        }
+    } else sketch.add(new vvr::LineSeg3D(p.x, p.y, p.z, p.x, p.y, p.z, col));
+}
+
+/*---[Paper]----------------------------------------------------------------------------*/
+struct Paper : vvr::Drawable
+{
+    vvr_decl_shared_ptr(Paper)
+
+    Paper(float w, float h);
+    void draw() const override;
+    real pickdist(const Ray &) const override;
+    vec Intersects(math::Ray &&ray) const;
+    void toggleFill() { disp_fill ^= true; }
+    void toggleWire() { disp_wire ^= true; }
+    void togglePts() { disp_pts ^= true; }
+
+private:
+    math::TriangleArray tris;
     math::Polygon pol;
     math::float4x4 mat = math::float4x4::identity;
     vvr::Colour col = vvr::Colour("F0E8B6");
-    Paper(float w, float h);
+    bool disp_fill = true;
+    bool disp_wire = true;
+    bool disp_pts = true;
 };
 
 Paper::Paper(float w, float h)
 {
-    pol.p.push_back(math::vec(-w, h, 0));
-    pol.p.push_back(math::vec(+w, h, 0));
-    pol.p.push_back(math::vec(+w, -h, 0));
     pol.p.push_back(math::vec(-w, -h, 0));
+    pol.p.push_back(math::vec(-w, +h, 0));
+    pol.p.push_back(math::vec(+w, +h, 0));
+    pol.p.push_back(math::vec(+w, -h, 0));
+    pol.Transform(mat);
+    tris = pol.Triangulate();
 }
 
+real Paper::pickdist(const Ray &ray) const
+{
+    if (!ray.Intersects(pol)) return -1;
+    else return pol.Distance(ray.pos);
+}
+
+vec Paper::Intersects(math::Ray &&ray) const
+{
+    if (!pol.Intersects(ray)) return vec::inf;
+    return pol.ClosestPoint(ray.ToLineSegment(10000));
+}
+
+void Paper::draw() const
+{
+    if (disp_fill) {
+        for (auto &tri : tris) {
+            vvr::Triangle3D(tri, col).draw();
+        }
+    }
+
+    if (disp_wire) {
+        for (int i=0; i < pol.NumEdges(); ++i) {
+            vvr::LineSeg3D(pol.Edge(i), vvr::black).draw();
+        }
+    }
+
+    if (disp_pts) {
+        for (int i=0; i < pol.NumVertices(); ++i) {
+            vvr::Point3D(pol.Vertex(i), vvr::black).draw();
+        }
+    }
+}
+
+/*---[Picking]--------------------------------------------------------------------------*/
+
+struct PaperDragger
+{
+    vvr_decl_shared_ptr(PaperDragger)
+    PaperDragger(vvr::Canvas &sketch) : sketch(sketch) {}
+    bool on_pick(vvr::Drawable* drw);
+    void on_drag(vvr::Drawable* drw, Ray ray0, Ray ray1);
+    void on_drop(vvr::Drawable* drw);
+    vvr::Canvas &sketch;
+};
+
+bool PaperDragger::on_pick(vvr::Drawable *drw)
+{
+    return true;
+}
+
+void PaperDragger::on_drag(vvr::Drawable *drw, Ray ray0, Ray ray1)
+{
+    auto paper = static_cast<Paper*>(drw);
+    const vec ip = paper->Intersects(std::move(ray1));
+    if (ip.IsFinite()) ::append(sketch, ip);
+}
+
+void PaperDragger::on_drop(vvr::Drawable *drw)
+{
+    ::smoothen(sketch);
+    for (auto d : sketch.getDrawables()) {
+        static_cast<vvr::Shape*>(d)->colour = vvr::LightSeaGreen;
+    }
+    sketch.newFrame();
+}
+
+/*---[Scene]----------------------------------------------------------------------------*/
 class OrigamiScene : public vvr::Scene
 {
 public:
     OrigamiScene();
+
+private:
     const char* getName() const override { return "Origami Scene"; }
+    void mouseHovered(int x, int y, int modif) override;
     void mousePressed(int x, int y, int modif) override;
-    void mouseMoved(int x, int y, int modif) override;
     void mouseReleased(int x, int y, int modif) override;
+    void mouseMoved(int x, int y, int modif) override;
     void mouseWheel(int dir, int modif) override;
     void keyEvent(unsigned char key, bool up, int modif) override;
-
-private:
     void draw() override;
-    void reset() override;
-    void append(math::Ray &&ray, bool shift_down);
-    void update();
-    void smoothen();
-    void triangulate();
 
 private:
-    std::vector<Paper> papers;
-    C2DPolygon m_polygon;
-    C2DPolygonSet m_polygon_set;
-    vvr::Animation m_anim;
-    unsigned m_num_pts;
+    typedef vvr::MousePicker3D<PaperDragger> PickerT;
 
-private:
-    vvr::Canvas m_sketch;
-    vvr::Canvas m_wire;
-    vvr::Canvas m_fill;
-    vvr::Canvas m_points;
-
-private:
-    std::unordered_map<char, vvr::MacroCmd> m_keymap;
+    Paper::Ptr          m_paper;
+    vvr::Canvas         m_papers;
+    vvr::Canvas         m_sketch;
+    vvr::KeyMap         m_keymap;
+    PickerT::Ptr        m_picker;
+    PaperDragger::Ptr   m_dragger;
 };
-
-//! Creation / Callbacks
 
 OrigamiScene::OrigamiScene()
 {
     m_bg_col = vvr::grey;
-    m_fullscreen = false;
     m_perspective_proj = true;
-    m_keymap['a'].add((new vvr::SimpleCmd<vvr::Axes, bool>(&getGlobalAxes(), &vvr::Axes::toggleVisibility)));
-    m_keymap['s'].add((new vvr::SimpleCmd<vvr::Canvas, bool>(&m_fill, &vvr::Canvas::toggleVisibility)));
-    m_keymap['w'].add((new vvr::SimpleCmd<vvr::Canvas, bool>(&m_wire, &vvr::Canvas::toggleVisibility)));
-    m_keymap['p'].add((new vvr::SimpleCmd<vvr::Canvas, bool>(&m_points, &vvr::Canvas::toggleVisibility)));
-    m_keymap['x'].add((new vvr::SimpleCmd<vvr::Canvas, void>(&m_sketch, &vvr::Canvas::clear)));
-    m_keymap['x'].add((new vvr::SimpleCmd<C2DPolygon, void>(&m_polygon, &C2DPolygon::Clear)));
-    m_keymap['f'].add((new vvr::SimpleCmd<OrigamiScene, void>(this, &OrigamiScene::smoothen)));
-    m_keymap[' '].add((new vvr::SimpleCmd<vvr::Animation, bool>(&m_anim, &vvr::Animation::toggle)));
-    reset();
-}
 
-void OrigamiScene::reset()
-{
-    Scene::reset();
-    m_num_pts = 0;
-    papers.clear();
-    papers.push_back(Paper(12, 12*math::Sqrt(2)));
-    update();
-    m_anim.reset();
+    /* Create drawables and populate canvas. */
+    m_paper = Paper::Make(12, 12*math::Sqrt(2));
+    m_papers.add(m_paper.get());
+    m_papers.setDelOnClear(false);
+    m_dragger = PaperDragger::Make(m_sketch);
+    m_picker = PickerT::Make(m_papers, m_dragger.get());
+
+    /* Install key bindings */
+    m_keymap['a'].add((new vvr::SimpleCmd<vvr::Axes, bool>(&getGlobalAxes(), &vvr::Axes::toggleVisibility)));
+    m_keymap['x'].add((new vvr::SimpleCmd<vvr::Canvas>(&m_sketch, &vvr::Canvas::clear)));
+    m_keymap['s'].add((new vvr::SimpleCmd<Paper>(m_paper.get(), &Paper::toggleFill)));
+    m_keymap['w'].add((new vvr::SimpleCmd<Paper>(m_paper.get(), &Paper::toggleWire)));
+    m_keymap['p'].add((new vvr::SimpleCmd<Paper>(m_paper.get(), &Paper::togglePts)));
+
+    /* Default visibility */
+    getGlobalAxes().hide();
 }
 
 void OrigamiScene::draw()
 {
     getGlobalAxes().drawif();
-    m_fill.drawif();
-    m_wire.drawif();
-    m_points.drawif();
-    m_sketch.drawif();
+    m_paper->draw();
+    m_sketch.draw();
+}
+
+void OrigamiScene::mouseHovered(int x, int y, int modif)
+{
+    m_picker->pick(unproject(x,y), modif);
 }
 
 void OrigamiScene::mousePressed(int x, int y, int modif)
 {
-    const bool shift_down = shiftDown(modif);
-    if (shift_down) {
-        m_num_pts = 0;
-        Scene::mousePressed(x, y, modif);
-    } else append(unproject(x,y), shift_down);
-}
-
-void OrigamiScene::mouseReleased(int x, int y, int modif)
-{
-    Scene::mouseReleased(x, y, modif);
-    m_num_pts = 0;
+    m_picker->pick(unproject(x,y), modif);
+    if (!m_picker->picked()) Scene::mousePressed(x, y, modif);
 }
 
 void OrigamiScene::mouseMoved(int x, int y, int modif)
 {
-    const bool shift_down = shiftDown(modif);
-    if (m_num_pts) {
-        append(unproject(x,y), shift_down);
-    } else Scene::mouseMoved(x, y, modif);
+    m_picker->drag(unproject(x,y), modif);
+    if (!m_picker->picked()) Scene::mouseMoved(x, y, modif);
+}
+
+void OrigamiScene::mouseReleased(int x, int y, int modif)
+{
+    m_picker->drop(unproject(x,y), modif);
 }
 
 void OrigamiScene::mouseWheel(int dir, int modif)
 {
-    const bool shift_down = shiftDown(modif);
-    if (shift_down) {
+    if (shiftDown(modif)) {
         vvr::Shape::LineWidth += 0.2f*dir;
     } else Scene::mouseWheel(dir, modif);
 }
 
 void OrigamiScene::keyEvent(unsigned char key, bool up, int modif)
 {
-    Scene::keyEvent(key, up, modif);
-    const bool ctrl_down = ctrlDown(modif);
-    key = tolower(key);
-    if(m_keymap.find(key)!=std::end(m_keymap)) {
+    if(m_keymap.find(key) != std::end(m_keymap)) {
         m_keymap[key]();
     } else Scene::keyEvent(key, up, modif);
 }
 
-//! Functionality
-
-void OrigamiScene::update()
-{
-    m_fill.clear();
-    m_wire.clear();
-    m_points.clear();
-
-    for (auto &paper : papers)
-    {
-        auto pol = paper.pol;
-        pol.Transform(paper.mat);
-        const auto &tri_arr = pol.Triangulate();
-        for (auto &tri : tri_arr) {
-            m_fill.add(new vvr::Triangle3D(tri, paper.col));
-        }
-        for (int i = 0; i < pol.NumEdges(); ++i) {
-            m_wire.add(new vvr::LineSeg3D(pol.Edge(i), vvr::black));
-        }
-        for (int i = 0; i < pol.NumVertices(); ++i) {
-            m_points.add(new vvr::Point3D(pol.Vertex(i), vvr::black));
-        }
-    }
-}
-
-void OrigamiScene::append(math::Ray &&ray, bool shift_down)
-{
-    for (auto &paper : papers)
-    {
-        auto pol = paper.pol;
-        pol.Transform(paper.mat);
-
-        if (ray.Intersects(pol))
-        {
-            const vvr::Colour col = vvr::red;
-            math::vec p = pol.ClosestPoint(ray.ToLineSegment(10000));
-            vector<vvr::Drawable*> &drawables = m_sketch.getDrawables();
-
-            // Start new line segment set
-            if (drawables.empty() || m_num_pts == 0)
-            {
-                m_sketch.add(new vvr::LineSeg3D(p.x, p.y, p.z, p.x, p.y, p.z, col));
-            }
-            else
-            {
-                auto last_seg = static_cast<vvr::LineSeg3D*>(drawables.back());
-                math::vec last_point(last_seg->b);
-
-                if (last_point.Distance(p) < 0.3) continue;
-
-                m_sketch.add(new vvr::LineSeg3D(math::LineSegment(last_seg->b, p), col));
-                //! Smoothen slice
-                const unsigned n = 4;
-                const unsigned sn = drawables.size();
-                if (shift_down && sn > n && m_num_pts > n + 1)
-                {
-                    math::vec v(0,0,0);
-                    for (int i = 0; i < n; ++i) {
-                        auto ls = static_cast<vvr::LineSeg3D*>(drawables.at(sn - 1 - i));
-                        v += ls->b;
-                    }
-                    auto ls0 = static_cast<vvr::LineSeg3D*>(drawables.at(sn - 2));
-                    auto ls1 = static_cast<vvr::LineSeg3D*>(drawables.at(sn - 1));
-                    ls1->a = v / n;
-                    ls0->b = ls1->a;
-                }
-            }
-
-            ++m_num_pts;
-            continue;
-        }
-    }
-}
-
-void OrigamiScene::smoothen()
-{
-    if (!m_sketch.size()) return;
-
-    vector<vvr::Drawable*> &drw = m_sketch.getDrawables();
-
-    if (drw.size() < 3) return;
-
-    for (unsigned i = 1; i < drw.size() - 1; ++i) {
-        auto ls0 = static_cast<vvr::LineSeg3D*>(drw.at(i - 1));
-        auto ls1 = static_cast<vvr::LineSeg3D*>(drw.at(i));
-        auto ls2 = static_cast<vvr::LineSeg3D*>(drw.at(i + 1));
-        ls1->a = (ls0->a + ls1->a + ls2->a) / 3;
-    }
-
-    for (unsigned i = 0; i < drw.size() - 1; ++i) {
-        auto ls1 = static_cast<vvr::LineSeg3D*>(drw.at(i));
-        auto ls2 = static_cast<vvr::LineSeg3D*>(drw.at(i + 1));
-        ls1->b = ls2->a;
-    }
-}
-
-void OrigamiScene::triangulate()
-{
-    C2DPointSet ptset;
-    for (auto sh : m_sketch.getDrawables()) {
-        vvr::LineSeg3D &ls = static_cast<vvr::LineSeg3D&>(*sh);
-        ptset.Add(new C2DPoint(ls.b.x, ls.b.y));
-    }
-    m_polygon.Create(ptset);
-    m_polygon.GetConvexSubAreas(m_polygon_set);
-}
-
 vvr_invoke_main_with_scene(OrigamiScene)
-
