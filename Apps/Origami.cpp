@@ -142,17 +142,22 @@ struct PaperDragger
     bool on_pick(vvr::Drawable* drw, Ray ray);
     void on_drag(vvr::Drawable* drw, Ray ray0, Ray ray1);
     void on_drop(vvr::Drawable* drw);
+    void updateCrosshair(Paper *paper, const vec &p);
+    void hideCrosshair();
     vvr::Canvas &sketch;
     vvr::LineSeg3D hl,vl;
-
-private:
-    void updateCrosshair(Paper *paper, const vec &p);
 };
 
 PaperDragger::PaperDragger(vvr::Canvas &sketch) : sketch(sketch)
 {
     hl.colour = vvr::Gray;
     vl.colour = vvr::Gray;
+    hl.hide();
+    vl.hide();
+}
+
+void PaperDragger::hideCrosshair()
+{
     hl.hide();
     vl.hide();
 }
@@ -183,18 +188,18 @@ void PaperDragger::on_drag(vvr::Drawable *drw, Ray ray0, Ray ray1)
     auto paper = static_cast<Paper*>(drw);
     const vec ip = paper->Intersect(std::move(ray1));
     if (ip.IsFinite()) append(sketch, ip);
-    updateCrosshair(paper, ip);
+    hl.hide();
+    vl.hide();
 }
 
 void PaperDragger::on_drop(vvr::Drawable *drw)
 {
     smoothen(sketch);
+    smoothen(sketch);
     for (auto d : sketch.getDrawables()) {
         static_cast<vvr::Shape*>(d)->colour = vvr::LightSeaGreen;
     }
     sketch.newFrame();
-    hl.hide();
-    vl.hide();
 }
 
 /*---[OrigamiScene]---------------------------------------------------------------------*/
@@ -230,24 +235,21 @@ OrigamiScene::OrigamiScene()
     m_perspective_proj = true;
 
     /* Create drawables and populate canvas. */
-    math::float3x4 sys;
-    sys.SetTranslatePart(vec(0,0,10));
-    sys.SetRotatePart(math::Quat(float3x3::RotateY(math::DegToRad(45))));
-    m_paper = Paper::Make(10*math::Sqrt(2), 10, sys);
+    m_paper = Paper::Make(10*math::Sqrt(2), 10);
     m_papers.add(m_paper.get());
     m_papers.setDelOnClear(false);
     m_dragger = PaperDragger::Make(m_sketch);
     m_picker = PickerT::Make(m_papers, m_dragger.get());
 
     /* Install key bindings */
-    m_keymap['a'].add((new vvr::SimpleCmd<vvr::Axes, bool>(&getGlobalAxes(), &vvr::Axes::toggleVisibility)));
-    m_keymap['x'].add((new vvr::SimpleCmd<vvr::Canvas>(&m_sketch, &vvr::Canvas::clear)));
-    m_keymap['s'].add((new vvr::SimpleCmd<Paper>(m_paper.get(), &Paper::toggleFill)));
-    m_keymap['w'].add((new vvr::SimpleCmd<Paper>(m_paper.get(), &Paper::toggleWire)));
-    m_keymap['p'].add((new vvr::SimpleCmd<Paper>(m_paper.get(), &Paper::togglePts)));
+    m_keymap['a'].add(new vvr::SimpleCmd<vvr::Axes, bool>(&getGlobalAxes(), &vvr::Axes::toggleVisibility));
+    m_keymap['x'].add(new vvr::SimpleCmd<vvr::Canvas>(&m_sketch, &vvr::Canvas::clear));
+    m_keymap['s'].add(new vvr::SimpleCmd<Paper>(m_paper.get(), &Paper::toggleFill));
+    m_keymap['w'].add(new vvr::SimpleCmd<Paper>(m_paper.get(), &Paper::toggleWire));
+    m_keymap['p'].add(new vvr::SimpleCmd<Paper>(m_paper.get(), &Paper::togglePts));
 
     /* Default visibility */
-    getGlobalAxes().show();
+    getGlobalAxes().hide();
 }
 
 void OrigamiScene::draw()
@@ -262,23 +264,32 @@ void OrigamiScene::draw()
 void OrigamiScene::mouseHovered(int x, int y, int modif)
 {
     m_picker->pick(unproject(x,y), modif);
+    if (m_picker->picked()) {
+        cursorHide();
+    } else {
+        m_dragger->hideCrosshair();
+        cursorShow();
+    }
 }
 
 void OrigamiScene::mousePressed(int x, int y, int modif)
 {
     m_picker->pick(unproject(x,y), modif);
-    if (!m_picker->picked()) Scene::mousePressed(x, y, modif);
+    if (m_picker->picked()) {
+        cursorHide();
+    } else Scene::mousePressed(x, y, modif);
 }
 
 void OrigamiScene::mouseMoved(int x, int y, int modif)
 {
     m_picker->drag(unproject(x,y), modif);
-    if (!m_picker->picked()) Scene::mouseMoved(x, y, modif);
+    if (m_picker->picked()) {
+    } else Scene::mouseMoved(x, y, modif);
 }
 
 void OrigamiScene::mouseReleased(int x, int y, int modif)
 {
-    m_picker->drop(unproject(x,y), modif);
+    mouseHovered(x, y, modif);
 }
 
 void OrigamiScene::mouseWheel(int dir, int modif)
@@ -290,7 +301,7 @@ void OrigamiScene::mouseWheel(int dir, int modif)
 
 void OrigamiScene::keyEvent(unsigned char key, bool up, int modif)
 {
-    if(m_keymap.find(key) != std::end(m_keymap)) {
+    if (m_keymap.find(key) != std::end(m_keymap)) {
         m_keymap[key]();
     } else Scene::keyEvent(key, up, modif);
 }

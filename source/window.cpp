@@ -1,6 +1,7 @@
 #include "window.h"
 #include <vvr/glwidget.h>
 #include <vvr/scene.h>
+#include <vvr/command.h>
 #include <QtOpenGL>
 #include <QtWidgets>
 #include <QPushButton>
@@ -18,6 +19,12 @@ vvr::Window::Window(vvr::Scene *scene) : scene(scene)
 {
     setupUi(this);
     setWindowTitle(tr(scene->getName()));
+
+    // Set commands availabe to scene
+    scene->cursorShow.add(new vvr::SimpleCmd<Window>(this, &Window::cursor_show));
+    scene->cursorHide.add(new vvr::SimpleCmd<Window>(this, &Window::cursor_hide));
+    scene->cursorHand.add(new vvr::SimpleCmd<Window>(this, &Window::cursor_hand));
+    scene->cursorGrab.add(new vvr::SimpleCmd<Window>(this, &Window::cursor_grab));
 
     // Redirect std::cout to our custom logging widget
     m_std_cout_logger = new StdRedirector<>(std::cout, &Window::s_log_cout, this);
@@ -177,6 +184,26 @@ void vvr::Window::do_log_cerr(const QString &str)
     }
 }
 
+void vvr::Window::cursor_show()
+{
+    QApplication::setOverrideCursor(Qt::CrossCursor);
+}
+
+void vvr::Window::cursor_hide()
+{
+    QApplication::setOverrideCursor(Qt::BlankCursor);
+}
+
+void vvr::Window::cursor_hand()
+{
+    QApplication::setOverrideCursor(Qt::OpenHandCursor);
+}
+
+void vvr::Window::cursor_grab()
+{
+    QApplication::setOverrideCursor(Qt::ClosedHandCursor);
+}
+
 //! Entry point of vvr applications.
 
 int vvr::mainLoop(int argc, char* argv[], vvr::Scene *scene)
@@ -186,10 +213,11 @@ int vvr::mainLoop(int argc, char* argv[], vvr::Scene *scene)
     QSplashScreen splash(pixmap);
     splash.show();
     app.processEvents();
-    Window window(scene);
-    window.showMaximized();
+    Window win(scene);
+    win.showMaximized();
     splash.close();
-    window.focusToGlWidget();
+    win.focusToGlWidget();
+    win.cursor_show();
     app.exec();
     return 0;
 }

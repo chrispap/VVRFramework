@@ -15,33 +15,24 @@ class VVRFramework_API Window : public QMainWindow, private Ui::MainWindow
 public:
     Window(vvr::Scene *scene);
     void focusToGlWidget();
+    void cursor_show();
+    void cursor_hide();
+    void cursor_hand();
+    void cursor_grab();
+
+signals:
+    void keyPressed(QKeyEvent *event);
+    void log_cout(const QString &str);
+    void log_cerr(const QString &str);
 
 private slots:
     void about();
     void sliderMoved(int val);
-
-signals:
-    void keyPressed(QKeyEvent *event);
-
-private:
     void keyPressEvent(QKeyEvent* event) override;
     void createActions();
     void createMenus();
-
-private: // Static callbacks for StdRedirector
-    static void s_log_cout(const char* ptr, std::streamsize count, void*);
-    static void s_log_cerr(const char* ptr, std::streamsize count, void*);
-
-signals: // signals emmited from statuc callbacks
-    void log_cout(const QString &str);
-    void log_cerr(const QString &str);
-
-private slots: // Slots that actually show the text
     void do_log_cout(const QString &str);
     void do_log_cerr(const QString &str);
-
-private:
-    static QString aboutMessage;
 
 private:
     QMenu *fileMenu;
@@ -50,10 +41,13 @@ private:
     QAction *aboutAct;
     StdRedirector<> *m_std_cout_logger;
     StdRedirector<> *m_std_cerr_logger;
-
-protected:
-    Scene *scene;
     GlWidget *glWidget;
+    Scene *scene;
+
+    /* Static callbacks for StdRedirector */
+    static void s_log_cout(const char* ptr, std::streamsize count, void*);
+    static void s_log_cerr(const char* ptr, std::streamsize count, void*);
+    static QString aboutMessage;
 };
 
 }

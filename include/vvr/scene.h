@@ -3,6 +3,7 @@
 
 #include "vvrframework_DLL.h"
 #include <vvr/drawing.h>
+#include <vvr/command.h>
 #include <MathGeoLib.h>
 
 namespace vvr {
@@ -75,6 +76,12 @@ namespace vvr {
         bool m_hide_log;
         bool m_hide_sliders;
         bool m_first_resize;
+
+    protected:
+        MacroCmd cursorShow;
+        MacroCmd cursorHide;
+        MacroCmd cursorHand;
+        MacroCmd cursorGrab;
 
     private:
         Axes m_axes;
