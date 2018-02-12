@@ -186,22 +186,22 @@ void vvr::Window::do_log_cerr(const QString &str)
 
 void vvr::Window::cursor_show()
 {
-    QApplication::setOverrideCursor(Qt::CrossCursor);
+    QApplication::changeOverrideCursor(Qt::CrossCursor);
 }
 
 void vvr::Window::cursor_hide()
 {
-    QApplication::setOverrideCursor(Qt::BlankCursor);
+    QApplication::changeOverrideCursor(Qt::BlankCursor);
 }
 
 void vvr::Window::cursor_hand()
 {
-    QApplication::setOverrideCursor(Qt::OpenHandCursor);
+    QApplication::changeOverrideCursor(Qt::OpenHandCursor);
 }
 
 void vvr::Window::cursor_grab()
 {
-    QApplication::setOverrideCursor(Qt::ClosedHandCursor);
+    QApplication::changeOverrideCursor(Qt::ClosedHandCursor);
 }
 
 //! Entry point of vvr applications.
@@ -214,10 +214,10 @@ int vvr::mainLoop(int argc, char* argv[], vvr::Scene *scene)
     splash.show();
     app.processEvents();
     Window win(scene);
-    win.showMaximized();
     splash.close();
+    win.showMaximized();
     win.focusToGlWidget();
-    win.cursor_show();
+    app.setOverrideCursor(Qt::CrossCursor);
     app.exec();
     return 0;
 }

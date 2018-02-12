@@ -101,26 +101,35 @@ public:
 
     void mousePressed(int x, int y, int modif) override
     {
-        if (ctrlDown(modif))
+        if (ctrlDown(modif)) {
             Scene::mousePressed(x, y, modif);
-        else _board->piece_picker->pick(unproject(x, y), modif);
+        } else _board->piece_picker->pick(unproject(x, y), modif);
+
+        if (_board->piece_picker->picked()) {
+            cursorGrab();
+        }
     }
 
     void mouseMoved(int x, int y, int modif) override
     {
-        if (ctrlDown(modif) && !_board->piece_picker->picked())
+        if (ctrlDown(modif) && !_board->piece_picker->picked()) {
             Scene::mouseMoved(x, y, modif);
-        else _board->piece_picker->drag(unproject(x, y), modif);
+        } else _board->piece_picker->drag(unproject(x, y), modif);
     }
 
     void mouseReleased(int x, int y, int modif) override
     {
         _board->piece_picker->drop(unproject(x, y), modif);
+        cursorShow();
     }
 
     void mouseHovered(int x, int y, int modif) override
     {
         _board->region_picker->pick(unproject(x, y), modif);
+
+        if (_board->region_picker->picked()) {
+            cursorHand();
+        } else cursorShow();
     }
 
 private:
@@ -494,7 +503,8 @@ void tavli::Region::removePiece(Piece *piece)
 real tavli::Region::pickdist(const Ray &ray) const
 {
     LineSegment l(top, base);
-    return l.Distance(ray);
+    auto d = l.Distance(ray);
+    return (d < piecediam) ? d : -1;
 }
 
 /*---[tavli::PieceDragger]--------------------------------------------------------------*/
@@ -527,8 +537,9 @@ void tavli::PieceDragger::on_drag(Drawable* drw, Ray ray0, Ray ray1)
 void tavli::PieceDragger::on_drop(Drawable* drw)
 {
     auto piece = static_cast<Piece*>(drw);
+    auto region = static_cast<Region*>(_regionPicker->picked());
+    if (!region) region = piece->region;
     piece->colour = _colour;
-    Region* region = static_cast<Region*>(_regionPicker->picked());
     piece->region->removePiece(piece);
     region->addPiece(piece);
     _regionPicker->drop(_ray, 0);
@@ -541,7 +552,7 @@ bool tavli::RegionHlter::on_pick(Drawable* drw, Ray ray)
     assert(typeid(Region)==typeid(*drw));
     auto reg = static_cast<Region*>(drw);
     _colour = reg->colour;
-    reg->colour.mul(1.30);
+    reg->colour.mul(1.50);
     reg->setColourPerVertex(reg->colour, reg->colour, reg->colour);
     return true;
 }
@@ -565,10 +576,10 @@ int main(int argc, char* argv[])
         int coli = 0;
 
         /* Default colors */
-        colours[coli++] = Colour(0x443322);
-        colours[coli++] = Colour(0x242622);
-        colours[coli++] = Colour(0x550000);
-        colours[coli++] = Colour(0xBBBBBB);
+        colours[coli++] = Colour(0x443322); ///> Board
+        colours[coli++] = Colour(0x242622); ///> Regions
+        colours[coli++] = Colour(0x550000); ///> Team 1
+        colours[coli++] = Colour(0xBBBBBB); ///> Team 2
 
 #ifndef __APPLE__
         /* Load from CLI */

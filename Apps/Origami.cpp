@@ -47,6 +47,13 @@ static void append(vvr::Canvas &sketch, const vec &p)
     } else sketch.add(new vvr::LineSeg3D(p.x, p.y, p.z, p.x, p.y, p.z, col));
 }
 
+static void recolour(vvr::Canvas &sketch, vvr::Colour colour)
+{
+    for (auto d : sketch.getDrawables()) {
+        static_cast<vvr::Shape*>(d)->colour = colour;
+    }
+}
+
 /*---[Paper]----------------------------------------------------------------------------*/
 struct Paper : vvr::Drawable
 {
@@ -196,9 +203,7 @@ void PaperDragger::on_drop(vvr::Drawable *drw)
 {
     smoothen(sketch);
     smoothen(sketch);
-    for (auto d : sketch.getDrawables()) {
-        static_cast<vvr::Shape*>(d)->colour = vvr::LightSeaGreen;
-    }
+    recolour(sketch, vvr::LightCoral);
     sketch.newFrame();
 }
 
