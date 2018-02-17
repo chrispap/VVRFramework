@@ -437,22 +437,6 @@ void KDTreeScene::sliderChanged(int slider_id, float v)
     }
 }
 
-int main(int argc, char* argv[])
-{
-    try {
-        return vvr::main_with_scene(argc, argv, new KDTreeScene);
-    }
-    catch (std::string exc) {
-        std::cerr << exc << std::endl;
-        return 1;
-    }
-    catch (...)
-    {
-        std::cerr << "Unknown exception" << std::endl;
-        return 1;
-    }
-}
-
 //! Tasks
 
 void Task_01_FindPtsOfNode(const vvr::KDNode* root, math::VecArray &pts)
@@ -511,3 +495,8 @@ void Task_04_NearestK(const int k, const math::vec& test_pt, const vvr::KDNode* 
         node = node->child_right;
     }
 }
+
+/*---[Invoke]---------------------------------------------------------------------------*/
+#ifndef ALL_DEMO_APP
+vvr_invoke_main_with_scene(KDTreeScene)
+#endif

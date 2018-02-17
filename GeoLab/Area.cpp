@@ -104,5 +104,7 @@ void SceneArea::mouseWheel(int dir, int modif)
     }
 }
 
-/* Application entry point */
+/*---[Invoke]---------------------------------------------------------------------------*/
+#ifndef ALL_DEMO_APP
 vvr_invoke_main_with_scene(SceneArea)
+#endif

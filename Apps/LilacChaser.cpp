@@ -96,15 +96,7 @@ void LilacChaserScene::mouseWheel(int dir, int modif)
     }
 }
 
-int main(int argc, char* argv[])
-{
-    try
-    {
-        return vvr::main_with_scene(argc, argv, new LilacChaserScene);
-    }
-    catch (std::string exc)
-    {
-        cerr << exc << endl;
-        return 1;
-    }
-}
+/*---[Invoke]---------------------------------------------------------------------------*/
+#ifndef ALL_DEMO_APP
+vvr_invoke_main_with_scene(LilacChaserScene)
+#endif

@@ -14,8 +14,9 @@ class VVRFramework_API GlWidget : public QGLWidget
     Q_OBJECT
 
 public:
-    GlWidget(vvr::Scene *scene, QWidget *parent = 0);
+    GlWidget(vvr::Scene *scene=0, QWidget *parent = 0);
     ~GlWidget();
+    void setScene(vvr::Scene *scene);
 
 public slots:
     void idle();

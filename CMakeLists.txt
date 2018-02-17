@@ -17,6 +17,7 @@ add_subdirectory(source)
 add_subdirectory(GeoLab)
 add_subdirectory(Apps)
 add_subdirectory(Games)
+add_subdirectory(AllDemo)
 #########################################################################################
 
 #### Group (Visual Studio only) #########################################################

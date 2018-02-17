@@ -122,8 +122,6 @@ void vvr::Window::focusToGlWidget()
     glWidget->setFocus();
 }
 
-//! Console output redirecting
-
 void vvr::Window::s_log_cout(const char* ptr, std::streamsize count, void* pte)
 {
     printf("%.*s", (int)count, ptr);
@@ -203,8 +201,6 @@ void vvr::Window::cursor_grab()
 {
     QApplication::changeOverrideCursor(Qt::ClosedHandCursor);
 }
-
-//! Entry point of vvr applications.
 
 int vvr::main_with_scene(int argc, char* argv[], vvr::Scene *scene)
 {

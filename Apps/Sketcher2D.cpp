@@ -324,4 +324,7 @@ void Sketcher::toggle_croshair()
     m_vl->toggleVisibility();
 }
 
+/*---[Invoke]---------------------------------------------------------------------------*/
+#ifndef ALL_DEMO_APP
 vvr_invoke_main_with_scene(Sketcher)
+#endif

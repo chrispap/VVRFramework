@@ -83,4 +83,7 @@ void Simple2DScene::reset()
     m_canvas.clear();
 }
 
+/*---[Invoke]---------------------------------------------------------------------------*/
+#ifndef ALL_DEMO_APP
 vvr_invoke_main_with_scene(Simple2DScene)
+#endif

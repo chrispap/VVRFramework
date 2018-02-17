@@ -66,13 +66,16 @@ int main(int argc, char* argv[])                                                
 {                                                                                       \
     try                                                                                 \
     {                                                                                   \
-        return vvr::main_with_scene(argc, argv, new SceneClassName);                           \
+        return vvr::main_with_scene(argc, argv, new SceneClassName);                    \
     }                                                                                   \
     catch (std::string exc)                                                             \
     {                                                                                   \
         std::cerr << exc << std::endl;                                                  \
     }                                                                                   \
+    catch (...)                                                                         \
+    {                                                                                   \
+        std::cerr << "Unrecognized exception." << std::endl;                            \
+    }                                                                                   \
     return 1;                                                                           \
-}                                                                                       \
-
+}
 #endif

@@ -319,4 +319,7 @@ void Simple3DScene::pick(int x, int y)
     }
 }
 
+/*---[Invoke]---------------------------------------------------------------------------*/
+#ifndef ALL_DEMO_APP
 vvr_invoke_main_with_scene(Simple3DScene)
+#endif

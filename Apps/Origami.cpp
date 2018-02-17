@@ -311,5 +311,7 @@ void OrigamiScene::keyEvent(unsigned char key, bool up, int modif)
     } else Scene::keyEvent(key, up, modif);
 }
 
-/*--------------------------------------------------------------------------------------*/
+/*---[Invoke]---------------------------------------------------------------------------*/
+#ifndef ALL_DEMO_APP
 vvr_invoke_main_with_scene(OrigamiScene)
+#endif

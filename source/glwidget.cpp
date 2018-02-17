@@ -21,6 +21,13 @@ vvr::GlWidget::~GlWidget()
     delete mScene;
 }
 
+void vvr::GlWidget::setScene(vvr::Scene *scene)
+{
+    mScene = scene;
+    resizeGL(width(), height());
+    idle();
+}
+
 void vvr::GlWidget::initializeGL()
 {
     mScene->glInit();

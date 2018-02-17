@@ -99,6 +99,7 @@ void BoxesScene::keyEvent(unsigned char key, bool up, int modif)
     }
 }
 
-/*--------------------------------------------------------------------------------------*/
-
+/*---[Invoke]---------------------------------------------------------------------------*/
+#ifndef ALL_DEMO_APP
 vvr_invoke_main_with_scene(BoxesScene)
+#endif

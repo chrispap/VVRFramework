@@ -17,7 +17,7 @@ class HelixScene : public vvr::Scene
 {
 public:
     HelixScene();
-    const char* getName() const override { return "Simple 3D Scene"; }
+    const char* getName() const override { return "DNA Helix"; }
     void keyEvent(unsigned char key, bool up, int modif) override;
 
 protected:
@@ -119,15 +119,7 @@ void HelixScene::keyEvent(unsigned char key_, bool up, int modif)
 
 }
 
-int main(int argc, char* argv[])
-{
-    try
-    {
-        return vvr::main_with_scene(argc, argv, new HelixScene);
-    }
-    catch (std::string exc)
-    {
-        cerr << exc << endl;
-        return 1;
-    }
-}
+/*---[Invoke]---------------------------------------------------------------------------*/
+#ifndef ALL_DEMO_APP
+vvr_invoke_main_with_scene(HelixScene)
+#endif
