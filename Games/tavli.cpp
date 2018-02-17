@@ -594,7 +594,7 @@ int main(int argc, char* argv[])
             printf("colours[coli++] = Colour(\"%02X%02X%02X\");\n", c.r, c.g, c.b);
         vvr_msg("\n");
 
-        return mainLoop(argc, argv, new TavliScene(colours));
+        return main_with_scene(argc, argv, new TavliScene(colours));
     }
     catch (std::string exc)
     {

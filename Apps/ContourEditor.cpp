@@ -330,7 +330,7 @@ int main(int argc, char* argv[])
 {
     try
     {
-        return vvr::mainLoop(argc, argv, new ContourEditorScene);
+        return vvr::main_with_scene(argc, argv, new ContourEditorScene);
     }
     catch (std::string exc)
     {

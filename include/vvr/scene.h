@@ -99,7 +99,7 @@ namespace vvr {
         friend class Window;
     };
 
-    int VVRFramework_API mainLoop(int argc, char* argv[], Scene *scene);
+    int VVRFramework_API main_with_scene(int argc, char* argv[], Scene *scene);
 }
 
 #endif

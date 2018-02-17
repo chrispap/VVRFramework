@@ -297,7 +297,7 @@ int main(int argc, char* argv[])
 {
     try
     {
-        return vvr::mainLoop(argc, argv, new ArmJointScene);
+        return vvr::main_with_scene(argc, argv, new ArmJointScene);
     }
     catch (std::string exc)
     {

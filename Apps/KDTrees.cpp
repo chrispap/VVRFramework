@@ -440,7 +440,7 @@ void KDTreeScene::sliderChanged(int slider_id, float v)
 int main(int argc, char* argv[])
 {
     try {
-        return vvr::mainLoop(argc, argv, new KDTreeScene);
+        return vvr::main_with_scene(argc, argv, new KDTreeScene);
     }
     catch (std::string exc) {
         std::cerr << exc << std::endl;

@@ -206,7 +206,7 @@ void vvr::Window::cursor_grab()
 
 //! Entry point of vvr applications.
 
-int vvr::mainLoop(int argc, char* argv[], vvr::Scene *scene)
+int vvr::main_with_scene(int argc, char* argv[], vvr::Scene *scene)
 {
     QApplication app(argc, argv);
     QPixmap pixmap(":/Icons/vvrframework-splash.png");

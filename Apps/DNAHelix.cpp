@@ -123,7 +123,7 @@ int main(int argc, char* argv[])
 {
     try
     {
-        return vvr::mainLoop(argc, argv, new HelixScene);
+        return vvr::main_with_scene(argc, argv, new HelixScene);
     }
     catch (std::string exc)
     {

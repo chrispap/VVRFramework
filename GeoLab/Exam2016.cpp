@@ -428,7 +428,7 @@ int main(int argc, char* argv[])
 {
     try
     {
-        return vvr::mainLoop(argc, argv, new Exam2016Scene);
+        return vvr::main_with_scene(argc, argv, new Exam2016Scene);
     }
     catch (std::string exc)
     {

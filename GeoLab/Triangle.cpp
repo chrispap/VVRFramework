@@ -169,7 +169,7 @@ int main(int argc, char* argv[])
 {
     try
     {
-        return mainLoop(argc, argv, new TriangleScene);
+        return main_with_scene(argc, argv, new TriangleScene);
     }
     catch (std::string exc)
     {

@@ -108,7 +108,7 @@ int main(int argc, char* argv[])
 {
     try
     {
-        return vvr::mainLoop(argc, argv, new AnimationScene);
+        return vvr::main_with_scene(argc, argv, new AnimationScene);
     }
     catch (std::string exc)
     {

@@ -254,5 +254,5 @@ void Task_CollinearPoints(const C2DPointSet &cloudPts, C2DPointSet &collinearPts
 
 int main(int argc, char* argv[])
 {
-    return vvr::mainLoop(argc, argv, new SceneCollinear);
+    return vvr::main_with_scene(argc, argv, new SceneCollinear);
 }

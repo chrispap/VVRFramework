@@ -368,7 +368,7 @@ void pca(vector<vec>& vertices, vec &center, vec &dir)
 int main(int argc, char* argv[])
 {
     try {
-        return vvr::mainLoop(argc, argv, new Mesh3DScene);
+        return vvr::main_with_scene(argc, argv, new Mesh3DScene);
     }
     catch (std::string exc) {
         cerr << exc << endl;

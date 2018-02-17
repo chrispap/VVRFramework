@@ -633,7 +633,7 @@ int main(int argc, char* argv[])
 {
     try
     {
-        return vvr::mainLoop(argc, argv, new MoldingScene);
+        return vvr::main_with_scene(argc, argv, new MoldingScene);
     }
     catch (std::string exc)
     {
