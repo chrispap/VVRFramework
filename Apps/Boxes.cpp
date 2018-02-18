@@ -13,10 +13,7 @@
 #include <vector>
 #include <MathGeoLib.h>
 
-/*--- Scene Implementation -------------------------------------------------------------*/
-
-using math::vec;
-
+/*--------------------------------------------------------------------------------------*/
 class BoxesScene : public vvr::Scene
 {
 public:

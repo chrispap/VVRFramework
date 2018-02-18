@@ -13,6 +13,14 @@
 #include <string>
 #include <MathGeoLib.h>
 
+/*--------------------------------------------------------------------------------------*/
+#define FLAG_SHOW_AXES       1
+#define FLAG_SHOW_AABB       2
+#define FLAG_SHOW_WIRE       4
+#define FLAG_SHOW_SOLID      8
+#define FLAG_SHOW_NORMALS   16
+
+/*--------------------------------------------------------------------------------------*/
 class HelixScene : public vvr::Scene
 {
 public:
@@ -32,19 +40,10 @@ private:
     vvr::Animation m_anim;
 };
 
-#define FLAG_SHOW_AXES       1
-#define FLAG_SHOW_AABB       2
-#define FLAG_SHOW_WIRE       4
-#define FLAG_SHOW_SOLID      8
-#define FLAG_SHOW_NORMALS   16
-
-using namespace std;
-using namespace vvr;
-using namespace math;
-
+/*--------------------------------------------------------------------------------------*/
 HelixScene::HelixScene()
 {
-    m_bg_col = vvr::black;
+    m_bg_col = vvr::white;
     m_perspective_proj = true;
     m_style_flag = FLAG_SHOW_SOLID | FLAG_SHOW_WIRE;
 }
@@ -78,18 +77,18 @@ void HelixScene::draw()
         p[0].x = m_r * Cos(phase + t);
         p[0].z = m_r * Sin(phase + t);
         p[0].y = m_c * t;
-        Sphere3D s1(p[0].x, p[0].y, p[0].z, m_r / 8, vvr::darkRed);
+        vvr::Sphere3D s1(p[0].x, p[0].y, p[0].z, m_r / 8, vvr::darkRed);
         s1.filled = true;
         s1.draw();
 
         p[1].x = m_r * Cos(phase + t + DegToRad(90 * 2));
         p[1].z = m_r * Sin(phase + t + DegToRad(90 * 2));
         p[1].y = m_c * t;
-        Sphere3D s2(p[1].x, p[1].y, p[1].z, m_r / 8, vvr::darkGreen);
+        vvr::Sphere3D s2(p[1].x, p[1].y, p[1].z, m_r / 8, vvr::darkGreen);
         s2.filled = true;
         s2.draw();
 
-        LineSeg3D(p[0].x, p[0].y, p[0].z, p[1].x, p[1].y, p[1].z, Colour(34, 34, 34)).draw();
+        vvr::LineSeg3D(p[0].x, p[0].y, p[0].z, p[1].x, p[1].y, p[1].z, vvr::Colour(34, 34, 34)).draw();
     }
 
 }

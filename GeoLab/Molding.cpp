@@ -1,19 +1,32 @@
-#ifndef SCENE_MOLDING_H
-#define SCENE_MOLDING_H
-
 #include <vvr/settings.h>
 #include <vvr/scene.h>
 #include <vvr/mesh.h>
 #include <vvr/drawing.h>
-#include "GeoLib.h"
+#include <vvr/utils.h>
+#include <vvr/drawing.h>
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <MathGeoLib.h>
+#include <GeoLib.h>
 
+/*--------------------------------------------------------------------------------------*/
+using namespace std;
+using namespace vvr;
+
+/*--------------------------------------------------------------------------------------*/
+#define HARDCODED_MOLD_REMOVABLE 0
+#define MOLD_SIDE_MIN_LEN 70
+#define SPEED_PIXELS_PER_SEC 20
+
+/*--------------------------------------------------------------------------------------*/
 class MoldingScene : public vvr::Scene
 {
 public:
     MoldingScene();
 
     const char* getName() const override {
-        return "UNIVERSITY OF PATRAS - VVR GROUP - COMPUTATIONAL GEOMETRY LAB";
+        return "Molding";
     }
 
 protected:
@@ -39,21 +52,7 @@ private:
     bool m_anim_on;
 };
 
-#endif
-#include <vvr/utils.h>
-#include <vvr/drawing.h>
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <MathGeoLib.h>
-
-using namespace std;
-using namespace vvr;
-
-#define HARDCODED_MOLD_REMOVABLE 0
-#define MOLD_SIDE_MIN_LEN 70
-#define SPEED_PIXELS_PER_SEC 20
-
+/*--------------------------------------------------------------------------------------*/
 MoldingScene::MoldingScene()
 {
     m_bg_col = vvr::grey;
@@ -313,15 +312,7 @@ void MoldingScene::keyEvent(unsigned char key, bool up, int modif)
 
 }
 
-int main(int argc, char* argv[])
-{
-    try
-    {
-        return vvr::main_with_scene(argc, argv, new MoldingScene);
-    }
-    catch (std::string exc)
-    {
-        cerr << exc << endl;
-        return 1;
-    }
-}
+/*---[Invoke]---------------------------------------------------------------------------*/
+#ifndef ALL_DEMO_APP
+vvr_invoke_main_with_scene(MoldingScene)
+#endif

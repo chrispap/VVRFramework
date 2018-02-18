@@ -9,6 +9,7 @@
 #include <string>
 #include <functional>
 
+/*--------------------------------------------------------------------------------------*/
 class Simple2DScene : public vvr::Scene
 {
 public:
@@ -33,6 +34,7 @@ private:
     PickerT::Ptr m_picker;
 };
 
+/*--------------------------------------------------------------------------------------*/
 Simple2DScene::Simple2DScene()
 {
     using namespace std::placeholders;

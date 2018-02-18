@@ -98,6 +98,7 @@ private:
     std::unordered_map<char, vvr::MacroCmd> m_key_map;
 };
 
+/*--------------------------------------------------------------------------------------*/
 Sketcher::Sketcher()
 {
     vvr::Shape::PointSize *= 2;

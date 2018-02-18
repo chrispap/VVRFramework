@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 
+/*--------------------------------------------------------------------------------------*/
 class LilacChaserScene : public vvr::Scene
 {
 public:
@@ -34,8 +35,7 @@ private:
     const unsigned N = 12;
 };
 
-using namespace std;
-
+/*--------------------------------------------------------------------------------------*/
 LilacChaserScene::LilacChaserScene()
 {
     m_bg_col = vvr::Colour("BFBFBF");

@@ -19,7 +19,7 @@ public:
     TriangulationScene();
 
     const char* getName() const override {
-        return "UNIVERSITY OF PATRAS - VVR GROUP - COMPUTATIONAL GEOMETRY LAB";
+        return "Triangulation";
     }
 
 protected:
@@ -199,19 +199,6 @@ void TriangulationScene::draw()
     vvr::draw(m_pts, vvr::red);
 
     exitPixelMode();
-}
-
-int main(int argc, char* argv[])
-{
-    try
-    {
-        return vvr::main_with_scene(argc, argv, new TriangulationScene);
-    }
-    catch (std::string exc)
-    {
-        cerr << exc << endl;
-        return 1;
-    }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -452,3 +439,8 @@ bool FindAdjacentTriangle(vector<Tri> &tris, C2DPoint *p1, C2DPoint *p2, unsigne
 
     return false;
 }
+
+/*---[Invoke]---------------------------------------------------------------------------*/
+#ifndef ALL_DEMO_APP
+vvr_invoke_main_with_scene(TriangulationScene)
+#endif

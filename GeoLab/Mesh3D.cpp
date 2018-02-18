@@ -10,14 +10,10 @@
 #include <set>
 #include "symmetriceigensolver3x3.h"
 
-//! MACROS used for toggling and testing bitwise flags.
-#define FLAG(x) (1<<(x))
-#define FLAG_ON(v,f) (v & FLAG(f))
-#define FLAG_TOGGLE(v,c,f) case c: v ^= FLAG(f); std::cout \
-    << #f << " = " << (FLAG_ON(v,f) ? "ON" : "OFF") \
-    << std::endl; break
-
 using namespace math;
+
+//#define OBJ_FILENAME "pins.obj"
+#define OBJ_FILENAME "vvrlab.obj"
 
 void Task_1_FindCenterMass(std::vector<vec> &vertices, vec &cm);
 void Task_2_FindAABB(std::vector<vec> &vertices, vvr::Aabb3D &aabb);
@@ -63,24 +59,17 @@ private:
     std::vector<int> m_intersections;
 };
 
-using namespace std;
-using namespace vvr;
-
-//#define OBJ_FILENAME "icosahedron.obj"
-//#define OBJ_FILENAME "vvrlab.obj"
-#define OBJ_FILENAME "pins.obj"
-
 Mesh3DScene::Mesh3DScene()
 {
-    //! Load settings.
+    //! Load std::settings.
     vvr::Shape::LineWidth = 4;
     vvr::Shape::PointSize = 10;
     m_hide_log = false;
     m_perspective_proj = false;
-    m_bg_col = Colour("768E77");
-    m_obj_col = Colour("454545");
-    const string objDir = getBasePath() + "resources/obj/";
-    const string objFile = objDir + OBJ_FILENAME;
+    m_bg_col = vvr::Colour("768E77");
+    m_obj_col = vvr::Colour("454545");
+    const std::string objDir = vvr::getBasePath() + "resources/obj/";
+    const std::string objFile = objDir + OBJ_FILENAME;
     m_model_original = vvr::Mesh::Make(objFile);
     reset();
 }
@@ -95,9 +84,9 @@ void Mesh3DScene::reset()
 
     //! Define what will be vissible by default
     m_flag = 0;
-    m_flag |= FLAG(SHOW_SOLID);
-    m_flag |= FLAG(SHOW_WIRE);
-    m_flag |= FLAG(MODE_PARTITION);
+    m_flag |= vvr_flag(SHOW_SOLID);
+    m_flag |= vvr_flag(SHOW_WIRE);
+    m_flag |= vvr_flag(MODE_PARTITION);
 }
 
 void Mesh3DScene::resize()
@@ -164,14 +153,14 @@ void Mesh3DScene::Tasks()
 
     m_model_original = m_model;
 
-    if (!FLAG_ON(m_flag, SPLIT_INSTEAD_OF_INTERSECT))
+    if (!vvr_flag_test(m_flag, SPLIT_INSTEAD_OF_INTERSECT))
     {
         Task_5_Intersect(m_model->getTriangles(), m_plane, m_intersections);
     }
     else
     {
         m_intersections.clear();
-        m_model = Mesh::Make(*m_model_original);
+        m_model = vvr::Mesh::Make(*m_model_original);
         Task_5_Split(*m_model, m_plane);
     }
 }
@@ -179,7 +168,7 @@ void Mesh3DScene::Tasks()
 void Mesh3DScene::draw()
 {
     //! Draw plane
-    if (FLAG_ON(m_flag, SHOW_PLANE)) {
+    if (vvr_flag_test(m_flag, SHOW_PLANE)) {
         vvr::Colour colPlane(0x41, 0x14, 0xB3);
         float u = 20, v = 20;
         math::vec p0(m_plane.Point(-u, -v, math::vec(0, 0, 0)));
@@ -190,34 +179,34 @@ void Mesh3DScene::draw()
         vvr::Triangle3D(math::Triangle(p2, p1, p3), colPlane).draw();
     }
 
-    if (FLAG_ON(m_flag, SHOW_SOLID)) m_model->draw(m_obj_col, SOLID);
-    if (FLAG_ON(m_flag, SHOW_WIRE)) m_model->draw(vvr::black, WIRE);
-    if (FLAG_ON(m_flag, SHOW_NORMALS)) m_model->draw(vvr::black, NORMALS);
-    if (FLAG_ON(m_flag, SHOW_AXES)) m_model->draw(vvr::black, AXES);
+    if (vvr_flag_test(m_flag, SHOW_SOLID)) m_model->draw(m_obj_col, vvr::SOLID);
+    if (vvr_flag_test(m_flag, SHOW_WIRE)) m_model->draw(vvr::black, vvr::WIRE);
+    if (vvr_flag_test(m_flag, SHOW_NORMALS)) m_model->draw(vvr::black, vvr::NORMALS);
+    if (vvr_flag_test(m_flag, SHOW_AXES)) m_model->draw(vvr::black, vvr::AXES);
 
     //! Draw pca line
-    if (FLAG_ON(m_flag, SHOW_PCA)) {
+    if (vvr_flag_test(m_flag, SHOW_PCA)) {
         Task_4_Draw_PCA(m_pca_cen, m_pca_dir);
     }
 
     //! Draw center mass
-    if (FLAG_ON(m_flag, SHOW_CM)) {
-        Point3D(m_center_mass.x, m_center_mass.y, m_center_mass.z, vvr::red).draw();
+    if (vvr_flag_test(m_flag, SHOW_CM)) {
+        vvr::Point3D(m_center_mass.x, m_center_mass.y, m_center_mass.z, vvr::red).draw();
     }
 
     //! Draw AABB
-    if (FLAG_ON(m_flag, SHOW_AABB)) {
+    if (vvr_flag_test(m_flag, SHOW_AABB)) {
         m_aabb.colour = vvr::black;
         m_aabb.setTransparency(1);
         m_aabb.draw();
     }
 
     //! Draw intersecting triangles of model
-    if (FLAG_ON(m_flag, SHOW_INTERSECTIONS)) {
-        vector<vvr::Triangle> &triangles = m_model->getTriangles();
+    if (vvr_flag_test(m_flag, SHOW_INTERSECTIONS)) {
+        std::vector<vvr::Triangle> &triangles = m_model->getTriangles();
         for (int i = 0; i < m_intersections.size(); i++) {
             vvr::Triangle &t = triangles[m_intersections[i]];
-            Triangle3D t3d(
+            vvr::Triangle3D t3d(
                 t.v1().x, t.v1().y, t.v1().z,
                 t.v2().x, t.v2().y, t.v2().z,
                 t.v3().x, t.v3().y, t.v3().z,
@@ -229,30 +218,30 @@ void Mesh3DScene::draw()
     m_canvas.draw();
 }
 
-void Mesh3DScene::arrowEvent(ArrowDir dir, int modif)
+void Mesh3DScene::arrowEvent(vvr::ArrowDir dir, int modif)
 {
-    if (FLAG_ON(m_flag, MODE_PARTITION))
+    if (vvr_flag_test(m_flag, MODE_PARTITION))
     {
-        if (dir == UP) m_canvas.next();
-        else if (dir == DOWN) m_canvas.prev();
+        if (dir == vvr::UP) m_canvas.next();
+        else if (dir == vvr::DOWN) m_canvas.prev();
         return;
     }
 
     math::vec n = m_plane.normal;
-    if (dir == UP) m_plane_d += 1;
-    else if (dir == DOWN) m_plane_d -= 1;
-    else if (dir == LEFT) n = math::float3x3::RotateY(DegToRad(1)).Transform(n);
-    else if (dir == RIGHT) n = math::float3x3::RotateY(DegToRad(-1)).Transform(n);
+    if (dir == vvr::UP) m_plane_d += 1;
+    else if (dir == vvr::DOWN) m_plane_d -= 1;
+    else if (dir == vvr::LEFT) n = math::float3x3::RotateY(DegToRad(1)).Transform(n);
+    else if (dir == vvr::RIGHT) n = math::float3x3::RotateY(DegToRad(-1)).Transform(n);
     m_plane = Plane(n.Normalized(), m_plane_d);
 
-    if (!FLAG_ON(m_flag, SPLIT_INSTEAD_OF_INTERSECT))
+    if (!vvr_flag_test(m_flag, SPLIT_INSTEAD_OF_INTERSECT))
     {
         Task_5_Intersect(m_model_original->getTriangles(), m_plane, m_intersections);
     }
     else
     {
         m_intersections.clear();
-        m_model = Mesh::Make(*m_model_original);
+        m_model = vvr::Mesh::Make(*m_model_original);
         Task_5_Split(*m_model, m_plane);
     }
 }
@@ -264,16 +253,16 @@ void Mesh3DScene::keyEvent(unsigned char key, bool up, int modif)
 
     switch (key)
     {
-        FLAG_TOGGLE(m_flag, 's', SHOW_SOLID);
-        FLAG_TOGGLE(m_flag, 'w', SHOW_WIRE);
-        FLAG_TOGGLE(m_flag, 'n', SHOW_NORMALS);
-        FLAG_TOGGLE(m_flag, 'a', SHOW_AXES);
-        FLAG_TOGGLE(m_flag, 'p', SHOW_PLANE);
-        FLAG_TOGGLE(m_flag, 'b', SHOW_AABB);
-        FLAG_TOGGLE(m_flag, 'c', SHOW_PCA);
-        FLAG_TOGGLE(m_flag, 'i', SHOW_INTERSECTIONS);
-        FLAG_TOGGLE(m_flag, 'm', SHOW_CM);
-        FLAG_TOGGLE(m_flag, 'x', SPLIT_INSTEAD_OF_INTERSECT);
+        vvr_flag_toggle(m_flag, 's', SHOW_SOLID);
+        vvr_flag_toggle(m_flag, 'w', SHOW_WIRE);
+        vvr_flag_toggle(m_flag, 'n', SHOW_NORMALS);
+        vvr_flag_toggle(m_flag, 'a', SHOW_AXES);
+        vvr_flag_toggle(m_flag, 'p', SHOW_PLANE);
+        vvr_flag_toggle(m_flag, 'b', SHOW_AABB);
+        vvr_flag_toggle(m_flag, 'c', SHOW_PCA);
+        vvr_flag_toggle(m_flag, 'i', SHOW_INTERSECTIONS);
+        vvr_flag_toggle(m_flag, 'm', SHOW_CM);
+        vvr_flag_toggle(m_flag, 'x', SPLIT_INSTEAD_OF_INTERSECT);
     }
 }
 
@@ -294,7 +283,7 @@ void Mesh3DScene::printKeyboardShortcuts()
         << std::endl << std::endl;
 }
 
-void pca(vector<vec>& vertices, vec &center, vec &dir)
+void pca(std::vector<vec>& vertices, vec &center, vec &dir)
 {
     const int count = vertices.size();
 
@@ -350,7 +339,7 @@ void pca(vector<vec>& vertices, vec &center, vec &dir)
     det[7] = det[5];
     det[8] = dy2 + dx2;
 
-    /* Searching for a eigenvector of det corresponding to the minimal eigenvalue */
+    /* Searching for a eigenstd::vector of det corresponding to the minimal eigenvalue */
     gte::SymmetricEigensolver3x3<float> solver;
     std::array<float, 3> eval;
     std::array<std::array<float, 3>, 3> evec;
@@ -365,25 +354,9 @@ void pca(vector<vec>& vertices, vec &center, vec &dir)
     dir.z = evec[0][2];
 }
 
-int main(int argc, char* argv[])
-{
-    try {
-        return vvr::main_with_scene(argc, argv, new Mesh3DScene);
-    }
-    catch (std::string exc) {
-        cerr << exc << endl;
-        return 1;
-    }
-    catch (...)
-    {
-        cerr << "Unknown exception" << endl;
-        return 1;
-    }
-}
-
 //! LAB Tasks
 
-void Task_1_FindCenterMass(vector<vec> &vertices, vec &cm)
+void Task_1_FindCenterMass(std::vector<vec> &vertices, vec &cm)
 {
     //!//////////////////////////////////////////////////////////////////////////////////
     //! TASK:
@@ -404,7 +377,7 @@ void Task_1_FindCenterMass(vector<vec> &vertices, vec &cm)
     cm /= N;
 }
 
-void Task_2_FindAABB(vector<vec> &vertices, Aabb3D &aabb)
+void Task_2_FindAABB(std::vector<vec> &vertices, vvr::Aabb3D &aabb)
 {
     //!//////////////////////////////////////////////////////////////////////////////////
     //! TASK:
@@ -419,7 +392,7 @@ void Task_2_FindAABB(vector<vec> &vertices, Aabb3D &aabb)
     //!
     //!//////////////////////////////////////////////////////////////////////////////////
 
-    aabb = Aabb3D(vertices);
+    aabb = vvr::Aabb3D(vertices);
 }
 
 vec Mesh3DScene::Task_3_Pick_Origin()
@@ -430,7 +403,7 @@ vec Mesh3DScene::Task_3_Pick_Origin()
     return m_center_mass;
 }
 
-void Task_3_AlignOriginTo(vector<vec> &vertices, const vec &cm)
+void Task_3_AlignOriginTo(std::vector<vec> &vertices, const vec &cm)
 {
     //!//////////////////////////////////////////////////////////////////////////////////
     //! TASK:
@@ -461,25 +434,25 @@ void Task_4_Draw_PCA(vec &center, vec &dir)
     //!
     //!//////////////////////////////////////////////////////////////////////////////////
 
-    Point3D pt(center.x, center.y, center.z, vvr::magenta);
+    vvr::Point3D pt(center.x, center.y, center.z, vvr::magenta);
     vec start = dir;
     vec end = dir;
     start *= -1000;
     end *= 1000;
     start += center;
     end += center;
-    LineSeg3D line(start.x, start.y, start.z, end.x, end.y, end.z, vvr::magenta);
+    vvr::LineSeg3D line(start.x, start.y, start.z, end.x, end.y, end.z, vvr::magenta);
     line.draw();
     pt.draw();
 }
 
-void Task_5_Intersect(vector<vvr::Triangle> &triangles, Plane &plane, vector<int> &intersection_indices)
+void Task_5_Intersect(std::vector<vvr::Triangle> &triangles, Plane &plane, std::vector<int> &intersection_indices)
 {
     //!//////////////////////////////////////////////////////////////////////////////////
     //! TASK:
     //!
     //!  - Brete ta trigwna pou temnontai me to epipedo `plane`.
-    //!  - Kante ta push_back sto vector intersection_indices.
+    //!  - Kante ta push_back sto std::vector intersection_indices.
     //!
     //!//////////////////////////////////////////////////////////////////////////////////
 
@@ -507,7 +480,7 @@ void Task_5_Intersect(vector<vvr::Triangle> &triangles, Plane &plane, vector<int
     }
 }
 
-void Task_5_Split(Mesh &mesh, Plane &plane)
+void Task_5_Split(vvr::Mesh &mesh, Plane &plane)
 {
     //!//////////////////////////////////////////////////////////////////////////////////
     //! TASK:
@@ -516,10 +489,10 @@ void Task_5_Split(Mesh &mesh, Plane &plane)
     //!
     //!//////////////////////////////////////////////////////////////////////////////////
 
-    vector<vvr::Triangle> &triangles = mesh.getTriangles();
+    std::vector<vvr::Triangle> &triangles = mesh.getTriangles();
 
-    set<vec*> verts_right;
-    set<vec*> verts_left;
+    std::set<vec*> verts_right;
+    std::set<vec*> verts_left;
 
     for (int i = 0; i < triangles.size(); i++)
     {
@@ -557,26 +530,26 @@ void Task_5_Split(Mesh &mesh, Plane &plane)
     vec n = plane.normal;
     vec d = vec(n.x, n.y, n.z);
 
-    for (set<vec*>::iterator vi = verts_right.begin(); vi != verts_right.end(); ++vi) {
+    for (std::set<vec*>::iterator vi = verts_right.begin(); vi != verts_right.end(); ++vi) {
         **vi -= d;
     }
 
-    for (set<vec*>::iterator vi = verts_left.begin(); vi != verts_left.end(); ++vi) {
+    for (std::set<vec*>::iterator vi = verts_left.begin(); vi != verts_left.end(); ++vi) {
         **vi += d;
     }
 }
 
 void FindSubMeshes(vvr::Mesh &mesh, vvr::Canvas &canvas)
 {
-    const vector<vvr::Triangle> &tris = mesh.getTriangles();
-    const vector<vec> &vecs = mesh.getVertices();
+    const std::vector<vvr::Triangle> &tris = mesh.getTriangles();
+    const std::vector<vec> &vecs = mesh.getVertices();
 
     int NUM_OF_VECS = vecs.size();
     int NUM_OF_PARTS = 0;
 
     int i = 0;
-    vector<set<int> > vectris(vecs.size());
-    for (vector<vvr::Triangle>::const_iterator ti = tris.cbegin();
+    std::vector<std::set<int> > vectris(vecs.size());
+    for (std::vector<vvr::Triangle>::const_iterator ti = tris.cbegin();
         ti != tris.cend();
         ++ti)
     {
@@ -586,7 +559,7 @@ void FindSubMeshes(vvr::Mesh &mesh, vvr::Canvas &canvas)
         ++i;
     }
 
-    set<int> v_tbc;
+    std::set<int> v_tbc;
 
     for (int i = 0; i < vecs.size(); i++) {
         v_tbc.insert(i);
@@ -594,14 +567,14 @@ void FindSubMeshes(vvr::Mesh &mesh, vvr::Canvas &canvas)
 
     while (!v_tbc.empty())
     {
-        set<int> v_part;
-        set<int> v_step;
+        std::set<int> v_part;
+        std::set<int> v_step;
         v_step.insert(*v_tbc.begin());
         unsigned v_part_size = 0;
 
         do
         {
-            set<int> v_step_new;
+            std::set<int> v_step_new;
             for (auto vi : v_step)
             {
                 for (auto ti : vectris[vi])
@@ -617,7 +590,7 @@ void FindSubMeshes(vvr::Mesh &mesh, vvr::Canvas &canvas)
             v_part.insert(std::begin(v_step), std::end(v_step));
         } while (v_part_size != v_part.size());
 
-        vector<vec> vs;
+        std::vector<vec> vs;
         for (auto v : v_part) {
             vs.push_back(vecs.at(v));
             v_tbc.erase(v);
@@ -644,3 +617,8 @@ void FindSubMeshes(vvr::Mesh &mesh, vvr::Canvas &canvas)
     vvr_echo(NUM_OF_VECS);
     vvr_echo(NUM_OF_PARTS);
 }
+
+/*---[Invoke]---------------------------------------------------------------------------*/
+#ifndef ALL_DEMO_APP
+vvr_invoke_main_with_scene(Mesh3DScene)
+#endif

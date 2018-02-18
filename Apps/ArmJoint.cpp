@@ -12,16 +12,21 @@
 #include <string>
 #include <MathGeoLib.h>
 
-using namespace std;
-using namespace vvr;
-using namespace math;
+/*--------------------------------------------------------------------------------------*/
+#define MODE_PLAYBACK true
+#define FLAG_SHOW_AXES      1
+#define FLAG_RENDER_SOLID   2
+#define FLAG_RENDER_WIRE    4
+#define FILE_RADIUS "resources/data/LineTest/Radius.txt"
+#define FILE_HUMERUS "resources/data/LineTest/Humerus.txt"
 
+/*--------------------------------------------------------------------------------------*/
 struct Bone
 {
     Bone();
     std::string name;
-    vector<math::Quat> rots;
-    vector<double> times;
+    std::vector<math::Quat> rots;
+    std::vector<double> times;
     vvr::Mesh::Ptr mesh;
     math::Quat calib_quat;
     bool anim_on;
@@ -50,7 +55,7 @@ public:
     * @param filename
     * @param bone The struct to store the motion.
     */
-    static void loadRecordedMotion(const string filename, Bone &bone);
+    static void loadRecordedMotion(const std::string filename, Bone &bone);
 
     /**
     * @param rot Euler angles in radians
@@ -79,18 +84,7 @@ private:
     bool m_anim_on;
 };
 
-#define MODE_PLAYBACK true
-#define FILE_RADIUS "resources/data/LineTest/Radius.txt"
-#define FILE_HUMERUS "resources/data/LineTest/Humerus.txt"
-
-#define FLAG_SHOW_AXES      1
-#define FLAG_RENDER_SOLID   2
-#define FLAG_RENDER_WIRE    4
-
-using namespace std;
-using namespace vvr;
-using namespace math;
-
+/*--------------------------------------------------------------------------------------*/
 Bone::Bone() : calib_quat(Quat::identity)
 {
 
@@ -127,32 +121,31 @@ void Bone::animate(float t, float speed)
     }
 }
 
+/*--------------------------------------------------------------------------------------*/
 ArmJointScene::ArmJointScene()
 {
     m_style_flag = FLAG_RENDER_SOLID;
-    m_bg_col = Colour("768E77");
-    m_bone_col = Colour("8A7F4D");
+    m_bg_col = vvr::Colour("768E77");
+    m_bone_col = vvr::Colour("8A7F4D");
     m_perspective_proj = true;
     load();
     m_anim_speed = 1;
-    m_anim_on = true;
+    m_anim_on = false;
     m_anim_time = 0;
-    m_anim_last_update = getSeconds();
+    m_anim_last_update = vvr::getSeconds();
 }
-
-//! Callbacks - Scene
 
 void ArmJointScene::load()
 {
-    const string objFileBone = getBasePath() + "resources/obj/bone.obj";
+    const std::string objFileBone = vvr::getBasePath() + "resources/obj/bone.obj";
 
     // Load 3D models Humerus
-    m_humerus.mesh = Mesh::Make(objFileBone);
-    m_radius.mesh = Mesh::Make(*m_humerus.mesh);
+    m_humerus.mesh = vvr::Mesh::Make(objFileBone);
+    m_radius.mesh = vvr::Mesh::Make(*m_humerus.mesh);
 
     // Switch mode of execution: {Live Streaming, Playback}
-    loadRecordedMotion(getBasePath() + FILE_RADIUS, m_radius);
-    loadRecordedMotion(getBasePath() + FILE_HUMERUS, m_humerus);
+    loadRecordedMotion(vvr::getBasePath() + FILE_RADIUS, m_radius);
+    loadRecordedMotion(vvr::getBasePath() + FILE_HUMERUS, m_humerus);
 }
 
 void ArmJointScene::resize()
@@ -177,13 +170,13 @@ void ArmJointScene::draw()
 
     // Create style enum
     int s = 0;
-    if (m_style_flag & FLAG_RENDER_SOLID) s |= SOLID;
-    if (m_style_flag & FLAG_RENDER_WIRE) s |= WIRE;
-    if (m_style_flag & FLAG_SHOW_AXES) s |= AXES;
+    if (m_style_flag & FLAG_RENDER_SOLID) s |= vvr::SOLID;
+    if (m_style_flag & FLAG_RENDER_WIRE) s |= vvr::WIRE;
+    if (m_style_flag & FLAG_SHOW_AXES) s |= vvr::AXES;
 
     // Draw objects
-    m_radius.mesh->draw(m_bone_col, (Style)s);
-    m_humerus.mesh->draw(m_bone_col, (Style)s);
+    m_radius.mesh->draw(m_bone_col, (vvr::Style)s);
+    m_humerus.mesh->draw(m_bone_col, (vvr::Style)s);
 }
 
 bool ArmJointScene::idle()
@@ -192,8 +185,8 @@ bool ArmJointScene::idle()
     if (!m_anim_on) return false;
 
     // Find current animation time
-    m_anim_time += (getSeconds() - m_anim_last_update);
-    m_anim_last_update = getSeconds();
+    m_anim_time += (vvr::getSeconds() - m_anim_last_update);
+    m_anim_last_update = vvr::getSeconds();
 
     // Animate objects
     m_humerus.animate(m_anim_time, m_anim_speed);
@@ -205,8 +198,6 @@ bool ArmJointScene::idle()
     return m_radius.anim_on || m_humerus.anim_on;
 }
 
-//! Callbacks - UI
-
 void ArmJointScene::keyEvent(unsigned char key, bool up, int modif)
 {
     Scene::keyEvent(key, up, modif);
@@ -215,7 +206,7 @@ void ArmJointScene::keyEvent(unsigned char key, bool up, int modif)
     {
         m_anim_on = !m_anim_on;
         if (m_anim_on) {
-            m_anim_last_update = getSeconds();
+            m_anim_last_update = vvr::getSeconds();
         }
     }
     else if (key == 'a') m_style_flag ^= FLAG_SHOW_AXES;
@@ -223,7 +214,7 @@ void ArmJointScene::keyEvent(unsigned char key, bool up, int modif)
     else if (key == 'w') m_style_flag ^= FLAG_RENDER_WIRE;
 }
 
-void ArmJointScene::arrowEvent(ArrowDir dir, int modif)
+void ArmJointScene::arrowEvent(vvr::ArrowDir dir, int modif)
 {
     Scene::arrowEvent(dir, modif);
 }
@@ -236,16 +227,14 @@ void ArmJointScene::reset()
     Scene::reset();
 }
 
-//! Helper functions
-
-void ArmJointScene::loadRecordedMotion(string filename, Bone &bone)
+void ArmJointScene::loadRecordedMotion(std::string filename, Bone &bone)
 {
-    ifstream file(filename.c_str());
+    std::ifstream file(filename.c_str());
 
     if (!file.is_open())
         throw "Cannot open <" + filename + ">";
 
-    string line;
+    std::string line;
     bone.times.clear();
     bone.rots.clear();
 
@@ -257,10 +246,10 @@ void ArmJointScene::loadRecordedMotion(string filename, Bone &bone)
         vec rot;
 
         if (line.at(0) == '#') {
-            string calib_label = "#calibration";
+            std::string calib_label = "#calibration";
             if (line.compare(0, calib_label.size(), calib_label.c_str()) == 0) {
                 std::istringstream iss(line);
-                string trash;
+                std::string trash;
                 iss >> trash >> rot.x >> rot.y >> rot.z;
                 calib_quat = getBoneQuaternion(vec(rot.x, rot.y, rot.z));
             }

@@ -12,22 +12,24 @@
 #include <cmath>
 #include <cstring>
 
-#define APP_TITLE "Contour Editor"
-//#define CONTOUR_FILENAME  "resources/contours/contours.txt"
-//#define CONTOUR_FILENAME  "resources/contours/contours3.txt"
-//#define CONTOUR_FILENAME  "resources/contours/contoursPaths.txt"
-//#define CONTOUR_FILENAME  "resources/contours/contourstest.txt"
+#if 0
 #define CONTOUR_FILENAME  "resources/contours/contoursOlympus.txt"
-#define CONTOUR_DELIMITER "CONTOUR-LINE"
+#define CONTOUR_FILENAME  "resources/contours/contoursPaths.txt"
+#define CONTOUR_FILENAME  "resources/contours/contourstest.txt"
+#define CONTOUR_FILENAME  "resources/contours/contours3.txt"
+#endif
+
+/*--------------------------------------------------------------------------------------*/
 #define MIN_POINT_DIST_PIXELS 10
+#define CONTOUR_DELIMITER "CONTOUR-LINE"
+#define CONTOUR_FILENAME  "resources/contours/contours.txt"
 
-using namespace math;
-
+/*--------------------------------------------------------------------------------------*/
 class ContourEditorScene : public vvr::Scene
 {
 public:
     ContourEditorScene();
-    const char* getName() const override { return APP_TITLE; }
+    const char* getName() const override { return "Contour Editor"; }
 
 protected:
     void draw() override;
@@ -52,13 +54,11 @@ private:
     int m_active_contour;
 };
 
-using namespace std;
-using namespace vvr;
-
+/*--------------------------------------------------------------------------------------*/
 ContourEditorScene::ContourEditorScene()
 {
     m_active_contour = 0;
-    m_bg_col = Colour(0x44, 0x44, 0x44);
+    m_bg_col = vvr::Colour(0x44, 0x44, 0x44);
     m_hide_log = false;
     m_perspective_proj = false;
     b_render_3D = true;
@@ -68,9 +68,9 @@ ContourEditorScene::ContourEditorScene()
     m_heights[0] = 0.1;
 
     try {
-        loadContoursFromFile(getBasePath() + CONTOUR_FILENAME);
-    } catch (string exc) {
-         std::cerr << exc << endl;
+        loadContoursFromFile(vvr::getBasePath() + CONTOUR_FILENAME);
+    } catch (std::string exc) {
+         std::cerr << exc << std::endl;
     }
 }
 
@@ -92,7 +92,7 @@ void ContourEditorScene::draw()
             vec p1 = m_pts[ci][pi];
             vec p2 = m_pts[ci][(pi + 1) % m_pts[ci].size()];
 
-            Colour line_col = vvr::yellow;
+            vvr::Colour line_col = vvr::yellow;
 
             if (ci == m_pts.size() - 1 && pi == m_pts[ci].size() - 1) {
                 line_col = vvr::grey;
@@ -100,8 +100,8 @@ void ContourEditorScene::draw()
 
             if (!b_render_3D)
             {
-                LineSeg2D(p1.x, p1.y, p2.x, p2.y, line_col).draw();
-                if (b_show_pts) Point2D(p1.x, p1.y, vvr::yellow).draw();
+                vvr::LineSeg2D(p1.x, p1.y, p2.x, p2.y, line_col).draw();
+                if (b_show_pts) vvr::Point2D(p1.x, p1.y, vvr::yellow).draw();
             }
             else
             {
@@ -114,17 +114,17 @@ void ContourEditorScene::draw()
                 /* All three colours can be set at once using:
                    --> vvr::Triangle3D::setColourPerVertex(...); */
                 
-                Colour col_base = vvr::darkGreen;
-                Colour col_sel1 = vvr::red;
-                Colour col_sel2 = vvr::darkRed;
-                Colour col_top; col_top.g = height / height_max * 255;
+                vvr::Colour col_base = vvr::darkGreen;
+                vvr::Colour col_sel1 = vvr::red;
+                vvr::Colour col_sel2 = vvr::darkRed;
+                vvr::Colour col_top; col_top.g = height / height_max * 255;
 
-                Triangle3D t1(
+                vvr::Triangle3D t1(
                     p2.x, p2.z, p2.y,
                     p1.x, p1.z, p1.y,
                     p2z.x, p2z.z, p2z.y);
 
-                Triangle3D t2(
+                vvr::Triangle3D t2(
                     p1.x, p1.z, p1.y,
                     p1z.x, p1z.z, p1z.y,
                     p2z.x, p2z.z, p2z.y);
@@ -219,7 +219,7 @@ void ContourEditorScene::keyEvent(unsigned char key, bool up, int modif)
         if (m_pts.back().size()>0)
             m_pts.back().resize(m_pts.back().size()-1);
         else {
-            m_pts.resize(max(1, (int) m_pts.size()-1));
+            m_pts.resize(std::max(1, (int) m_pts.size()-1));
             m_heights.resize(m_pts.size());
         }
         break;
@@ -232,21 +232,21 @@ void ContourEditorScene::keyEvent(unsigned char key, bool up, int modif)
 
 }
 
-void ContourEditorScene::arrowEvent(ArrowDir dir, int modif)
+void ContourEditorScene::arrowEvent(vvr::ArrowDir dir, int modif)
 {
-    if (dir==LEFT) {
+    if (dir==vvr::LEFT) {
         m_active_contour = m_active_contour>0? m_active_contour-1: m_active_contour;
         return;
     }
-    if (dir==RIGHT) {
+    if (dir==vvr::RIGHT) {
         m_active_contour = m_active_contour<m_pts.size()-1? m_active_contour+1: m_active_contour;
         return;
     }
-    if (dir==UP) {
+    if (dir==vvr::UP) {
         m_heights[m_active_contour] += 0.1;
         return;
     }
-    if (dir==DOWN) {
+    if (dir==vvr::DOWN) {
         m_heights[m_active_contour] -= 0.1;
         if (m_heights[m_active_contour] < 0)
             m_heights[m_active_contour] = 0;
@@ -264,8 +264,8 @@ void ContourEditorScene::reset()
 
 void ContourEditorScene::saveContoursToFile()
 {
-    string filename = CONTOUR_FILENAME;
-    filename = getBasePath() + filename;
+    std::string filename = CONTOUR_FILENAME;
+    filename = vvr::getBasePath() + filename;
     std::cout << "Saving to " << filename << std::endl;
 
     FILE* file = fopen(filename.c_str(), "w");
