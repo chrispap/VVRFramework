@@ -14,13 +14,6 @@
 #include <MathGeoLib.h>
 
 /*--------------------------------------------------------------------------------------*/
-#define FLAG_SHOW_AXES       1
-#define FLAG_SHOW_AABB       2
-#define FLAG_SHOW_WIRE       4
-#define FLAG_SHOW_SOLID      8
-#define FLAG_SHOW_NORMALS   16
-
-/*--------------------------------------------------------------------------------------*/
 class HelixScene : public vvr::Scene
 {
 public:
@@ -34,9 +27,9 @@ protected:
     bool idle() override;
 
 private:
-    float m_r, m_c;
+    float m_r;
+    float m_c;
     double m_sec;
-    int m_style_flag;
     vvr::Animation m_anim;
 };
 
@@ -45,26 +38,20 @@ HelixScene::HelixScene()
 {
     m_bg_col = vvr::white;
     m_perspective_proj = true;
-    m_style_flag = FLAG_SHOW_SOLID | FLAG_SHOW_WIRE;
+    getGlobalAxes().hide();
 }
 
 void HelixScene::resize()
 {
-    static bool FIRST_PASS = true;
-
-    if (FIRST_PASS)
-    {
+    if (m_first_resize) {
         m_r = getSceneWidth() / 20;
         m_c = getSceneWidth() / 40;
     }
-
-    FIRST_PASS = false;
 }
 
 void HelixScene::draw()
 {
-    if (m_style_flag & FLAG_SHOW_AXES)
-        drawAxes();
+    getGlobalAxes().drawif();
 
     vec p[2];
     const float degs_from = 360 * 2;
@@ -90,7 +77,6 @@ void HelixScene::draw()
 
         vvr::LineSeg3D(p[0].x, p[0].y, p[0].z, p[1].x, p[1].y, p[1].z, vvr::Colour(34, 34, 34)).draw();
     }
-
 }
 
 bool HelixScene::idle()
@@ -101,19 +87,15 @@ bool HelixScene::idle()
     return true;
 }
 
-void HelixScene::keyEvent(unsigned char key_, bool up, int modif)
+void HelixScene::keyEvent(unsigned char key, bool up, int modif)
 {
-    unsigned char key = tolower(key_);
+    const unsigned char k = tolower(key);
 
-    switch (key)
+    switch (k)
     {
-    case 'a': m_style_flag ^= FLAG_SHOW_AXES; break;
-    case 'w': m_style_flag ^= FLAG_SHOW_WIRE; break;
-    case 's': m_style_flag ^= FLAG_SHOW_SOLID; break;
-    case 'n': m_style_flag ^= FLAG_SHOW_NORMALS; break;
-    case 'b': m_style_flag ^= FLAG_SHOW_AABB; break;
+    case 'a': getGlobalAxes().toggleVisibility(); break;
     case ' ': m_anim.toggle(); break;
-    default: Scene::keyEvent(key_, up, modif);
+    default: Scene::keyEvent(key, up, modif);
     }
 
 }

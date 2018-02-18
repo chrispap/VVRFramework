@@ -18,6 +18,7 @@ using namespace math;
 #define VVR_FOV_MAX 160
 #define VVR_FOV_MIN 2
 
+/*--------------------------------------------------------------------------------------*/
 Scene::Scene()
 {
     m_bg_col = vvr::white;
@@ -97,8 +98,7 @@ Ray Scene::unproject(int x, int y)
         (float)y / getViewportHeight() * 2);
 }
 
-/*--- [OpenGL callbacks] ---------------------------------------------------------------*/
-
+/*---[OpenGL]---------------------------------------------------------------------------*/
 static void glInfo()
 {
     /* PRINT OpenGL INFO */
@@ -196,8 +196,7 @@ void Scene::glRender()
     draw();
 }
 
-/*--- [Events] -------------------------------------------------------------------------*/
-
+/*---[Events]---------------------------------------------------------------------------*/
 void Scene::keyEvent(unsigned char key, bool up, int modif)
 {
     if (up) return;
@@ -278,3 +277,4 @@ void Scene::setSliderVal(int slider_id, float val)
     //      in order to be able to change
     //      slider values from the scene.
 }
+/*--------------------------------------------------------------------------------------*/

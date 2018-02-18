@@ -25,7 +25,7 @@
 
 /*----[VVR MULTILINE MACRO]-------------------------------------------------------------*/
 #define vvr_flag_toggle(v,c,f) case c: v ^= vvr_flag(f); std::cout                      \
-    << #f << " = " << (vvr_flag_test(v,f) ? "ON" : "OFF")                                 \
+    << #f << " = " << (vvr_flag_test(v,f) ? "ON" : "OFF")                               \
     << std::endl; break                                                                 \
 
 /*----[VVR MULTILINE MACRO]-------------------------------------------------------------*/

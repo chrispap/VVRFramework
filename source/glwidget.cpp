@@ -8,6 +8,7 @@
 
 #define ANIM_INTERVAL 10
 
+/*--------------------------------------------------------------------------------------*/
 vvr::GlWidget::GlWidget(vvr::Scene *scene, QWidget *parent) : QGLWidget(parent)
 {
     mScene = scene;
@@ -28,6 +29,7 @@ void vvr::GlWidget::setScene(vvr::Scene *scene)
     idle();
 }
 
+/*---[OpenGL]---------------------------------------------------------------------------*/
 void vvr::GlWidget::initializeGL()
 {
     mScene->glInit();
@@ -43,12 +45,14 @@ void vvr::GlWidget::resizeGL(int width, int height)
     mScene->glResize(width, height);
 }
 
+/*---[Events]---------------------------------------------------------------------------*/
 void vvr::GlWidget::idle()
 {
-    if (!mScene->idle())
+    if (!mScene->idle()) {
         mTimer.stop();
-    else if (!mTimer.isActive())
+    } else if (!mTimer.isActive()) {
         mTimer.start(ANIM_INTERVAL);
+    }
     update();
 }
 
@@ -84,12 +88,10 @@ void vvr::GlWidget::mouseMoveEvent(QMouseEvent *event)
     int y = event->y();
     mScene->mouse2pix(x, y);
 
-    if (event->buttons() & Qt::LeftButton)
-    {
+    if (event->buttons() & Qt::LeftButton) {
         mScene->mouseMoved(x, y, mkModif(event));
     }
-    else if (event->buttons() == Qt::NoButton)
-    {
+    else if (event->buttons() == Qt::NoButton) {
         mScene->mouseHovered(x, y, mkModif(event));
     }
     else return;
@@ -130,3 +132,4 @@ int vvr::GlWidget::mkModif(QInputEvent *event)
     int modif = (ctrl << 0) | (shift << 1) | (alt << 2) ;
     return modif;
 }
+/*--------------------------------------------------------------------------------------*/

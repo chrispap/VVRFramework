@@ -15,8 +15,8 @@
 /*--------------------------------------------------------------------------------------*/
 DemoWindow::DemoWindow()
 {
-    glw = nullptr;
     ui.setupUi(this);
+    glw = nullptr;
 
     scns.push_back(new OrigamiScene);
     scns.push_back(new BoxesScene);
@@ -31,7 +31,8 @@ DemoWindow::DemoWindow()
     scns.push_back(new TriangulationScene);
     scns.push_back(new Mesh3DScene);
 
-    for (auto s:scns) {
+    /* Add scenes to list */
+    for (auto s : scns) {
         auto b = new QPushButton(s->getName());
         connect(b, &QPushButton::clicked, [s,this](){
             SetScene(s);
@@ -39,6 +40,7 @@ DemoWindow::DemoWindow()
         ui.verticalLayout_left->addWidget(b);
     }
 
+    /* Set initial scene */
     SetScene(scns.at(0));
 }
 
