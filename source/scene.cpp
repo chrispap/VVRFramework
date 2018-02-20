@@ -10,6 +10,7 @@
 #include <locale>
 #include <cmath>
 #include <QtOpenGL>
+#include <cassert>
 
 using namespace vvr;
 using namespace std;
@@ -36,6 +37,11 @@ Scene::Scene()
 void Scene::reset()
 {
     setCameraPos(vec(0, 0, m_camera_dist));
+}
+
+void Scene::resize()
+{
+
 }
 
 void Scene::drawAxes()
@@ -76,6 +82,13 @@ void Scene::mouse2pix(int &x, int &y)
     y = -y;
 }
 
+void Scene::pix2mouse(int &x, int &y)
+{
+    y = -y;
+    y += m_screen_height / 2;
+    x += m_screen_width / 2;
+}
+
 void Scene::setCameraPos(const vec &pos)
 {
     vec front0 = vec(0, 0, -1);
@@ -101,7 +114,6 @@ Ray Scene::unproject(int x, int y)
 /*---[OpenGL]---------------------------------------------------------------------------*/
 static void glInfo()
 {
-    /* PRINT OpenGL INFO */
     printf("\n=== VVR Framework ================\n");
     printf(" %s\n", glGetString(GL_VERSION));
     printf(" %s\n", glGetString(GL_VENDOR));
@@ -112,18 +124,15 @@ static void glInfo()
 
 void Scene::glInit()
 {
-    // Light setup
     float lz = m_camera_dist * 3;
     static GLfloat light_position[] = { 0, 0, lz, 1 };
     static GLfloat ambientLight[] = { .75, .75, .75, 1 };
     static GLfloat diffuseLight[] = { .75, .75, .75, 1 };
     static GLfloat specularLight[] = { .85, .85, .85, 1 };
-
     glLightfv(GL_LIGHT0, GL_POSITION, light_position);
     glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
     glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
     glLightfv(GL_LIGHT0, GL_SPECULAR, specularLight);
-
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
     glEnable(GL_LINE_SMOOTH);
@@ -132,7 +141,6 @@ void Scene::glInit()
     glEnable(GL_NORMALIZE);
     glEnable(GL_TEXTURE_2D);
     glEnable(GL_BLEND);
-
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
     glDepthMask(GL_TRUE);
     glDepthFunc(GL_LEQUAL);
@@ -143,7 +151,6 @@ void Scene::glInit()
     glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
     glInfo();
 }
 
@@ -172,7 +179,7 @@ void Scene::glResize(int w, int h)
         m_frustum.SetViewPlaneDistances(n, f);
     }
 
-    //! Set OpenGL Projection Matrix
+    /* Set OpenGL Projection Matrix */
     glViewport(0, 0, m_screen_width, m_screen_height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -220,29 +227,56 @@ void Scene::mousePressed(int x, int y, int modif)
 {
     m_mouse_x = x;
     m_mouse_y = y;
+
+    int xx=x, yy=y;
+    pix2mouse(xx, yy);
+    glReadPixels(xx,yy, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &m_mouse_depth);
+    m_frustum_mlstn = m_frustum;
+
+    if (ctrlDown(modif)) {
+        m_mouse_op = 't';
+    } else m_mouse_op = 'r';
+
+    cursorGrab();
 }
 
 void Scene::mouseMoved(int x, int y, int modif)
 {
-    const int dx = x - m_mouse_x;
-    const int dy = y - m_mouse_y;
-    m_mouse_x = x;
-    m_mouse_y = y;
-
-    const math::vec up = m_frustum.Up();
+    const math::vec updir = m_frustum.Up();
     const math::vec right = m_frustum.WorldRight();
 
-    float angleYaw = math::DegToRad(-vvr::normalizeAngle((float)dx / 2));
-    float anglePitch = math::DegToRad(vvr::normalizeAngle((float)dy / 2));
-
-    math::float3x3 transform = float3x3::RotateAxisAngle(right, anglePitch) *
-        float3x3::RotateAxisAngle(up, angleYaw);
-
-    m_frustum.Transform(transform);
-    math::vec newpos = m_frustum.Pos();
-    math::vec newfront = m_frustum.Front();
-    math::vec newup = m_frustum.Up();
-    m_frustum.SetFrame(newpos, newfront, newup);
+    if (m_mouse_op=='r')
+    {
+        const int dx = x - m_mouse_x;
+        const int dy = y - m_mouse_y;
+        m_mouse_x = x;
+        m_mouse_y = y;
+        /* Rotate scene */
+        float rot_x = math::DegToRad(-vvr::normalizeAngle((float)dx/2));
+        float rot_y = math::DegToRad( vvr::normalizeAngle((float)dy/2));
+        math::float3x3 transform = math::float3x3::identity;
+        transform = transform * float3x3::RotateAxisAngle(right, rot_y);
+        transform = transform * float3x3::RotateAxisAngle(updir, rot_x);
+        m_frustum.Transform(transform);
+        m_frustum.SetPos(m_frustum.Pos());
+    }
+    else if (m_mouse_op=='t')
+    {
+        const int dx = x - m_mouse_x;
+        const int dy = y - m_mouse_y;
+        /* Translate scene */
+        float w = m_scene_width;
+        float h = m_scene_height;
+        vec dv = vec::zero;
+        dv -= right * dx * w / m_screen_width;
+        dv -= updir * dy * h / m_screen_height;
+        m_frustum.SetPos(m_frustum_mlstn.Pos() + dv);
+    }
+    else
+    {
+        vvr_msg("Should not reach.");
+        assert(0);
+    }
 }
 
 void Scene::mouseHovered(int x, int y, int modif)
@@ -252,7 +286,8 @@ void Scene::mouseHovered(int x, int y, int modif)
 
 void Scene::mouseReleased(int x, int y, int modif)
 {
-
+    m_mouse_op = '\0';
+    cursorShow();
 }
 
 void Scene::mouseWheel(int dir, int modif)

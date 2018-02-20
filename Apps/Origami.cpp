@@ -240,7 +240,8 @@ OrigamiScene::OrigamiScene()
     m_perspective_proj = true;
 
     /* Create drawables and populate canvas. */
-    m_paper = Paper::Make(10*math::Sqrt(2), 10);
+    float a = 10;
+    m_paper = Paper::Make(a*math::Sqrt(2), a);
     m_papers.add(m_paper.get());
     m_papers.setDelOnClear(false);
     m_dragger = PaperDragger::Make(m_sketch);
@@ -279,7 +280,9 @@ void OrigamiScene::mouseHovered(int x, int y, int modif)
 
 void OrigamiScene::mousePressed(int x, int y, int modif)
 {
-    m_picker->pick(unproject(x,y), modif);
+    auto ray = unproject(x,y);
+    m_picker->drop(ray, modif);
+    m_picker->pick(ray, modif);
     if (m_picker->picked()) {
         cursorHide();
     } else Scene::mousePressed(x, y, modif);
@@ -287,8 +290,8 @@ void OrigamiScene::mousePressed(int x, int y, int modif)
 
 void OrigamiScene::mouseMoved(int x, int y, int modif)
 {
-    m_picker->drag(unproject(x,y), modif);
     if (m_picker->picked()) {
+        m_picker->drag(unproject(x,y), modif);
     } else Scene::mouseMoved(x, y, modif);
 }
 

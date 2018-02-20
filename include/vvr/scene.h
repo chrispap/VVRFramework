@@ -53,11 +53,12 @@ namespace vvr {
         /*--- [Virtual] ----------------------------------------------------------------*/
         virtual void draw() = 0;
         virtual void reset();
-        virtual void resize() {}
+        virtual void resize();
 
         /*--- [Helpers] ----------------------------------------------------------------*/
         math::Ray unproject(int x, int y);
         void mouse2pix(int &x, int &y);
+        void pix2mouse(int &x, int &y);
         void enterPixelMode();
         void exitPixelMode();
         void drawAxes();
@@ -84,16 +85,19 @@ namespace vvr {
         MacroCmd cursorGrab;
 
     private:
-        Axes m_axes;
         math::Frustum m_frustum;
-        float m_fov;
-        float m_camera_dist;
-        float m_scene_width;
-        float m_scene_height;
-        int m_screen_width;
-        int m_screen_height;
-        int m_mouse_x;
-        int m_mouse_y;
+        math::Frustum m_frustum_mlstn;
+        Axes    m_axes;
+        float   m_fov;
+        float   m_camera_dist;
+        float   m_scene_width;
+        float   m_scene_height;
+        int     m_screen_width;
+        int     m_screen_height;
+        int     m_mouse_x;
+        int     m_mouse_y;
+        char    m_mouse_op;
+        float   m_mouse_depth;
 
         friend class GlWidget;
         friend class Window;
