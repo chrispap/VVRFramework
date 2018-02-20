@@ -33,7 +33,7 @@ class Mesh3DScene : public vvr::Scene
 
 public:
     Mesh3DScene();
-    const char* getName() const override { return "3D Scene"; }
+    const char* getName() const override { return "3D Mesh"; }
     void keyEvent(unsigned char key, bool up, int modif) override;
     void arrowEvent(vvr::ArrowDir dir, int modif) override;
 

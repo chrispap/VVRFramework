@@ -21,7 +21,7 @@ class KDTreeScene : public vvr::Scene
 
 public:
     KDTreeScene();
-    const char* getName() const override { return "KD Tree Scene"; }
+    const char* getName() const override { return "kd-Trees"; }
     void keyEvent(unsigned char key, bool up, int modif) override;
     void arrowEvent(vvr::ArrowDir dir, int modif) override;
     void mouseWheel(int dir, int modif) override;

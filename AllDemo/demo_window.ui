@@ -14,21 +14,26 @@
    <string>VVR Demo</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout">
+   <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1">
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,5">
+     <layout class="QVBoxLayout" name="layout_sidebar" stretch="0,10">
+      <property name="leftMargin">
+       <number>3</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
       <item>
-       <layout class="QVBoxLayout" name="verticalLayout_left" stretch="10">
-        <property name="leftMargin">
-         <number>3</number>
-        </property>
-        <property name="bottomMargin">
+       <layout class="QVBoxLayout" name="layout_scenes">
+        <property name="spacing">
          <number>0</number>
         </property>
-        <item>
-         <widget class="QPlainTextEdit" name="plain_text_log">
-          <property name="styleSheet">
-           <string notr="true">QPlainTextEdit { 
+       </layout>
+      </item>
+      <item>
+       <widget class="QPlainTextEdit" name="plain_text_log">
+        <property name="styleSheet">
+         <string notr="true">QPlainTextEdit { 
     border: 1px solid grey;
     border-radius: 4px;
     font: Ubuntu mono;
@@ -37,35 +42,33 @@
     color: #00aa33;
 }
 </string>
-          </property>
-          <property name="readOnly">
-           <bool>true</bool>
-          </property>
-          <property name="textInteractionFlags">
-           <set>Qt::TextSelectableByMouse</set>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <widget class="QScrollArea" name="scrollArea">
-        <property name="widgetResizable">
+        </property>
+        <property name="readOnly">
          <bool>true</bool>
         </property>
-        <widget class="QWidget" name="scrollAreaWidgetContents">
-         <property name="geometry">
-          <rect>
-           <x>0</x>
-           <y>0</y>
-           <width>205</width>
-           <height>291</height>
-          </rect>
-         </property>
-        </widget>
+        <property name="textInteractionFlags">
+         <set>Qt::TextSelectableByMouse</set>
+        </property>
        </widget>
       </item>
      </layout>
+    </item>
+    <item>
+     <widget class="QScrollArea" name="scrollArea">
+      <property name="widgetResizable">
+       <bool>true</bool>
+      </property>
+      <widget class="QWidget" name="scrollAreaWidgetContents">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>207</width>
+         <height>293</height>
+        </rect>
+       </property>
+      </widget>
+     </widget>
     </item>
    </layout>
   </widget>

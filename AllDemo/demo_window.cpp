@@ -8,9 +8,11 @@
 #include "Apps/ArmJoint.cpp"
 #include "Apps/Simple2D.cpp"
 #include "Apps/Simple3D.cpp"
+#include "Apps/KDTrees.cpp"
 #include "GeoLab/Molding.cpp"
 #include "GeoLab/Triangulation.cpp"
 #include "GeoLab/Mesh3D.cpp"
+#include "Games/tavli.cpp"
 
 /*--------------------------------------------------------------------------------------*/
 DemoWindow::DemoWindow()
@@ -30,18 +32,18 @@ DemoWindow::DemoWindow()
     scns.push_back(new MoldingScene);
     scns.push_back(new TriangulationScene);
     scns.push_back(new Mesh3DScene);
+    scns.push_back(new KDTreeScene);
+    scns.push_back(new TavliScene(tavli::GetDefaultColours()));
 
     /* Add scenes to list */
     for (auto s : scns) {
-        auto b = new QPushButton(s->getName());
-        connect(b, &QPushButton::clicked, [s,this](){
-            SetScene(s);
-        });
-        ui.verticalLayout_left->addWidget(b);
+        auto btn = new QPushButton(s->getName());
+        ui.layout_scenes->addWidget(btn);
+        connect(btn, &QPushButton::clicked, [s,this](){SetScene(s);});
     }
 
     /* Set initial scene */
-    SetScene(scns.at(0));
+    SetScene(scns[0]);
 }
 
 void DemoWindow::SetScene(vvr::Scene *scene)
@@ -50,9 +52,6 @@ void DemoWindow::SetScene(vvr::Scene *scene)
     if (!glw) {
         glw = new vvr::GlWidget(scn);
         ui.scrollArea->setWidget(glw);
-        ui.scrollArea->setWidgetResizable(true);
-        ui.scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-        ui.scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     } else glw->setScene(scn);
 }
 

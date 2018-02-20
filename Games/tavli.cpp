@@ -18,14 +18,12 @@ static float HHH = 0.10;
 static float dHHH = 0.01;
 
 using namespace vvr;
-using namespace math;
 
-/*---[tavli::scene]---------------------------------------------------------------------*/
-
+/*---[TavliScene]-----------------------------------------------------------------------*/
 class TavliScene : public Scene
 {
 public:
-    TavliScene(std::vector<Colour> &colours)
+    TavliScene(const std::vector<Colour> &colours)
     {
         m_bg_col = Colour("222222");
         m_create_menus = false;
@@ -101,20 +99,17 @@ public:
 
     void mousePressed(int x, int y, int modif) override
     {
-        if (ctrlDown(modif)) {
-            Scene::mousePressed(x, y, modif);
-        } else _board->piece_picker->pick(unproject(x, y), modif);
-
+        _board->piece_picker->pick(unproject(x, y), modif);
         if (_board->piece_picker->picked()) {
             cursorGrab();
-        }
+        } else Scene::mousePressed(x, y, modif);
     }
 
     void mouseMoved(int x, int y, int modif) override
     {
-        if (ctrlDown(modif) && !_board->piece_picker->picked()) {
-            Scene::mouseMoved(x, y, modif);
-        } else _board->piece_picker->drag(unproject(x, y), modif);
+        if (_board->piece_picker->picked()) {
+            _board->piece_picker->drag(unproject(x, y), modif);
+        } else Scene::mouseMoved(x, y, modif);
     }
 
     void mouseReleased(int x, int y, int modif) override
@@ -126,7 +121,6 @@ public:
     void mouseHovered(int x, int y, int modif) override
     {
         _board->region_picker->pick(unproject(x, y), modif);
-
         if (_board->region_picker->picked()) {
             cursorHand();
         } else cursorShow();
@@ -139,7 +133,6 @@ private:
 };
 
 /*---[tavli::Board]---------------------------------------------------------------------*/
-
 tavli::Board::Board(std::vector<Colour> &colours)
 {
     _colours = colours;
@@ -355,7 +348,6 @@ void tavli::Board::draw() const
 }
 
 /*---[tavli::Piece]---------------------------------------------------------------------*/
-
 tavli::Piece::Piece(Colour col) : Cylinder3D(col)
 {
     normal.Set(0, 0, 1);
@@ -384,7 +376,6 @@ real tavli::Piece::pickdist(const Ray& ray) const
 }
 
 /*---[tavli::Region]--------------------------------------------------------------------*/
-
 tavli::Region::Region(Board *board, int id, Colour col) : Triangle3D(col)
 {
     vvr_setmemb(board);
@@ -508,7 +499,6 @@ real tavli::Region::pickdist(const Ray &ray) const
 }
 
 /*---[tavli::PieceDragger]--------------------------------------------------------------*/
-
 bool tavli::PieceDragger::on_pick(Drawable* drw, Ray ray)
 {
     assert(typeid(Piece)==typeid(*drw));
@@ -546,7 +536,6 @@ void tavli::PieceDragger::on_drop(Drawable* drw)
 }
 
 /*---[tavli::RegionHlter]---------------------------------------------------------------*/
-
 bool tavli::RegionHlter::on_pick(Drawable* drw, Ray ray)
 {
     assert(typeid(Region)==typeid(*drw));
@@ -565,22 +554,25 @@ void tavli::RegionHlter::on_drop(Drawable* drw)
 }
 
 /*---[main]-----------------------------------------------------------------------------*/
+namespace tavli {
+    std::vector<Colour> GetDefaultColours()
+    {
+        std::vector<Colour> colours = {
+            Colour(0x443322),  ///> Board
+            Colour(0x242622),  ///> Regions
+            Colour(0x550000),  ///> Team 1
+            Colour(0xBBBBBB)   ///> Team 2
+        };
+        return colours;
+    }
+}
 
+#ifndef ALL_DEMO_APP
 int main(int argc, char* argv[])
 {
     try
     {
-        std::vector<Colour> colours;
-        colours.resize(4);
-
-        int coli = 0;
-
-        /* Default colors */
-        colours[coli++] = Colour(0x443322); ///> Board
-        colours[coli++] = Colour(0x242622); ///> Regions
-        colours[coli++] = Colour(0x550000); ///> Team 1
-        colours[coli++] = Colour(0xBBBBBB); ///> Team 2
-
+        std::vector<Colour> colours = tavli::GetDefaultColours();
 #ifndef __APPLE__
         /* Load from CLI */
         for(coli=0; coli < argc-1; coli++) {
@@ -602,5 +594,5 @@ int main(int argc, char* argv[])
         return 1;
     }
 }
-
+#endif
 /*--------------------------------------------------------------------------------------*/

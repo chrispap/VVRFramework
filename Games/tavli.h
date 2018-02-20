@@ -10,7 +10,6 @@
 namespace tavli
 {
     using namespace vvr;
-    using namespace math;
 
     struct RegionHlter;
     struct PieceDragger;
