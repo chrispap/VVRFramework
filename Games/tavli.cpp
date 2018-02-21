@@ -575,7 +575,7 @@ int main(int argc, char* argv[])
         std::vector<Colour> colours = tavli::GetDefaultColours();
 #ifndef __APPLE__
         /* Load from CLI */
-        for(coli=0; coli < argc-1; coli++) {
+        for(int coli=0; coli < argc-1; coli++) {
             colours[coli] = Colour(argv[1+coli]);
         }
 #endif
