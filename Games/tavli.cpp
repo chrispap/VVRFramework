@@ -95,7 +95,7 @@ namespace tavli
 
     class Board : public vvr::Drawable
     {
-        std::vector<vvr::Colour>     _colours;
+        std::vector<vvr::Colour> _colours;
         std::vector<Piece*>     _pieces;
         std::vector<Region*>    _regions;
         Mesh::Ptr               _3DBoard;
@@ -123,118 +123,130 @@ namespace tavli
     };
 }
 
-/*---[TavliScene]-----------------------------------------------------------------------*/
 class TavliScene : public vvr::Scene
 {
 public:
-    TavliScene(const std::vector<vvr::Colour> &colours)
-    {
-        m_bg_col = vvr::Colour("222222");
-        m_create_menus = false;
-        m_perspective_proj = true;
-        m_fullscreen = false;
-        _colours = colours;
-        _board = nullptr;
-        reset();
+    TavliScene(const std::vector<vvr::Colour> &colours);
+    ~TavliScene();
+    
+    const char* getName() const  override { 
+        return "Tavli Game"; 
     }
 
-    ~TavliScene()
-    {
-        delete _board;
-    }
-
-    const char* getName() const  override
-    {
-        return "Tavli Game";
-    }
-
-    void reset() override
-    {
-        resetCamera();
-        delete _board;
-        _board = new tavli::Board(_colours);
-        _board->setupGamePortes();
-        resize();
-    }
-
-    void resetCamera()
-    {
-        Scene::reset();
-        vec pos = getFrustum().Pos();
-        pos.y -= 55;
-        pos.z += 25;
-        setCameraPos(pos);
-    }
-
-    void resize() override
-    {
-        if (m_first_resize)
-        {
-            _axes = &getGlobalAxes();
-            _axes->hide();
-        }
-
-        const float width = 0.7 * getSceneWidth();
-        const float height = 0.7 * getSceneWidth();
-        _board->resize(width, height);
-    }
-
-    void draw() override
-    {
-        _axes->drawif();
-        _board->drawif();
-    }
-
-    void keyEvent(unsigned char key, bool up, int modif) override
-    {
-        switch (tolower(key))
-        {
-        case 'a': _axes->toggleVisibility(); break;
-        case 'b': _board->toggleVisibility(); break;
-        case 'h': HHH -= dHHH; vvr_echo(HHH); resize(); break;
-        case 'j': HHH += dHHH; vvr_echo(HHH); resize(); break;
-        case '0': resetCamera(); break;
-        case '1': _board->setupGamePortes(); break;
-        case '2': _board->setupGamePlakwto(); break;
-        case '3': _board->setupGameFevga(); break;
-        default: Scene::keyEvent(key, up, modif);
-        }
-    }
-
-    void mousePressed(int x, int y, int modif) override
-    {
-        _board->piece_picker->pick(unproject(x, y), modif);
-        if (_board->piece_picker->picked()) {
-            cursorGrab();
-        } else Scene::mousePressed(x, y, modif);
-    }
-
-    void mouseMoved(int x, int y, int modif) override
-    {
-        if (_board->piece_picker->picked()) {
-            _board->piece_picker->drag(unproject(x, y), modif);
-        } else Scene::mouseMoved(x, y, modif);
-    }
-
-    void mouseReleased(int x, int y, int modif) override
-    {
-        _board->piece_picker->drop(unproject(x, y), modif);
-        cursorShow();
-    }
-
-    void mouseHovered(int x, int y, int modif) override
-    {
-        _board->region_picker->pick(unproject(x, y), modif);
-        if (_board->region_picker->picked()) {
-            cursorHand();
-        } else cursorShow();
-    }
+    void reset() override;
+    void resetCamera();
+    void resize() override;
+    void draw() override;
+    void keyEvent(unsigned char key, bool up, int modif) override;
+    void mousePressed(int x, int y, int modif) override;
+    void mouseMoved(int x, int y, int modif) override;
+    void mouseReleased(int x, int y, int modif) override;
+    void mouseHovered(int x, int y, int modif) override;
 
 private:
     vvr::Axes*                  _axes;
     tavli::Board*               _board;
     std::vector<vvr::Colour>    _colours;
 };
+
+/*---[TavliScene]-----------------------------------------------------------------------*/
+TavliScene::TavliScene(const std::vector<vvr::Colour> &colours)
+{
+    m_bg_col = vvr::Colour("222222");
+    m_create_menus = false;
+    m_perspective_proj = true;
+    m_fullscreen = false;
+    _colours = colours;
+    _board = nullptr;
+    reset();
+}
+
+TavliScene::~TavliScene()
+{
+    delete _board;
+}
+
+void TavliScene::reset()
+{
+    resetCamera();
+    delete _board;
+    _board = new tavli::Board(_colours);
+    _board->setupGamePortes();
+    resize();
+}
+
+void TavliScene::resetCamera()
+{
+    Scene::reset();
+    vec pos = getFrustum().Pos();
+    pos.y -= 55;
+    pos.z += 25;
+    setCameraPos(pos);
+}
+
+void TavliScene::resize()
+{
+    if (m_first_resize)
+    {
+        _axes = &getGlobalAxes();
+        _axes->hide();
+    }
+
+    const float width = 0.7 * getSceneWidth();
+    const float height = 0.7 * getSceneWidth();
+    _board->resize(width, height);
+}
+
+void TavliScene::draw()
+{
+    _axes->drawif();
+    _board->drawif();
+}
+
+void TavliScene::keyEvent(unsigned char key, bool up, int modif)
+{
+    switch (tolower(key))
+    {
+    case 'a': _axes->toggleVisibility(); break;
+    case 'b': _board->toggleVisibility(); break;
+    case 'h': HHH -= dHHH; vvr_echo(HHH); resize(); break;
+    case 'j': HHH += dHHH; vvr_echo(HHH); resize(); break;
+    case '0': resetCamera(); break;
+    case '1': _board->setupGamePortes(); break;
+    case '2': _board->setupGamePlakwto(); break;
+    case '3': _board->setupGameFevga(); break;
+    default: Scene::keyEvent(key, up, modif);
+    }
+}
+
+void TavliScene::mousePressed(int x, int y, int modif)
+{
+    _board->piece_picker->pick(unproject(x, y), modif);
+    if (_board->piece_picker->picked()) {
+        cursorGrab();
+    } else Scene::mousePressed(x, y, modif);
+}
+
+void TavliScene::mouseMoved(int x, int y, int modif)
+{
+    if (_board->piece_picker->picked()) {
+        _board->piece_picker->drag(unproject(x, y), modif);
+    } else Scene::mouseMoved(x, y, modif);
+}
+
+void TavliScene::mouseReleased(int x, int y, int modif)
+{
+    _board->piece_picker->drop(unproject(x, y), modif);
+    cursorShow();
+}
+
+void TavliScene::mouseHovered(int x, int y, int modif)
+{
+    _board->region_picker->pick(unproject(x, y), modif);
+    if (_board->region_picker->picked()) {
+        cursorHand();
+    } else cursorShow();
+}
 
 /*---[tavli::Board]---------------------------------------------------------------------*/
 tavli::Board::Board(std::vector<vvr::Colour> &colours)
