@@ -1,31 +1,135 @@
-#include "tavli.h"
 #include <vvr/utils.h>
 #include <vvr/drawing.h>
 #include <vvr/settings.h>
 #include <vvr/scene.h>
 #include <vvr/mesh.h>
 #include <vvr/palette.h>
+#include <vvr/picking.h>
 #include <iostream>
 #include <fstream>
 #include <iostream>
 #include <cstring>
 #include <string>
-#include <set>
 #include <vector>
-#include <MathGeoLib.h>
+#include <set>
 
 static float HHH = 0.10;
 static float dHHH = 0.01;
 
-using namespace vvr;
+/*---[Declarations]---------------------------------------------------------------------*/
+namespace tavli
+{
+    using namespace vvr;
+
+    struct RegionHlter;
+    struct PieceDragger;
+    struct Piece;
+    struct Region;
+    class  Board;
+
+    //! Pickers
+
+    typedef MousePicker3D<RegionHlter> RegionPicker;
+    typedef MousePicker3D<PieceDragger> PiecePicker;
+
+    //! Draggers
+
+    struct RegionHlter
+    {
+        vvr_decl_shared_ptr(RegionHlter)
+
+        bool on_pick(vvr::Drawable* drw, Ray ray);
+        void on_drag(vvr::Drawable* drw, Ray ray0, Ray ray1) {}
+        void on_drop(vvr::Drawable* drw);
+
+    private:
+        vvr::Colour _colour;
+    };
+
+    struct PieceDragger
+    {
+        vvr_decl_shared_ptr(PieceDragger)
+
+        bool on_pick(vvr::Drawable* drw, Ray ray);
+        void on_drag(vvr::Drawable* drw, Ray ray0, Ray ray1);
+        void on_drop(vvr::Drawable* drw);
+
+        PieceDragger(RegionPicker* rp)
+            : _regionPicker{ rp } {}
+
+    private:
+        Ray _ray;
+        vvr::Colour _colour;
+        RegionPicker* _regionPicker;
+    };
+
+    //! Game entities
+
+    struct Piece : public Cylinder3D
+    {
+        Region* region;
+        Piece(vvr::Colour col);
+        void pick();
+        void draw() const override;
+        real pickdist(const Ray& ray) const override;
+    };
+
+    struct Region : public Triangle3D
+    {
+        /* Data [Logic] */
+        Board* board;
+        std::vector<Piece*> pieces;
+
+        /* Data [Drawing] */
+        float piecediam, boardheight;
+        int id, rows;
+        vec base, top, dir;
+
+        Region(Board* board, int reg, vvr::Colour colour);
+        void addPiece(Piece *piece);
+        void removePiece(Piece *piece);
+        void resize(float diam, float boardheight);
+        void arrangePieces(size_t index_from=0);
+        real pickdist(const Ray& ray) const override;
+    };
+
+    class Board : public vvr::Drawable
+    {
+        std::vector<vvr::Colour>     _colours;
+        std::vector<Piece*>     _pieces;
+        std::vector<Region*>    _regions;
+        Mesh::Ptr               _3DBoard;
+        Canvas                  _pieceCanvas;
+        Canvas                  _regionCanvas;
+        float                   _width;
+        float                   _height;
+
+    public:
+        RegionHlter::Ptr        region_hlter;
+        RegionPicker::Ptr       region_picker;
+        PieceDragger::Ptr       piece_dragger;
+        PiecePicker::Ptr        piece_picker;
+
+        Board(std::vector<vvr::Colour> &cols);
+        ~Board();
+        void load3DModels();
+        void createRegions();
+        void clearPieces();
+        void setupGamePortes();
+        void setupGamePlakwto();
+        void setupGameFevga();
+        void draw() const override;
+        void resize(const float width, const float height);
+    };
+}
 
 /*---[TavliScene]-----------------------------------------------------------------------*/
-class TavliScene : public Scene
+class TavliScene : public vvr::Scene
 {
 public:
-    TavliScene(const std::vector<Colour> &colours)
+    TavliScene(const std::vector<vvr::Colour> &colours)
     {
-        m_bg_col = Colour("222222");
+        m_bg_col = vvr::Colour("222222");
         m_create_menus = false;
         m_perspective_proj = true;
         m_fullscreen = false;
@@ -127,13 +231,13 @@ public:
     }
 
 private:
-    Axes* _axes;
-    tavli::Board *_board;
-    std::vector<Colour> _colours;
+    vvr::Axes*                  _axes;
+    tavli::Board*               _board;
+    std::vector<vvr::Colour>    _colours;
 };
 
 /*---[tavli::Board]---------------------------------------------------------------------*/
-tavli::Board::Board(std::vector<Colour> &colours)
+tavli::Board::Board(std::vector<vvr::Colour> &colours)
 {
     _colours = colours;
     load3DModels();
@@ -348,7 +452,7 @@ void tavli::Board::draw() const
 }
 
 /*---[tavli::Piece]---------------------------------------------------------------------*/
-tavli::Piece::Piece(Colour col) : Cylinder3D(col)
+tavli::Piece::Piece(vvr::Colour col) : Cylinder3D(col)
 {
     normal.Set(0, 0, 1);
 }
@@ -363,7 +467,7 @@ void tavli::Piece::pick()
     basecenter.z = region->boardheight * 0.10 + height;
 }
 
-real tavli::Piece::pickdist(const Ray& ray) const
+vvr::real tavli::Piece::pickdist(const Ray& ray) const
 {
     Circle c(diskTop());
     float d;
@@ -376,7 +480,7 @@ real tavli::Piece::pickdist(const Ray& ray) const
 }
 
 /*---[tavli::Region]--------------------------------------------------------------------*/
-tavli::Region::Region(Board *board, int id, Colour col) : Triangle3D(col)
+tavli::Region::Region(Board *board, int id, vvr::Colour col) : Triangle3D(col)
 {
     vvr_setmemb(board);
     vvr_setmemb(id);
@@ -491,7 +595,7 @@ void tavli::Region::removePiece(Piece *piece)
     arrangePieces();
 }
 
-real tavli::Region::pickdist(const Ray &ray) const
+vvr::real tavli::Region::pickdist(const Ray &ray) const
 {
     LineSegment l(top, base);
     auto d = l.Distance(ray);
@@ -499,7 +603,7 @@ real tavli::Region::pickdist(const Ray &ray) const
 }
 
 /*---[tavli::PieceDragger]--------------------------------------------------------------*/
-bool tavli::PieceDragger::on_pick(Drawable* drw, Ray ray)
+bool tavli::PieceDragger::on_pick(vvr::Drawable* drw, Ray ray)
 {
     assert(typeid(Piece)==typeid(*drw));
     auto piece = static_cast<Piece*>(drw);
@@ -509,7 +613,7 @@ bool tavli::PieceDragger::on_pick(Drawable* drw, Ray ray)
     return true;
 }
 
-void tavli::PieceDragger::on_drag(Drawable* drw, Ray ray0, Ray ray1)
+void tavli::PieceDragger::on_drag(vvr::Drawable* drw, Ray ray0, Ray ray1)
 {
     assert(dynamic_cast<Piece*>(drw));
     auto piece = static_cast<Piece*>(drw);
@@ -524,7 +628,7 @@ void tavli::PieceDragger::on_drag(Drawable* drw, Ray ray0, Ray ray1)
     _ray = ray1;
 }
 
-void tavli::PieceDragger::on_drop(Drawable* drw)
+void tavli::PieceDragger::on_drop(vvr::Drawable* drw)
 {
     auto piece = static_cast<Piece*>(drw);
     auto region = static_cast<Region*>(_regionPicker->picked());
@@ -536,7 +640,7 @@ void tavli::PieceDragger::on_drop(Drawable* drw)
 }
 
 /*---[tavli::RegionHlter]---------------------------------------------------------------*/
-bool tavli::RegionHlter::on_pick(Drawable* drw, Ray ray)
+bool tavli::RegionHlter::on_pick(vvr::Drawable* drw, Ray ray)
 {
     assert(typeid(Region)==typeid(*drw));
     auto reg = static_cast<Region*>(drw);
@@ -546,7 +650,7 @@ bool tavli::RegionHlter::on_pick(Drawable* drw, Ray ray)
     return true;
 }
 
-void tavli::RegionHlter::on_drop(Drawable* drw)
+void tavli::RegionHlter::on_drop(vvr::Drawable* drw)
 {
     auto reg = static_cast<Region*>(drw);
     reg->colour = _colour;
@@ -555,13 +659,13 @@ void tavli::RegionHlter::on_drop(Drawable* drw)
 
 /*---[main]-----------------------------------------------------------------------------*/
 namespace tavli {
-    std::vector<Colour> GetDefaultColours()
+    std::vector<vvr::Colour> GetDefaultColours()
     {
-        std::vector<Colour> colours = {
-            Colour(0x443322),  ///> Board
-            Colour(0x242622),  ///> Regions
-            Colour(0x550000),  ///> Team 1
-            Colour(0xBBBBBB)   ///> Team 2
+        std::vector<vvr::Colour> colours = {
+            vvr::Colour(0x443322),  ///> Board
+            vvr::Colour(0x242622),  ///> Regions
+            vvr::Colour(0x550000),  ///> Team 1
+            vvr::Colour(0xBBBBBB)   ///> Team 2
         };
         return colours;
     }
@@ -572,18 +676,18 @@ int main(int argc, char* argv[])
 {
     try
     {
-        std::vector<Colour> colours = tavli::GetDefaultColours();
+        std::vector<vvr::Colour> colours = tavli::GetDefaultColours();
 #ifndef __APPLE__
         /* Load from CLI */
         for(int coli=0; coli < argc-1; coli++) {
-            colours[coli] = Colour(argv[1+coli]);
+            colours[coli] = vvr::Colour(argv[1+coli]);
         }
 #endif
 
         /* Print colours */
         vvr_msg("Colours: ");
         for (auto c : colours)
-            printf("colours[coli++] = Colour(\"%02X%02X%02X\");\n", c.r, c.g, c.b);
+            printf("colours[coli++] = vvr::Colour(\"%02X%02X%02X\");\n", c.r, c.g, c.b);
         vvr_msg("\n");
 
         return main_with_scene(argc, argv, new TavliScene(colours));
