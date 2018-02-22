@@ -1,4 +1,5 @@
-#include "demo_window.h"
+#include <ui_demo_window.h>
+#include <vvr/glwidget.h>
 #include "Apps/Boxes.cpp"
 #include "Apps/Origami.cpp"
 #include "Apps/DNAHelix.cpp"
@@ -13,6 +14,22 @@
 #include "GeoLab/Triangulation.cpp"
 #include "GeoLab/Mesh3D.cpp"
 #include "Games/tavli.cpp"
+
+class DemoWindow : public QMainWindow
+{
+    Q_OBJECT
+public:
+    DemoWindow();
+public slots:
+    void SetScene(vvr::Scene*);
+signals:
+    void keyPressed(QKeyEvent*);
+private:
+    Ui::DemoWindow ui;
+    vvr::GlWidget *glw;
+    vvr::Scene *scn;
+    std::vector<vvr::Scene*> scns;
+};
 
 /*--------------------------------------------------------------------------------------*/
 DemoWindow::DemoWindow()
@@ -63,3 +80,5 @@ int main(int argc, char* argv[])
     demowin.showMaximized();
     app.exec();
 }
+
+#include "demo_window.moc"

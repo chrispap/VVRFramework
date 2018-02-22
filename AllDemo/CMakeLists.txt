@@ -12,7 +12,7 @@ option(HIDE_CONSOLE_WINDOW "Show only gui window and not the the console" OFF)
 link_directories(${CMAKE_BINARY_DIR}/lib)
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 file(GLOB APP_SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}
-    demo_window.cpp			demo_window.h
+    demo_window.cpp
 )
 
 add_executable(Demo MACOSX_BUNDLE ${APP_SRC_FILES} ${UI_FILES})
