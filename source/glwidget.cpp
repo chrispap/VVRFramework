@@ -1,19 +1,18 @@
 #include <vvr/glwidget.h>
 #include <vvr/scene.h>
 #include <iostream>
-#include <QtOpenGL>
+#include <QApplication>
 #include <QMouseEvent>
 #include <QTimer>
 #include <cmath>
 
-#define ANIM_INTERVAL 10
-
 /*--------------------------------------------------------------------------------------*/
-vvr::GlWidget::GlWidget(vvr::Scene *scene, QWidget *parent) : QGLWidget(parent)
+vvr::GlWidget::GlWidget(vvr::Scene *scene, QWidget *parent) : QOpenGLWidget(parent)
 {
     mScene = scene;
+    mTimer.setSingleShot(true);
     connect(&mTimer, SIGNAL(timeout()), this, SLOT(idle()));
-    mTimer.start(ANIM_INTERVAL);
+    mTimer.start(0);
     setMouseTracking(true);
 }
 
@@ -51,7 +50,7 @@ void vvr::GlWidget::idle()
     if (!mScene->idle()) {
         mTimer.stop();
     } else if (!mTimer.isActive()) {
-        mTimer.start(ANIM_INTERVAL);
+        mTimer.start(0);
     }
     update();
 }
@@ -90,9 +89,11 @@ void vvr::GlWidget::mouseMoveEvent(QMouseEvent *event)
 
     if (event->buttons() & Qt::LeftButton) {
         mScene->mouseMoved(x, y, mkModif(event));
+        event->accept();
     }
     else if (event->buttons() == Qt::NoButton) {
         mScene->mouseHovered(x, y, mkModif(event));
+        event->accept();
     }
     else return;
 

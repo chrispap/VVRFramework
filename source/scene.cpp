@@ -114,7 +114,7 @@ Ray Scene::unproject(int x, int y)
 /*---[OpenGL]---------------------------------------------------------------------------*/
 static void glInfo()
 {
-    printf("\n=== VVR Framework ================\n");
+    printf("\n=== VVR-Framework 2018 ===========\n");
     printf(" %s\n", glGetString(GL_VERSION));
     printf(" %s\n", glGetString(GL_VENDOR));
     printf(" %s\n", glGetString(GL_RENDERER));
@@ -156,15 +156,17 @@ void Scene::glInit()
 
 void Scene::glResize(int w, int h)
 {
-    const float ar = (float)w / h;
     m_screen_width = w;
     m_screen_height = h;
 
+    /* Set frustum with following modes:
+     * - Perspective
+     * - Orthographic */
     if (m_perspective_proj)
     {
         const float n = m_camera_dist * 0.1;
         const float f = -m_camera_dist * 2.1;
-        m_frustum.SetVerticalFovAndAspectRatio(DegToRad(m_fov), ar);
+        m_frustum.SetVerticalFovAndAspectRatio(DegToRad(m_fov), ((float)w/h));
         m_frustum.SetViewPlaneDistances(n, f);
         m_scene_width = m_frustum.NearPlaneWidth() / 0.1;
         m_scene_height = m_frustum.NearPlaneHeight() / 0.1;
@@ -174,18 +176,11 @@ void Scene::glResize(int w, int h)
         const float n = -m_camera_dist * 2;
         const float f = m_camera_dist * 2;
         m_scene_width = m_camera_dist / 2;
-        m_scene_height = m_scene_width / ar;
+        m_scene_height = m_scene_width / ((float)w/h);
         m_frustum.SetOrthographic(m_scene_width, m_scene_height);
         m_frustum.SetViewPlaneDistances(n, f);
     }
 
-    /* Set OpenGL Projection Matrix */
-    glViewport(0, 0, m_screen_width, m_screen_height);
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    float4x4 pjm = m_frustum.ProjectionMatrix();
-    pjm.Transpose(); // Covert to colunm major for OpenGL
-    glMultMatrixf(pjm.ptr());
     m_axes.setSize(getSceneWidth());
     resize();
     m_first_resize = false;
@@ -193,13 +188,22 @@ void Scene::glResize(int w, int h)
 
 void Scene::glRender()
 {
+    /* Set projection matrix */
+    float4x4 pjm = m_frustum.ProjectionMatrix();
+    pjm.Transpose(); // Colunm major for OpenGL.
+    glViewport(0, 0, m_screen_width, m_screen_height);
+    glMatrixMode(GL_PROJECTION);
+    glLoadMatrixf(pjm.ptr());
+
+    /* Set modelview matrix */
+    float4x4 mvm = m_frustum.ViewMatrix();
+    mvm.Transpose(); // Colunm major for OpenGL.
     glClearColor(m_bg_col.r / 255.0, m_bg_col.g / 255.0, m_bg_col.b / 255.0, 1);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    float4x4 mvm = m_frustum.ViewMatrix();
-    mvm.Transpose(); // Covert to colunm major for OpenGL
-    glMultMatrixf(mvm.ptr());
+    glLoadMatrixf(mvm.ptr());
+
+    /* Render scene */
     draw();
 }
 

@@ -178,14 +178,18 @@ void Sketcher::resize()
 
 void Sketcher::mouseHovered(int x, int y, int modif)
 {
-    m_picker->pick(vvr::Mousepos{ x, y }, 0, false);
     m_hl->set(x, y, x + 1, y);
     m_vl->set(x, y, x, y + 1);
+    m_picker->pick(vvr::Mousepos{ x, y }, 0, false);
+    if (m_picker->picked()) {
+        cursorHand();
+    } else cursorShow();
 }
 
 void Sketcher::mousePressed(int x, int y, int modif)
 {
     m_picker->pick(vvr::Mousepos{ x, y }, modif, true);
+    if (m_picker->picked()) cursorGrab();
 }
 
 void Sketcher::mouseMoved(int x, int y, int modif)
@@ -193,10 +197,10 @@ void Sketcher::mouseMoved(int x, int y, int modif)
     if (m_grid.visible && !shiftDown(modif)) {
         vvr::snap_to_grid(x, y, m_gs);
     }
-
-    m_hl->set(x, y, x + 1, y);
-    m_vl->set(x, y, x, y + 1);
-
+    {
+        m_hl->set(x, y, x + 1, y);
+        m_vl->set(x, y, x, y + 1);
+    }
     if (m_picker->picked()) {
         m_picker->drag(vvr::Mousepos{ x, y }, modif);
     }
@@ -204,6 +208,7 @@ void Sketcher::mouseMoved(int x, int y, int modif)
 
 void Sketcher::mouseReleased(int x, int y, int modif)
 {
+    if (m_picker->picked()) cursorShow();
     m_picker->drop();
 }
 

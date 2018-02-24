@@ -3,13 +3,13 @@
 
 #include "vvrframework_DLL.h"
 #include "scene.h"
-#include <QtOpenGL>
-#include <QGLWidget>
+#include <QOpenGLWidget>
 #include <QInputEvent>
+#include <QTimer>
 
 namespace vvr {
 
-class VVRFramework_API GlWidget : public QGLWidget
+class VVRFramework_API GlWidget : public QOpenGLWidget
 {
     Q_OBJECT
 

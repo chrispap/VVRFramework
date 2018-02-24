@@ -1,4 +1,5 @@
 #include <ui_demo_window.h>
+#include <QPushButton>
 #include <vvr/glwidget.h>
 #include "Apps/Boxes.cpp"
 #include "Apps/Origami.cpp"

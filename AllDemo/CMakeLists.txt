@@ -15,15 +15,15 @@ file(GLOB APP_SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}
     demo_window.cpp
 )
 
-add_executable(Demo MACOSX_BUNDLE ${APP_SRC_FILES} ${UI_FILES})
-target_link_libraries(Demo Qt5::Widgets Qt5::OpenGL)
-target_link_libraries(Demo
+add_executable(AllDemo MACOSX_BUNDLE ${APP_SRC_FILES} ${UI_FILES})
+target_link_libraries(AllDemo Qt5::Widgets Qt5::OpenGL)
+target_link_libraries(AllDemo
   optimized VVRFramework debug vvrframework_d
   optimized GeoLib debug GeoLib_d
   optimized MathGeoLib debug MathGeoLib_d)
-set_property(TARGET Demo PROPERTY FOLDER "Examples")
+set_property(TARGET AllDemo PROPERTY FOLDER "Examples")
 if(HIDE_CONSOLE_WINDOW AND WIN32 AND MSVC)
-  set_target_properties(Demo PROPERTIES LINK_FLAGS "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
+  set_target_properties(AllDemo PROPERTIES LINK_FLAGS "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
 endif()
 
 include_directories(${CMAKE_SOURCE_DIR}/include)
