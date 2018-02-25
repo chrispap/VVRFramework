@@ -15,7 +15,7 @@ using std::endl;
 
 QString vvr::Window::aboutMessage = QString("Chris Papapavlou | chrispapapaulou@gmail.com ") + QString(QChar(0xA9));
 
-vvr::Window::Window(vvr::Scene *scene) : scene(scene)
+vvr::Window::Window(vvr::Scene *scene) : m_scene(scene)
 {
     setupUi(this);
     setWindowTitle(tr(scene->getName()));
@@ -33,13 +33,13 @@ vvr::Window::Window(vvr::Scene *scene) : scene(scene)
     connect(this, SIGNAL(log_cerr(const QString&)), this, SLOT(do_log_cerr(const QString&)));
 
     // Init glwidget
-    glWidget = new vvr::GlWidget(scene);
-    scrollArea->setWidget(glWidget);
+    m_glwidget = new vvr::GlWidget(scene);
+    scrollArea->setWidget(m_glwidget);
     scrollArea->setWidgetResizable(true);
     scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-    connect(this, SIGNAL(keyPressed(QKeyEvent*)), glWidget, SLOT(onKeyPressed(QKeyEvent*)));
+    connect(this, SIGNAL(keyPressed(QKeyEvent*)), m_glwidget, SLOT(onKeyPressed(QKeyEvent*)));
     connect(horizontalSlider_0, SIGNAL(valueChanged(int)), this, SLOT(sliderMoved(int)));
     connect(horizontalSlider_1, SIGNAL(valueChanged(int)), this, SLOT(sliderMoved(int)));
     connect(horizontalSlider_2, SIGNAL(valueChanged(int)), this, SLOT(sliderMoved(int)));
@@ -101,14 +101,14 @@ void vvr::Window::createMenus()
 
 void vvr::Window::about()
 {
-    QMessageBox::about(this, scene->getName(), aboutMessage);
+    QMessageBox::about(this, m_scene->getName(), aboutMessage);
 }
 
 void vvr::Window::sliderMoved(int val)
 {
     const int id = std::stoi(vvr::split(sender()->objectName().toStdString(), '_').back());
-    scene->sliderChanged(id, val / 100.0f);
-    glWidget->update();
+    m_scene->sliderChanged(id, val / 100.0f);
+    m_glwidget->update();
 }
 
 void vvr::Window::keyPressEvent(QKeyEvent* event)
@@ -119,7 +119,7 @@ void vvr::Window::keyPressEvent(QKeyEvent* event)
 
 void vvr::Window::focusToGlWidget()
 {
-    glWidget->setFocus();
+    m_glwidget->setFocus();
 }
 
 void vvr::Window::s_log_cout(const char* ptr, std::streamsize count, void* pte)

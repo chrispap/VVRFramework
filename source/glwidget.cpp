@@ -22,22 +22,22 @@ void vvr::get_mouse_xy(int &x, int &y)
 /*--------------------------------------------------------------------------------------*/
 vvr::GlWidget::GlWidget(vvr::Scene *scene, QWidget *parent) : QOpenGLWidget(parent)
 {
-    mScene = scene;
-    mTimer.setSingleShot(true);
-    connect(&mTimer, SIGNAL(timeout()), this, SLOT(idle()));
-    mTimer.start(0);
+    m_scene = scene;
+    m_timer.setSingleShot(true);
+    connect(&m_timer, SIGNAL(timeout()), this, SLOT(idle()));
+    m_timer.start(0);
     setMouseTracking(true);
     s_widget_ptr = this;
 }
 
 vvr::GlWidget::~GlWidget()
 {
-    delete mScene;
+    delete m_scene;
 }
 
 void vvr::GlWidget::setScene(vvr::Scene *scene)
 {
-    mScene = scene;
+    m_scene = scene;
     resizeGL(width(), height());
     idle();
 }
@@ -45,26 +45,26 @@ void vvr::GlWidget::setScene(vvr::Scene *scene)
 /*---[OpenGL]---------------------------------------------------------------------------*/
 void vvr::GlWidget::initializeGL()
 {
-    mScene->glInit();
+    m_scene->glInit();
 }
 
 void vvr::GlWidget::paintGL()
 {
-    mScene->glRender();
+    m_scene->glRender();
 }
 
 void vvr::GlWidget::resizeGL(int width, int height)
 {
-    mScene->glResize(width, height);
+    m_scene->glResize(width, height);
 }
 
 /*---[Events]---------------------------------------------------------------------------*/
 void vvr::GlWidget::idle()
 {
-    if (!mScene->idle()) {
-        mTimer.stop();
-    } else if (!mTimer.isActive()) {
-        mTimer.start(0);
+    if (!m_scene->idle()) {
+        m_timer.stop();
+    } else if (!m_timer.isActive()) {
+        m_timer.start(0);
     }
     update();
 }
@@ -75,8 +75,8 @@ void vvr::GlWidget::mousePressEvent(QMouseEvent *event)
     {
         int x = event->x();
         int y = event->y();
-        mScene->mouse2pix(x, y);
-        mScene->mousePressed(x, y, mkModif(event));
+        m_scene->mouse2pix(x, y);
+        m_scene->mousePressed(x, y, mkModif(event));
         setFocus();
         idle();
     }
@@ -88,8 +88,8 @@ void vvr::GlWidget::mouseReleaseEvent(QMouseEvent *event)
     {
         int x = event->x();
         int y = event->y();
-        mScene->mouse2pix(x, y);
-        mScene->mouseReleased(x, y, mkModif(event));
+        m_scene->mouse2pix(x, y);
+        m_scene->mouseReleased(x, y, mkModif(event));
         setFocus();
         idle();
     }
@@ -99,14 +99,14 @@ void vvr::GlWidget::mouseMoveEvent(QMouseEvent *event)
 {
     int x = event->x();
     int y = event->y();
-    mScene->mouse2pix(x, y);
+    m_scene->mouse2pix(x, y);
 
     if (event->buttons() & Qt::LeftButton) {
-        mScene->mouseMoved(x, y, mkModif(event));
+        m_scene->mouseMoved(x, y, mkModif(event));
         event->accept();
     }
     else if (event->buttons() == Qt::NoButton) {
-        mScene->mouseHovered(x, y, mkModif(event));
+        m_scene->mouseHovered(x, y, mkModif(event));
         event->accept();
     }
     else return;
@@ -116,7 +116,7 @@ void vvr::GlWidget::mouseMoveEvent(QMouseEvent *event)
 
 void vvr::GlWidget::wheelEvent(QWheelEvent *event)
 {
-    mScene->mouseWheel(event->delta()>0?1:-1, mkModif(event));
+    m_scene->mouseWheel(event->delta()>0?1:-1, mkModif(event));
     idle();
 }
 
@@ -130,12 +130,12 @@ void vvr::GlWidget::onKeyPressed(QKeyEvent *event)
     int modif = mkModif(event);
     QString txt = event->text();
     if (event->key() == Qt::Key_Escape) QApplication::quit();
-    else if (event->key() >= Qt::Key_A && event->key() <= Qt::Key_Z) mScene->keyEvent(tolower(event->key()), false, modif);
-    else if (txt.length()>0) mScene->keyEvent(txt.toStdString()[0],false, modif);
-    else if (event->key() == Qt::Key_Left) mScene->arrowEvent(vvr::LEFT, modif);
-    else if (event->key() == Qt::Key_Right) mScene->arrowEvent(vvr::RIGHT, modif);
-    else if (event->key() == Qt::Key_Up) mScene->arrowEvent(vvr::UP, modif);
-    else if (event->key() == Qt::Key_Down) mScene->arrowEvent(vvr::DOWN, modif);
+    else if (event->key() >= Qt::Key_A && event->key() <= Qt::Key_Z) m_scene->keyEvent(tolower(event->key()), false, modif);
+    else if (txt.length()>0) m_scene->keyEvent(txt.toStdString()[0],false, modif);
+    else if (event->key() == Qt::Key_Left) m_scene->arrowEvent(vvr::LEFT, modif);
+    else if (event->key() == Qt::Key_Right) m_scene->arrowEvent(vvr::RIGHT, modif);
+    else if (event->key() == Qt::Key_Up) m_scene->arrowEvent(vvr::UP, modif);
+    else if (event->key() == Qt::Key_Down) m_scene->arrowEvent(vvr::DOWN, modif);
     idle();
 }
 

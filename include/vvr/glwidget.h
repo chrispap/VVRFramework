@@ -36,8 +36,8 @@ private:
     static int mkModif(QInputEvent *event);
 
 private:
-    Scene *mScene;
-    QTimer mTimer;
+    Scene *m_scene;
+    QTimer m_timer;
 };
 
 }

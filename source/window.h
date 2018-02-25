@@ -41,8 +41,8 @@ private:
     QAction *aboutAct;
     StdRedirector<> *m_std_cout_logger;
     StdRedirector<> *m_std_cerr_logger;
-    GlWidget *glWidget;
-    Scene *scene;
+    GlWidget *m_glwidget;
+    Scene *m_scene;
 
     /* Static callbacks for StdRedirector */
     static void s_log_cout(const char* ptr, std::streamsize count, void*);
