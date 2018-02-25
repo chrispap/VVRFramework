@@ -12,10 +12,13 @@ static QWidget *s_widget_ptr;
 
 static int make_modifier_flag(QInputEvent *event)
 {
+    int modif = 0;
     bool ctrl  = event->modifiers() & Qt::ControlModifier;
     bool shift = event->modifiers() & Qt::ShiftModifier;
     bool alt   = event->modifiers() & Qt::AltModifier;
-    bool modif = (ctrl << 0) | (shift << 1) | (alt << 2);
+    modif |= (ctrl  << 0);
+    modif |= (shift << 1);
+    modif |= (alt   << 2);
     return modif;
 }
 
