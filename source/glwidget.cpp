@@ -6,6 +6,19 @@
 #include <QTimer>
 #include <cmath>
 
+static int s_mouse_x;
+static int s_mouse_y;
+static QWidget *s_widget_ptr;
+
+void vvr::get_mouse_xy(int &x, int &y)
+{
+    x = s_mouse_x;
+    y = s_mouse_y;
+    QPoint p = s_widget_ptr->mapFromGlobal(QCursor::pos());
+    x = p.x();
+    y = p.y();
+}
+
 /*--------------------------------------------------------------------------------------*/
 vvr::GlWidget::GlWidget(vvr::Scene *scene, QWidget *parent) : QOpenGLWidget(parent)
 {
@@ -14,6 +27,7 @@ vvr::GlWidget::GlWidget(vvr::Scene *scene, QWidget *parent) : QOpenGLWidget(pare
     connect(&mTimer, SIGNAL(timeout()), this, SLOT(idle()));
     mTimer.start(0);
     setMouseTracking(true);
+    s_widget_ptr = this;
 }
 
 vvr::GlWidget::~GlWidget()

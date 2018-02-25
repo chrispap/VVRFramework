@@ -104,6 +104,8 @@ namespace vvr {
     };
 
     int VVRFramework_API main_with_scene(int argc, char* argv[], Scene *scene);
+
+    void VVRFramework_API get_mouse_xy(int &x, int &y);
 }
 
 #endif
