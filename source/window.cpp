@@ -20,26 +20,24 @@ vvr::Window::Window(vvr::Scene *scene) : m_scene(scene)
     setupUi(this);
     setWindowTitle(tr(scene->getName()));
 
-    // Set commands availabe to scene
+    /* Set commands availabe to scene */
     scene->cursorShow.add(new vvr::SimpleCmd<Window>(this, &Window::cursor_show));
     scene->cursorHide.add(new vvr::SimpleCmd<Window>(this, &Window::cursor_hide));
     scene->cursorHand.add(new vvr::SimpleCmd<Window>(this, &Window::cursor_hand));
     scene->cursorGrab.add(new vvr::SimpleCmd<Window>(this, &Window::cursor_grab));
 
-    // Redirect std::cout to our custom logging widget
+    /* Redirect std::cout to our custom logging widget */
     m_std_cout_logger = new StdRedirector<>(std::cout, &Window::s_log_cout, this);
     m_std_cerr_logger = new StdRedirector<>(std::cerr, &Window::s_log_cerr, this);
-    connect(this, SIGNAL(log_cout(const QString&)), this, SLOT(do_log_cout(const QString&)));
-    connect(this, SIGNAL(log_cerr(const QString&)), this, SLOT(do_log_cerr(const QString&)));
 
-    // Init glwidget
+    /* Init glwidget */
     m_glwidget = new vvr::GlWidget(scene);
+    installEventFilter(m_glwidget);
     scrollArea->setWidget(m_glwidget);
     scrollArea->setWidgetResizable(true);
     scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
-    connect(this, SIGNAL(keyPressed(QKeyEvent*)), m_glwidget, SLOT(onKeyPressed(QKeyEvent*)));
     connect(horizontalSlider_0, SIGNAL(valueChanged(int)), this, SLOT(sliderMoved(int)));
     connect(horizontalSlider_1, SIGNAL(valueChanged(int)), this, SLOT(sliderMoved(int)));
     connect(horizontalSlider_2, SIGNAL(valueChanged(int)), this, SLOT(sliderMoved(int)));
@@ -77,24 +75,22 @@ vvr::Window::Window(vvr::Scene *scene) : m_scene(scene)
 
 void vvr::Window::createActions()
 {
-    // exit action
+    //! Action Exit
     exitAct = new QAction(tr("E&xit"), this);
     exitAct->setShortcuts(QKeySequence::Quit);
     connect(exitAct, SIGNAL(triggered()), this, SLOT(close()));
-
-    // about action
+    //! Action About
     aboutAct = new QAction(tr("&About"), this);
     connect(aboutAct, SIGNAL(triggered()), this, SLOT(about()));
 }
 
 void vvr::Window::createMenus()
 {
-    // file menu
+    //! Menu: File
     fileMenu = QMainWindow::menuBar()->addMenu(tr("&File"));
     fileMenu->addSeparator();
     fileMenu->addAction(exitAct);
-
-    // help menu
+    //! Menu: Help
     helpMenu = QMainWindow::menuBar()->addMenu(tr("&Help"));
     helpMenu->addAction(aboutAct);
 }
@@ -109,12 +105,6 @@ void vvr::Window::sliderMoved(int val)
     const int id = std::stoi(vvr::split(sender()->objectName().toStdString(), '_').back());
     m_scene->sliderChanged(id, val / 100.0f);
     m_glwidget->update();
-}
-
-void vvr::Window::keyPressEvent(QKeyEvent* event)
-{
-    std::string str = event->text().toStdString();
-    if (str.length() > 0) emit keyPressed(event);
 }
 
 void vvr::Window::focusToGlWidget()
@@ -138,7 +128,7 @@ void vvr::Window::s_log_cerr(const char* ptr, std::streamsize count, void* pte)
     window->log_cerr(str);
 }
 
-void vvr::Window::do_log_cout(const QString &str)
+void vvr::Window::log_cout(const QString &str)
 {
     QScrollBar *vScrollBar = plain_text_log->verticalScrollBar();
     const bool keep_on_bottom = vScrollBar->value() == vScrollBar->maximum();
@@ -160,7 +150,7 @@ void vvr::Window::do_log_cout(const QString &str)
     }
 }
 
-void vvr::Window::do_log_cerr(const QString &str)
+void vvr::Window::log_cerr(const QString &str)
 {
     QScrollBar *vScrollBar = plain_text_log->verticalScrollBar();
     const bool keep_on_bottom = vScrollBar->value() == vScrollBar->maximum();

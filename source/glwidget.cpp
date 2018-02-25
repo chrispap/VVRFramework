@@ -10,6 +10,15 @@ static int s_mouse_x;
 static int s_mouse_y;
 static QWidget *s_widget_ptr;
 
+static int make_modifier_flag(QInputEvent *event)
+{
+    bool ctrl  = event->modifiers() & Qt::ControlModifier;
+    bool shift = event->modifiers() & Qt::ShiftModifier;
+    bool alt   = event->modifiers() & Qt::AltModifier;
+    bool modif = (ctrl << 0) | (shift << 1) | (alt << 2);
+    return modif;
+}
+
 void vvr::get_mouse_xy(int &x, int &y)
 {
     x = s_mouse_x;
@@ -25,9 +34,9 @@ vvr::GlWidget::GlWidget(vvr::Scene *scene, QWidget *parent) : QOpenGLWidget(pare
     m_scene = scene;
     m_timer.setSingleShot(true);
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(idle()));
-    m_timer.start(0);
-    setMouseTracking(true);
     s_widget_ptr = this;
+    setMouseTracking(true);
+    m_timer.start(100);
 }
 
 vvr::GlWidget::~GlWidget()
@@ -71,12 +80,11 @@ void vvr::GlWidget::idle()
 
 void vvr::GlWidget::mousePressEvent(QMouseEvent *event)
 {
-    if (event->button() == Qt::LeftButton)
-    {
+    if (event->button() == Qt::LeftButton) {
         int x = event->x();
         int y = event->y();
         m_scene->mouse2pix(x, y);
-        m_scene->mousePressed(x, y, mkModif(event));
+        m_scene->mousePressed(x, y, make_modifier_flag(event));
         setFocus();
         idle();
     }
@@ -84,12 +92,11 @@ void vvr::GlWidget::mousePressEvent(QMouseEvent *event)
 
 void vvr::GlWidget::mouseReleaseEvent(QMouseEvent *event)
 {
-    if (event->button() == Qt::LeftButton)
-    {
+    if (event->button() == Qt::LeftButton) {
         int x = event->x();
         int y = event->y();
         m_scene->mouse2pix(x, y);
-        m_scene->mouseReleased(x, y, mkModif(event));
+        m_scene->mouseReleased(x, y, make_modifier_flag(event));
         setFocus();
         idle();
     }
@@ -102,32 +109,25 @@ void vvr::GlWidget::mouseMoveEvent(QMouseEvent *event)
     m_scene->mouse2pix(x, y);
 
     if (event->buttons() & Qt::LeftButton) {
-        m_scene->mouseMoved(x, y, mkModif(event));
+        m_scene->mouseMoved(x, y, make_modifier_flag(event));
         event->accept();
-    }
-    else if (event->buttons() == Qt::NoButton) {
-        m_scene->mouseHovered(x, y, mkModif(event));
+    } else if (event->buttons() == Qt::NoButton) {
+        m_scene->mouseHovered(x, y, make_modifier_flag(event));
         event->accept();
-    }
-    else return;
+    } else return;
 
     update();
 }
 
 void vvr::GlWidget::wheelEvent(QWheelEvent *event)
 {
-    m_scene->mouseWheel(event->delta()>0?1:-1, mkModif(event));
+    m_scene->mouseWheel(event->delta()>0?1:-1, make_modifier_flag(event));
     idle();
 }
 
 void vvr::GlWidget::keyPressEvent(QKeyEvent *event)
 {
-    onKeyPressed(event);
-}
-
-void vvr::GlWidget::onKeyPressed(QKeyEvent *event)
-{
-    int modif = mkModif(event);
+    int modif = make_modifier_flag(event);
     QString txt = event->text();
     if (event->key() == Qt::Key_Escape) QApplication::quit();
     else if (event->key() >= Qt::Key_A && event->key() <= Qt::Key_Z) m_scene->keyEvent(tolower(event->key()), false, modif);
@@ -139,12 +139,12 @@ void vvr::GlWidget::onKeyPressed(QKeyEvent *event)
     idle();
 }
 
-int vvr::GlWidget::mkModif(QInputEvent *event)
+bool vvr::GlWidget::eventFilter(QObject *obj, QEvent *event)
 {
-    int ctrl  = event->modifiers() & Qt::ControlModifier ? 1 : 0;
-    int shift = event->modifiers() & Qt::ShiftModifier   ? 1 : 0;
-    int alt   = event->modifiers() & Qt::AltModifier     ? 1 : 0;
-    int modif = (ctrl << 0) | (shift << 1) | (alt << 2) ;
-    return modif;
+    if (event->type() == QEvent::KeyPress) {
+        QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
+        keyPressEvent(keyEvent);
+        return true;
+    } else return false;
 }
 /*--------------------------------------------------------------------------------------*/

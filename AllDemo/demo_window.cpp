@@ -62,6 +62,8 @@ DemoWindow::DemoWindow()
 
     /* Set initial scene */
     SetScene(scns[0]);
+    installEventFilter(glw);
+    glw->setFocus();
 }
 
 void DemoWindow::SetScene(vvr::Scene *scene)

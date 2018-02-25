@@ -20,19 +20,13 @@ public:
     void cursor_hand();
     void cursor_grab();
 
-signals:
-    void keyPressed(QKeyEvent *event);
-    void log_cout(const QString &str);
-    void log_cerr(const QString &str);
-
 private slots:
     void about();
     void sliderMoved(int val);
-    void keyPressEvent(QKeyEvent* event) override;
     void createActions();
     void createMenus();
-    void do_log_cout(const QString &str);
-    void do_log_cerr(const QString &str);
+    void log_cout(const QString &str);
+    void log_cerr(const QString &str);
 
 private:
     QMenu *fileMenu;
@@ -44,6 +38,7 @@ private:
     GlWidget *m_glwidget;
     Scene *m_scene;
 
+private:
     /* Static callbacks for StdRedirector */
     static void s_log_cout(const char* ptr, std::streamsize count, void*);
     static void s_log_cerr(const char* ptr, std::streamsize count, void*);

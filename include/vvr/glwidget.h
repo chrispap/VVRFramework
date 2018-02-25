@@ -16,24 +16,21 @@ class VVRFramework_API GlWidget : public QOpenGLWidget
 public:
     GlWidget(vvr::Scene *scene=0, QWidget *parent = 0);
     ~GlWidget();
-    void setScene(vvr::Scene *scene);
 
 public slots:
     void idle();
-    void onKeyPressed(QKeyEvent *event);
+    void setScene(vvr::Scene *scene);
 
 protected:
     void initializeGL() override;
     void paintGL() override;
     void resizeGL(int w, int h) override;
-    void mousePressEvent(QMouseEvent *event) override;
-    void mouseReleaseEvent(QMouseEvent *event) override;
-    void mouseMoveEvent(QMouseEvent *event) override;
-    void wheelEvent(QWheelEvent *event) override;
-    void keyPressEvent(QKeyEvent *event) override;
-
-private:
-    static int mkModif(QInputEvent *event);
+    void mousePressEvent(QMouseEvent*) override;
+    void mouseReleaseEvent(QMouseEvent*) override;
+    void mouseMoveEvent(QMouseEvent*) override;
+    void wheelEvent(QWheelEvent*) override;
+    void keyPressEvent(QKeyEvent*) override;
+    bool eventFilter(QObject*, QEvent*) override;
 
 private:
     Scene *m_scene;

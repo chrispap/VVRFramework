@@ -37,7 +37,6 @@ TutorialScene::TutorialScene()
 
 void TutorialScene::draw()
 {
-    cout << "Drawing" << endl;
     enterPixelMode();
     m_canvas.draw();
     exitPixelMode();
