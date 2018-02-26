@@ -5,7 +5,7 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
-#include <QtOpenGL>
+#include <gl.h>
 
 using vvr::real;
 using math::vec;

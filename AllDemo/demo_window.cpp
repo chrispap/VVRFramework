@@ -10,6 +10,7 @@
 #include "Apps/ArmJoint.cpp"
 #include "Apps/Simple2D.cpp"
 #include "Apps/Simple3D.cpp"
+#include "Apps/Tutorial.cpp"
 #include "Apps/KDTrees.cpp"
 #include "GeoLab/Molding.cpp"
 #include "GeoLab/Triangulation.cpp"
@@ -32,12 +33,8 @@ private:
     std::vector<vvr::Scene*> scns;
 };
 
-/*--------------------------------------------------------------------------------------*/
-DemoWindow::DemoWindow()
+static void gather_available_scenes(std::vector<vvr::Scene*> &scns)
 {
-    ui.setupUi(this);
-    glw = nullptr;
-
     scns.push_back(new OrigamiScene);
     scns.push_back(new BoxesScene);
     scns.push_back(new HelixScene);
@@ -51,7 +48,17 @@ DemoWindow::DemoWindow()
     scns.push_back(new TriangulationScene);
     scns.push_back(new Mesh3DScene);
     scns.push_back(new KDTreeScene);
+    scns.push_back(new TutorialScene);
     scns.push_back(new TavliScene(tavli::GetDefaultColours()));
+}
+
+/*--------------------------------------------------------------------------------------*/
+DemoWindow::DemoWindow()
+{
+    ui.setupUi(this);
+    glw = nullptr;
+
+    gather_available_scenes(scns);
 
     /* Add scenes to list */
     for (auto s : scns) {
@@ -80,7 +87,7 @@ int main(int argc, char* argv[])
 {
     QApplication app(argc, argv);
     DemoWindow demowin;
-    demowin.showMaximized();
+    demowin.show();//Maximized();
     app.exec();
 }
 

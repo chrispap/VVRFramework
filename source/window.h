@@ -39,7 +39,6 @@ private:
     Scene *m_scene;
 
 private:
-    /* Static callbacks for StdRedirector */
     static void s_log_cout(const char* ptr, std::streamsize count, void*);
     static void s_log_cerr(const char* ptr, std::streamsize count, void*);
     static QString aboutMessage;

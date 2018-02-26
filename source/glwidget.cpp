@@ -1,10 +1,21 @@
 #include <vvr/glwidget.h>
 #include <vvr/scene.h>
+#include <cmath>
 #include <iostream>
 #include <QApplication>
+#include <QOpenGLContext>
 #include <QMouseEvent>
 #include <QTimer>
-#include <cmath>
+#include <gl.h>
+
+#if 0
+#define PRINT_TIME_FROM_FUNCTION(msg) \
+    std::cout << (getSeconds()*1000)  << "msec - " << \
+    __FUNCTION__ <<  \
+    " ("<< msg << ")\n";
+#else
+#define PRINT_TIME_FROM_FUNCTION(msg) (void)(0)
+#endif
 
 static int s_mouse_x;
 static int s_mouse_y;
@@ -34,6 +45,15 @@ void vvr::get_mouse_xy(int &x, int &y)
 /*--------------------------------------------------------------------------------------*/
 vvr::GlWidget::GlWidget(vvr::Scene *scene, QWidget *parent) : QOpenGLWidget(parent)
 {
+#if 0
+    QSurfaceFormat format;
+    format.setVersion(4,3);
+    format.setSamples(4);
+    format.setProfile(QSurfaceFormat::NoProfile);
+    format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
+    format.setSwapInterval(0);
+    setFormat(format);
+#endif
     m_scene = scene;
     m_timer.setSingleShot(true);
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(idle()));
@@ -62,7 +82,9 @@ void vvr::GlWidget::initializeGL()
 
 void vvr::GlWidget::paintGL()
 {
+    PRINT_TIME_FROM_FUNCTION("In");
     m_scene->glRender();
+    PRINT_TIME_FROM_FUNCTION("Out");
 }
 
 void vvr::GlWidget::resizeGL(int width, int height)
@@ -107,19 +129,23 @@ void vvr::GlWidget::mouseReleaseEvent(QMouseEvent *event)
 
 void vvr::GlWidget::mouseMoveEvent(QMouseEvent *event)
 {
+    PRINT_TIME_FROM_FUNCTION("In");
     int x = event->x();
     int y = event->y();
     m_scene->mouse2pix(x, y);
 
     if (event->buttons() & Qt::LeftButton) {
         m_scene->mouseMoved(x, y, make_modifier_flag(event));
-        event->accept();
     } else if (event->buttons() == Qt::NoButton) {
         m_scene->mouseHovered(x, y, make_modifier_flag(event));
-        event->accept();
-    } else return;
+    } else {
+        event->ignore();
+        return;
+    }
 
     update();
+    event->accept();
+    PRINT_TIME_FROM_FUNCTION("Out");
 }
 
 void vvr::GlWidget::wheelEvent(QWheelEvent *event)

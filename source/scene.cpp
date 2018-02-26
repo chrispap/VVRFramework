@@ -9,8 +9,8 @@
 #include <algorithm>
 #include <locale>
 #include <cmath>
-#include <QtOpenGL>
 #include <cassert>
+#include <gl.h>
 
 using namespace vvr;
 using namespace std;

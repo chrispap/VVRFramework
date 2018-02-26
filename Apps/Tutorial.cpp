@@ -13,7 +13,7 @@ struct TutorialScene : public vvr::Scene
 {
     TutorialScene();
 private:
-    const char* getName() const override { return "VVRFramework Tutorial"; }
+    const char* getName() const override { return "Simple tutorial"; }
     void draw() override;
     void reset() override;
     void mousePressed(int x, int y, int modif) override;
@@ -55,8 +55,6 @@ void TutorialScene::mousePressed(int x, int y, int modif)
 
 void TutorialScene::mouseMoved(int x, int y, int modif)
 {
-    cout << "Mouse moved   - [" << x << ", " << y << "]" << endl;
-
     C2DPoint p2(x,y);
     m_canvas.add(p1, p2);
     m_canvas.add(p1, vvr::darkRed);

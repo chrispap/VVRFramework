@@ -9,8 +9,9 @@
 #include <vector>
 #include <list>
 #include <set>
-#include <QtOpenGL>
 #include <QFile>
+#include <QTextStream>
+#include <gl.h>
 
 using namespace std;
 using namespace vvr;

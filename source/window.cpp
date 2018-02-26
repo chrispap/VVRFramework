@@ -2,7 +2,6 @@
 #include <vvr/glwidget.h>
 #include <vvr/scene.h>
 #include <vvr/command.h>
-#include <QtOpenGL>
 #include <QtWidgets>
 #include <QPushButton>
 #include <QLabel>
@@ -201,7 +200,7 @@ int vvr::main_with_scene(int argc, char* argv[], vvr::Scene *scene)
     app.processEvents();
     Window win(scene);
     splash.close();
-    win.showMaximized();
+    win.show();//Maximized();
     win.focusToGlWidget();
     app.setOverrideCursor(Qt::CrossCursor);
     app.exec();
