@@ -3,6 +3,7 @@
 
 #include "vvrframework_DLL.h"
 #include "utils.h"
+#include "palette.h"
 #include "macros.h"
 #include <MathGeoLib.h>
 #include <GeoLib.h>
@@ -12,110 +13,14 @@
 #include <cstdlib>
 #include <utility>
 
-namespace vvr {
-
+namespace vvr
+{
     /*------------------------------------------------------------------------[types]---*/
-
     typedef float real;
     using math::vec;
     struct Canvas;
 
-    /*-----------------------------------------------------------------------[Colour]---*/
-
-    struct VVRFramework_API Colour
-    {
-        Colour()
-            : r(0)
-            , g(0)
-            , b(0)
-            , a(255)
-        { }
-
-        Colour(unsigned val)
-            : r((unsigned char)((val & 0xFF0000) >> 16))
-            , g((unsigned char)((val & 0x00FF00) >>  8))
-            , b((unsigned char)((val & 0x0000FF) >>  0))
-            , a(255)
-        { }
-
-        Colour(int r, int g, int b)
-            : r((unsigned char)r)
-            , g((unsigned char)g)
-            , b((unsigned char)b)
-            , a(255)
-        { }
-
-        Colour(float r, float g, float b)
-            : r((unsigned char)(r * 0xFF))
-            , g((unsigned char)(g * 0xFF))
-            , b((unsigned char)(b * 0xFF))
-            , a(255)
-        { }
-
-        Colour(std::string hex_str)
-            : r(strtol(hex_str.substr(0, 2).c_str(), 0, 16))
-            , g(strtol(hex_str.substr(2, 2).c_str(), 0, 16))
-            , b(strtol(hex_str.substr(4, 2).c_str(), 0, 16))
-            , a(255)
-        { }
-
-        void add(unsigned char val)
-        {
-            r = std::min(0xFF, (int)r + val);
-            g = std::min(0xFF, (int)g + val);
-            b = std::min(0xFF, (int)b + val);
-        }
-
-        void sub(unsigned char val)
-        {
-            r = std::max(0x00, (int)r - val);
-            g = std::max(0x00, (int)g - val);
-            b = std::max(0x00, (int)b - val);
-        }
-
-        void mul(float c)
-        {
-            r = std::min((int)(c * r), 0xFF);
-            g = std::min((int)(c * g), 0xFF);
-            b = std::min((int)(c * b), 0xFF);
-        }
-
-        void lighter()
-        {
-            add(55);
-        }
-
-        void darker()
-        {
-            sub(55);
-        }
-
-        union
-        {
-            struct { unsigned char r, g, b, a; };
-            unsigned char data[4];
-        };
-
-    };
-
-    extern const VVRFramework_API Colour white;
-    extern const VVRFramework_API Colour red;
-    extern const VVRFramework_API Colour green;
-    extern const VVRFramework_API Colour blue;
-    extern const VVRFramework_API Colour black;
-    extern const VVRFramework_API Colour yellow;
-    extern const VVRFramework_API Colour grey;
-    extern const VVRFramework_API Colour orange;
-    extern const VVRFramework_API Colour cyan;
-    extern const VVRFramework_API Colour magenta;
-    extern const VVRFramework_API Colour darkOrange;
-    extern const VVRFramework_API Colour darkRed;
-    extern const VVRFramework_API Colour darkGreen;
-    extern const VVRFramework_API Colour yellowGreen;
-    extern const VVRFramework_API Colour lilac;
-
     /*----------------------------------------------------------------------[Helpers]---*/
-
     math::AABB aabbFromVertices(const std::vector<vec> &vertices);
 
     VVRFramework_API void draw(C2DPointSet &point_set, Colour col = Colour());
@@ -125,7 +30,6 @@ namespace vvr {
     VVRFramework_API void draw(C2DPolygon &polygon, Colour col = Colour(), bool filled = false);
 
     /*--------------------------------------------------------------------[Drawables]---*/
-
     struct VVRFramework_API Drawable
     {
         virtual ~Drawable() { }
@@ -204,8 +108,7 @@ namespace vvr {
         Drawable* add(const C2DTriangle &tri, Colour col = Colour(), bool solid = false);
     };
 
-    /*---[Shapes: 2D]---*/
-
+    /*---[Shapes: 2D]-------------------------------------------------------------------*/
     struct VVRFramework_API Point2D     : Shape
     {
         real x, y;
@@ -362,8 +265,7 @@ namespace vvr {
         }
     };
 
-    /*---[Shapes: 3D]---*/
-
+    /*---[Shapes: 3D]-------------------------------------------------------------------*/
     struct VVRFramework_API Point3D     : Shape, math::vec
     {
         vvr_decl_shape(Point3D, vec, false)
@@ -562,8 +464,7 @@ namespace vvr {
         }
     };
 
-    /*---[Widgets]---*/
-
+    /*---[Widgets]----------------------------------------------------------------------*/
     struct VVRFramework_API Ground      : Drawable
     {
         Ground(const real W, const real D, const real B, const real T, Colour colour);
@@ -598,8 +499,7 @@ namespace vvr {
         LineSeg3D x, y, z;
     };
 
-    /*---[Composite]---*/
-
+    /*---[Composite]--------------------------------------------------------------------*/
     template <class WholeT, class BlockT, size_t N>
     struct Composite : public Drawable
     {
@@ -656,7 +556,6 @@ namespace vvr {
     typedef Composite<Triangle3D, Point3D, 3> CompositeTriangle;
 
     typedef Composite<LineSeg3D, Point3D, 2> CompositeLine;
-
     /*----------------------------------------------------------------------------------*/
 }
 

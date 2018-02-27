@@ -13,22 +13,6 @@ using math::vec;
 real vvr::Shape::LineWidth = 2.2f;
 real vvr::Shape::PointSize = 7.0f;
 
-const vvr::Colour vvr::red(0xFF, 0x00, 0x00);
-const vvr::Colour vvr::blue(0x00, 0x00, 0xFF);
-const vvr::Colour vvr::grey(0x66, 0x66, 0x66);
-const vvr::Colour vvr::cyan(0x00, 0xFF, 0xFF);
-const vvr::Colour vvr::white(0xFF, 0xFF, 0xFF);
-const vvr::Colour vvr::green(0x00, 0xFF, 0x00);
-const vvr::Colour vvr::black(0x00, 0x00, 0x00);
-const vvr::Colour vvr::yellow(0xFF, 0xFF, 0x00);
-const vvr::Colour vvr::orange(0xFF, 0x66, 0x00);
-const vvr::Colour vvr::magenta(0xFF, 0x00, 0xFF);
-const vvr::Colour vvr::darkRed(0x8B, 0x00, 0x00);
-const vvr::Colour vvr::darkOrange(0xFF, 0x8C, 0x00);
-const vvr::Colour vvr::darkGreen(0x00, 0x64, 0x00);
-const vvr::Colour vvr::yellowGreen(0x9A, 0xCD, 0x32);
-const vvr::Colour vvr::lilac(0xCD, 0xA9, 0xCD);
-
 /*---[Helpers]---*/
 
 math::AABB vvr::aabbFromVertices(const std::vector<vec> &vertices)
