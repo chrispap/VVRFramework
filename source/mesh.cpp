@@ -11,7 +11,7 @@
 #include <set>
 #include <QFile>
 #include <QTextStream>
-#include <gl.h>
+#include <QtGui> //gl.h
 
 using namespace std;
 using namespace vvr;

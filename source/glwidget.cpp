@@ -6,13 +6,12 @@
 #include <QOpenGLContext>
 #include <QMouseEvent>
 #include <QTimer>
-#include <gl.h>
+#include <QtGui> //gl.h
 
 #if 0
 #define PRINT_TIME_FROM_FUNCTION(msg) \
     std::cout << (getSeconds()*1000)  << "msec - " << \
-    __FUNCTION__ <<  \
-    " ("<< msg << ")\n";
+    __FUNCTION__ << " ("<< msg << ")\n";
 #else
 #define PRINT_TIME_FROM_FUNCTION(msg) (void)(0)
 #endif

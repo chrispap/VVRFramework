@@ -10,7 +10,7 @@
 #include <locale>
 #include <cmath>
 #include <cassert>
-#include <gl.h>
+#include <QtGui> //gl.h
 
 using namespace vvr;
 using namespace std;
