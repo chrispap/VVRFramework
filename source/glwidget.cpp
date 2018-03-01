@@ -16,8 +16,6 @@
 #define PRINT_TIME_FROM_FUNCTION(msg) (void)(0)
 #endif
 
-static int s_mouse_x;
-static int s_mouse_y;
 static QWidget *s_widget_ptr;
 
 static int make_modifier_flag(QInputEvent *event)
@@ -34,8 +32,6 @@ static int make_modifier_flag(QInputEvent *event)
 
 void vvr::get_mouse_xy(int &x, int &y)
 {
-    x = s_mouse_x;
-    y = s_mouse_y;
     QPoint p = s_widget_ptr->mapFromGlobal(QCursor::pos());
     x = p.x();
     y = p.y();
