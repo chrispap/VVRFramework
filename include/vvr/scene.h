@@ -103,8 +103,9 @@ namespace vvr {
         friend class Window;
     };
 
-    int VVRFramework_API main_with_scene(int argc, char* argv[], Scene *scene);
-
+    int VVRFramework_API  main_with_scene(int argc, char* argv[], Scene *scene);
+    void VVRFramework_API set_status_bar_msg(const std::string &msg);
+    void VVRFramework_API clear_status_bar();
     void VVRFramework_API get_mouse_xy(int &x, int &y);
 }
 

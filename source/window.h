@@ -8,9 +8,10 @@
 
 namespace vvr {
 
-class VVRFramework_API Window : public QMainWindow, private Ui::MainWindow
+class VVRFramework_API Window : public QMainWindow
 {
     Q_OBJECT
+    Ui::MainWindow ui;
 
 public:
     Window(vvr::Scene *scene);

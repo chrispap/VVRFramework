@@ -271,8 +271,10 @@ void OrigamiScene::mouseHovered(int x, int y, int modif)
 {
     m_picker->pick(unproject(x,y), modif);
     if (m_picker->picked()) {
+        vvr::set_status_bar_msg("Sketch on paper surface");
         cursorHide();
     } else {
+        vvr::clear_status_bar();
         m_dragger->hideCrosshair();
         cursorShow();
     }
