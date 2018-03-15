@@ -2,8 +2,6 @@
 #include <algorithm>
 #include <cmath>
 
-using namespace std;
-
 vvr::dsp::Signal vvr::dsp::smooth(const Signal &in, int window_size)
 {
     Signal out(in.size());
@@ -65,7 +63,7 @@ vvr::dsp::Signal vvr::dsp::threshold(const Signal &in, double threshold)
     return out;
 }
 
-vvr::dsp::Signal vvr::dsp::consecutiveThreshold(const Signal &in, int max_cons_vals)
+vvr::dsp::Signal vvr::dsp::consecutive_threshold(const Signal &in, int max_cons_vals)
 {
     Signal out(in);
 
@@ -84,12 +82,12 @@ vvr::dsp::Signal vvr::dsp::consecutiveThreshold(const Signal &in, int max_cons_v
     return out;
 }
 
-double vvr::dsp::interpSmooth_0_1 (int i, int imax)
+double vvr::dsp::interp_smooth_01 (int i, int imax)
 {
     return sin(1.57079632679489661923 * i / imax);
 }
 
-double vvr::dsp::interpLinear (double x0, double x1, double y0, double y1, double x)
+double vvr::dsp::interp_linear (double x0, double x1, double y0, double y1, double x)
 {
     const double dx = x1-x0;
     const double dy = y1-y0;
@@ -97,7 +95,7 @@ double vvr::dsp::interpLinear (double x0, double x1, double y0, double y1, doubl
     return y0 + a * (x-x0);
 }
 
-unsigned vvr::dsp::detectNonZero(const Signal &signal, unsigned offset, double tolerance, bool reverse_dir)
+unsigned vvr::dsp::detect_nonzero(const Signal &signal, unsigned offset, double tolerance, bool reverse_dir)
 {
     if (!reverse_dir)
     {
@@ -119,7 +117,7 @@ unsigned vvr::dsp::detectNonZero(const Signal &signal, unsigned offset, double t
     return offset;
 }
 
-unsigned vvr::dsp::detectZero(const Signal &signal, unsigned offset, double tolerance, bool reverse_dir)
+unsigned vvr::dsp::detect_zero(const Signal &signal, unsigned offset, double tolerance, bool reverse_dir)
 {
     if (!reverse_dir)
     {

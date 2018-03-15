@@ -14,19 +14,39 @@
 
 namespace vvr
 {
-    float VVRFramework_API getSeconds();
-    double VVRFramework_API normalizeAngle(double angle);
-    std::string VVRFramework_API getExePath();
-    std::string VVRFramework_API getBasePath();
-    bool VVRFramework_API mkdir(const std::string &path);
-    bool VVRFramework_API fileExists(const std::string &filename);
-    bool VVRFramework_API dirExists(const std::string &dirname);
-    void VVRFramework_API split(const std::string &s, char delim, std::vector<std::string> &elems);
-    std::vector<std::string> VVRFramework_API split(const std::string &s, char delim);
-    std::string VVRFramework_API zpn(int num, int len);
+    float
+    VVRFramework_API getSeconds();
+
+    double
+    VVRFramework_API normalizeAngle(double angle);
+
+    std::string
+    VVRFramework_API getExePath();
+
+    std::string
+    VVRFramework_API getBasePath();
+
+    bool
+    VVRFramework_API mkdir(const std::string &path);
+
+    bool
+    VVRFramework_API fileExists(const std::string &filename);
+
+    bool
+    VVRFramework_API dirExists(const std::string &dirname);
+
+    void
+    VVRFramework_API split(const std::string &s, char delim, std::vector<std::string> &elems);
+
+    std::vector<std::string>
+    VVRFramework_API split(const std::string &s, char delim);
+
+    std::string
+    VVRFramework_API zpn(int num, int len);
 
 #ifdef __GNUG__
-    std::string VVRFramework_API demangle(const char* name);
+    std::string
+    VVRFramework_API demangle(const char* name);
 
     template <class T>
     std::string typestr(const T& t) { return demangle(typeid(t).name()); }
