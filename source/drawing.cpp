@@ -13,8 +13,7 @@ using math::vec;
 real vvr::Shape::LineWidth = 2.2f;
 real vvr::Shape::PointSize = 7.0f;
 
-/*---[Helpers]---*/
-
+/*---[Helpers]--------------------------------------------------------------------------*/
 math::AABB vvr::aabbFromVertices(const std::vector<vec> &vertices)
 {
     vec lo, hi;
@@ -190,8 +189,7 @@ void vvr::Drawable::addToCanvas(Canvas &canvas)
     canvas.add(this);
 }
 
-/*---[Shape: Drawing]---*/
-
+/*---[Shape: Drawing]-------------------------------------------------------------------*/
 void vvr::Shape::draw() const
 {
     glPolygonMode(GL_FRONT_AND_BACK, filled ? GL_FILL : GL_LINE);
@@ -437,8 +435,7 @@ vvr::Ground::Ground(const real W, const real D, const real B, const real T, Colo
     m_floor_tris.push_back(vvr::Triangle3D(math::Triangle(vF, vA, vB), col));
 }
 
-/*---[Canvas]---*/
-
+/*---[Canvas]---------------------------------------------------------------------------*/
 vvr::Canvas::Canvas() : fid(0) , del_on_clear(true)
 {
     frames.reserve(16);
@@ -456,10 +453,10 @@ vvr::Canvas::~Canvas()
     }
 }
 
-vvr::Drawable* vvr::Canvas::add(vvr::Drawable *drawable_ptr)
+vvr::Drawable* vvr::Canvas::add(vvr::Drawable *drw)
 {
-    frames[fid].drvec.push_back(drawable_ptr);
-    return drawable_ptr;
+    frames[fid].drvec.push_back(drw);
+    return drw;
 }
 
 void vvr::Canvas::newFrame(bool show_old_frames)
@@ -523,6 +520,7 @@ void vvr::Canvas::clearFrame()
     frames[fid].drvec.clear();
 }
 
+/*---[Functions]------------------------------------------------------------------------*/
 vvr::Drawable* vvr::Canvas::add(const C2DPoint &p, Colour col)
 {
     return add(new Point2D(p.x, p.y, col));
@@ -566,4 +564,8 @@ vvr::Drawable* vvr::Canvas::add(const C2DTriangle &tri, Colour col, bool solid)
     return add(drw);
 }
 
+void vvr::add_to_canvas(Canvas &canvas, Drawable *drw)
+{
+    drw->addToCanvas(canvas);
+}
 /*--------------------------------------------------------------------------------------*/

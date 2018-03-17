@@ -66,7 +66,7 @@ struct BSpline
         return p;
     }
 
-    const auto ParamRange()
+    const auto Range()
     {
         const int mb = knots.size() - cps.size();
         return std::make_pair(knots[mb - 1], (*(knots.end() - 1)));

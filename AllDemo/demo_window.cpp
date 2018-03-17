@@ -15,6 +15,7 @@
 #include "GeoLab/Molding.cpp"
 #include "GeoLab/Triangulation.cpp"
 #include "GeoLab/Mesh3D.cpp"
+#include "GeoLab/Triangle.cpp"
 #include "Games/tavli.cpp"
 
 static void gather_scenes(std::vector<vvr::Scene*> &scns)
@@ -33,6 +34,7 @@ static void gather_scenes(std::vector<vvr::Scene*> &scns)
     scns.push_back(new Mesh3DScene);
     scns.push_back(new KDTreeScene);
     scns.push_back(new TutorialScene);
+    scns.push_back(new TriangleScene);
     scns.push_back(new TavliScene(tavli::GetDefaultColours()));
 }
 

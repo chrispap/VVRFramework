@@ -9,7 +9,7 @@
 #include <QTimer>
 #include <QtGui> //gl.h
 
-#define DISABLE_PRINTS 0 /// Always '1' before commit
+#define DISABLE_PRINTS 1
 #if DISABLE_PRINTS
 #undef vvr_echo_time_from_function
 #define vvr_echo_time_from_function(x) (void)(0)
@@ -128,11 +128,8 @@ void vvr::GlWidget::mouseMoveEvent(QMouseEvent *event)
     } else if (event->buttons() == Qt::NoButton) {
         m_scene->mouseHovered(x, y, make_modifier_flag(event));
     } else {
-        vvr_echo_time_from_function("IGNORE EVENT IN MOUSE MOVE");
         return event->ignore();
     }
-
-    vvr_echo_time_from_function("UPDATING IN MOUSE MOVE");
 
     update();
     event->accept();

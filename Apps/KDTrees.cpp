@@ -3,14 +3,53 @@
 #include <vvr/kdtree.h>
 #include <vvr/macros.h>
 
-/**
-* Array with 6 predefined colours.
-*/
+#define DIMENSIONS 3
+#define NUM_PTS_DEFAULT 100
+#define SEC_PER_FLOOR 10
+#define GND_WIDTH 40
+#define GND_TOP 10
+#define GND_BOTTOM -10
+#define GND_DEPTH 10
+#define SPHERE_RAD 0.5
+#define POINT_SIZE 6
+#define AUTOPLAY false
+
 static const vvr::Colour Pallete[6] = {
     vvr::red, vvr::green, vvr::blue, vvr::magenta,
     vvr::orange, vvr::yellow,
 };
 
+struct VecComparator {
+    unsigned axis;
+    VecComparator(unsigned axis) : axis(axis % 3) {}
+    virtual inline bool operator() (const math::vec& v1, const math::vec& v2) {
+        return (v1.ptr()[axis] < v2.ptr()[axis]);
+    }
+};
+
+/*---[Tasks]----------------------------------------------------------------------------*/
+
+/**
+ * @brief Find all the points under `root` node of the tree.
+ */
+void Task_01_FindPtsOfNode(const vvr::KDNode* root, math::VecArray &pts);
+
+/**
+ * @brief Find the nearest neighbour of `test_pt` inside `root`.
+ */
+void Task_02_Nearest(const math::vec& test_pt, const vvr::KDNode* root, const vvr::KDNode **nn, float *best_dist);
+
+/**
+ * @brief Find the points of `kdtree` that are contained inside `sphere`.
+ */
+void Task_03_InSphere(const math::Sphere &sphere, const vvr::KDNode *root, math::VecArray &pts);
+
+/**
+ * @brief Find the `k` nearest neighbours of `test_pt` inside `root`.
+ */
+void Task_04_NearestK(const int k, const math::vec& test_pt, const vvr::KDNode* root, const vvr::KDNode **knn, float *best_dist);
+
+/*---[KDTreeScene]----------------------------------------------------------------------*/
 class KDTreeScene : public vvr::Scene
 {
     enum {
@@ -48,52 +87,7 @@ private:
     int m_kn;
 };
 
-/**
-* Function object to compare 2 3D-vecs in the specified axis.
-*/
-struct VecComparator {
-    unsigned axis;
-    VecComparator(unsigned axis) : axis(axis % 3) {}
-    virtual inline bool operator() (const math::vec& v1, const math::vec& v2) {
-        return (v1.ptr()[axis] < v2.ptr()[axis]);
-    }
-};
-
-//! Task function prototypes
-
-/**
-* Find all the points under `root` node of the tree.
-*/
-void Task_01_FindPtsOfNode(const vvr::KDNode* root, math::VecArray &pts);
-
-/**
-* Find the nearest neighbour of `test_pt` inside `root`.
-*/
-void Task_02_Nearest(const math::vec& test_pt, const vvr::KDNode* root, const vvr::KDNode **nn, float *best_dist);
-
-/**
-* Find the points of `kdtree` that are contained inside `sphere`.
-*/
-void Task_03_InSphere(const math::Sphere &sphere, const vvr::KDNode *root, math::VecArray &pts);
-
-/**
-* Find the `k` nearest neighbours of `test_pt` inside `root`.
-*/
-void Task_04_NearestK(const int k, const math::vec& test_pt, const vvr::KDNode* root, const vvr::KDNode **knn, float *best_dist);
-
-#define DIMENSIONS 3
-#define NUM_PTS_DEFAULT 100
-#define SEC_PER_FLOOR 10
-#define GND_WIDTH 40
-#define GND_TOP 10
-#define GND_BOTTOM -10
-#define GND_DEPTH 10
-#define SPHERE_RAD 0.5
-#define POINT_SIZE 6
-#define AUTOPLAY false
-
-//! KDTreeScene::
-
+/*--------------------------------------------------------------------------------------*/
 KDTreeScene::KDTreeScene()
 {
     vvr::Shape::LineWidth = 1;
@@ -437,8 +431,7 @@ void KDTreeScene::sliderChanged(int slider_id, float v)
     }
 }
 
-//! Tasks
-
+/*---[Tasks]----------------------------------------------------------------------------*/
 void Task_01_FindPtsOfNode(const vvr::KDNode* root, math::VecArray &pts)
 {
     pts.push_back(root->split_point);

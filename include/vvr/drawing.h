@@ -19,8 +19,9 @@ namespace vvr
     typedef float real;
     using math::vec;
     struct Canvas;
+    struct Drawable;
 
-    /*----------------------------------------------------------------------[Helpers]---*/
+    /*--------------------------------------------------------------------[Functions]---*/
     math::AABB aabbFromVertices(const std::vector<vec> &vertices);
 
     VVRFramework_API void draw(C2DPointSet &point_set, Colour col = Colour());
@@ -28,6 +29,8 @@ namespace vvr
     VVRFramework_API void draw(C2DLineSet &line_set, Colour col = Colour());
 
     VVRFramework_API void draw(C2DPolygon &polygon, Colour col = Colour(), bool filled = false);
+
+    VVRFramework_API void add_to_canvas(Canvas&, Drawable*);
 
     /*--------------------------------------------------------------------[Drawables]---*/
     struct VVRFramework_API Drawable
@@ -84,7 +87,7 @@ namespace vvr
         Canvas();
         ~Canvas();
         void draw() const override;
-        Drawable* add(Drawable *drawable_ptr);
+        Drawable* add(Drawable *drw);
         std::vector<Drawable*>& getDrawables(int offs = 0) { return frames[fid + offs].drvec; }
         size_t size() const { return frames.size(); }
         size_t frameIndex() const { return fid; }

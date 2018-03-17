@@ -27,14 +27,14 @@ namespace vvr
         typedef typename curve_t::point_t point_t;
 
         Colour colour;
-        bool disp_pts;
+        bool disp_pts = false;
 
         Curve3D(curve_t &curve) : crv(curve) {}
 
-        void Update(size_t num_pts) const
+        void Discretize(size_t num_pts) const
         {
             if (num_pts<2) num_pts = 2;
-            auto range = crv.ParamRange();
+            auto range = crv.Range();
             auto dt = (range.second - range.first) / (num_pts - 1);
             pts.resize(num_pts);
             for (size_t i = 0; i < num_pts; i++) {
@@ -44,7 +44,7 @@ namespace vvr
 
         void draw() const override
         {
-            Update(32);
+            Discretize(32);
             for (auto it = pts.begin(); it < pts.end() - 1; ++it) {
                 LineSeg3D(math::LineSegment(it[0], it[1]), colour).draw();
                 if (disp_pts) it->draw();
@@ -145,21 +145,21 @@ void Sketcher::reset()
     m_canvas.clear();
 
     //! Create bsplines
-    m_bsps[0] = new vvr::CurveBsp();
-    m_bsps[1] = new vvr::CurveBsp();
+    auto bsp1 = m_bsps[0] = new vvr::CurveBsp();
+    auto bsp2 = m_bsps[1] = new vvr::CurveBsp();
 
-    m_bsps[0]->bsp.knots = { 0, 0, 0, 0, 1, 1, 1, 1 };
-    m_bsps[0]->bsp.cps.push_back(new vvr::Point3D(250, 100, 0, vvr::red));
-    m_bsps[0]->bsp.cps.push_back(new vvr::Point3D( 50, 100, 0, vvr::red));
-    m_bsps[0]->bsp.cps.push_back(new vvr::Point3D( 20, 100, 0, vvr::red));
-    m_bsps[0]->bsp.cps.push_back(new vvr::Point3D(  0,   0, 0, vvr::red));
+    bsp1->bsp.knots = { 0, 0, 0, 0, 1, 1, 1, 1 };
+    bsp1->bsp.cps.push_back(new vvr::Point3D(250, 100, 0, vvr::red));
+    bsp1->bsp.cps.push_back(new vvr::Point3D( 50, 100, 0, vvr::red));
+    bsp1->bsp.cps.push_back(new vvr::Point3D( 20, 100, 0, vvr::red));
+    bsp1->bsp.cps.push_back(new vvr::Point3D(  0,   0, 0, vvr::red));
 
-    m_bsps[1]->bsp.knots = m_bsps[0]->bsp.knots;
-    m_bsps[1]->bsp.cps.push_back(m_bsps[0]->bsp.cps.back());
-    for (int i = m_bsps[0]->bsp.cps.size()-2; i >= 0; i--) {
-        m_bsps[1]->bsp.cps.push_back(new vvr::Point3D(*m_bsps[0]->bsp.cps[i]));
-        m_bsps[1]->bsp.cps.back()->x *= -1;
-        m_bsps[1]->bsp.cps.back()->y *= -1;
+    bsp2->bsp.knots = bsp1->bsp.knots;
+    bsp2->bsp.cps.push_back(bsp1->bsp.cps.back());
+    for (int i = bsp1->bsp.cps.size()-2; i >= 0; i--) {
+        bsp2->bsp.cps.push_back(new vvr::Point3D(*bsp1->bsp.cps[i]));
+        bsp2->bsp.cps.back()->x *= -1;
+        bsp2->bsp.cps.back()->y *= -1;
     }
 
     //! Create croshair lines.
@@ -182,14 +182,14 @@ void Sketcher::reset()
         vvr::darkGreen);
     triangle->whole.filled = true;
 
-    auto cir = new vvr::Circle2D(0, 0, 55);
+    auto circle = new vvr::Circle2D(0, 0, 55);
 
     //! Add to canvas.
-    m_canvas.add(cir);
-    line->addToCanvas(m_canvas);
-    triangle->addToCanvas(m_canvas);
-    m_bsps[0]->addToCanvas(m_canvas);
-    m_bsps[1]->addToCanvas(m_canvas);
+    vvr::add_to_canvas(m_canvas, triangle);
+    vvr::add_to_canvas(m_canvas, circle);
+    vvr::add_to_canvas(m_canvas, line);
+    vvr::add_to_canvas(m_canvas, bsp1);
+    vvr::add_to_canvas(m_canvas, bsp2);
 
     setCameraPos({0,0,50});
 }
