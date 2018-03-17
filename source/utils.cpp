@@ -23,7 +23,7 @@
 
 using namespace std;
 
-float vvr::getSeconds()
+float vvr::get_seconds()
 {
     static quint64 msec_base = 0;
     quint64 msec = QDateTime::currentMSecsSinceEpoch();
@@ -31,7 +31,7 @@ float vvr::getSeconds()
     return (float) (msec-msec_base) / 1000.0;
 }
 
-string vvr::getExePath()
+string vvr::get_exe_path()
 {
 #ifdef __linux__
     std::string path = "";
@@ -74,19 +74,19 @@ string vvr::getExePath()
 #endif
 }
 
-string vvr::getBasePath()
+string vvr::get_base_path()
 {
     return __BASE_DIR__;
 }
 
-double vvr::normalizeAngle(double angle)
+double vvr::normalize_deg(double deg)
 {
-    while (angle < 0)
-        angle += 360;
-    while (angle > 360)
-        angle -= 360;
+    while (deg < 0)
+        deg += 360;
+    while (deg > 360)
+        deg -= 360;
 
-    return angle;
+    return deg;
 }
 
 void vvr::split(const std::string &s, char delim, std::vector<std::string> &elems)
@@ -111,13 +111,13 @@ bool vvr::mkdir(const std::string &path)
     return dir.mkpath(".");
 }
 
-bool vvr::fileExists(const std::string &path)
+bool vvr::file_exists(const std::string &path)
 {
     QFileInfo checkFile(QString::fromStdString(path));
     return (checkFile.exists() && checkFile.isFile());
 }
 
-bool vvr::dirExists(const std::string &path)
+bool vvr::dir_exists(const std::string &path)
 {
     QFileInfo checkFile(QString::fromStdString(path));
     return (checkFile.exists() && checkFile.isDir());
@@ -131,12 +131,12 @@ std::string vvr::zpn(int num, int len)
 }
 
 #ifdef __GNUG__
-    std::string VVRFramework_API demangle(const char* name)
-    {
-        int status = -123;
-        std::unique_ptr<char, void(*)(void*)> res{
-            abi::__cxa_demangle(name, NULL, NULL, &status), std::free
-        };
-        return (status == 0) ? res.get() : name;
-    }
+std::string VVRFramework_API demangle(const char* name)
+{
+    int status = -123;
+    std::unique_ptr<char, void(*)(void*)> res {
+        abi::__cxa_demangle(name, NULL, NULL, &status), std::free
+    };
+    return (status == 0) ? res.get() : name;
+}
 #endif

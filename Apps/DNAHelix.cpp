@@ -83,7 +83,7 @@ bool HelixScene::idle()
 {
     if (m_anim.paused()) return false;
     m_anim.update();
-    m_sec = vvr::getSeconds();
+    m_sec = vvr::get_seconds();
     return true;
 }
 

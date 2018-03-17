@@ -177,7 +177,7 @@ void Simple3DScene::defineCuttingPlane(const math::vec &pos, const math::vec &no
 void Simple3DScene::load3DModels()
 {
     // Load 3D models.
-    const string objFile = getBasePath() + "resources/obj/" + objName;
+    const string objFile = get_base_path() + "resources/obj/" + objName;
 
     m_mesh_1 = Mesh::Make(objFile);
     m_mesh_1->cornerAlign();

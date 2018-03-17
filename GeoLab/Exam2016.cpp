@@ -322,7 +322,7 @@ Exam2016Scene::Exam2016Scene()
     m_line2.Set(m_pts[1], m_pts[2]);
 
     //! Setup Task: 3D
-    const string objDir = getBasePath() + "resources/obj/";
+    const string objDir = get_base_path() + "resources/obj/";
     const string objFile = objDir + OBJ_FILENAME;
     m_mesh = Mesh::Make(objFile);
 
@@ -392,7 +392,7 @@ bool Exam2016Scene::idle()
     const float deg_per_sec = 30;
     m_anim.update();
     float3x4 t = m_mesh->getTransform();
-    t.SetRotatePartY(math::DegToRad(vvr::normalizeAngle(m_anim.t * deg_per_sec)));
+    t.SetRotatePartY(math::DegToRad(vvr::normalize_deg(m_anim.t * deg_per_sec)));
     m_mesh->setTransform(t);
     return true;
 }

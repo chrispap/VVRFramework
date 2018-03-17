@@ -68,7 +68,7 @@ Mesh3DScene::Mesh3DScene()
     m_perspective_proj = false;
     m_bg_col = vvr::Colour("768E77");
     m_obj_col = vvr::Colour("454545");
-    const std::string objDir = vvr::getBasePath() + "resources/obj/";
+    const std::string objDir = vvr::get_base_path() + "resources/obj/";
     const std::string objFile = objDir + OBJ_FILENAME;
     m_model_original = vvr::Mesh::Make(objFile);
     reset();
@@ -142,9 +142,9 @@ void Mesh3DScene::Tasks()
     //! Homework
     //!//////////////////////////////////////////////////////////////////////////////////
 
-    float t = vvr::getSeconds();
+    float t = vvr::get_seconds();
     FindSubMeshes(*m_model, m_canvas);
-    t = vvr::getSeconds() - t;
+    t = vvr::get_seconds() - t;
     std::cout << "Partitioned in " << t << " sec" << std::endl;
 
     //!//////////////////////////////////////////////////////////////////////////////////

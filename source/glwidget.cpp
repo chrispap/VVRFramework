@@ -59,7 +59,7 @@ vvr::GlWidget::GlWidget(vvr::Scene *scene, QWidget *parent) : QOpenGLWidget(pare
 
 vvr::GlWidget::~GlWidget()
 {
-    delete m_scene;
+//    delete m_scene;
 }
 
 void vvr::GlWidget::setScene(vvr::Scene *scene)

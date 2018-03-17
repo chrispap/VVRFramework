@@ -256,8 +256,8 @@ void Scene::mouseMoved(int x, int y, int modif)
         m_mouse_x = x;
         m_mouse_y = y;
         /* Rotate scene */
-        float rot_x = math::DegToRad(-vvr::normalizeAngle((float)dx/2));
-        float rot_y = math::DegToRad( vvr::normalizeAngle((float)dy/2));
+        float rot_x = math::DegToRad(-vvr::normalize_deg((float)dx/2));
+        float rot_y = math::DegToRad( vvr::normalize_deg((float)dy/2));
         math::float3x3 transform = math::float3x3::identity;
         transform = transform * float3x3::RotateAxisAngle(right, rot_y);
         transform = transform * float3x3::RotateAxisAngle(updir, rot_x);

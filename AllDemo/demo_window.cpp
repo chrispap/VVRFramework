@@ -22,6 +22,7 @@ class DemoWindow : public QMainWindow
     Q_OBJECT
 public:
     DemoWindow();
+    ~DemoWindow();
 public slots:
     void SetScene(vvr::Scene*);
 signals:
@@ -71,6 +72,11 @@ DemoWindow::DemoWindow()
     SetScene(scns[0]);
     installEventFilter(glw);
     glw->setFocus();
+}
+
+DemoWindow::~DemoWindow()
+{
+    qDeleteAll(scns);
 }
 
 void DemoWindow::SetScene(vvr::Scene *scene)

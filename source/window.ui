@@ -154,25 +154,11 @@ QGroupBox::title {
              </property>
             </widget>
            </item>
-           <item>
-            <spacer name="verticalSpacer">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>40</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
           </layout>
           <zorder>horizontalSlider_4</zorder>
           <zorder>horizontalSlider_2</zorder>
           <zorder>horizontalSlider_5</zorder>
           <zorder>horizontalSlider_3</zorder>
-          <zorder>verticalSpacer</zorder>
           <zorder>horizontalSlider_1</zorder>
           <zorder>horizontalSlider_0</zorder>
          </widget>

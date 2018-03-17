@@ -273,8 +273,8 @@ tavli::Board::~Board()
 void tavli::Board::load3DModels()
 {
     std::string flnm = "tavli.obj";
-    std::string path1 = getExePath() + flnm;
-    std::string path2 = getBasePath() + "resources/obj/" + flnm;
+    std::string path1 = get_exe_path() + flnm;
+    std::string path2 = get_base_path() + "resources/obj/" + flnm;
 
     /* Load 3D model */
     try {

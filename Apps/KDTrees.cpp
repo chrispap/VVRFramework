@@ -197,7 +197,7 @@ void KDTreeScene::createSurfacePts(int num_pts)
 bool KDTreeScene::idle()
 {
     if (m_tree_invalidation_sec > 0 &&
-        vvr::getSeconds() - m_tree_invalidation_sec > 0.8)
+        vvr::get_seconds() - m_tree_invalidation_sec > 0.8)
     {
         delete m_KDTree;
         m_KDTree = new vvr::KDTree(m_pts);
@@ -311,7 +311,7 @@ void KDTreeScene::draw()
     //! Compute & Display FPS
     static float last_update = 0;
     static float last_show = 0;
-    const float sec = vvr::getSeconds();
+    const float sec = vvr::get_seconds();
     const float dt = sec - last_update;
     const float dt_show = sec - last_show;
     int FPS = 1.0 / dt;
@@ -374,7 +374,7 @@ void KDTreeScene::keyEvent(unsigned char key, bool up, int modif)
         else {
             createRandomPts(m_pts.size());
         }
-        m_tree_invalidation_sec = vvr::getSeconds();
+        m_tree_invalidation_sec = vvr::get_seconds();
     }
 }
 
@@ -426,7 +426,7 @@ void KDTreeScene::sliderChanged(int slider_id, float v)
         }
         vvr_echo(m_pts.size());
     }
-    m_tree_invalidation_sec = vvr::getSeconds();
+    m_tree_invalidation_sec = vvr::get_seconds();
     break;
     case 2:
         m_sphere->r = v * 30 * SPHERE_RAD;

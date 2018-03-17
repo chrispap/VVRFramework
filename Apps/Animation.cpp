@@ -78,7 +78,7 @@ bool AnimationScene::idle()
 {
     if (m_pause) return false;
 
-    const float sec = vvr::getSeconds();
+    const float sec = vvr::get_seconds();
 
     if (m_sphere_rad > getSceneWidth() / 4)
     {

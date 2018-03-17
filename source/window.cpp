@@ -210,6 +210,7 @@ int vvr::main_with_scene(int argc, char* argv[], vvr::Scene *scene)
     win.focusToGlWidget();
     app.setOverrideCursor(Qt::CrossCursor);
     app.exec();
+    delete scene;
     return 0;
 }
 

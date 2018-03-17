@@ -68,7 +68,7 @@ ContourEditorScene::ContourEditorScene()
     m_heights[0] = 0.1;
 
     try {
-        loadContoursFromFile(vvr::getBasePath() + CONTOUR_FILENAME);
+        loadContoursFromFile(vvr::get_base_path() + CONTOUR_FILENAME);
     } catch (std::string exc) {
          std::cerr << exc << std::endl;
     }
@@ -265,7 +265,7 @@ void ContourEditorScene::reset()
 void ContourEditorScene::saveContoursToFile()
 {
     std::string filename = CONTOUR_FILENAME;
-    filename = vvr::getBasePath() + filename;
+    filename = vvr::get_base_path() + filename;
     std::cout << "Saving to " << filename << std::endl;
 
     FILE* file = fopen(filename.c_str(), "w");

@@ -15,25 +15,25 @@
 namespace vvr
 {
     float
-    VVRFramework_API getSeconds();
+    VVRFramework_API get_seconds();
 
     double
-    VVRFramework_API normalizeAngle(double angle);
+    VVRFramework_API normalize_deg(double deg);
 
     std::string
-    VVRFramework_API getExePath();
+    VVRFramework_API get_exe_path();
 
     std::string
-    VVRFramework_API getBasePath();
+    VVRFramework_API get_base_path();
 
     bool
     VVRFramework_API mkdir(const std::string &path);
 
     bool
-    VVRFramework_API fileExists(const std::string &filename);
+    VVRFramework_API file_exists(const std::string &filename);
 
     bool
-    VVRFramework_API dirExists(const std::string &dirname);
+    VVRFramework_API dir_exists(const std::string &dirname);
 
     void
     VVRFramework_API split(const std::string &s, char delim, std::vector<std::string> &elems);
@@ -63,7 +63,7 @@ namespace vvr
 
     template <class Tuple, class F>
     constexpr auto apply(Tuple& t, F f) {
-        return apply_impl(t, f, std::make_index_sequence<std::tuple_size<Tuple>{}>{});
+        return apply_impl(t, f, std::make_index_sequence<std::tuple_size<Tuple>({})>{});
     }
 }
 

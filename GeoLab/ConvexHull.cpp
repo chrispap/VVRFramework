@@ -68,9 +68,9 @@ void ConvexHullScene::reset()
     }
 
     /* Compute & Measure time */
-    float sec = vvr::getSeconds();
+    float sec = vvr::get_seconds();
     ComputeConvexHull();
-    sec = vvr::getSeconds() - sec;
+    sec = vvr::get_seconds() - sec;
     std::cout << "Computed in " << sec << "\"" << std::endl;
 }
 

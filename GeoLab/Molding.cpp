@@ -100,7 +100,7 @@ void MoldingScene::reset()
     m_canvas.clear();
     m_pts.clear();
     m_pts.push_back(C2DPoint(-200, 0));
-    m_last_update_time = vvr::getSeconds();
+    m_last_update_time = vvr::get_seconds();
 }
 
 void MoldingScene::draw()
@@ -148,7 +148,7 @@ void MoldingScene::draw()
 bool MoldingScene::idle()
 {
     if (!m_anim_on) return false;
-    float t = vvr::getSeconds();
+    float t = vvr::get_seconds();
     float dt = t - m_last_update_time;
     if (isFreeToMove(m_dv))
         m_displacement += m_dv * (dt * SPEED_PIXELS_PER_SEC);
@@ -249,7 +249,7 @@ void MoldingScene::mousePressed(int x, int y, int modif)
     else if (shiftDown(modif))
     {
         if (!m_anim_on) {
-            m_last_update_time = vvr::getSeconds();
+            m_last_update_time = vvr::get_seconds();
             m_click_anchor.Set(x, y);
             m_dv.Set(0, 0);
         }
@@ -282,7 +282,7 @@ void MoldingScene::mouseMoved(int x, int y, int modif)
     else if (shiftDown(modif))
     {
         if (!m_anim_on) {
-            m_last_update_time = vvr::getSeconds();
+            m_last_update_time = vvr::get_seconds();
             m_click_anchor.Set(x, y);
         }
         C2DVector new_dir(x, y);

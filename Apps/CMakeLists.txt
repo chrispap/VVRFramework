@@ -11,7 +11,7 @@ foreach(srcFile ${APP_SRC_FILES})
     optimized VVRFramework debug VVRFramework_d
     optimized GeoLib debug GeoLib_d
     optimized MathGeoLib debug MathGeoLib_d)
-  set_property(TARGET ${appName} PROPERTY FOLDER "Examples")
+  set_property(TARGET ${appName} PROPERTY FOLDER "Apps")
   if(HIDE_CONSOLE_WINDOW AND WIN32 AND MSVC) 
     set_target_properties(${appName} PROPERTIES LINK_FLAGS "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
   endif()

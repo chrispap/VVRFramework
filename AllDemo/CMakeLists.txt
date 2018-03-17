@@ -21,7 +21,7 @@ target_link_libraries(AllDemo
   optimized VVRFramework debug vvrframework_d
   optimized GeoLib debug GeoLib_d
   optimized MathGeoLib debug MathGeoLib_d)
-set_property(TARGET AllDemo PROPERTY FOLDER "Examples")
+set_property(TARGET AllDemo PROPERTY FOLDER "Apps")
 if(HIDE_CONSOLE_WINDOW AND WIN32 AND MSVC)
   set_target_properties(AllDemo PROPERTIES LINK_FLAGS "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
 endif()

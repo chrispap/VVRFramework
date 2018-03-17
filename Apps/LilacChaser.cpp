@@ -72,7 +72,7 @@ void LilacChaserScene::draw()
 
 bool LilacChaserScene::idle()
 {
-    double sec = vvr::getSeconds();
+    double sec = vvr::get_seconds();
     for (vvr::Circle2D &c : m_circles) c.colour = vvr::lilac;
     m_circles.at((size_t)(sec / 0.125) % N).colour = m_bg_col;
     return true;

@@ -132,20 +132,20 @@ ArmJointScene::ArmJointScene()
     m_anim_speed = 1;
     m_anim_on = false;
     m_anim_time = 0;
-    m_anim_last_update = vvr::getSeconds();
+    m_anim_last_update = vvr::get_seconds();
 }
 
 void ArmJointScene::load()
 {
-    const std::string objFileBone = vvr::getBasePath() + "resources/obj/bone.obj";
+    const std::string objFileBone = vvr::get_base_path() + "resources/obj/bone.obj";
 
     // Load 3D models Humerus
     m_humerus.mesh = vvr::Mesh::Make(objFileBone);
     m_radius.mesh = vvr::Mesh::Make(*m_humerus.mesh);
 
     // Switch mode of execution: {Live Streaming, Playback}
-    loadRecordedMotion(vvr::getBasePath() + FILE_RADIUS, m_radius);
-    loadRecordedMotion(vvr::getBasePath() + FILE_HUMERUS, m_humerus);
+    loadRecordedMotion(vvr::get_base_path() + FILE_RADIUS, m_radius);
+    loadRecordedMotion(vvr::get_base_path() + FILE_HUMERUS, m_humerus);
 }
 
 void ArmJointScene::resize()
@@ -185,8 +185,8 @@ bool ArmJointScene::idle()
     if (!m_anim_on) return false;
 
     // Find current animation time
-    m_anim_time += (vvr::getSeconds() - m_anim_last_update);
-    m_anim_last_update = vvr::getSeconds();
+    m_anim_time += (vvr::get_seconds() - m_anim_last_update);
+    m_anim_last_update = vvr::get_seconds();
 
     // Animate objects
     m_humerus.animate(m_anim_time, m_anim_speed);
@@ -206,7 +206,7 @@ void ArmJointScene::keyEvent(unsigned char key, bool up, int modif)
     {
         m_anim_on = !m_anim_on;
         if (m_anim_on) {
-            m_anim_last_update = vvr::getSeconds();
+            m_anim_last_update = vvr::get_seconds();
         }
     }
     else if (key == 'a') m_style_flag ^= FLAG_SHOW_AXES;

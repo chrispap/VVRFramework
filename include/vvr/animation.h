@@ -56,8 +56,8 @@ namespace vvr
             float sec;
             if (m_paused) {
                 if (!start) return false;
-                m_last_update = sec = getSeconds();
-            } else sec = getSeconds();
+                m_last_update = sec = get_seconds();
+            } else sec = get_seconds();
             m_time += ((sec - m_last_update) * m_speed);
             m_last_update = sec;
             m_paused = false;
@@ -67,7 +67,7 @@ namespace vvr
         void setTime(float time)
         {
             m_time = time;
-            m_last_update = getSeconds();
+            m_last_update = get_seconds();
         }
 
         void reset()

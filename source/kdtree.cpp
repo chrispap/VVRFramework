@@ -11,19 +11,19 @@ KDTree::KDTree(math::VecArray &pts, int dimensions)
     : pts(pts)
     , m_DIM(dimensions)
 {
-    const float t = vvr::getSeconds();
+    const float t = vvr::get_seconds();
     m_root = new KDNode();
     m_depth = makeNode(m_root, pts, 0);
-    const float KDTree_construction_time = vvr::getSeconds() - t;
+    const float KDTree_construction_time = vvr::get_seconds() - t;
     vvr_echo(KDTree_construction_time);
     vvr_echo(m_depth);
 }
 
 KDTree::~KDTree()
 {
-    const float t = vvr::getSeconds();
+    const float t = vvr::get_seconds();
     delete m_root;
-    const float KDTree_destruction_time = vvr::getSeconds() - t;
+    const float KDTree_destruction_time = vvr::get_seconds() - t;
     vvr_echo(KDTree_destruction_time);
 }
 
