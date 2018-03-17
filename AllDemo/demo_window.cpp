@@ -17,24 +17,7 @@
 #include "GeoLab/Mesh3D.cpp"
 #include "Games/tavli.cpp"
 
-class DemoWindow : public QMainWindow
-{
-    Q_OBJECT
-public:
-    DemoWindow();
-    ~DemoWindow();
-public slots:
-    void SetScene(vvr::Scene*);
-signals:
-    void keyPressed(QKeyEvent*);
-private:
-    Ui::DemoWindow ui;
-    vvr::GlWidget *glw;
-    vvr::Scene *scn;
-    std::vector<vvr::Scene*> scns;
-};
-
-static void gather_available_scenes(std::vector<vvr::Scene*> &scns)
+static void gather_scenes(std::vector<vvr::Scene*> &scns)
 {
     scns.push_back(new OrigamiScene);
     scns.push_back(new BoxesScene);
@@ -53,13 +36,30 @@ static void gather_available_scenes(std::vector<vvr::Scene*> &scns)
     scns.push_back(new TavliScene(tavli::GetDefaultColours()));
 }
 
+class DemoWindow : public QMainWindow
+{
+    Q_OBJECT
+public:
+    DemoWindow();
+    ~DemoWindow();
+public slots:
+    void SetScene(vvr::Scene*);
+signals:
+    void keyPressed(QKeyEvent*);
+private:
+    Ui::DemoWindow ui;
+    vvr::GlWidget *glw;
+    vvr::Scene *scn;
+    std::vector<vvr::Scene*> scns;
+};
+
 /*--------------------------------------------------------------------------------------*/
 DemoWindow::DemoWindow()
 {
     ui.setupUi(this);
     glw = nullptr;
 
-    gather_available_scenes(scns);
+    gather_scenes(scns);
 
     /* Add scenes to list */
     for (auto s : scns) {

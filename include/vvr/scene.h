@@ -44,8 +44,8 @@ namespace vvr {
         float getSceneHeight()      { return m_scene_height; }
         bool getFullScreen()        { return m_fullscreen; }
         bool getCreateMenus()       { return m_create_menus; }
-        bool getHideLog()           { return m_hide_log; }
-        bool getHideSliders()       { return m_hide_sliders; }
+        bool shouldShowLog()        { return m_show_log; }
+        bool shouldShowSliders()    { return m_show_sliders; }
         void setFrustum(const math::Frustum &frustum) { m_frustum = frustum; }
         void setSliderVal(int slider_id, float val);
         void setCameraPos(const math::vec &pos);
@@ -74,8 +74,8 @@ namespace vvr {
         bool m_perspective_proj;
         bool m_fullscreen;
         bool m_create_menus;
-        bool m_hide_log;
-        bool m_hide_sliders;
+        bool m_show_log;
+        bool m_show_sliders;
         bool m_first_resize;
 
     protected:

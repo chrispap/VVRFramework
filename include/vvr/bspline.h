@@ -21,26 +21,19 @@ static inline G spline_division(const G& num, const G& den)
 }
 
 template <typename T>
-class BSpline
+struct BSpline
 {
     typedef typename std::remove_pointer<T>::type point_t;
     typedef std::vector<std::vector<double>> double_vector_2d;
 
-    std::vector<point_t> pts;   // Points of curve path.
-    std::vector<T> cps;         // Control points
-    std::vector<double> knv;    // Knot vector
-    size_t num_pts;             // Number of points
-    bool dirty;                 // Needs update
+    std::vector<T> cps;
+    std::vector<double> knots;
 
-public:
-    BSpline() 
-        : num_pts(2)
-        , dirty(true)
-    { }
+    BSpline() {}
 
-    point_t eval(const double t)
+    point_t Eval(const double t)
     {
-        const auto &X = knv;
+        const auto &X = knots;
         const auto &B = cps;
         const int kn = X.size();
         const int kp = B.size();
@@ -73,67 +66,10 @@ public:
         return p;
     }
 
-    void update(bool force = false)
+    const auto ParamRange()
     {
-        if (!dirty && !force) return;
-        auto range = get_param_range();
-        auto dt = (range.second - range.first) / (num_pts - 1);
-        pts.resize(num_pts);
-        for (int i = 0; i < num_pts; i++) {
-            pts[i] = eval(range.first + dt * i);
-        }
-        dirty = false;
-    }
-
-    void set_num_pts(int num)
-    {
-        bool force = num != num_pts;
-        if (num < 2) num = 2;
-        num_pts = num;
-        update(force);
-    }
-
-    void set_cps(std::vector<T> &&control_pts)
-    {
-        cps = control_pts;
-        dirty = true;
-    }
-
-    void set_cps(const std::vector<T> &control_pts)
-    {
-        cps = control_pts;
-        dirty = true;
-    }
-
-    void set_knots(std::vector<double> &&knot_vec)
-    {
-        knv = knot_vec;
-        dirty = true;
-    }
-
-    void set_knots(const std::vector<double> &knot_vec)
-    {
-        knv = knot_vec;
-        dirty = true;
-    }
-
-    const auto get_param_range()
-    {
-        const int mb = knv.size() - cps.size();
-        std::pair<double, double> range;
-        range.first = knv[mb - 1];
-        range.second = *(knv.end() - 1);
-        return range;
-    }
-
-    const auto& get_pts() const
-    {
-        return pts;
-    }
-
-    const auto& get_cps() const
-    {
-        return cps;
+        const int mb = knots.size() - cps.size();
+        return std::make_pair(knots[mb - 1], (*(knots.end() - 1)));
     }
 };
 

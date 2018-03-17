@@ -463,7 +463,7 @@ void Mold(const std::vector<C2DPoint> &pts, std::vector<C2DPolygon> &mold_pieces
 MoldingScene::MoldingScene()
 {
     m_bg_col = vvr::grey;
-    m_hide_log = false;
+    m_show_log = true;
     m_curr_p = NULL;
     HARDCODEDMOLD_01(m_pts);
     m_polygon = C2DPolygon(&m_pts[0], m_pts.size(), false);

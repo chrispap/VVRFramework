@@ -53,10 +53,12 @@ vvr::Window::Window(vvr::Scene *scene) : m_scene(scene)
     if (scene->getCreateMenus()) {
         createMenus();
     }
-    if (scene->getHideLog()) {
+
+    if (!scene->shouldShowLog()) {
         ui.plain_text_log->hide();
     }
-    if (scene->getHideSliders()) {
+
+    if (!scene->shouldShowSliders()) {
         QLayoutItem* item;
         QLayout* layout = ui.slider_groupbox->layout();
         QLayout* sublayout;
@@ -64,17 +66,15 @@ vvr::Window::Window(vvr::Scene *scene) : m_scene(scene)
         while ((item = layout->takeAt(0))) {
             if ((sublayout = item->layout()) != 0) {/* do the same for sublayout*/}
             else if ((widget = item->widget()) != 0) { widget->hide(); delete widget; }
-            else { delete item; }
+            else delete item;
         }
         delete layout;
         delete ui.slider_groupbox;
     }
+
     if (scene->getFullScreen()) {
         QTimer::singleShot(150, this, SLOT(showFullScreen()));
-    }
-    else {
-        showNormal();
-    }
+    } else showNormal();
 }
 
 void vvr::Window::createActions()
@@ -90,11 +90,9 @@ void vvr::Window::createActions()
 
 void vvr::Window::createMenus()
 {
-    //! Menu: File
     fileMenu = QMainWindow::menuBar()->addMenu(tr("&File"));
     fileMenu->addSeparator();
     fileMenu->addAction(exitAct);
-    //! Menu: Help
     helpMenu = QMainWindow::menuBar()->addMenu(tr("&Help"));
     helpMenu->addAction(aboutAct);
 }

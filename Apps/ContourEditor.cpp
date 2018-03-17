@@ -59,7 +59,7 @@ ContourEditorScene::ContourEditorScene()
 {
     m_active_contour = 0;
     m_bg_col = vvr::Colour(0x44, 0x44, 0x44);
-    m_hide_log = false;
+    m_show_log = true;
     m_perspective_proj = false;
     b_render_3D = true;
     b_show_pts = true;

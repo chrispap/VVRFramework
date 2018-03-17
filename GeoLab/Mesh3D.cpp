@@ -61,10 +61,9 @@ private:
 
 Mesh3DScene::Mesh3DScene()
 {
-    //! Load std::settings.
     vvr::Shape::LineWidth = 4;
     vvr::Shape::PointSize = 10;
-    m_hide_log = false;
+    m_show_log = true;
     m_perspective_proj = false;
     m_bg_col = vvr::Colour("768E77");
     m_obj_col = vvr::Colour("454545");

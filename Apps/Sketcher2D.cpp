@@ -17,43 +17,62 @@
 #include <cassert>
 #include <functional>
 
- /*---[Curve]---------------------------------------------------------------------------*/
-struct CurveBsp4 : public vvr::BSpline<vvr::Point3D*>, public vvr::Drawable
+namespace vvr
 {
-    vvr_decl_shared_ptr(CurveBsp4)
-
-public:
-    CurveBsp4(const std::vector<vvr::Point3D*> &cps, vvr::Colour col_curve)
+    /*---[Curve3D]----------------------------------------------------------------------*/
+    template<typename T>
+    struct Curve3D : public Drawable
     {
-        set_cps(cps);
-        set_knots({ 0, 0, 0, 0, 1, 1, 1, 1 });
-        set_num_pts(32);
-        disp_pts = false;
-        colour = col_curve;
-    }
+        typedef T curve_t;
+        typedef typename curve_t::point_t point_t;
 
-    void draw() const override
-    {
-        const_cast<CurveBsp4*>(this)->update(true);
+        Colour colour;
+        bool disp_pts;
 
-        /* Draw curve and|or sample points. */
-        for (auto it = get_pts().begin(); it < get_pts().end() - 1; ++it) {
-            vvr::LineSeg3D(math::LineSegment(it[0], it[1]), colour).draw();
-            if (disp_pts) it->draw();
+        Curve3D(curve_t &curve) : crv(curve) {}
+
+        void Update(size_t num_pts) const
+        {
+            if (num_pts<2) num_pts = 2;
+            auto range = crv.ParamRange();
+            auto dt = (range.second - range.first) / (num_pts - 1);
+            pts.resize(num_pts);
+            for (size_t i = 0; i < num_pts; i++) {
+                pts[i] = crv.Eval(range.first + dt * i);
+            }
         }
-        if (disp_pts) get_pts().back().draw();
-    }
 
-    void addToCanvas(vvr::Canvas &canvas) override
+        void draw() const override
+        {
+            Update(32);
+            for (auto it = pts.begin(); it < pts.end() - 1; ++it) {
+                LineSeg3D(math::LineSegment(it[0], it[1]), colour).draw();
+                if (disp_pts) it->draw();
+            }
+            if (disp_pts) pts.back().draw();
+        }
+
+    private:
+        mutable std::vector<point_t> pts;
+        curve_t &crv;
+    };
+
+    /*---[CurveBsp]---------------------------------------------------------------------*/
+    struct CurveBsp : Curve3D<BSpline<Point3D*> >
     {
-        canvas.add(this);
-        for (auto cp : get_cps()) canvas.add(cp);
-    }
+        curve_t bsp;
 
-public:
-    bool disp_pts;
-    vvr::Colour colour;
-};
+        CurveBsp() : Curve3D<curve_t>(bsp) {}
+
+        void addToCanvas(Canvas &canvas) override
+        {
+            canvas.add(this);
+            for (auto cp : bsp.cps) {
+                canvas.add(cp);
+            }
+        }
+    };
+}
 
 /*---[Sketcher]-------------------------------------------------------------------------*/
 class Sketcher : public vvr::Scene
@@ -91,9 +110,9 @@ private:
     PickerT::Ptr    m_picker;
     vvr::Canvas     m_canvas;
     vvr::Canvas     m_grid;
-    CurveBsp4*      m_splines[2];
     vvr::Line2D*    m_hl;
     vvr::Line2D*    m_vl;
+    vvr::CurveBsp*  m_bsps[2];
 
     std::unordered_map<char, vvr::MacroCmd> m_key_map;
 };
@@ -125,46 +144,52 @@ void Sketcher::reset()
     m_picker->drop();
     m_canvas.clear();
 
-    /* Create objects */
-    std::vector<vvr::Point3D*> cps;
-    cps.push_back(new vvr::Point3D(250, 100, 0, vvr::red));
-    cps.push_back(new vvr::Point3D( 50, 100, 0, vvr::red));
-    cps.push_back(new vvr::Point3D( 20, 100, 0, vvr::red));
-    cps.push_back(new vvr::Point3D(  0,   0, 0, vvr::red));
-    m_splines[0] = new CurveBsp4(cps, vvr::black);
-    m_splines[0]->addToCanvas(m_canvas);
+    //! Create bsplines
+    m_bsps[0] = new vvr::CurveBsp();
+    m_bsps[1] = new vvr::CurveBsp();
 
-    cps.clear();
-    cps.push_back(m_splines[0]->get_cps().back());
-    for (int i = m_splines[0]->get_cps().size()-2; i >= 0; i--) {
-        cps.push_back(new vvr::Point3D(*m_splines[0]->get_cps()[i]));
-        cps.back()->x *= -1;
-        cps.back()->y *= -1;
+    m_bsps[0]->bsp.knots = { 0, 0, 0, 0, 1, 1, 1, 1 };
+    m_bsps[0]->bsp.cps.push_back(new vvr::Point3D(250, 100, 0, vvr::red));
+    m_bsps[0]->bsp.cps.push_back(new vvr::Point3D( 50, 100, 0, vvr::red));
+    m_bsps[0]->bsp.cps.push_back(new vvr::Point3D( 20, 100, 0, vvr::red));
+    m_bsps[0]->bsp.cps.push_back(new vvr::Point3D(  0,   0, 0, vvr::red));
+
+    m_bsps[1]->bsp.knots = m_bsps[0]->bsp.knots;
+    m_bsps[1]->bsp.cps.push_back(m_bsps[0]->bsp.cps.back());
+    for (int i = m_bsps[0]->bsp.cps.size()-2; i >= 0; i--) {
+        m_bsps[1]->bsp.cps.push_back(new vvr::Point3D(*m_bsps[0]->bsp.cps[i]));
+        m_bsps[1]->bsp.cps.back()->x *= -1;
+        m_bsps[1]->bsp.cps.back()->y *= -1;
     }
-    m_splines[1] = new CurveBsp4(cps, vvr::black);
-    m_splines[1]->addToCanvas(m_canvas);
 
+    //! Create croshair lines.
     m_hl = new vvr::Line2D(0, 0, 0, 0, vvr::red);
     m_vl = new vvr::Line2D(0, 0, 0, 0, vvr::red);
     m_hl->hide();
     m_vl->hide();
 
+    //! Create composite line
     auto line = new vvr::CompositeLine({
         {new vvr::Point3D(0, 100, 0, vvr::darkRed),
         new vvr::Point3D(100, 200, 0, vvr::darkRed)} },
         vvr::darkRed);
-    line->addToCanvas(m_canvas);
 
+    //! Create composite triangle
     auto triangle = new vvr::CompositeTriangle({{
         new vvr::Point3D(0,0,0, vvr::darkGreen),
         new vvr::Point3D(300,0,0, vvr::darkGreen),
         new vvr::Point3D(200,150,0, vvr::darkGreen) }},
         vvr::darkGreen);
-    triangle->addToCanvas(m_canvas);
     triangle->whole.filled = true;
 
     auto cir = new vvr::Circle2D(0, 0, 55);
+
+    //! Add to canvas.
     m_canvas.add(cir);
+    line->addToCanvas(m_canvas);
+    triangle->addToCanvas(m_canvas);
+    m_bsps[0]->addToCanvas(m_canvas);
+    m_bsps[1]->addToCanvas(m_canvas);
 
     setCameraPos({0,0,50});
 }
@@ -222,18 +247,11 @@ void Sketcher::keyEvent(unsigned char key, bool up, int modif)
 
 void Sketcher::arrowEvent(vvr::ArrowDir dir, int modif)
 {
-    if (dir == vvr::ArrowDir::UP) {
-        m_splines[0]->set_num_pts(m_splines[0]->get_pts().size() + 1);
-        m_splines[1]->set_num_pts(m_splines[0]->get_pts().size() + 1);
-    }
-    else if (dir == vvr::ArrowDir::DOWN) {
-        m_splines[0]->set_num_pts(m_splines[0]->get_pts().size() - 1);
-        m_splines[1]->set_num_pts(m_splines[0]->get_pts().size() - 1);
-    }
-    else if (dir == vvr::ArrowDir::LEFT) {
-        if (m_gs==1) return;
-        m_gs--;
-        resize();
+    if (dir == vvr::ArrowDir::LEFT) {
+        if (m_gs>1) {
+            m_gs--;
+            resize();
+        }
     }
     else if (dir == vvr::ArrowDir::RIGHT) {
         m_gs++;
@@ -314,7 +332,7 @@ void Sketcher::save_scene()
 
 void Sketcher::toggle_points()
 {
-    for (auto s:m_splines) {
+    for (auto s : m_bsps) {
         s->disp_pts = !s->disp_pts;
     }
 }

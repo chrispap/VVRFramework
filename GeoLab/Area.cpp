@@ -36,8 +36,8 @@ SceneArea::SceneArea()
     m_rad = 30;
     m_x = 300;
     m_y = 0;
-    m_hide_log = false;
-    m_hide_sliders = false;
+    m_show_log = true;
+    m_show_sliders = false;
 }
 
 void SceneArea::draw()

@@ -56,7 +56,7 @@ private:
 MoldingScene::MoldingScene()
 {
     m_bg_col = vvr::grey;
-    m_hide_log = false;
+    m_show_log = true;
     reset();
 
     //! Two hardcoded molds.

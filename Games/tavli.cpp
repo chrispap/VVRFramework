@@ -153,7 +153,8 @@ private:
 TavliScene::TavliScene(const std::vector<vvr::Colour> &colours)
 {
     m_bg_col = vvr::Colour("222222");
-    m_create_menus = false;
+    m_create_menus = true;
+    m_show_log = true;
     m_perspective_proj = true;
     m_fullscreen = false;
     _colours = colours;

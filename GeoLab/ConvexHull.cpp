@@ -38,8 +38,8 @@ private:
 ConvexHullScene::ConvexHullScene()
 {
     m_bg_col = vvr::Colour(0x44, 0x44, 0x44);
-    m_hide_log = false;
-    m_hide_sliders = true;
+    m_show_log = true;
+    m_show_sliders = true;
     reset();
     m_canvas.clear();
     m_pts.clear();

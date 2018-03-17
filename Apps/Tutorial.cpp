@@ -32,7 +32,7 @@ static C2DPoint p1, p2;
 TutorialScene::TutorialScene()
 {
     m_bg_col = vvr::grey;
-    m_hide_log = false;
+    m_show_log = true;
 }
 
 void TutorialScene::draw()

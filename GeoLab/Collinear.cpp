@@ -53,8 +53,8 @@ void Task_CollinearPoints(const C2DPointSet&, C2DPointSet&);
 SceneCollinear::SceneCollinear()
 {
     m_bg_col = vvr::Colour(0x44, 0x44, 0x44);
-    m_hide_log = false;
-    m_hide_sliders = false;
+    m_show_log = true;
+    m_show_sliders = false;
     reset();
 }
 

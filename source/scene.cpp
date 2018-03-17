@@ -25,9 +25,9 @@ Scene::Scene()
     m_bg_col = vvr::white;
     m_perspective_proj = false;
     m_fullscreen = false;
-    m_create_menus = true;
-    m_hide_log = true;
-    m_hide_sliders = true;
+    m_create_menus = false;
+    m_show_log = false;
+    m_show_sliders = false;
     m_camera_dist = 100;
     m_fov = 30;
     m_first_resize = true;
