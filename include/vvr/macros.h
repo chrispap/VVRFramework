@@ -20,6 +20,11 @@
 #define vvr_setmemb(x) this->x = x
 
 /*----[VVR MULTILINE MACRO]-------------------------------------------------------------*/
+#define vvr_echo_time_from_function(msg)                                                \
+    std::cout << (vvr::get_seconds()*1000)  << "msec - " <<                             \
+    __FUNCTION__ << " ("<< msg << ")\n";                                                \
+
+/*----[VVR MULTILINE MACRO]-------------------------------------------------------------*/
 #define vvr_sstr(x) dynamic_cast<std::ostringstream&>                                   \
     ((std::ostringstream()<<std::dec<<x)).str()
 

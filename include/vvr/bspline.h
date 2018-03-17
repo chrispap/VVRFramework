@@ -13,7 +13,7 @@ template<typename G>
 G& ref(G* obj) { return *obj; }
 
 template <typename G>
-static inline G spline_division(const G& num, const G& den)
+static inline G bsp_div(const G& num, const G& den)
 {
     if (den!=0.0) return num / den;
     if (num==1.0) return 1.0;
@@ -52,8 +52,8 @@ struct BSpline
                 const double A_den = X[i + k] - X[i];
                 const double C_num = (X[i + k + 1] - t) * N[i + 1][k - 1];
                 const double C_den = X[i + k + 1] - X[i + 1];
-                const double A = spline_division(A_num, A_den);
-                const double C = spline_division(C_num, C_den);
+                const double A = bsp_div(A_num, A_den);
+                const double C = bsp_div(C_num, C_den);
                 N[i][k] = A + C;
             }
         }
