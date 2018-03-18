@@ -15,7 +15,6 @@
 
 namespace vvr
 {
-    /*------------------------------------------------------------------------[types]---*/
     typedef float real;
     using math::vec;
     struct Canvas;
@@ -30,23 +29,21 @@ namespace vvr
 
     VVRFramework_API void draw(C2DPolygon &polygon, Colour col = Colour(), bool filled = false);
 
-    VVRFramework_API void add_to_canvas(Canvas&, Drawable*);
+    VVRFramework_API void collect(Canvas&, Drawable*);
 
     /*--------------------------------------------------------------------[Drawables]---*/
     struct VVRFramework_API Drawable
     {
-        virtual ~Drawable() { }
+        virtual ~Drawable() {}
         virtual void draw() const = 0;
         virtual real pickdist(int x, int y) const { return real(-1); }
         virtual real pickdist(const math::Ray&) const { return real(-1); }
-        virtual Drawable* clone() { return  nullptr; }
-        virtual void addToCanvas(Canvas &canvas);
-
-        void drawif() const             { if (visible) draw();                  }
-        bool show()                     { visible = true;       return visible; }
-        bool hide()                     { visible = false;      return visible; }
-        bool toggleVisibility()         { visible = !visible;   return visible; }
-
+        virtual Drawable* clone() { return nullptr; }
+        virtual void collect(Canvas &canvas);
+        void drawif() const { if (visible) draw(); }
+        bool show() { return (visible = true); }
+        bool hide() { return (visible = false); }
+        bool toggle() { return (visible = !visible); }
         bool visible = true;
     };
 
@@ -549,7 +546,7 @@ namespace vvr
             return whole.pickdist(x, y);
         }
 
-        void addToCanvas(Canvas &canvas) override
+        void collect(Canvas &canvas) override
         {
             canvas.add(this);
             for (auto c : blocks) canvas.add(c);

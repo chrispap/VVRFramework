@@ -13,7 +13,7 @@ using math::vec;
 real vvr::Shape::LineWidth = 2.2f;
 real vvr::Shape::PointSize = 7.0f;
 
-/*---[Helpers]--------------------------------------------------------------------------*/
+/*---[Drawing helpers]------------------------------------------------------------------*/
 math::AABB vvr::aabbFromVertices(const std::vector<vec> &vertices)
 {
     vec lo, hi;
@@ -182,11 +182,6 @@ void vvr::draw(C2DPolygon  &polygon, Colour col, bool filled)
     if (err) {
         std::cerr << "Polygon Invalid. Cannot render." << std::endl;
     }
-}
-
-void vvr::Drawable::addToCanvas(Canvas &canvas)
-{
-    canvas.add(this);
 }
 
 /*---[Shape: Drawing]-------------------------------------------------------------------*/
@@ -520,7 +515,6 @@ void vvr::Canvas::clearFrame()
     frames[fid].drvec.clear();
 }
 
-/*---[Functions]------------------------------------------------------------------------*/
 vvr::Drawable* vvr::Canvas::add(const C2DPoint &p, Colour col)
 {
     return add(new Point2D(p.x, p.y, col));
@@ -564,8 +558,13 @@ vvr::Drawable* vvr::Canvas::add(const C2DTriangle &tri, Colour col, bool solid)
     return add(drw);
 }
 
-void vvr::add_to_canvas(Canvas &canvas, Drawable *drw)
+void vvr::Drawable::collect(Canvas &canvas)
 {
-    drw->addToCanvas(canvas);
+    canvas.add(this);
+}
+
+void vvr::collect(Canvas &canvas, Drawable *drw)
+{
+    drw->collect(canvas);
 }
 /*--------------------------------------------------------------------------------------*/

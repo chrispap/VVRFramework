@@ -26,25 +26,27 @@ namespace vvr
         typedef T curve_t;
         typedef typename curve_t::point_t point_t;
 
-        Colour colour;
-        bool disp_pts = false;
+        Curve3D(curve_t &curve) : curve(curve) {}
 
-        Curve3D(curve_t &curve) : crv(curve) {}
-
-        void Discretize(size_t num_pts) const
+        /**
+         * @TODO Make a template from this, giving the potential to specialize
+         *  for curves that need special treatment in discretization.
+         *  e.g.: Hilbert curve, or a simple polyline with known number of pts.
+         */
+        void discretize(size_t num_pts) const
         {
             if (num_pts<2) num_pts = 2;
-            auto range = crv.Range();
+            auto range = curve.range();
             double dt = (range.second - range.first) / (num_pts - 1);
             pts.resize(num_pts);
             for (size_t i = 0; i < num_pts; i++) {
-                pts[i] = crv.Eval(range.first + dt * i);
+                pts[i] = curve.eval(range.first + dt * i);
             }
         }
 
         void draw() const override
         {
-            Discretize(32);
+            discretize(32);
             for (auto it = pts.begin(); it < pts.end() - 1; ++it) {
                 LineSeg3D(math::LineSegment(it[0], it[1]), colour).draw();
                 if (disp_pts) it->draw();
@@ -52,9 +54,25 @@ namespace vvr
             if (disp_pts) pts.back().draw();
         }
 
+        real pickdist(int x, int y) const override
+        {
+            vec p(x,y,0);
+            const real maxdsq = vvr_square(vvr::Shape::PointSize);
+            real d = std::numeric_limits<real>::max();
+            for (size_t i=0; i<pts.size()-1; ++i) {
+                math::LineSegment ls(pts[i], pts[i+1]);
+                d = std::min(d, ls.DistanceSq(p));
+            }
+            return ((d < maxdsq) ? d: -1);
+        }
+
+    public:
+        Colour colour;
+        bool disp_pts = false;
+
     private:
+        curve_t &curve;
         mutable std::vector<point_t> pts;
-        curve_t &crv;
     };
 
     /*---[CurveBsp]---------------------------------------------------------------------*/
@@ -64,13 +82,45 @@ namespace vvr
 
         CurveBsp() : Curve3D<curve_t>(bsp) {}
 
-        void addToCanvas(Canvas &canvas) override
+        void collect(Canvas &canvas) override
         {
             canvas.add(this);
             for (auto cp : bsp.cps) {
                 canvas.add(cp);
             }
         }
+    };
+
+    template <class ContextT>
+    struct Dragger2D<CurveBsp, ContextT> : DraggerBase
+    {
+        bool on_pick(Mousepos mp, CurveBsp* bsp)
+        {
+            picked = bsp;
+            colvirg = picked->colour;
+            picked->colour = col_hover;
+            mplast = mp;
+            return true;
+        }
+
+        void on_drag(Mousepos mp)
+        {
+            for (auto cp : picked->bsp.cps) {
+                vec p(vec::zero);
+                cp->x = cp->x + mp.x - mplast.x;
+                cp->y = cp->y + mp.y - mplast.y;
+            }
+            mplast = mp;
+        }
+
+        void on_drop()
+        {
+            picked->colour = colvirg;
+        }
+
+    private:
+        Mousepos mplast;
+        CurveBsp* picked;
     };
 }
 
@@ -99,11 +149,12 @@ private:
     void toggle_croshair();
 
     typedef vvr::PriorityPicker2D<
-    /*0*/vvr::MousePicker2D<vvr::Point3D>,
-    /*1*/vvr::MousePicker2D<vvr::LineSeg3D>,
-    /*2*/vvr::MousePicker2D<vvr::Circle2D>,
-    /*3*/vvr::MousePicker2D<vvr::CompositeTriangle>,
-    /*4*/vvr::MousePicker2D<vvr::CompositeLine>
+    vvr::MousePicker2D<vvr::Point3D>,
+    vvr::MousePicker2D<vvr::LineSeg3D>,
+    vvr::MousePicker2D<vvr::Circle2D>,
+    vvr::MousePicker2D<vvr::CurveBsp>,
+    vvr::MousePicker2D<vvr::CompositeTriangle>,
+    vvr::MousePicker2D<vvr::CompositeLine>
     > PickerT;
 
     int             m_gs = 40;
@@ -133,7 +184,7 @@ Sketcher::Sketcher()
 
     /* Create picker */
     m_picker = PickerT::Make(m_canvas);
-    m_picker->get<vvr::Point3D>().dragger().col_hover = vvr::Blue;
+    m_picker->get_picker<vvr::Point3D>().dragger.col_hover = vvr::Blue;
     reset();
 }
 
@@ -185,11 +236,11 @@ void Sketcher::reset()
     auto circle = new vvr::Circle2D(0, 0, 55);
 
     //! Add to canvas.
-    vvr::add_to_canvas(m_canvas, triangle);
-    vvr::add_to_canvas(m_canvas, circle);
-    vvr::add_to_canvas(m_canvas, line);
-    vvr::add_to_canvas(m_canvas, bsp1);
-    vvr::add_to_canvas(m_canvas, bsp2);
+    vvr::collect(m_canvas, triangle);
+    vvr::collect(m_canvas, circle);
+    vvr::collect(m_canvas, line);
+    vvr::collect(m_canvas, bsp1);
+    vvr::collect(m_canvas, bsp2);
 
     setCameraPos({0,0,50});
 }
@@ -206,15 +257,15 @@ void Sketcher::mouseHovered(int x, int y, int modif)
     m_hl->set(x, y, x + 1, y);
     m_vl->set(x, y, x, y + 1);
     m_picker->do_pick(vvr::Mousepos{ x, y }, 0, false);
-    if (m_picker->picked()) {
+    if (m_picker->get_picked()) {
         cursorHand();
     } else cursorShow();
 }
 
 void Sketcher::mousePressed(int x, int y, int modif)
 {
-    m_picker->do_pick(vvr::Mousepos{ x, y }, modif, true);
-    if (m_picker->picked()) cursorGrab();
+    m_picker->do_pick(vvr::Mousepos{ x, y }, modif, ctrlDown(modif));
+    if (m_picker->get_picked()) cursorGrab();
 }
 
 void Sketcher::mouseMoved(int x, int y, int modif)
@@ -226,14 +277,14 @@ void Sketcher::mouseMoved(int x, int y, int modif)
         m_hl->set(x, y, x + 1, y);
         m_vl->set(x, y, x, y + 1);
     }
-    if (m_picker->picked()) {
+    if (m_picker->get_picked()) {
         m_picker->do_drag(vvr::Mousepos{ x, y }, modif);
     }
 }
 
 void Sketcher::mouseReleased(int x, int y, int modif)
 {
-    if (m_picker->picked()) cursorShow();
+    if (m_picker->get_picked()) cursorShow();
     m_picker->do_drop();
 }
 
@@ -264,7 +315,7 @@ void Sketcher::draw()
     enterPixelMode();
     m_grid.drawif();
     m_canvas.draw();
-    if (auto p=m_picker->picked()) p->draw();
+    if (auto p=m_picker->get_picked()) p->draw();
     vvr::real lw = vvr::Shape::SetLineWidth(1);
     m_hl->drawif();
     m_vl->drawif();
@@ -335,13 +386,13 @@ void Sketcher::toggle_points()
 
 void Sketcher::toggle_grid()
 {
-    m_grid.toggleVisibility();
+    m_grid.toggle();
 }
 
 void Sketcher::toggle_croshair()
 {
-    m_hl->toggleVisibility();
-    m_vl->toggleVisibility();
+    m_hl->toggle();
+    m_vl->toggle();
 }
 
 /*---[Invoke]---------------------------------------------------------------------------*/

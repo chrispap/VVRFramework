@@ -79,16 +79,16 @@ void BoxesScene::keyEvent(unsigned char key, bool up, int modif)
     switch (key)
     {
     case 'a':
-        getGlobalAxes().toggleVisibility();
+        getGlobalAxes().toggle();
         break;
 
     case 'b':
-        mAabb1->toggleVisibility();
-        mAabb2->toggleVisibility();
+        mAabb1->toggle();
+        mAabb2->toggle();
         break;
 
     case 'o':
-        mBox->toggleVisibility();
+        mBox->toggle();
 
     case 'm':
         setBoxFromCurrentView();

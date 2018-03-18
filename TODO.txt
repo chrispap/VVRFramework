@@ -1,26 +1,49 @@
-[DATA]:
-    - Canvas should stop deleting 'vvr::Drawable' objects! {NOT SAFE / NOT SCALABLE}
-    - A resource management object should be designed.
-    - Investigate the potential of using 'std::shared_ptr'.
-    - A serialization process should be engineered.
-    - A file format for storing/exporting/exchanging scenes should be introduced.
-    - Sample JSON:  {
+---[DATA]---------------------------------------------------------------------------------
+  - Canvas should stop deleting 'vvr::Drawable' objects! {NOT SAFE / NOT SCALABLE}
+  - A resource management object should be designed.
+  - Investigate the potential of using 'std::shared_ptr'.
+  - A serialization process should be engineered.
+  - A file format for storing/exporting/exchanging scenes should be introduced.
+  - Sample JSON:  {
                       "vvr::Point3D": [133,233,456],
                       "vvr::Circle2D": {
                         "center": [20,30],
                         "radius": 50 }
                     }
 
-[TOOLS]:
-    - Geometry creation.
-    - Geometry manipulation.
-    - Support smart interactions of shapes:
-      - Snap, Align, Tangent, Equidistant, Parallel.
-    - Make an editable queue of tools:
-    - Widgets for:
-        - Visibility control of different shapes/types.
-        - Tools.
-        - Flags/Modes.
+---[TOOLS]--------------------------------------------------------------------------------
+  - Geometry creation.
+  - Geometry manipulation.
+  - Support smart interactions of shapes:
+    - Snap, Align, Tangent, Equidistant, Parallel.
+  - Make an editable queue of tools:
+  - Widgets for:
+    - Visibility control of different shapes/types.
+    - Tools.
+    - Flags/Modes.
+  - Create an 'InputConsumer' object with modifiable behaviour.
 
-[APPS]:
-    - Animation of iterative refinement of a Hilbert Curve.
+---[APPS]---------------------------------------------------------------------------------
+  - Animation of iterative refinement of a Hilbert Curve.
+
+---[FIXES]--------------------------------------------------------------------------------
+  - Stop passing arround mouse positions and modifiers.
+    Store them in 'private' 'vvr::Scene' variables uppon event arrival and
+    provide methods to get them. {Mousepos, Modifiers, ...}.
+  - Refactor 'vvr::Canvas' or create a new, simpler, cleaner class.
+  - Create a new 'Manager-like' object to handle all the exising Drawables of the
+    application. It must have utilities to show/hide all, to list them etc.
+    It could be coupled? with some pickers and draggers. Or not...
+  - Make the AllDemo window more complete, maybe replace the old one with this.
+  - Revisit the interface for curves @see: 'vvr::Curve3D'.
+  - Decouple some concepts: {Canvas / Drawables / Drawing / ... }
+    Use different vectors for drawing / picking.
+    Maybe use one vector for each type, or each picker could have its vector.
+    Duplication would then be responsibility of the dragger. The dragger could know
+    the drawing vector, so that in duplication, entities would be added in that along
+    with the picking vector.
+  - Use DistanceSq for querying in the various pickDists.
+  - Implement a selection mechanism. Click selection, box selection, ...
+  - Revisit vvr::Drawable::clone and respective copy-ctors.
+
+------------------------------------------------------------------------------------------

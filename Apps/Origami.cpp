@@ -248,7 +248,7 @@ OrigamiScene::OrigamiScene()
     m_picker = PickerT::Make(m_papers, m_dragger.get());
 
     /* Install key bindings */
-    m_keymap['a'].add(new vvr::SimpleCmd<vvr::Axes, bool>(&getGlobalAxes(), &vvr::Axes::toggleVisibility));
+    m_keymap['a'].add(new vvr::SimpleCmd<vvr::Axes, bool>(&getGlobalAxes(), &vvr::Axes::toggle));
     m_keymap['x'].add(new vvr::SimpleCmd<vvr::Canvas>(&m_sketch, &vvr::Canvas::clear));
     m_keymap['s'].add(new vvr::SimpleCmd<Paper>(m_paper.get(), &Paper::toggleFill));
     m_keymap['w'].add(new vvr::SimpleCmd<Paper>(m_paper.get(), &Paper::toggleWire));

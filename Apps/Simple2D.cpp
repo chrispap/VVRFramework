@@ -9,7 +9,7 @@
 #include <string>
 #include <functional>
 
-/*--------------------------------------------------------------------------------------*/
+/*---[Simple2DScene]--------------------------------------------------------------------*/
 class Simple2DScene : public vvr::Scene
 {
 public:
@@ -41,10 +41,15 @@ Simple2DScene::Simple2DScene()
     m_bg_col = vvr::grey;
 
     /* Create circles in random positions. */
-    for (int i=0; i<111; i++) {
+    for (int i=0; i<11; i++) {
         int x = rand() % 800 - 400;
         int y = rand() % 600 - 300;
         m_canvas.add(new vvr::Circle2D(x, y, 20, vvr::white));
+    }
+    for (int i=0; i<11; i++) {
+        int x = rand() % 800 - 400;
+        int y = rand() % 600 - 300;
+        m_canvas.add(new vvr::Point3D(x, y, 0, vvr::white));
     }
 
     m_picker = PickerT::Make(m_canvas);
@@ -57,7 +62,7 @@ void Simple2DScene::mouseHovered(int x, int y, int modif)
 
 void Simple2DScene::mousePressed(int x, int y, int modif)
 {
-    m_picker->do_pick(vvr::Mousepos{ x, y }, modif);
+    m_picker->do_pick(vvr::Mousepos{ x, y }, modif, true);
 }
 
 void Simple2DScene::mouseMoved(int x, int y, int modif)
@@ -74,8 +79,10 @@ void Simple2DScene::draw()
 {
     enterPixelMode();
     m_canvas.draw();
-    vvr::Circle2D* c = m_picker->picked<1>();
-    if (c) c->draw();
+    if (m_picker->get_picked()) {
+        m_picker->get_picked()->draw();
+        cursorGrab();
+    } else cursorHand();
     exitPixelMode();
 }
 

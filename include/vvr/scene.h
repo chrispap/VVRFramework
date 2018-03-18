@@ -8,11 +8,6 @@
 
 namespace vvr
 {
-    struct Mousepos
-    {
-        int x, y;
-    };
-
     enum ArrowDir { UP = 0, DOWN, RIGHT, LEFT };
 
     class VVRFramework_API Scene

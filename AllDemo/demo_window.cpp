@@ -95,7 +95,7 @@ int main(int argc, char* argv[])
 {
     QApplication app(argc, argv);
     DemoWindow demowin;
-    demowin.show();//Maximized();
+    demowin.showMaximized();
     app.exec();
 }
 

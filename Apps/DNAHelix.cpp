@@ -93,7 +93,7 @@ void HelixScene::keyEvent(unsigned char key, bool up, int modif)
 
     switch (k)
     {
-    case 'a': getGlobalAxes().toggleVisibility(); break;
+    case 'a': getGlobalAxes().toggle(); break;
     case ' ': m_anim.toggle(); break;
     default: Scene::keyEvent(key, up, modif);
     }

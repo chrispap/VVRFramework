@@ -205,8 +205,8 @@ void TavliScene::keyEvent(unsigned char key, bool up, int modif)
 {
     switch (tolower(key))
     {
-    case 'a': _axes->toggleVisibility(); break;
-    case 'b': _board->toggleVisibility(); break;
+    case 'a': _axes->toggle(); break;
+    case 'b': _board->toggle(); break;
     case 'h': HHH -= dHHH; vvr_echo(HHH); resize(); break;
     case 'j': HHH += dHHH; vvr_echo(HHH); resize(); break;
     case '0': resetCamera(); break;
