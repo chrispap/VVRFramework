@@ -20,15 +20,11 @@
 
 //#define objName "tavli.obj"
 //#define objName "cube.obj"
-//#define objName "bunny_low.obj"
+#define objName "bunny_low.obj"
 //#define objName "large/unicorn.obj"
 //#define objName "ironman.obj"
 //#define objName "unicorn_low.obj"
-#define objName "dragon_low_low.obj"
-
-using namespace vvr;
-using namespace std;
-using namespace math;
+//#define objName "dragon_low_low.obj"
 
 struct CuttingPlane : public math::Plane, vvr::Drawable
 {
@@ -99,8 +95,8 @@ private:
 
 Simple3DScene::Simple3DScene()
 {
-    m_bg_col = Colour("768E77");
-    m_obj_col = Colour("454545");
+    m_bg_col = vvr::Colour("768E77");
+    m_obj_col = vvr::Colour("454545");
     m_perspective_proj = true;
     m_style_flag = 0;
     m_style_flag |= FLAG_SHOW_SOLID;
@@ -165,9 +161,9 @@ void Simple3DScene::defineCuttingPlane(const math::vec &pos, const math::vec &no
         if (y > maxy) maxy = y;
     }
 
-    vec newpos =
-        ((maxx + minx) / 2) * m_plane->X +
-        ((maxy + miny) / 2) * m_plane->Y + m_plane->pos;
+    vec newpos(vec::zero);
+    newpos += ((maxx + minx) / 2) * m_plane->X;
+    newpos += ((maxy + miny) / 2) * m_plane->Y + m_plane->pos;
 
     float newside = sqrt(2.0f) * std::max(maxx - minx, maxy - miny);
 
@@ -177,15 +173,15 @@ void Simple3DScene::defineCuttingPlane(const math::vec &pos, const math::vec &no
 void Simple3DScene::load3DModels()
 {
     // Load 3D models.
-    const string objFile = get_base_path() + "resources/obj/" + objName;
+    const std::string objFile = vvr::get_base_path() + "resources/obj/" + objName;
 
-    m_mesh_1 = Mesh::Make(objFile);
+    m_mesh_1 = vvr::Mesh::Make(objFile);
     m_mesh_1->cornerAlign();
     m_mesh_1->setBigSize(getSceneWidth() / 8);
     m_mesh_1->update();
 
-    m_mesh_2 = Mesh::Make(*m_mesh_1);
-    m_mesh_3 = Mesh::Make(*m_mesh_1);
+    m_mesh_2 = vvr::Mesh::Make(*m_mesh_1);
+    m_mesh_3 = vvr::Mesh::Make(*m_mesh_1);
 
     m_mesh_2->setBigSize(m_mesh_1->getMaxSize() * 1.5);
     m_mesh_3->setBigSize(m_mesh_1->getMaxSize() / 1.5);
@@ -206,11 +202,11 @@ void Simple3DScene::draw()
     //! Draw meshes
     for (auto mesh : { m_mesh_1, m_mesh_2, m_mesh_3 })
     {
-        if (m_style_flag & FLAG_SHOW_SOLID) mesh->draw(m_obj_col, SOLID);
-        if (m_style_flag & FLAG_SHOW_WIRE) mesh->draw(vvr::black, WIRE);
-        if (m_style_flag & FLAG_SHOW_NORMALS) mesh->draw(vvr::black, NORMALS);
-        if (m_style_flag & FLAG_SHOW_AXES) mesh->draw(vvr::black, AXES);
-        if (m_style_flag & FLAG_SHOW_AABB) mesh->draw(vvr::black, BOUND);
+        if (m_style_flag & FLAG_SHOW_SOLID) mesh->draw(m_obj_col, vvr::SOLID);
+        if (m_style_flag & FLAG_SHOW_WIRE) mesh->draw(vvr::black, vvr::WIRE);
+        if (m_style_flag & FLAG_SHOW_NORMALS) mesh->draw(vvr::black, vvr::NORMALS);
+        if (m_style_flag & FLAG_SHOW_AXES) mesh->draw(vvr::black, vvr::AXES);
+        if (m_style_flag & FLAG_SHOW_AABB) mesh->draw(vvr::black, vvr::BOUND);
     }
 
     //! Draw selected triangles
@@ -277,7 +273,7 @@ void Simple3DScene::pick(int x, int y)
 
     for (vvr::Mesh::Ptr mesh_ptr : { m_mesh_1, m_mesh_2, m_mesh_3, })
     {
-        vector<vvr::Triangle3D*> tris_sel;
+        std::vector<vvr::Triangle3D*> tris_sel;
         int tri_min_index = -1, tri_counter = 0;
         float tri_min_dist = FLT_MAX;
 
@@ -292,7 +288,7 @@ void Simple3DScene::pick(int x, int y)
                 );
 
             if (tri.Intersects(ray, NULL, &intr)) {
-                tris_sel.push_back(new Triangle3D(tri, vvr::magenta));
+                tris_sel.push_back(new vvr::Triangle3D(tri, vvr::magenta));
                 float d;
                 if ((d = tri.DistanceSq(ray.pos)) < tri_min_dist) {
                     tri_min_dist = d;

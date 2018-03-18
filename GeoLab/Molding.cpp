@@ -234,15 +234,7 @@ void MoldingScene::mousePressed(int x, int y, int modif)
 {
     C2DPoint p(x, y);
 
-    if (altDown(modif))
-    {
-        for (int i = 0; i < (int)m_pts.size(); ++i) {
-            if (p.Distance(m_pts[i]) < 10) {
-                m_curr_p = &m_pts[i];
-            }
-        }
-    }
-    else if (ctrlDown(modif))
+    if (ctrlDown(modif))
     {
         m_pts.push_back(p);
     }
@@ -255,7 +247,14 @@ void MoldingScene::mousePressed(int x, int y, int modif)
         }
         m_anim_on = true;
     }
-
+    else
+    {
+        for (int i = 0; i < (int)m_pts.size(); ++i) {
+            if (p.Distance(m_pts[i]) < 10) {
+                m_curr_p = &m_pts[i];
+            }
+        }
+    }
 }
 
 void MoldingScene::mouseReleased(int x, int y, int modif)
@@ -269,11 +268,7 @@ void MoldingScene::mouseMoved(int x, int y, int modif)
 {
     C2DPoint p(x, y);
 
-    if (altDown(modif) && m_curr_p)
-    {
-        *m_curr_p = p;
-    }
-    else if (ctrlDown(modif))
+    if (ctrlDown(modif))
     {
         if (p.Distance(m_pts.back()) > MOLD_SIDE_MIN_LEN) {
             m_pts.push_back(p);
@@ -291,7 +286,10 @@ void MoldingScene::mouseMoved(int x, int y, int modif)
         m_dv = new_dir;
         m_anim_on = true;
     }
-
+    else if (m_curr_p)
+    {
+        *m_curr_p = p;
+    }
 }
 
 void MoldingScene::keyEvent(unsigned char key, bool up, int modif)

@@ -6,7 +6,12 @@
 #include <vvr/command.h>
 #include <MathGeoLib.h>
 
-namespace vvr {
+namespace vvr
+{
+    struct Mousepos
+    {
+        int x, y;
+    };
 
     enum ArrowDir { UP = 0, DOWN, RIGHT, LEFT };
 

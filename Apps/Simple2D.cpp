@@ -52,22 +52,22 @@ Simple2DScene::Simple2DScene()
 
 void Simple2DScene::mouseHovered(int x, int y, int modif)
 {
-    m_picker->pick(vvr::Mousepos{ x, y }, modif);
+    m_picker->do_pick(vvr::Mousepos{ x, y }, modif);
 }
 
 void Simple2DScene::mousePressed(int x, int y, int modif)
 {
-    m_picker->pick(vvr::Mousepos{ x, y }, modif);
+    m_picker->do_pick(vvr::Mousepos{ x, y }, modif);
 }
 
 void Simple2DScene::mouseMoved(int x, int y, int modif)
 {
-    m_picker->drag(vvr::Mousepos{ x, y }, modif);
+    m_picker->do_drag(vvr::Mousepos{ x, y }, modif);
 }
 
 void Simple2DScene::mouseReleased(int x, int y, int modif)
 {
-    m_picker->drop();
+    m_picker->do_drop();
 }
 
 void Simple2DScene::draw()

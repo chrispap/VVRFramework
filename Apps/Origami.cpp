@@ -269,7 +269,7 @@ void OrigamiScene::draw()
 
 void OrigamiScene::mouseHovered(int x, int y, int modif)
 {
-    m_picker->pick(unproject(x,y), modif);
+    m_picker->do_pick(unproject(x,y), modif);
     if (m_picker->picked()) {
         vvr::set_status_bar_msg("Sketch on paper surface");
         cursorHide();
@@ -283,8 +283,8 @@ void OrigamiScene::mouseHovered(int x, int y, int modif)
 void OrigamiScene::mousePressed(int x, int y, int modif)
 {
     auto ray = unproject(x,y);
-    m_picker->drop(ray, modif);
-    m_picker->pick(ray, modif);
+    m_picker->do_drop(ray, modif);
+    m_picker->do_pick(ray, modif);
     if (m_picker->picked()) {
         cursorHide();
     } else Scene::mousePressed(x, y, modif);
@@ -293,7 +293,7 @@ void OrigamiScene::mousePressed(int x, int y, int modif)
 void OrigamiScene::mouseMoved(int x, int y, int modif)
 {
     if (m_picker->picked()) {
-        m_picker->drag(unproject(x,y), modif);
+        m_picker->do_drag(unproject(x,y), modif);
     } else Scene::mouseMoved(x, y, modif);
 }
 

@@ -37,6 +37,7 @@ set(INCL_FILES
   ../include/vvr/geom.h
   ../include/vvr/drawing.h
   ../include/vvr/palette.h
+  ../include/vvr/dragging.h
   ../include/vvr/picking.h
   ../include/vvr/mesh.h
   ../include/vvr/kdtree.h

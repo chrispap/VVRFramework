@@ -35,7 +35,7 @@ namespace vvr
         {
             if (num_pts<2) num_pts = 2;
             auto range = crv.Range();
-            auto dt = (range.second - range.first) / (num_pts - 1);
+            double dt = (range.second - range.first) / (num_pts - 1);
             pts.resize(num_pts);
             for (size_t i = 0; i < num_pts; i++) {
                 pts[i] = crv.Eval(range.first + dt * i);
@@ -133,7 +133,7 @@ Sketcher::Sketcher()
 
     /* Create picker */
     m_picker = PickerT::Make(m_canvas);
-    m_picker->get<0>().dragger().col_hover = vvr::Blue;
+    m_picker->get<vvr::Point3D>().dragger().col_hover = vvr::Blue;
     reset();
 }
 
@@ -141,7 +141,7 @@ void Sketcher::reset()
 {
     vvr::Scene::reset();
 
-    m_picker->drop();
+    m_picker->do_drop();
     m_canvas.clear();
 
     //! Create bsplines
@@ -205,7 +205,7 @@ void Sketcher::mouseHovered(int x, int y, int modif)
 {
     m_hl->set(x, y, x + 1, y);
     m_vl->set(x, y, x, y + 1);
-    m_picker->pick(vvr::Mousepos{ x, y }, 0, false);
+    m_picker->do_pick(vvr::Mousepos{ x, y }, 0, false);
     if (m_picker->picked()) {
         cursorHand();
     } else cursorShow();
@@ -213,7 +213,7 @@ void Sketcher::mouseHovered(int x, int y, int modif)
 
 void Sketcher::mousePressed(int x, int y, int modif)
 {
-    m_picker->pick(vvr::Mousepos{ x, y }, modif, true);
+    m_picker->do_pick(vvr::Mousepos{ x, y }, modif, true);
     if (m_picker->picked()) cursorGrab();
 }
 
@@ -227,14 +227,14 @@ void Sketcher::mouseMoved(int x, int y, int modif)
         m_vl->set(x, y, x, y + 1);
     }
     if (m_picker->picked()) {
-        m_picker->drag(vvr::Mousepos{ x, y }, modif);
+        m_picker->do_drag(vvr::Mousepos{ x, y }, modif);
     }
 }
 
 void Sketcher::mouseReleased(int x, int y, int modif)
 {
     if (m_picker->picked()) cursorShow();
-    m_picker->drop();
+    m_picker->do_drop();
 }
 
 void Sketcher::keyEvent(unsigned char key, bool up, int modif)
@@ -262,17 +262,13 @@ void Sketcher::arrowEvent(vvr::ArrowDir dir, int modif)
 void Sketcher::draw()
 {
     enterPixelMode();
-    {
-        m_grid.drawif();
-        m_canvas.draw();
-        if (auto p=m_picker->picked()) {
-            p->draw();
-        }
-        vvr::real lw = vvr::Shape::SetLineWidth(1);
-        m_hl->drawif();
-        m_vl->drawif();
-        lw = vvr::Shape::SetLineWidth(lw);
-    }
+    m_grid.drawif();
+    m_canvas.draw();
+    if (auto p=m_picker->picked()) p->draw();
+    vvr::real lw = vvr::Shape::SetLineWidth(1);
+    m_hl->drawif();
+    m_vl->drawif();
+    lw = vvr::Shape::SetLineWidth(lw);
     exitPixelMode();
 }
 
