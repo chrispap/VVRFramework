@@ -82,6 +82,12 @@ namespace vvr
 
         CurveBsp() : Curve3D<curve_t>(bsp) {}
 
+        CurveBsp(CurveBsp const &other) : Curve3D<curve_t>(bsp), bsp(other.bsp)
+        {
+            disp_pts = other.disp_pts;
+            colour = other.colour;
+        }
+
         void collect(Canvas &canvas) override
         {
             canvas.add(this);
@@ -99,7 +105,7 @@ namespace vvr
             picked = bsp;
             colvirg = picked->colour;
             picked->colour = col_hover;
-            mplast = mp;
+            mpl = mp;
             return true;
         }
 
@@ -107,10 +113,10 @@ namespace vvr
         {
             for (auto cp : picked->bsp.cps) {
                 vec p(vec::zero);
-                cp->x = cp->x + mp.x - mplast.x;
-                cp->y = cp->y + mp.y - mplast.y;
+                cp->x = cp->x + mp.x - mpl.x;
+                cp->y = cp->y + mp.y - mpl.y;
             }
-            mplast = mp;
+            mpl = mp;
         }
 
         void on_drop()
@@ -119,7 +125,7 @@ namespace vvr
         }
 
     private:
-        Mousepos mplast;
+        Mousepos mpl;
         CurveBsp* picked;
     };
 }
@@ -177,10 +183,10 @@ Sketcher::Sketcher()
     m_canvas.setDelOnClear(false);
 
     /* Create keyboard mapping */
+    m_key_map['v'].add((new vvr::SimpleCmd<Sketcher>(this, &Sketcher::toggle_croshair)));
     m_key_map['p'].add((new vvr::SimpleCmd<Sketcher>(this, &Sketcher::toggle_points)));
     m_key_map['g'].add((new vvr::SimpleCmd<Sketcher>(this, &Sketcher::toggle_grid)));
     m_key_map['s'].add((new vvr::SimpleCmd<Sketcher>(this, &Sketcher::save_scene)));
-    m_key_map['v'].add((new vvr::SimpleCmd<Sketcher>(this, &Sketcher::toggle_croshair)));
 
     /* Create picker */
     m_picker = PickerT::Make(m_canvas);
@@ -216,8 +222,8 @@ void Sketcher::reset()
     //! Create croshair lines.
     m_hl = new vvr::Line2D(0, 0, 0, 0, vvr::red);
     m_vl = new vvr::Line2D(0, 0, 0, 0, vvr::red);
-    m_hl->hide();
-    m_vl->hide();
+    m_hl->show();
+    m_vl->show();
 
     //! Create composite line
     auto line = new vvr::CompositeLine({

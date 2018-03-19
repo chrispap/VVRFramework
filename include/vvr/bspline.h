@@ -26,10 +26,15 @@ namespace vvr {
         typedef typename std::remove_pointer<T>::type point_t;
         typedef std::vector<std::vector<double>> double_vector_2d;
 
-        std::vector<T> cps;
         std::vector<double> knots;
+        std::vector<T> cps;
 
         BSpline() {}
+
+        BSpline(BSpline const &other) : knots(other.knots)
+        {
+            copy_cps(other.cps);
+        }
 
         point_t eval(const double t)
         {
@@ -70,6 +75,25 @@ namespace vvr {
         {
             const int mb = knots.size() - cps.size();
             return std::make_pair(knots[mb - 1], (*(knots.end() - 1)));
+        }
+
+    private:
+        template <typename R=T,
+        typename std::enable_if<std::is_pointer<R>::value,R>::type=nullptr>
+        void copy_cps(std::vector<R> const &other_cps)
+        {
+            for (auto p : other_cps) {
+                cps.push_back(new point_t(ref(p)));
+            }
+        }
+
+        template <typename R=T,
+        typename std::enable_if<!std::is_pointer<R>::value,R>::type=nullptr>
+        void copy_cps(std::vector<R> const &other_cps)
+        {
+            for (auto p : other_cps) {
+                cps.push_back(point_t(ref(p)));
+            }
         }
     };
 }

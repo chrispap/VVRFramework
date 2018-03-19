@@ -68,7 +68,7 @@ namespace vvr
         bool on_pick(Mousepos mp, LineSeg3D* ln)
         {
             picked = ln;
-            mplast = mp;
+            mpl = mp;
             colvirg = picked->colour;
             picked->colour = col_hover;
             return true;
@@ -76,8 +76,8 @@ namespace vvr
 
         void on_drag(Mousepos mp)
         {
-            picked->Translate(vec(mp.x-mplast.x, mp.y - mplast.y, 0));
-            mplast = mp;
+            picked->Translate(vec(mp.x-mpl.x, mp.y - mpl.y, 0));
+            mpl = mp;
         }
 
         void on_drop()
@@ -87,7 +87,7 @@ namespace vvr
 
     private:
         LineSeg3D* picked;
-        Mousepos mplast;
+        Mousepos mpl;
     };
 
     template <class ContextT>
@@ -96,7 +96,7 @@ namespace vvr
         bool on_pick(Mousepos mp, Triangle3D* tri)
         {
             picked = tri;
-            mplast = mp;
+            mpl = mp;
             colvirg = picked->colour;
             picked->colour = col_hover;
             picked->setColourPerVertex(picked->colour, picked->colour, picked->colour);
@@ -105,8 +105,8 @@ namespace vvr
 
         void on_drag(Mousepos mp)
         {
-            picked->Translate(vec(mp.x - mplast.x, mp.y - mplast.y, 0));
-            mplast = mp;
+            picked->Translate(vec(mp.x - mpl.x, mp.y - mpl.y, 0));
+            mpl = mp;
         }
 
         void on_drop()
@@ -117,7 +117,7 @@ namespace vvr
 
     private:
         Triangle3D* picked;
-        Mousepos mplast;
+        Mousepos mpl;
     };
 
     template <class ContextT>
@@ -125,7 +125,7 @@ namespace vvr
     {
         bool on_pick(Mousepos mp, Triangle2D* tri)
         {
-            mplast = mp;
+            mpl = mp;
             picked = tri;
             colvirg = picked->colour;
             picked->colour = col_hover;
@@ -134,15 +134,15 @@ namespace vvr
 
         void on_drag(Mousepos mp)
         {
-            const int dx = mp.x - mplast.x;
-            const int dy = mp.y - mplast.y;
+            const int dx = mp.x - mpl.x;
+            const int dy = mp.y - mpl.y;
             picked->x1 += dx;
             picked->x2 += dx;
             picked->x3 += dx;
             picked->y1 += dy;
             picked->y2 += dy;
             picked->y3 += dy;
-            mplast = mp;
+            mpl = mp;
         }
 
         void on_drop()
@@ -152,7 +152,7 @@ namespace vvr
 
     private:
         Triangle2D *picked;
-        Mousepos mplast;
+        Mousepos mpl;
     };
 
     template <class ContextT>
@@ -188,7 +188,7 @@ namespace vvr
         bool on_pick(Mousepos mp, composite_t* drw)
         {
             size_t i=0;
-            mplast = mp;
+            mpl = mp;
             picked = drw;
             if (!dragger_whole.on_pick(mp, &drw->whole)) {
                 return false;
@@ -204,11 +204,11 @@ namespace vvr
             size_t i=0;
             Mousepos mpd;
             for (auto comp : picked->blocks) {
-                mpd.x = mp.x - mplast.x + comp->x;
-                mpd.y = mp.y - mplast.y + comp->y;
+                mpd.x = mp.x - mpl.x + comp->x;
+                mpd.y = mp.y - mpl.y + comp->y;
                 dragger_block[i++].on_drag(mpd);
             }
-            mplast = mp;
+            mpl = mp;
         }
 
         void on_drop()
@@ -224,7 +224,7 @@ namespace vvr
         Dragger2D<WholeT, ContextT> dragger_whole;
         Dragger2D<BlockT, ContextT> dragger_block[N];
         composite_t* picked;
-        Mousepos mplast;
+        Mousepos mpl;
     };
 }
 
