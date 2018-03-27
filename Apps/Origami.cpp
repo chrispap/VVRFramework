@@ -4,6 +4,7 @@
 #include <vvr/animation.h>
 #include <vvr/command.h>
 #include <vvr/picking.h>
+#include <vvr/geom.h>
 #include <MathGeoLib.h>
 
 using vvr::vec;
@@ -229,6 +230,7 @@ private:
     Paper::Ptr          m_paper;
     vvr::Canvas         m_papers;
     vvr::Canvas         m_sketch;
+    vvr::Canvas         m_hull;
     vvr::KeyMap         m_keymap;
     PickerT::Ptr        m_picker;
     PaperDragger::Ptr   m_dragger;
@@ -250,6 +252,7 @@ OrigamiScene::OrigamiScene()
     /* Install key bindings */
     m_keymap['a'].add(new vvr::SimpleCmd<vvr::Axes, bool>(&getGlobalAxes(), &vvr::Axes::toggle));
     m_keymap['x'].add(new vvr::SimpleCmd<vvr::Canvas>(&m_sketch, &vvr::Canvas::clear));
+    m_keymap['x'].add(new vvr::SimpleCmd<vvr::Canvas>(&m_hull, &vvr::Canvas::clear));
     m_keymap['s'].add(new vvr::SimpleCmd<Paper>(m_paper.get(), &Paper::toggleFill));
     m_keymap['w'].add(new vvr::SimpleCmd<Paper>(m_paper.get(), &Paper::toggleWire));
     m_keymap['p'].add(new vvr::SimpleCmd<Paper>(m_paper.get(), &Paper::togglePts));
@@ -263,6 +266,7 @@ void OrigamiScene::draw()
     getGlobalAxes().drawif();
     m_paper->draw();
     m_sketch.draw();
+    m_hull.draw();
     m_dragger->hl.drawif();
     m_dragger->vl.drawif();
 }
@@ -300,6 +304,28 @@ void OrigamiScene::mouseMoved(int x, int y, int modif)
 void OrigamiScene::mouseReleased(int x, int y, int modif)
 {
     mouseHovered(x, y, modif);
+
+    /* Compute/draw convex hull of latest sketch. */
+    {
+        auto drw = m_sketch.getDrawables(-1);
+        vec u = m_paper->getPolygon().BasisU();
+        vec v = m_paper->getPolygon().BasisV();
+        std::vector<math::float2> pts, ch;
+
+        for (auto d : drw) {
+            vvr::LineSeg3D* ls3;
+            if (!(ls3 = dynamic_cast<vvr::LineSeg3D*>(d))) continue;
+            math::float2 p2(ls3->a.Dot(u), ls3->a.Dot(v));
+            pts.push_back(p2);
+        }
+
+        m_hull.newFrame();
+        ch = vvr::convex_hull(pts);
+        if (ch.size()<3) return;
+        for (auto p: ch) append(m_hull, u*p.x + v*p.y);
+        append(m_hull, u*ch.front().x + v*ch.front().y);
+        recolour(m_hull, vvr::Blue);
+    }
 }
 
 void OrigamiScene::mouseWheel(int dir, int modif)

@@ -3,6 +3,28 @@
 
 #include "vvrframework_DLL.h"
 #include <vvr/drawing.h>
+#include <vvr/macros.h>
+
+#include <type_traits> // To use 'std::integral_constant'.
+#include <iostream>    // To use 'std::cout'.
+#include <iomanip>     // To use 'std::boolalpha'.
+
+#define VVR_GENERATE_HAS_MEMBER(xxx)                                                    \
+template <class T>                                                                      \
+struct has_##xxx                                                                        \
+{                                                                                       \
+	typedef char Yes[1];                                                                \
+	typedef char No[2];                                                                 \
+	template <typename C, C>                                                            \
+	struct Check;                                                                       \
+    struct FakeBase { int xxx; };                                                       \
+	struct TestSubject : public FakeBase, public T {};                                  \
+	template <typename C>                                                               \
+	static No & Test(Check<int FakeBase::*, &C::xxx> *);                                \
+	template <typename>                                                                 \
+	static Yes & Test(...);                                                             \
+	const static bool value = sizeof(Test<TestSubject>(0)) == sizeof(Yes);              \
+}
 
 namespace vvr
 {
@@ -13,11 +35,6 @@ namespace vvr
         const double dyn = floor(fabs((double)y / gs) + 0.5);
         x = (x < 0) ? (-dxn * gs) : (dxn * gs);
         y = (y < 0) ? (-dyn * gs) : (dyn * gs);
-    }
-
-    bool operator==(const Point2D &lhs, const Point2D &rhs)
-    {
-        return (lhs.x == rhs.x) && (lhs.y == rhs.y);
     }
 
     template <typename point>
@@ -44,6 +61,16 @@ namespace vvr
         return (real)hypot(a.x - b.x, a.y - b.y);
     }
 
+    template <class T,
+    typename = typename std::enable_if<
+        std::is_same<T,vvr::Point2D>::value ||
+        std::is_same<T,math::float2>::value>::type
+    >
+    static bool operator==(const T &a, const T &b)
+    {
+        return (a.x==b.x) && (a.y==b.y);
+    }
+
     template <typename point>
     std::vector<point> convex_hull(std::vector<point> p)
     {
@@ -60,7 +87,7 @@ namespace vvr
         for (int i = n - 2, t = k; i >= 0; q[k++] = p[i--]) {
             for (; k > t && !ccw(q[k - 2], q[k - 1], p[i]); --k);
         }
-        q.resize(k - 1 - (q[0] == q[1]));
+        q.resize(k - 1 - (q[0]==q[1]));
         return q;
     }
 

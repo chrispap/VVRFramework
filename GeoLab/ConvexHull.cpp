@@ -12,11 +12,10 @@
 class ConvexHullScene : public vvr::Scene
 {
 public:
-
     ConvexHullScene();
 
     const char* getName() const override {
-        return "UNIVERSITY OF PATRAS - VVR GROUP - COMPUTATIONAL GEOMETRY LAB";
+        return "2D ConvexHull";
     }
 
 protected:
@@ -93,10 +92,9 @@ void ConvexHullScene::mouseMoved(int x, int y, int modif)
 
 void ConvexHullScene::arrowEvent(vvr::ArrowDir dir, int modif)
 {
-    if (dir == vvr::LEFT) {
+    if (dir==vvr::LEFT) {
         m_canvas.prev();
-    }
-    else if (dir == vvr::RIGHT) {
+    } else if (dir==vvr::RIGHT) {
         m_canvas.next();
     }
 }
@@ -104,18 +102,16 @@ void ConvexHullScene::arrowEvent(vvr::ArrowDir dir, int modif)
 void ConvexHullScene::draw()
 {
     enterPixelMode();
-    {
-        vvr::Shape::PointSize = 10;
-        //for (const auto &p : m_pts) p.draw();
-        m_canvas.draw();
-    }
+    vvr::Shape::PointSize = 10;
+    for (const auto &p : m_pts) p.draw();
+    m_canvas.draw();
     exitPixelMode();
 }
 
 void ConvexHullScene::ComputeConvexHull()
 {
     /* Compute hull */
-    auto h = convex_hull(m_pts);
+    auto h = vvr::convex_hull(m_pts);
     const size_t n = h.size();
 
     m_canvas.clear();
@@ -131,7 +127,7 @@ void ConvexHullScene::ComputeConvexHull()
     /* Display: Hull Diameter */
     {
         size_t i1, i2;
-        const auto diam = convex_diameter(h, i1, i2);
+        const auto diam = vvr::convex_diameter(h, i1, i2);
         m_canvas.add(new vvr::LineSeg2D(h[i1].x, h[i1].y, h[i2].x, h[i2].y, vvr::blue));
         vvr_echo(diam);
     }
@@ -139,7 +135,7 @@ void ConvexHullScene::ComputeConvexHull()
     /* Display: Hull Width */
     {
         size_t i1, i2;
-        const auto width = convex_width(h, i1, i2);
+        const auto width = vvr::convex_width(h, i1, i2);
         C2DPoint p1(h[i1].x, h[i1].y);
         C2DPoint p11(h[(i1+1)%n].x, h[(i1+1)%n].y);
         C2DPoint p2(h[i2].x, h[i2].y);
@@ -155,15 +151,7 @@ void ConvexHullScene::ComputeConvexHull()
     }
 }
 
-int main(int argc, char* argv[])
-{
-    try
-    {
-        return vvr::main_with_scene(argc, argv, new ConvexHullScene);
-    }
-    catch (std::string exc)
-    {
-        std::cerr << exc << std::endl;
-        return 1;
-    }
-}
+/*---[Invoke]---------------------------------------------------------------------------*/
+#ifndef ALL_DEMO_APP
+vvr_invoke_main_with_scene(ConvexHullScene)
+#endif

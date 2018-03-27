@@ -45,5 +45,7 @@
   - Use DistanceSq for querying in the various pickDists.
   - Implement a selection mechanism. Click selection, box selection, ...
   - Revisit vvr::Drawable::clone and respective copy-ctors.
+  - Move bspline to geom.h -> Decide what functionality will stay in the class
+    and what will become external.
 
 ------------------------------------------------------------------------------------------
