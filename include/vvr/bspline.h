@@ -78,17 +78,21 @@ namespace vvr {
         }
 
     private:
-        void copy_cps(std::vector<T> const &other_cps)
+        template <typename R=T,
+            typename std::enable_if<std::is_pointer<R>::value,R>::type=nullptr>
+            void copy_cps(std::vector<R> const &other_cps)
         {
-            if constexpr(std::is_pointer<T>()) {
-                for (auto p : other_cps) {
-                    cps.push_back(new point_t(ref(p)));
-                }
+            for (auto p : other_cps) {
+                cps.push_back(new point_t(ref(p)));
             }
-            else {
-                for (auto p : other_cps) {
-                    cps.push_back(point_t(ref(p)));
-                }
+        }
+
+        template <typename R=T,
+            typename std::enable_if<!std::is_pointer<R>::value,R>::type=nullptr>
+            void copy_cps(std::vector<R> const &other_cps)
+        {
+            for (auto p : other_cps) {
+                cps.push_back(point_t(ref(p)));
             }
         }
     };
