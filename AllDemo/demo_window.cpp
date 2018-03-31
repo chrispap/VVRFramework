@@ -31,7 +31,8 @@ static void gather_scenes(std::vector<vvr::Scene*> &scns)
     scns.push_back(new Simple2DScene);
     scns.push_back(new Simple3DScene);
     scns.push_back(new MoldingScene);
-    scns.push_back(new TriangulationScene);
+    scns.push_back(new DelaunayScene);
+    scns.push_back(new DelaunayAutoScene);
     scns.push_back(new Mesh3DScene);
     scns.push_back(new KDTreeScene);
     scns.push_back(new TutorialScene);

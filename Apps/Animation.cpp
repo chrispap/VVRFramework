@@ -3,6 +3,7 @@
 #include <vvr/settings.h>
 #include <vvr/scene.h>
 #include <vvr/mesh.h>
+#include <vvr/animation.h>
 #include <iostream>
 #include <fstream>
 #include <iostream>
@@ -26,82 +27,56 @@ protected:
     void keyEvent(unsigned char key, bool up, int modif) override;
 
 private:
-    float m_sphere_rad;
-    bool m_pause;
+    vvr::Sphere3D sphere;
+    vvr::Animation anim;
 };
-
-#define FLAG_SHOW_AXES       1
-#define FLAG_SHOW_AABB       2
-#define FLAG_SHOW_WIRE       4
-#define FLAG_SHOW_SOLID      8
-#define FLAG_SHOW_NORMALS   16
-
-using namespace vvr;
-using namespace std;
-using namespace math;
 
 AnimationScene::AnimationScene()
 {
-    m_bg_col = Colour("768E77");
     m_perspective_proj = true;
-    m_fullscreen = true;
-    m_pause = false;
+    reset();
 }
 
 void AnimationScene::reset()
 {
     Scene::reset();
+    sphere = vvr::Sphere3D(0, 0, 0, 0);
+    sphere.colour = vvr::BlueViolet;
+    sphere.filled = true;
+    anim.setTime(0);
 }
 
 void AnimationScene::resize()
 {
-    // Making FIRST PASS static and initialing it to true we make
-    // sure that the if block will be executed only once.
-    static bool first_pass = true;
-
-    if (first_pass)
-    {
-        m_sphere_rad = getSceneWidth() / 10;
-
-        first_pass = false;
+    if (m_first_resize) {
+        sphere.r = getSceneWidth() / 10;
     }
 }
 
 void AnimationScene::draw()
 {
-    vvr::Sphere3D sphere(0, 0, 0, m_sphere_rad, Colour(134, 100, 25));
-    sphere.filled = true;
     sphere.draw();
+    getGlobalAxes().draw();
 }
 
 bool AnimationScene::idle()
 {
-    if (m_pause) return false;
-
-    const float sec = vvr::get_seconds();
-
-    if (m_sphere_rad > getSceneWidth() / 4)
-    {
-        m_sphere_rad = getSceneWidth() / 10;
-    }
-    else
-    {
-        m_sphere_rad += sec * 0.1 + 1;
-    }
-
-    return !m_pause;
+    anim.update();
+    if (anim.paused()) return false;
+    if (sphere.r > getSceneWidth() / 4) anim.setTime(0);
+    sphere.r = anim.t * 15;
+    return true;
 }
 
 void AnimationScene::keyEvent(unsigned char key, bool up, int modif)
 {
     Scene::keyEvent(key, up, modif);
     key = tolower(key);
-
     switch (key)
     {
-    case ' ': m_pause = !m_pause; break;
+    case ' ': anim.toggle(); break;
+    case 's': sphere.filled^=1; break;
     }
-
 }
 
 /*---[Invoke]---------------------------------------------------------------------------*/
