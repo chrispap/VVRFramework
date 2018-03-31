@@ -31,7 +31,7 @@ protected:
     void mouseWheel(int dir, int modif) override;
 
 private:
-    void processPoint(C2DPoint* const p);
+    void addPoint(C2DPoint* const p);
 
 private:
     vvr::Canvas m_canvas;
@@ -63,7 +63,7 @@ protected:
     void mouseWheel(int dir, int modif) override;
 
 private:
-    void processPoint(C2DPoint* const p);
+    void addPoint(C2DPoint* const p);
 
 private:
     C2DPointSet m_pts;
@@ -275,14 +275,14 @@ void DelaunayScene::resize()
 void DelaunayScene::mousePressed(int x, int y, int modif)
 {
     Scene::mousePressed(x, y, modif);
-    processPoint(new C2DPoint(x, y));
+    addPoint(new C2DPoint(x, y));
 }
 
 void DelaunayScene::mouseMoved(int x, int y, int modif)
 {
     Scene::mouseMoved(x, y, modif);
     if (m_pts.GetLast()->Distance(C2DPoint(x, y)) > 80)
-        processPoint(new C2DPoint(x, y));
+        addPoint(new C2DPoint(x, y));
 }
 
 void DelaunayScene::keyEvent(unsigned char key, bool up, int modif)
@@ -335,219 +335,7 @@ void DelaunayScene::draw()
     exitPixelMode();
 }
 
-/*---[TriangulationExpScene]------------------------------------------------------------*/
-DelaunayAutoScene::DelaunayAutoScene()
-{
-    m_bg_col = vvr::Colour(0x44, 0x44, 0x44);
-    m_create_menus = false;
-    m_lw_canvas = 2;
-    m_lw_tris = 3;
-    m_sz_pt = 10;
-}
-
-void DelaunayAutoScene::reset()
-{
-    Scene::reset();
-    m_style_flag = 0;
-    m_style_flag |= 1;
-    m_canvas.clear();
-    m_tris.clear();
-    m_pts.DeleteAll();
-
-    const int W = getViewportWidth() * 0.9;
-    const int H = getViewportHeight()  * 0.9;
-
-    C2DPoint* A = new C2DPoint(-W / 2, -H / 2);
-    C2DPoint* B = new C2DPoint(-W / 2, +H / 2);
-    C2DPoint* C = new C2DPoint(+W / 2, +H / 2);
-    C2DPoint* D = new C2DPoint(+W / 2, -H/2);
-
-    m_pts.Add(A);
-    m_pts.Add(B);
-    m_pts.Add(C);
-    m_pts.Add(D);
-    m_tris.insert(Tri(A, B, C));
-    m_tris.insert(Tri(A, C, D));
-
-    m_anim_on = false;
-}
-
-void DelaunayAutoScene::resize()
-{
-    static bool first_pass = true;
-    if (first_pass) reset();
-    first_pass = false;
-}
-
-void DelaunayAutoScene::mousePressed(int x, int y, int modif)
-{
-    Scene::mousePressed(x, y, modif);
-    processPoint(new C2DPoint(x, y));
-}
-
-void DelaunayAutoScene::mouseMoved(int x, int y, int modif)
-{
-    Scene::mouseMoved(x, y, modif);
-    if (m_pts.GetLast()->Distance(C2DPoint(x, y)) > 80)
-        processPoint(new C2DPoint(x, y));
-}
-
-void DelaunayAutoScene::keyEvent(unsigned char key, bool up, int modif)
-{
-    Scene::keyEvent(key, up, modif);
-    key = tolower(key);
-
-    switch (key)
-    {
-    case ' ': m_anim_on^=true; break;
-    case 'c': m_style_flag ^= 1; break;
-    }
-}
-
-void DelaunayAutoScene::mouseWheel(int dir, int modif)
-{
-    if (shiftDown(modif))
-    {
-        m_lw_canvas *= pow(1.2f, dir);
-        m_lw_tris *= pow(1.2f, dir);
-        m_sz_pt *= pow(1.2f, dir);
-    }
-    else
-    {
-        Scene::mouseWheel(dir, modif);
-    }
-}
-
-bool DelaunayAutoScene::idle()
-{
-    if (!m_anim_on) return false;
-
-    for (size_t rep = 0; rep < 1; rep++)
-    {
-        const unsigned N = std::min((size_t)100, m_tris.size());
-        C2DPoint **pts = new C2DPoint*[N];
-        int i = 0;
-        std::set<Tri>::reverse_iterator tri_iter;
-        for (tri_iter = m_tris.rbegin(); tri_iter != m_tris.rend(); ++tri_iter) {
-            pts[i] = new C2DPoint(tri_iter->to_C2D().GetInCentre());
-            if (++i == N) break;
-        }
-        for (size_t i = 0; i < N; i++) {
-            unsigned size_before = m_pts.size();
-            processPoint(pts[i]);
-            if (m_pts.size() != size_before) break;
-        }
-        delete[] pts;
-    }
-
-    return true;
-}
-
-void DelaunayAutoScene::draw()
-{
-    enterPixelMode();
-
-    //! Draw violations and anything else added to canvas
-    if (m_style_flag & 1) {
-        vvr::Shape::LineWidth = m_lw_canvas;
-        m_canvas.draw();
-    }
-
-    //! Draw triangles
-    vvr::Shape::LineWidth = m_lw_tris;
-
-    std::set<Tri>::const_iterator tri_iter;
-    for (tri_iter = m_tris.begin(); tri_iter != m_tris.end(); ++tri_iter) {
-        tri_iter->to_vvr(vvr::black).draw();
-    }
-
-    //! Draw points
-    vvr::Shape::PointSize = m_sz_pt;
-    vvr::draw(m_pts, vvr::red);
-
-    exitPixelMode();
-}
-
-void DelaunayAutoScene::processPoint(C2DPoint* const p)
-{
-    //! [CHECK 1]
-    //! Check whether a point already exists in the same coords.
-
-    for (size_t i = 0; i < m_pts.size(); i++) {
-        if (*m_pts.GetAt(i) == *p) {
-            delete p; return;
-        }
-    }
-
-    //! Find enclosing triangle.
-    unsigned count_enclosing = 0;
-    std::set<Tri>::iterator tri_iter, tri_enclosing_iter;
-    for (tri_iter = m_tris.begin(); tri_iter != m_tris.end(); ++tri_iter) {
-        if (tri_iter->to_C2D().Contains(*p)) {
-            count_enclosing++;
-            tri_enclosing_iter = tri_iter;
-        }
-    }
-
-    //! [CHECK 2]
-    //! If no enclosing triangle was found.
-    //! Or if more than one were found.
-
-    if (count_enclosing != 1) {
-        delete p; return;
-    }
-
-    std::vector<Tri> tris_new;
-    Tri tri_enclosing = *tri_enclosing_iter;
-    tris_new.push_back(Tri(p, tri_enclosing.v1, tri_enclosing.v2));
-    tris_new.push_back(Tri(p, tri_enclosing.v2, tri_enclosing.v3));
-    tris_new.push_back(Tri(p, tri_enclosing.v3, tri_enclosing.v1));
-
-    //! [CHECK 3]
-    //! Check if any of the 3 triangles are colinear. (Use GeoLib's function)
-
-    if (tris_new[0].to_C2D().Collinear() ||
-        tris_new[1].to_C2D().Collinear() ||
-        tris_new[2].to_C2D().Collinear())
-    {
-        delete p; return;
-    }
-
-    //! Here we have a valid point.
-    //! We keep it and proceed.
-
-    m_pts.Add(p);
-    m_tris.erase(tri_enclosing_iter);
-    m_canvas.clear();
-
-    for (int i = 0; i < 3; i++)
-    {
-        if (!IsDelaunay(tris_new[i].to_C2D(), m_pts))
-        {
-            C2DPoint *p1 = tris_new[i].v1;
-            C2DPoint *p2 = tris_new[i].v2;
-            C2DPoint *p3 = tris_new[i].v3;
-            C2DPoint *v_opposite = NULL;
-            FindAdjacentTriangle(m_tris, p2, p3, &v_opposite, true);
-            Tri tri_flip_1(p1, p2, v_opposite);
-            Tri tri_flip_2(p1, p3, v_opposite);
-            m_tris.insert(tri_flip_1);
-            m_tris.insert(tri_flip_2);
-            m_canvas.add(new vvr::Triangle2D(tri_flip_1.to_vvr(vvr::green, true)));
-            m_canvas.add(new vvr::Triangle2D(tri_flip_2.to_vvr(vvr::yellow, true)));
-        }
-        else
-        {
-            m_canvas.add(new vvr::Triangle2D(tris_new[i].to_vvr(vvr::darkGreen, true)));
-            m_tris.insert(tris_new[i]);
-        }
-    }
-
-    //! Find violations. Fix them. Visualize.
-    ShowViolations(m_tris, m_pts, m_canvas, vvr::magenta);
-}
-
-void DelaunayScene::processPoint(C2DPoint* const p)
+void DelaunayScene::addPoint(C2DPoint* const p)
 {
     //! [Check 1]
     //! Check whether a point already exists in the same coords.
@@ -643,6 +431,218 @@ void DelaunayScene::processPoint(C2DPoint* const p)
     std::vector<unsigned> violations;
     FindViolations(m_tris, m_pts, violations);
     ShowViolations(m_tris, violations, m_canvas, vvr::magenta);
+}
+
+/*---[TriangulationExpScene]------------------------------------------------------------*/
+DelaunayAutoScene::DelaunayAutoScene()
+{
+    m_bg_col = vvr::Colour(0x44, 0x44, 0x44);
+    m_create_menus = false;
+    m_lw_canvas = 2;
+    m_lw_tris = 3;
+    m_sz_pt = 10;
+}
+
+void DelaunayAutoScene::reset()
+{
+    Scene::reset();
+    m_style_flag = 0;
+    m_style_flag |= 1;
+    m_canvas.clear();
+    m_tris.clear();
+    m_pts.DeleteAll();
+
+    const int W = getViewportWidth() * 0.9;
+    const int H = getViewportHeight()  * 0.9;
+
+    C2DPoint* A = new C2DPoint(-W / 2, -H / 2);
+    C2DPoint* B = new C2DPoint(-W / 2, +H / 2);
+    C2DPoint* C = new C2DPoint(+W / 2, +H / 2);
+    C2DPoint* D = new C2DPoint(+W / 2, -H/2);
+
+    m_pts.Add(A);
+    m_pts.Add(B);
+    m_pts.Add(C);
+    m_pts.Add(D);
+    m_tris.insert(Tri(A, B, C));
+    m_tris.insert(Tri(A, C, D));
+
+    m_anim_on = false;
+}
+
+void DelaunayAutoScene::resize()
+{
+    static bool first_pass = true;
+    if (first_pass) reset();
+    first_pass = false;
+}
+
+void DelaunayAutoScene::mousePressed(int x, int y, int modif)
+{
+    Scene::mousePressed(x, y, modif);
+    addPoint(new C2DPoint(x, y));
+}
+
+void DelaunayAutoScene::mouseMoved(int x, int y, int modif)
+{
+    Scene::mouseMoved(x, y, modif);
+    if (m_pts.GetLast()->Distance(C2DPoint(x, y)) > 80)
+        addPoint(new C2DPoint(x, y));
+}
+
+void DelaunayAutoScene::keyEvent(unsigned char key, bool up, int modif)
+{
+    Scene::keyEvent(key, up, modif);
+    key = tolower(key);
+
+    switch (key)
+    {
+    case ' ': m_anim_on^=true; break;
+    case 'c': m_style_flag ^= 1; break;
+    }
+}
+
+void DelaunayAutoScene::mouseWheel(int dir, int modif)
+{
+    if (shiftDown(modif))
+    {
+        m_lw_canvas *= pow(1.2f, dir);
+        m_lw_tris *= pow(1.2f, dir);
+        m_sz_pt *= pow(1.2f, dir);
+    }
+    else
+    {
+        Scene::mouseWheel(dir, modif);
+    }
+}
+
+bool DelaunayAutoScene::idle()
+{
+    if (!m_anim_on) return false;
+
+    for (size_t rep = 0; rep < 1; rep++)
+    {
+        const unsigned N = std::min((size_t)100, m_tris.size());
+        C2DPoint **pts = new C2DPoint*[N];
+        int i = 0;
+        std::set<Tri>::reverse_iterator tri_iter;
+        for (tri_iter = m_tris.rbegin(); tri_iter != m_tris.rend(); ++tri_iter) {
+            pts[i] = new C2DPoint(tri_iter->to_C2D().GetInCentre());
+            if (++i == N) break;
+        }
+        for (size_t i = 0; i < N; i++) {
+            unsigned size_before = m_pts.size();
+            addPoint(pts[i]);
+            if (m_pts.size() != size_before) break;
+        }
+        delete[] pts;
+    }
+
+    return true;
+}
+
+void DelaunayAutoScene::draw()
+{
+    enterPixelMode();
+
+    //! Draw violations and anything else added to canvas
+    if (m_style_flag & 1) {
+        vvr::Shape::LineWidth = m_lw_canvas;
+        m_canvas.draw();
+    }
+
+    //! Draw triangles
+    vvr::Shape::LineWidth = m_lw_tris;
+
+    std::set<Tri>::const_iterator tri_iter;
+    for (tri_iter = m_tris.begin(); tri_iter != m_tris.end(); ++tri_iter) {
+        tri_iter->to_vvr(vvr::black).draw();
+    }
+
+    //! Draw points
+    vvr::Shape::PointSize = m_sz_pt;
+    vvr::draw(m_pts, vvr::red);
+
+    exitPixelMode();
+}
+
+void DelaunayAutoScene::addPoint(C2DPoint* const p)
+{
+    //! [CHECK 1]
+    //! Check whether a point already exists in the same coords.
+
+    for (size_t i = 0; i < m_pts.size(); i++) {
+        if (*m_pts.GetAt(i) == *p) {
+            delete p; return;
+        }
+    }
+
+    //! Find enclosing triangle.
+    unsigned count_enclosing = 0;
+    std::set<Tri>::iterator tri_iter, tri_enclosing_iter;
+    for (tri_iter = m_tris.begin(); tri_iter != m_tris.end(); ++tri_iter) {
+        if (tri_iter->to_C2D().Contains(*p)) {
+            count_enclosing++;
+            tri_enclosing_iter = tri_iter;
+        }
+    }
+
+    //! [CHECK 2]
+    //! If no enclosing triangle was found.
+    //! Or if more than one were found.
+
+    if (count_enclosing != 1) {
+        delete p; return;
+    }
+
+    std::vector<Tri> tris_new;
+    Tri tri_enclosing = *tri_enclosing_iter;
+    tris_new.push_back(Tri(p, tri_enclosing.v1, tri_enclosing.v2));
+    tris_new.push_back(Tri(p, tri_enclosing.v2, tri_enclosing.v3));
+    tris_new.push_back(Tri(p, tri_enclosing.v3, tri_enclosing.v1));
+
+    //! [CHECK 3]
+    //! Check if any of the 3 triangles are colinear. (Use GeoLib's function)
+
+    if (tris_new[0].to_C2D().Collinear() ||
+        tris_new[1].to_C2D().Collinear() ||
+        tris_new[2].to_C2D().Collinear())
+    {
+        delete p; return;
+    }
+
+    //! Here we have a valid point.
+    //! We keep it and proceed.
+
+    m_pts.Add(p);
+    m_tris.erase(tri_enclosing_iter);
+    m_canvas.clear();
+
+    for (int i = 0; i < 3; i++)
+    {
+        if (!IsDelaunay(tris_new[i].to_C2D(), m_pts))
+        {
+            C2DPoint *p1 = tris_new[i].v1;
+            C2DPoint *p2 = tris_new[i].v2;
+            C2DPoint *p3 = tris_new[i].v3;
+            C2DPoint *v_opposite = NULL;
+            FindAdjacentTriangle(m_tris, p2, p3, &v_opposite, true);
+            Tri tri_flip_1(p1, p2, v_opposite);
+            Tri tri_flip_2(p1, p3, v_opposite);
+            m_tris.insert(tri_flip_1);
+            m_tris.insert(tri_flip_2);
+            m_canvas.add(new vvr::Triangle2D(tri_flip_1.to_vvr(vvr::green, true)));
+            m_canvas.add(new vvr::Triangle2D(tri_flip_2.to_vvr(vvr::yellow, true)));
+        }
+        else
+        {
+            m_canvas.add(new vvr::Triangle2D(tris_new[i].to_vvr(vvr::darkGreen, true)));
+            m_tris.insert(tris_new[i]);
+        }
+    }
+
+    //! Find violations. Fix them. Visualize.
+    ShowViolations(m_tris, m_pts, m_canvas, vvr::magenta);
 }
 
 /*---[Invoke]---------------------------------------------------------------------------*/

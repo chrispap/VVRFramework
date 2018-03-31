@@ -30,6 +30,10 @@
   - Stop passing arround mouse positions and modifiers.
     Store them in 'private' 'vvr::Scene' variables uppon event arrival and
     provide methods to get them. {Mousepos, Modifiers, ...}.
+  - In addition, abolish the multiple methods with same signature for the various events.
+    Make one event virtual function on the base class (vvr::Scene) and pass an integer
+    type argument. The details of the event (mouse pos, ...) will be available via
+    getters of the base class.
   - Refactor 'vvr::Canvas' or create a new, simpler, cleaner class.
   - Create a new 'Manager-like' object to handle all the exising Drawables of the
     application. It must have utilities to show/hide all, to list them etc.

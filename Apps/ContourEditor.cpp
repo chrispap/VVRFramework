@@ -224,7 +224,7 @@ void ContourEditorScene::keyEvent(unsigned char key, bool up, int modif)
         }
         break;
     case 's':
-        if (altDown(modif)) saveContoursToFile();
+        if (0&&altDown(modif)) saveContoursToFile();
         break;
     case 'p': b_show_pts ^= true;
         break;

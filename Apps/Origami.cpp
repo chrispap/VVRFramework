@@ -35,9 +35,8 @@ static void smoothen(vvr::Canvas &sketch)
     }
 }
 
-static void append(vvr::Canvas &sketch, const vec &p)
+static void append(vvr::Canvas &sketch, const vec &p, vvr::Colour col)
 {
-    const vvr::Colour &col = vvr::red;
     std::vector<vvr::Drawable*> &drw = sketch.getDrawables();
 
     if (drw.size()) {
@@ -63,7 +62,7 @@ struct Paper : vvr::Drawable
     Paper(float w, float h, const float3x4 &sys=math::float3x4::identity);
     void draw() const override;
     real pickdist(const Ray &) const override;
-    vec Intersect(math::Ray &&ray) const;
+    vec intersect(math::Ray &&ray) const;
     void toggleFill() { disp_fill ^= true; }
     void toggleWire() { disp_wire ^= true; }
     void togglePts() { disp_pts ^= true; }
@@ -115,7 +114,7 @@ real Paper::pickdist(const Ray &ray) const
     else return pol.Distance(ray.pos);
 }
 
-vec Paper::Intersect(math::Ray &&ray) const
+vec Paper::intersect(math::Ray &&ray) const
 {
     if (!pol.Intersects(ray)) return vec::inf;
     return pol.ClosestPoint(ray.ToLineSegment(10000));
@@ -150,8 +149,8 @@ struct PaperDragger
     bool on_pick(vvr::Drawable* drw, Ray ray);
     void on_drag(vvr::Drawable* drw, Ray ray0, Ray ray1);
     void on_drop(vvr::Drawable* drw);
-    void updateCrosshair(Paper *paper, const vec &p);
-    void hideCrosshair();
+    void UpdateCrosshair(Paper *paper, const vec &p);
+    void HideCrosshair();
     vvr::Canvas &sketch;
     vvr::LineSeg3D hl,vl;
 };
@@ -164,13 +163,13 @@ PaperDragger::PaperDragger(vvr::Canvas &sketch) : sketch(sketch)
     vl.hide();
 }
 
-void PaperDragger::hideCrosshair()
+void PaperDragger::HideCrosshair()
 {
     hl.hide();
     vl.hide();
 }
 
-void PaperDragger::updateCrosshair(Paper *paper, const vec& p)
+void PaperDragger::UpdateCrosshair(Paper *paper, const vec& p)
 {
     auto pol = paper->getPolygon();
     math::float2 uv = pol.MapTo2D(p);
@@ -186,25 +185,23 @@ void PaperDragger::updateCrosshair(Paper *paper, const vec& p)
 bool PaperDragger::on_pick(vvr::Drawable *drw, Ray ray)
 {
     auto paper = static_cast<Paper*>(drw);
-    vec ip = paper->Intersect(std::move(ray));
-    updateCrosshair(paper, ip);
+    vec ip = paper->intersect(std::move(ray));
+    UpdateCrosshair(paper, ip);
     return true;
 }
 
 void PaperDragger::on_drag(vvr::Drawable *drw, Ray ray0, Ray ray1)
 {
     auto paper = static_cast<Paper*>(drw);
-    const vec ip = paper->Intersect(std::move(ray1));
-    if (ip.IsFinite()) append(sketch, ip);
-    hl.hide();
-    vl.hide();
+    const vec ip = paper->intersect(std::move(ray1));
+    if (ip.IsFinite()) append(sketch, ip, vvr::LightCoral);
 }
 
 void PaperDragger::on_drop(vvr::Drawable *drw)
 {
     smoothen(sketch);
     smoothen(sketch);
-    recolour(sketch, vvr::LightCoral);
+    recolour(sketch, vvr::red);
     sketch.newFrame();
 }
 
@@ -279,7 +276,7 @@ void OrigamiScene::mouseHovered(int x, int y, int modif)
         cursorHide();
     } else {
         vvr::clear_status_bar();
-        m_dragger->hideCrosshair();
+        m_dragger->HideCrosshair();
         cursorShow();
     }
 }
@@ -290,6 +287,7 @@ void OrigamiScene::mousePressed(int x, int y, int modif)
     m_picker->do_drop(ray, modif);
     m_picker->do_pick(ray, modif);
     if (m_picker->picked()) {
+        m_dragger->HideCrosshair();
         cursorHide();
     } else Scene::mousePressed(x, y, modif);
 }
@@ -306,26 +304,24 @@ void OrigamiScene::mouseReleased(int x, int y, int modif)
     mouseHovered(x, y, modif);
 
     /* Compute/draw convex hull of latest sketch. */
-    {
-        auto drw = m_sketch.getDrawables(-1);
-        vec u = m_paper->getPolygon().BasisU();
-        vec v = m_paper->getPolygon().BasisV();
-        std::vector<math::float2> pts, ch;
+    auto drw = m_sketch.getDrawables(-1);
+    vec u = m_paper->getPolygon().BasisU();
+    vec v = m_paper->getPolygon().BasisV();
+    std::vector<math::float2> pts, ch;
 
-        for (auto d : drw) {
-            vvr::LineSeg3D* ls3;
-            if (!(ls3 = dynamic_cast<vvr::LineSeg3D*>(d))) continue;
-            math::float2 p2(ls3->a.Dot(u), ls3->a.Dot(v));
-            pts.push_back(p2);
-        }
-
-        m_hull.newFrame();
-        ch = vvr::convex_hull(pts);
-        if (ch.size()<3) return;
-        for (auto p: ch) append(m_hull, u*p.x + v*p.y);
-        append(m_hull, u*ch.front().x + v*ch.front().y);
-        recolour(m_hull, vvr::Blue);
+    for (auto d : drw) {
+        math::float2 p2;
+        vvr::LineSeg3D* ls3;
+        if (!(ls3 = dynamic_cast<vvr::LineSeg3D*>(d))) continue;
+        p2 = math::float2(ls3->a.Dot(u), ls3->a.Dot(v)); pts.push_back(p2);
+        p2 = math::float2(ls3->b.Dot(u), ls3->b.Dot(v)); pts.push_back(p2);
     }
+
+    m_hull.newFrame();
+    ch = vvr::convex_hull(pts);
+    if (ch.size()<3) return;
+    for (auto p: ch) append (m_hull, u*p.x + v*p.y, vvr::Blue);
+    append(m_hull, u*ch.front().x + v*ch.front().y, vvr::Blue);
 }
 
 void OrigamiScene::mouseWheel(int dir, int modif)

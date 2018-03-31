@@ -1,6 +1,8 @@
 #include <ui_demo_window.h>
-#include <QPushButton>
 #include <vvr/glwidget.h>
+#include <QPushButton>
+#include <string>
+//! Scene cpp files
 #include "Apps/Boxes.cpp"
 #include "Apps/Origami.cpp"
 #include "Apps/DNAHelix.cpp"
@@ -19,28 +21,31 @@
 #include "GeoLab/ConvexHull.cpp"
 #include "Games/tavli.cpp"
 
-static void gather_scenes(std::vector<vvr::Scene*> &scns)
+/*--------------------------------------------------------------------------------------*/
+template <typename T>
+static void gather(T &scenes)
 {
-    scns.push_back(new OrigamiScene);
-    scns.push_back(new BoxesScene);
-    scns.push_back(new HelixScene);
-    scns.push_back(new ContourEditorScene);
-    scns.push_back(new Sketcher);
-    scns.push_back(new LilacChaserScene);
-    scns.push_back(new ArmJointScene);
-    scns.push_back(new Simple2DScene);
-    scns.push_back(new Simple3DScene);
-    scns.push_back(new MoldingScene);
-    scns.push_back(new DelaunayScene);
-    scns.push_back(new DelaunayAutoScene);
-    scns.push_back(new Mesh3DScene);
-    scns.push_back(new KDTreeScene);
-    scns.push_back(new TutorialScene);
-    scns.push_back(new TriangleScene);
-    scns.push_back(new ConvexHullScene);
-    scns.push_back(new TavliScene(tavli::GetDefaultColours()));
+    scenes.push_back(new OrigamiScene);
+    scenes.push_back(new BoxesScene);
+    scenes.push_back(new HelixScene);
+    scenes.push_back(new ContourEditorScene);
+    scenes.push_back(new Sketcher);
+    scenes.push_back(new LilacChaserScene);
+    scenes.push_back(new ArmJointScene);
+    scenes.push_back(new Simple2DScene);
+    scenes.push_back(new Simple3DScene);
+    scenes.push_back(new MoldingScene);
+    scenes.push_back(new DelaunayScene);
+    scenes.push_back(new DelaunayAutoScene);
+    scenes.push_back(new Mesh3DScene);
+    scenes.push_back(new KDTreeScene);
+    scenes.push_back(new TutorialScene);
+    scenes.push_back(new TriangleScene);
+    scenes.push_back(new ConvexHullScene);
+    scenes.push_back(new TavliScene(tavli::GetDefaultColours()));
 }
 
+/*--------------------------------------------------------------------------------------*/
 class DemoWindow : public QMainWindow
 {
     Q_OBJECT
@@ -55,33 +60,34 @@ private:
     Ui::DemoWindow ui;
     vvr::GlWidget *glw;
     vvr::Scene *scn;
-    std::vector<vvr::Scene*> scns;
+    std::vector<vvr::Scene*> scenes;
 };
 
-/*--------------------------------------------------------------------------------------*/
 DemoWindow::DemoWindow()
 {
     ui.setupUi(this);
     glw = nullptr;
 
-    gather_scenes(scns);
-
     /* Add scenes to list */
-    for (auto s : scns) {
-        auto btn = new QPushButton(s->getName());
+    gather(scenes);
+    int i = 1;
+    for (auto s : scenes) {
+        auto label = QString::fromStdString(std::to_string(i++) + ". " + s->getName());
+        auto btn = new QPushButton(label);
+        btn->setStyleSheet("Text-align:left");
+        connect(btn, &QPushButton::clicked, [s,this]() { SetScene(s); });
         ui.layout_scenes->addWidget(btn);
-        connect(btn, &QPushButton::clicked, [s,this](){SetScene(s);});
     }
 
     /* Set initial scene */
-    SetScene(scns[0]);
+    SetScene(scenes[0]);
     installEventFilter(glw);
     glw->setFocus();
 }
 
 DemoWindow::~DemoWindow()
 {
-    qDeleteAll(scns);
+    qDeleteAll(scenes);
 }
 
 void DemoWindow::SetScene(vvr::Scene *scene)
