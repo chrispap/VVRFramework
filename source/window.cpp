@@ -198,6 +198,12 @@ void vvr::Window::cursor_grab()
 int vvr::main_with_scene(int argc, char* argv[], vvr::Scene *scene)
 {
     QApplication app(argc, argv);
+#if 0
+    QSurfaceFormat format;
+    format.setProfile(QSurfaceFormat::CoreProfile);
+    format.setVersion(4,1);
+    QSurfaceFormat::setDefaultFormat(format);
+#endif
     QPixmap pixmap(":/Icons/vvrframework-splash.png");
     QSplashScreen splash(pixmap);
     splash.show();

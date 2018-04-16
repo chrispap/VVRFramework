@@ -39,15 +39,6 @@ void vvr::get_mouse_xy(int &x, int &y)
 /*--------------------------------------------------------------------------------------*/
 vvr::GlWidget::GlWidget(vvr::Scene *scene, QWidget *parent) : QOpenGLWidget(parent)
 {
-#if 0
-    QSurfaceFormat format;
-    format.setVersion(4,3);
-    format.setSamples(4);
-    format.setProfile(QSurfaceFormat::NoProfile);
-    format.setSwapBehavior(QSurfaceFormat::DoubleBuffer);
-    format.setSwapInterval(0);
-    setFormat(format);
-#endif
     m_scene = scene;
     m_timer.setSingleShot(true);
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(idle()));

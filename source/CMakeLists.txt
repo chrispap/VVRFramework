@@ -20,6 +20,7 @@ set(IMPL_FILES
   window.cpp window.h
   glwidget.cpp
   scene.cpp
+  scene_modern.cpp
   drawing.cpp
   palette.cpp
   mesh.cpp
@@ -34,6 +35,7 @@ set(INCL_FILES
   ../include/vvr/macros.h
   ../include/vvr/glwidget.h
   ../include/vvr/scene.h
+  ../include/vvr/scene_modern.h
   ../include/vvr/geom.h
   ../include/vvr/drawing.h
   ../include/vvr/palette.h

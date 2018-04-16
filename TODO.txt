@@ -16,15 +16,23 @@
   - Geometry manipulation.
   - Support smart interactions of shapes:
     - Snap, Align, Tangent, Equidistant, Parallel.
-  - Make an editable queue of tools:
-  - Widgets for:
+  - Make widgets for:
     - Visibility control of different shapes/types.
-    - Tools.
     - Flags/Modes.
-  - Create an 'InputConsumer' object with modifiable behaviour.
+    - Tools.
 
----[APPS]---------------------------------------------------------------------------------
-  - Animation of iterative refinement of a Hilbert Curve.
+---[CODE]---------------------------------------------------------------------------------
+  - Create functions for manipulating common shapes in common ways.
+    - Move point on plane.
+    - Rotate object around axis.
+  - Handle user input:
+    - Create an 'InputConsumer' object with modifiable behaviour. (What do I mean???)
+    - Store input events in a queue and process it on idle. Or...
+    - Quickly process user events by modifying the appropriate app object property and
+      letting the idle() processing make the effect of the user input visible to the user.
+      e.g.: Arrow keys could just change the direction of a game object trajectory and
+      some other keys could change the speed of that object. Idle(), would read dir/speed
+      properties and use them.
 
 ---[FIXES]--------------------------------------------------------------------------------
   - Stop passing arround mouse positions and modifiers.
@@ -51,5 +59,8 @@
   - Revisit vvr::Drawable::clone and respective copy-ctors.
   - Move bspline to geom.h -> Decide what functionality will stay in the class
     and what will become external.
+
+---[APPS]---------------------------------------------------------------------------------
+  - Animation of iterative refinement of a Hilbert Curve.
 
 ------------------------------------------------------------------------------------------
