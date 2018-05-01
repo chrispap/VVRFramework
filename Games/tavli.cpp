@@ -13,8 +13,8 @@
 #include <vector>
 #include <set>
 
-static float HHH = 0.10;
-static float dHHH = 0.01;
+static float HHH = 0.10f;
+static float dHHH = 0.01f;
 
 /*---[Declarations]---------------------------------------------------------------------*/
 namespace tavli
@@ -25,7 +25,7 @@ namespace tavli
     struct PieceDragger;
     struct Piece;
     struct Region;
-    class  Board;
+    struct  Board;
 
     //! Pickers
     typedef MousePicker3D<RegionHighlighter> RegionPicker;
@@ -37,11 +37,11 @@ namespace tavli
         vvr_decl_shared_ptr(RegionHighlighter)
 
         bool on_pick(vvr::Drawable* drw, Ray ray);
-        void on_drag(vvr::Drawable* drw, Ray ray0, Ray ray1) {}
         void on_drop(vvr::Drawable* drw);
+        void on_drag(vvr::Drawable*, Ray, Ray) {}
 
     private:
-        vvr::Colour _colour;
+        vvr::Colour colour;
     };
 
     struct PieceDragger
@@ -52,12 +52,12 @@ namespace tavli
         void on_drag(vvr::Drawable* drw, Ray ray0, Ray ray1);
         void on_drop(vvr::Drawable* drw);
 
-        PieceDragger(RegionPicker* rp) : _regionPicker{ rp } {}
+        PieceDragger(RegionPicker* rp) : regionPicker{ rp } {}
 
     private:
-        Ray             _ray;
-        vvr::Colour     _colour;
-        RegionPicker*   _regionPicker;
+        Ray             ray;
+        vvr::Colour     colour;
+        RegionPicker*   regionPicker;
     };
 
     //! Game entities
@@ -74,7 +74,7 @@ namespace tavli
 
     struct Region : public Triangle3D
     {
-        Region(Board* board, int reg, vvr::Colour colour);
+        Region(Board* board, size_t reg, vvr::Colour colour);
         void addPiece(Piece *piece);
         void removePiece(Piece *piece);
         void resize(float diam, float boardheight);
@@ -84,15 +84,15 @@ namespace tavli
     public:
         Board* board;
         std::vector<Piece*> pieces;
+        size_t id, rows;
         float piecediam, boardheight;
-        int id, rows;
         vec base, top, dir;
     };
 
     struct Board : public vvr::Drawable
     {
         Board(std::vector<vvr::Colour> &cols);
-        ~Board();
+        ~Board() override;
         void load3DModels();
         void createRegions();
         void clearPieces();
@@ -109,14 +109,14 @@ namespace tavli
         PiecePicker::Ptr        piece_picker;
 
     private:
-        std::vector<vvr::Colour> _colours;
-        std::vector<Piece*>     _pieces;
-        std::vector<Region*>    _regions;
-        Mesh::Ptr               _3DBoard;
-        Canvas                  _pieceCanvas;
-        Canvas                  _regionCanvas;
-        float                   _width;
-        float                   _height;
+        std::vector<vvr::Colour> colours;
+        std::vector<Piece*>     pieces;
+        std::vector<Region*>    regions;
+        Mesh::Ptr               boardMesh;
+        Canvas                  pieceCanvas;
+        Canvas                  regionCanvas;
+        float                   width;
+        float                   height;
     };
 }
 
@@ -124,7 +124,7 @@ class TavliScene : public vvr::Scene
 {
 public:
     TavliScene(const std::vector<vvr::Colour> &colours);
-    ~TavliScene();
+    ~TavliScene() override;
 
     const char* getName() const  override {
         return "Tavli Game";
@@ -141,35 +141,35 @@ public:
     void mouseHovered(int x, int y, int modif) override;
 
 private:
-    vvr::Axes*                  _axes;
-    tavli::Board*               _board;
-    std::vector<vvr::Colour>    _colours;
+    vvr::Axes*                  axes;
+    tavli::Board*               board;
+    std::vector<vvr::Colour>    colours;
 };
 
 /*---[TavliScene]-----------------------------------------------------------------------*/
 TavliScene::TavliScene(const std::vector<vvr::Colour> &colours)
 {
+    this->colours = colours;
     m_bg_col = vvr::Colour("222222");
-    m_create_menus = true;
+    m_create_menus = false;
     m_show_log = true;
     m_perspective_proj = true;
-    m_fullscreen = false;
-    _colours = colours;
-    _board = nullptr;
+    m_fullscreen = true;
+    board = nullptr;
     reset();
 }
 
 TavliScene::~TavliScene()
 {
-    delete _board;
+    delete board;
 }
 
 void TavliScene::reset()
 {
     resetCamera();
-    delete _board;
-    _board = new tavli::Board(_colours);
-    _board->setupGamePortes();
+    delete board;
+    board = new tavli::Board(colours);
+    board->setupGamePortes();
     resize();
 }
 
@@ -186,62 +186,64 @@ void TavliScene::resize()
 {
     if (m_first_resize)
     {
-        _axes = &getGlobalAxes();
-        _axes->hide();
+        axes = &getGlobalAxes();
+        axes->hide();
     }
 
-    const float width = 0.7 * getSceneWidth();
-    const float height = 0.7 * getSceneWidth();
-    _board->resize(width, height);
+    const float width = 0.7f * getSceneWidth();
+    const float height = 0.7f * getSceneWidth();
+    board->resize(width, height);
 }
 
 void TavliScene::draw()
 {
-    _axes->drawif();
-    _board->drawif();
+    axes->drawif();
+    board->drawif();
 }
 
 void TavliScene::keyEvent(unsigned char key, bool up, int modif)
 {
     switch (tolower(key))
     {
-    case 'a': _axes->toggle(); break;
-    case 'b': _board->toggle(); break;
+    case 'a': axes->toggle(); break;
+    case 'b': board->toggle(); break;
     case 'h': HHH -= dHHH; vvr_echo(HHH); resize(); break;
     case 'j': HHH += dHHH; vvr_echo(HHH); resize(); break;
     case '0': resetCamera(); break;
-    case '1': _board->setupGamePortes(); break;
-    case '2': _board->setupGamePlakwto(); break;
-    case '3': _board->setupGameFevga(); break;
+    case '1': board->setupGamePortes(); break;
+    case '2': board->setupGamePlakwto(); break;
+    case '3': board->setupGameFevga(); break;
     default: Scene::keyEvent(key, up, modif);
     }
 }
 
 void TavliScene::mousePressed(int x, int y, int modif)
 {
-    _board->piece_picker->do_pick(unproject(x, y), modif);
-    if (_board->piece_picker->picked()) {
+    board->piece_picker->do_pick(unproject(x, y), modif);
+    if (board->piece_picker->picked()) {
         cursorGrab();
     } else Scene::mousePressed(x, y, modif);
 }
 
 void TavliScene::mouseMoved(int x, int y, int modif)
 {
-    if (_board->piece_picker->picked()) {
-        _board->piece_picker->do_drag(unproject(x, y), modif);
-    } else Scene::mouseMoved(x, y, modif);
+    if (board->piece_picker->picked()) {
+        board->piece_picker->do_drag(unproject(x, y), modif);
+    } else if (this->altDown(modif)) Scene::mouseMoved(x, y, modif);
 }
 
 void TavliScene::mouseReleased(int x, int y, int modif)
 {
-    _board->piece_picker->do_drop(unproject(x, y), modif);
+    board->piece_picker->do_drop(unproject(x, y), modif);
     cursorShow();
 }
 
 void TavliScene::mouseHovered(int x, int y, int modif)
 {
-    _board->region_picker->do_pick(unproject(x, y), modif);
-    if (_board->region_picker->picked()) {
+    //_board->region_picker->do_pick(unproject(x, y), modif);
+    board->piece_picker->do_pick(unproject(x, y), modif);
+    if (board->piece_picker->picked()) {
+        //auto piece = static_cast<tavli::Piece*>(_board->piece_picker->picked());
         cursorHand();
     } else cursorShow();
 }
@@ -249,22 +251,22 @@ void TavliScene::mouseHovered(int x, int y, int modif)
 /*---[tavli::Board]---------------------------------------------------------------------*/
 tavli::Board::Board(std::vector<vvr::Colour> &colours)
 {
-    _colours = colours;
+    this->colours = colours;
     load3DModels();
     createRegions();
     region_hlter = RegionHighlighter::Make();
-    region_picker = RegionPicker::Make(_regionCanvas, region_hlter.get());
+    region_picker = RegionPicker::Make(regionCanvas, region_hlter.get());
     piece_dragger = PieceDragger::Make(region_picker.get());
-    piece_picker = PiecePicker::Make(_pieceCanvas, piece_dragger.get());
+    piece_picker = PiecePicker::Make(pieceCanvas, piece_dragger.get());
     vvr_msg("Created tavli board.");
 }
 
 tavli::Board::~Board()
 {
     clearPieces();
-    _regionCanvas.setDelOnClear(false);
-    _regionCanvas.clear();
-    for (auto &reg : _regions) delete reg;
+    regionCanvas.setDelOnClear(false);
+    regionCanvas.clear();
+    for (auto &reg : regions) delete reg;
     vvr_msg("Deleted tavli board.");
 }
 
@@ -276,16 +278,16 @@ void tavli::Board::load3DModels()
 
     /* Load 3D model */
     try {
-        if (!_3DBoard) _3DBoard = Mesh::Make(path1);
+        if (!boardMesh) boardMesh = Mesh::Make(path1);
     }
     catch (std::string err) { vvr_msg(err); }
 
     try {
-        if (!_3DBoard) _3DBoard = Mesh::Make(path2);
+        if (!boardMesh) boardMesh = Mesh::Make(path2);
     }
     catch (std::string err) { vvr_msg(err); }
 
-    if (!_3DBoard) {
+    if (!boardMesh) {
         throw std::string("Could not find 3D model in any of the known locations.");
     }
     else {
@@ -293,46 +295,46 @@ void tavli::Board::load3DModels()
     }
 
     /* Fix positioning */
-    _3DBoard->transform(float3x4::RotateX(pi / 2));
-    _3DBoard->transform(float3x4::RotateZ(pi / 2));
-    vec size = _3DBoard->getAABB().Size();
-    _3DBoard->cornerAlign();
-    _3DBoard->move({ 0,-size.y / 2, -size.z * 0.27f });
+    boardMesh->transform(float3x4::RotateX(pi / 2));
+    boardMesh->transform(float3x4::RotateZ(pi / 2));
+    vec size = boardMesh->getAABB().Size();
+    boardMesh->cornerAlign();
+    boardMesh->move({ 0,-size.y / 2, -size.z * 0.27f });
 }
 
 void tavli::Board::createRegions()
 {
     /* Regions [Playing] */
     for (int i = 0; i < 24; ++i) {
-        _regions.push_back(new Region(this, i, _colours[1]));
-        _regionCanvas.add(_regions.back());
+        regions.push_back(new Region(this, i, colours[1]));
+        regionCanvas.add(regions.back());
     }
 
     /* Regions [Plakomena] */
-    _regions.push_back(new Region(this, -1, _colours[1])); // [i=24]
-    _regions.push_back(new Region(this, 24, _colours[1])); // [i=25]
-    _regions.at(24)->rows = 3;
-    _regions.at(25)->rows = 3;
+    regions.push_back(new Region(this, -1, colours[1])); // [i=24]
+    regions.push_back(new Region(this, 24, colours[1])); // [i=25]
+    regions.at(24)->rows = 3;
+    regions.at(25)->rows = 3;
 
     /* Regions [Mazemena] */
-    _regions.push_back(new Region(this, 25, _colours[1])); // [i=26]
-    _regions.push_back(new Region(this, 26, _colours[1])); // [i=27]
-    _regions.at(26)->rows = 4;
-    _regions.at(27)->rows = 4;
+    regions.push_back(new Region(this, 25, colours[1])); // [i=26]
+    regions.push_back(new Region(this, 26, colours[1])); // [i=27]
+    regions.at(26)->rows = 4;
+    regions.at(27)->rows = 4;
 
-    for (int i = 0; i < 4; i++) {
-        _regions.at(24 + i)->visible = false;
-        _regionCanvas.add(_regions.at(24 + i));
+    for (size_t i = 0; i < 4; i++) {
+        regions.at(24 + i)->visible = false;
+        regionCanvas.add(regions.at(24 + i));
     }
 }
 
 void tavli::Board::resize(const float width, const float height)
 {
-    _width = width;
-    _height = height;
+    this->width = width;
+    this->height = height;
 
     /* Resize regions and they will also resize their pieces. */
-    for (auto &reg : _regions) {
+    for (auto &reg : regions) {
         reg->resize(width / 13, height);
     }
 
@@ -340,28 +342,31 @@ void tavli::Board::resize(const float width, const float height)
     float3x4 mat;
     vec size, scale;
     mat.SetIdentity();
-    _3DBoard->setTransform(mat);
-    size = _3DBoard->getAABB().Size();
+    boardMesh->setTransform(mat);
+    size = boardMesh->getAABB().Size();
     scale = {
         width / size.x * 0.525f,
         height / size.y * 1.06f,
         width / 15
     };
     mat = mat * float3x4::Scale(scale);
-    _3DBoard->setTransform(mat);
+    boardMesh->setTransform(mat);
 }
 
 void tavli::Board::clearPieces()
 {
-    for (auto &reg : _regions) reg->pieces.clear();
-    _pieceCanvas.clear();
+    for (auto &reg : regions) reg->pieces.clear();
+    pieceCanvas.clear();
 }
 
 void tavli::Board::setupGamePortes()
 {
     clearPieces();
 
-    static const int regs[15]
+    regions.at(11)->rows = 5;
+    regions.at(11+12)->rows = 5;
+
+    static const size_t regs[15]
     {
         23,23,
         12,12,12,12,12,
@@ -371,18 +376,18 @@ void tavli::Board::setupGamePortes()
 
     /* Pieces: Player 1 */
     for (size_t i = 0; i < 15; ++i) {
-        Region* reg = _regions[regs[i]];
-        Piece* piece = new Piece(_colours[2]);
+        Region* reg = regions[regs[i]];
+        Piece* piece = new Piece(colours[2]);
         reg->addPiece(piece);
-        _pieceCanvas.add(piece);
+        pieceCanvas.add(piece);
     }
 
     /* Pieces: Player 2 */
     for (size_t i = 0; i < 15; ++i) {
-        Region* reg = _regions[23 - regs[i]];
-        Piece* piece = new Piece(_colours[3]);
+        Region* reg = regions[23 - regs[i]];
+        Piece* piece = new Piece(colours[3]);
         reg->addPiece(piece);
-        _pieceCanvas.add(piece);
+        pieceCanvas.add(piece);
     }
 
     vvr_msg("Setup game portes.");
@@ -392,26 +397,29 @@ void tavli::Board::setupGamePlakwto()
 {
     clearPieces();
 
+    regions.at(11)->rows = 5;
+    regions.at(11+12)->rows = 5;
+
     const int pl1reg = 0;
     const int pl2reg = 23;
 
-    _regions.at(pl1reg)->rows = 3;
-    _regions.at(pl2reg)->rows = 3;
+    regions.at(pl1reg)->rows = 3;
+    regions.at(pl2reg)->rows = 3;
 
     /* Pieces: Player 1 */
     for (size_t i = 0; i < 15; ++i) {
-        Region* reg = _regions[pl1reg];
-        Piece* piece = new Piece(_colours[2]);
+        Region* reg = regions[pl1reg];
+        Piece* piece = new Piece(colours[2]);
         reg->addPiece(piece);
-        _pieceCanvas.add(piece);
+        pieceCanvas.add(piece);
     }
 
     /* Pieces: Player 2 */
     for (size_t i = 0; i < 15; ++i) {
-        Region* reg = _regions[pl2reg];
-        Piece* piece = new Piece(_colours[3]);
+        Region* reg = regions[pl2reg];
+        Piece* piece = new Piece(colours[3]);
         reg->addPiece(piece);
-        _pieceCanvas.add(piece);
+        pieceCanvas.add(piece);
     }
 
     vvr_msg("Setup game plakwto.");
@@ -424,23 +432,23 @@ void tavli::Board::setupGameFevga()
     const int pl1reg = 11;
     const int pl2reg = 11 + 12;
 
-    _regions.at(pl1reg)->rows = 3;
-    _regions.at(pl2reg)->rows = 3;
+    regions.at(pl1reg)->rows = 3;
+    regions.at(pl2reg)->rows = 3;
 
     /* Pieces: Player 1 */
     for (size_t i = 0; i < 15; ++i) {
-        Region* reg = _regions[pl1reg];
-        Piece* piece = new Piece(_colours[2]);
+        Region* reg = regions[pl1reg];
+        Piece* piece = new Piece(colours[2]);
         reg->addPiece(piece);
-        _pieceCanvas.add(piece);
+        pieceCanvas.add(piece);
     }
 
     /* Pieces: Player 2 */
     for (size_t i = 0; i < 15; ++i) {
-        Region* reg = _regions[pl2reg];
-        Piece* piece = new Piece(_colours[3]);
+        Region* reg = regions[pl2reg];
+        Piece* piece = new Piece(colours[3]);
         reg->addPiece(piece);
-        _pieceCanvas.add(piece);
+        pieceCanvas.add(piece);
     }
 
     vvr_msg("Setup game fevga.");
@@ -449,16 +457,16 @@ void tavli::Board::setupGameFevga()
 void tavli::Board::draw() const
 {
     /* Draw pieces and regions */
-    _regionCanvas.draw();
-    _pieceCanvas.draw();
+    regionCanvas.draw();
+    pieceCanvas.draw();
 
     /* Draw 3D model */
-    _3DBoard->draw(_colours[0], SOLID);
-    const auto t(_3DBoard->getTransform());
+    boardMesh->draw(colours[0], SOLID);
+    const auto t(boardMesh->getTransform());
     auto tt = float3x4::RotateZ(pi) * t;
-    _3DBoard->setTransform(tt);
-    _3DBoard->draw(_colours[0], SOLID);
-    _3DBoard->setTransform(t);
+    boardMesh->setTransform(tt);
+    boardMesh->draw(colours[0], SOLID);
+    boardMesh->setTransform(t);
 }
 
 /*---[tavli::Piece]---------------------------------------------------------------------*/
@@ -474,7 +482,7 @@ void tavli::Piece::draw() const
 
 void tavli::Piece::on_pick()
 {
-    basecenter.z = region->boardheight * 0.10 + height;
+    basecenter.z = region->boardheight * 0.10f + height;
 }
 
 vvr::real tavli::Piece::pickdist(const Ray& ray) const
@@ -490,7 +498,7 @@ vvr::real tavli::Piece::pickdist(const Ray& ray) const
 }
 
 /*---[tavli::Region]--------------------------------------------------------------------*/
-tavli::Region::Region(Board *board, int id, vvr::Colour col) : Triangle3D(col)
+tavli::Region::Region(Board *board, size_t id, vvr::Colour col) : Triangle3D(col)
 {
     vvr_setmemb(board);
     vvr_setmemb(id);
@@ -509,26 +517,26 @@ void tavli::Region::resize(float piecediam, float boardheight)
     case 0:
         base.x = piecediam * (6 - id);
         base.y = -boardheight / 2;
-        top.y = -boardheight*0.05;
+        top.y = -boardheight * 0.05f;
         dir.Set(0, 1, 0);
         break;
     case 1:
         base.x = -piecediam * (id - 5);
         base.y = -boardheight / 2;
-        top.y = -boardheight*0.05;
+        top.y = -boardheight * 0.05f;
         dir.Set(0, 1, 0);
         break;
     case 2:
         base.x = -piecediam * (18 - id);
         base.y = boardheight / 2;
-        top.y = boardheight*0.05;
+        top.y = boardheight * 0.05f;
         dir.Set(0, -1, 0);
         break;
     case 3:
     case 4:
         base.x = piecediam * (id - 17);
         base.y = boardheight / 2;
-        top.y = boardheight*0.05;
+        top.y = boardheight * 0.05f;
         dir.Set(0, -1, 0);
         break;
     default: assert(false);
@@ -537,7 +545,7 @@ void tavli::Region::resize(float piecediam, float boardheight)
     if (id == 25)
     {
         base.x = 0;
-        base.y = -r * 1.5;
+        base.y = -r * 1.5f;
         base.z = boardheight * 0.1f;
         top.x = base.x;
         top.y = -boardheight/2;
@@ -547,7 +555,7 @@ void tavli::Region::resize(float piecediam, float boardheight)
     else if (id == 26)
     {
         base.x = 0;
-        base.y = r * 1.5;
+        base.y = r * 1.5f;
         base.z = boardheight * 0.1f;
         top.x = base.x;
         top.y = boardheight/2;
@@ -556,7 +564,7 @@ void tavli::Region::resize(float piecediam, float boardheight)
     }
     else
     {
-        base.z = 0.001;
+        base.z = 0.001f;
         top.x = base.x;
         top.z = base.z;
     }
@@ -570,8 +578,8 @@ void tavli::Region::resize(float piecediam, float boardheight)
 
     if (id == -1 || id == 24)
     {
-        base.x += boardheight * 0.04;
-        top.x += boardheight * 0.04;
+        base.x += boardheight * 0.04f;
+        top.x += boardheight * 0.04f;
     }
 
     arrangePieces();
@@ -587,7 +595,7 @@ void tavli::Region::arrangePieces(size_t index_from)
         pieces[i]->radius = r;
         pieces[i]->height = h;
         pieces[i]->basecenter = base + (dir*(piecediam*(i%rows) + r));
-        pieces[i]->basecenter.z += (i / rows) * h * 1.1;
+        pieces[i]->basecenter.z += (i / rows) * h * 1.1f;
     }
 }
 
@@ -613,13 +621,12 @@ vvr::real tavli::Region::pickdist(const Ray &ray) const
 }
 
 /*---[tavli::PieceDragger]--------------------------------------------------------------*/
-bool tavli::PieceDragger::on_pick(vvr::Drawable* drw, Ray ray)
+bool tavli::PieceDragger::on_pick(vvr::Drawable* drw, Ray)
 {
     assert(typeid(Piece)==typeid(*drw));
     auto piece = static_cast<Piece*>(drw);
-    _colour = piece->colour;
-    piece->colour.mul(1.4);
-    piece->on_pick();
+    colour = piece->colour;
+    piece->colour.mul(1.4f);
     return true;
 }
 
@@ -628,25 +635,26 @@ void tavli::PieceDragger::on_drag(vvr::Drawable* drw, Ray ray0, Ray ray1)
     assert(dynamic_cast<Piece*>(drw));
     auto piece = static_cast<Piece*>(drw);
     float d0, d1;
+    piece->on_pick();
     Plane boardplane(piece->diskBase().ContainingPlane());
     boardplane.Intersects(ray0, &d0);
     boardplane.Intersects(ray1, &d1);
     vec dv(ray1.GetPoint(d1) - ray0.GetPoint(d0));
     piece->basecenter += dv;
-    _regionPicker->do_drop(ray1, 0);
-    _regionPicker->do_pick(ray1, 0);
-    _ray = ray1;
+    regionPicker->do_drop(ray1, 0);
+    regionPicker->do_pick(ray1, 0);
+    ray = ray1;
 }
 
 void tavli::PieceDragger::on_drop(vvr::Drawable* drw)
 {
     auto piece = static_cast<Piece*>(drw);
-    auto region = static_cast<Region*>(_regionPicker->picked());
+    auto region = static_cast<Region*>(regionPicker->picked());
     if (!region) region = piece->region;
-    piece->colour = _colour;
+    piece->colour = colour;
     piece->region->removePiece(piece);
     region->addPiece(piece);
-    _regionPicker->do_drop(_ray, 0);
+    regionPicker->do_drop(ray, 0);
 }
 
 /*---[tavli::RegionHighlighter]---------------------------------------------------------*/
@@ -654,7 +662,7 @@ bool tavli::RegionHighlighter::on_pick(vvr::Drawable* drw, Ray ray)
 {
     assert(typeid(Region)==typeid(*drw));
     auto reg = static_cast<Region*>(drw);
-    _colour = reg->colour;
+    colour = reg->colour;
     reg->colour.mul(1.50);
     reg->setColourPerVertex(reg->colour, reg->colour, reg->colour);
     return true;
@@ -663,8 +671,8 @@ bool tavli::RegionHighlighter::on_pick(vvr::Drawable* drw, Ray ray)
 void tavli::RegionHighlighter::on_drop(vvr::Drawable* drw)
 {
     auto reg = static_cast<Region*>(drw);
-    reg->colour = _colour;
-    reg->setColourPerVertex(_colour, _colour, _colour);
+    reg->colour = colour;
+    reg->setColourPerVertex(colour, colour, colour);
 }
 
 /*---[main]-----------------------------------------------------------------------------*/
@@ -689,7 +697,8 @@ int main(int argc, char* argv[])
         std::vector<vvr::Colour> colours = tavli::GetDefaultColours();
 #ifndef __APPLE__
         /* Load from CLI */
-        for(int coli=0; coli < argc-1; coli++) {
+        assert(argc>0);
+        for(size_t coli=0; coli < (size_t)(argc-1); coli++) {
             colours[coli] = vvr::Colour(argv[1+coli]);
         }
 #endif
