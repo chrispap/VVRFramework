@@ -25,7 +25,7 @@ namespace tavli
     struct PieceDragger;
     struct Piece;
     struct Region;
-    struct  Board;
+    struct Board;
 
     //! Pickers
     typedef MousePicker3D<RegionHighlighter> RegionPicker;
@@ -649,16 +649,17 @@ void tavli::PieceDragger::on_drag(vvr::Drawable* drw, Ray ray0, Ray ray1)
 void tavli::PieceDragger::on_drop(vvr::Drawable* drw)
 {
     auto piece = static_cast<Piece*>(drw);
-    auto region = static_cast<Region*>(regionPicker->picked());
-    if (!region) region = piece->region;
+    auto region_drop = static_cast<Region*>(regionPicker->picked());
+    if (region_drop && region_drop!=piece->region) {
+        piece->region->removePiece(piece);
+        region_drop->addPiece(piece);
+    } else piece->region->arrangePieces(0);
     piece->colour = colour;
-    piece->region->removePiece(piece);
-    region->addPiece(piece);
     regionPicker->do_drop(ray, 0);
 }
 
 /*---[tavli::RegionHighlighter]---------------------------------------------------------*/
-bool tavli::RegionHighlighter::on_pick(vvr::Drawable* drw, Ray ray)
+bool tavli::RegionHighlighter::on_pick(vvr::Drawable* drw, Ray)
 {
     assert(typeid(Region)==typeid(*drw));
     auto reg = static_cast<Region*>(drw);
