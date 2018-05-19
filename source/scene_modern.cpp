@@ -3,8 +3,6 @@
 #include <MathGeoLib.h>
 #include <QtGui> //gl.h
 
-#define ENABLE_MODERN 0
-
 /*--------------------------------------------------------------------------------------*/
 const char* vertex_shader =
         "#version 410\n"
@@ -45,7 +43,7 @@ void vvr::SceneModern::resize()
 
 void vvr::SceneModern::setupGL()
 {
-#if DISABLE_MODERN
+#if VVR_ENABLE_MODERN_GL
     int  ok;
     char infoLog[512];
 
@@ -80,7 +78,7 @@ void vvr::SceneModern::setupGL()
 
 void vvr::SceneModern::draw()
 {
-#if DISABLE_MODERN
+#if VVR_ENABLE_MODERN_GL
     enterPixelMode();
     glUseProgram(shader_program);
     glBindVertexArray(vao);

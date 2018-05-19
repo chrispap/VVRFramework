@@ -198,7 +198,7 @@ void vvr::Window::cursor_grab()
 int vvr::main_with_scene(int argc, char* argv[], vvr::Scene *scene)
 {
     QApplication app(argc, argv);
-#if 0
+#if VVR_ENABLE_MODERN_GL
     QSurfaceFormat format;
     format.setProfile(QSurfaceFormat::CoreProfile);
     format.setVersion(4,1);
