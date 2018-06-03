@@ -10,11 +10,14 @@ namespace vvr {
 
 class VVRFramework_API Settings
 {
+    std::string m_path;
     std::map<std::string, std::string> m_map;
 
 public:
-    Settings () {}
-    Settings (std::string file);
+    Settings();
+    Settings(std::string file_path);
+    void reload();
+    const std::string& filePath() const { return m_path; }
 
     void getKeys(std::vector<std::string> &keys) const;
     void write(const std::string &filename) const;

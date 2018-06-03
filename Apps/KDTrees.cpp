@@ -95,7 +95,7 @@ KDTreeScene::KDTreeScene()
     m_bg_col = vvr::grey;
     m_perspective_proj = true;
     m_show_log = true;
-    m_show_sliders = false;
+    m_show_sliders = true;
     m_fullscreen = false;
     if (AUTOPLAY) m_anim.update(true);
     m_KDTree = NULL;

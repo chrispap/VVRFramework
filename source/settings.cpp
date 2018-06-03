@@ -10,11 +10,19 @@
 using namespace vvr;
 using namespace std;
 
-Settings::Settings(string filename)
+Settings::Settings()
 {
-    FILE *file;
-    file = fopen(filename.c_str(), "r");
-    if (!file) throw string("Cannot open config file <")+filename+">";
+}
+
+Settings::Settings(string path) : m_path(path)
+{
+    reload();
+}
+
+void Settings::reload()
+{
+    FILE *file = fopen(m_path.c_str(), "r");
+    if (!file) throw string("Cannot open config file <")+m_path+">";
 
     char Line[MAX_LINE_LEN], Key[128], Val[MAX_LINE_LEN-128];
     while (fgets(Line, MAX_LINE_LEN, file)) {

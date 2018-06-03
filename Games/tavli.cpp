@@ -74,7 +74,7 @@ namespace tavli
 
     struct Region : public Triangle3D
     {
-        Region(Board* board, size_t reg, vvr::Colour colour);
+        Region(Board* board, int id, vvr::Colour colour);
         void addPiece(Piece *piece);
         void removePiece(Piece *piece);
         void resize(float diam, float boardheight);
@@ -84,9 +84,10 @@ namespace tavli
     public:
         Board* board;
         std::vector<Piece*> pieces;
-        size_t id, rows;
         float piecediam, boardheight;
         vec base, top, dir;
+        size_t rows;
+        int id;
     };
 
     struct Board : public vvr::Drawable
@@ -498,7 +499,7 @@ vvr::real tavli::Piece::pickdist(const Ray& ray) const
 }
 
 /*---[tavli::Region]--------------------------------------------------------------------*/
-tavli::Region::Region(Board *board, size_t id, vvr::Colour col) : Triangle3D(col)
+tavli::Region::Region(Board *board, int id, vvr::Colour col) : Triangle3D(col)
 {
     vvr_setmemb(board);
     vvr_setmemb(id);
@@ -514,6 +515,7 @@ void tavli::Region::resize(float piecediam, float boardheight)
 
     switch (id / 6)
     {
+    default:
     case 0:
         base.x = piecediam * (6 - id);
         base.y = -boardheight / 2;
@@ -539,7 +541,6 @@ void tavli::Region::resize(float piecediam, float boardheight)
         top.y = boardheight * 0.05f;
         dir.Set(0, -1, 0);
         break;
-    default: assert(false);
     }
 
     if (id == 25)
