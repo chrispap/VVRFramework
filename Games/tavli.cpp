@@ -155,7 +155,7 @@ TavliScene::TavliScene(const std::vector<vvr::Colour> &colours)
     m_create_menus = false;
     m_show_log = true;
     m_perspective_proj = true;
-    m_fullscreen = true;
+    m_fullscreen = false;
     board = nullptr;
     reset();
 }
@@ -682,11 +682,11 @@ namespace tavli {
     std::vector<vvr::Colour> GetDefaultColours()
     {
         std::vector<vvr::Colour> colours = {
-            vvr::Colour(0x443322),  ///> Board
-            vvr::Colour(0x242622),  ///> Regions
-            vvr::Colour(0x550000),  ///> Team 1
-            vvr::Colour(0xBBBBBB)   ///> Team 2
-        };
+            0x443322,  ///> Board
+            0x242622,  ///> Regions
+            0x550000,  ///> Team 1
+            0xBBBBBB   ///> Team 2
+        };     
         return colours;
     }
 }
@@ -700,15 +700,15 @@ int main(int argc, char* argv[])
 #ifndef __APPLE__
         /* Load from CLI */
         assert(argc>0);
-        for(size_t coli=0; coli < (size_t)(argc-1); coli++) {
+        for(size_t coli=0; coli < std::min(colours.size(),(size_t)(argc-1)); coli++) {
             colours[coli] = vvr::Colour(argv[1+coli]);
         }
 #endif
 
         /* Print colours */
-        vvr_msg("Colours: ");
-        for (auto c : colours)
+        for (auto c : colours) {
             printf("colours[coli++] = vvr::Colour(\"%02X%02X%02X\");\n", c.r, c.g, c.b);
+        }
         vvr_msg("\n");
 
         return main_with_scene(argc, argv, new TavliScene(colours));

@@ -44,6 +44,15 @@ namespace vvr
     std::string
     VVRFramework_API zpn(int num, int len);
 
+    inline char get_path_separator()
+    {
+#ifdef _WIN32
+        return '\\';
+#else
+        return '/';
+#endif
+    }
+
 #ifdef __GNUG__
     std::string
     VVRFramework_API demangle(const char* name);
