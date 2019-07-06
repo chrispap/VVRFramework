@@ -14,6 +14,7 @@
 #include "Apps/Simple3D.cpp"
 #include "Apps/Tutorial.cpp"
 #include "Apps/KDTrees.cpp"
+#include "Apps/Fourier.cpp"
 #include "GeoLab/Molding.cpp"
 #include "GeoLab/Triangulation.cpp"
 #include "GeoLab/Mesh3D.cpp"
@@ -42,6 +43,7 @@ static void gather(T &scenes)
     scenes.push_back(new TutorialScene);
     scenes.push_back(new TriangleScene);
     scenes.push_back(new ConvexHullScene);
+    scenes.push_back(new FourierScene);
     scenes.push_back(new TavliScene(tavli::GetDefaultColours()));
 }
 

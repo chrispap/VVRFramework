@@ -9,6 +9,12 @@
 #include <fstream>
 #include <string>
 
+struct Fcomp
+{
+    double l;
+    double w;
+};
+
 struct FourierScene : public vvr::Scene
 {
     FourierScene();
@@ -24,36 +30,35 @@ private:
     vvr::Animation m_anim;
     vvr::Canvas m_lines;
     vvr::Canvas m_trace;
+    std::vector<Fcomp> fc;
 };
-
-using namespace std;
-using namespace vvr;
-using namespace math;
 
 FourierScene::FourierScene()
 {
+    vvr::Shape::PointSize = 2;
+    vvr::Shape::LineWidth = 1.5;
     m_bg_col = vvr::grey;
-    m_show_log = true;
-    m_fullscreen = true;
+    fc.push_back({  10,   25 });
+    fc.push_back({ 150,   50 });
+    fc.push_back({  50,  150 });
+    fc.push_back({  15,  600 });
+    for (auto i=0; i<fc.size(); i++) {
+        m_lines.add(new vvr::LineSeg2D);
+    }
     reset();
 }
 
 void FourierScene::reset()
 {
-    cout << "Reset" << endl;
+    std::cout << "Reset" << std::endl;
     vvr::Scene::reset();
-    m_lines.clear();
     m_trace.clear();
-    for (auto i=0; i<5; i++) {
-        m_lines.add(new vvr::LineSeg2D);
-    }
     m_anim.reset();
 }
 
 void FourierScene::draw()
 {
     enterPixelMode();
-    getGlobalAxes().draw();
     m_trace.draw();
     m_lines.draw();
     exitPixelMode();
@@ -62,27 +67,20 @@ void FourierScene::draw()
 bool FourierScene::idle()
 {
     m_anim.update(true);
-    auto t = m_anim.t;
-    const float cl = 0.80;
-    const float cw = 2.25;
-    float l = 200;
-    float w = 20;
+    const float t = m_anim.t;
     C2DVector e(0, 0);
     size_t i = 0;
-    for (vvr::Drawable *d : m_lines.getDrawables()) 
+
+    for (vvr::Drawable *d : m_lines.getDrawables())
     {
         auto &ln = *static_cast<vvr::LineSeg2D*>(d);
-        C2DVector v(l, 0);
-        v.TurnLeft(t * math::DegToRad(w));
-        ln.x1 = e.i; 
-        ln.y1 = e.j;
-        e += v;
-        ln.x2 = e.i; 
-        ln.y2 = e.j;
-        l *= cl;
-        w *= cw;
+        C2DVector v(fc[i].l, 0);
+        v.TurnLeft(t * math::DegToRad(fc[i].w));
+        ln.x1 = e.i; ln.y1 = e.j; e += v;
+        ln.x2 = e.i; ln.y2 = e.j;
         ++i;
     }
+
     m_trace.add(C2DPoint(e), vvr::orange);
     return true;
 }
