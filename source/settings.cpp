@@ -4,11 +4,35 @@
 #include <cstdio>
 #include <iostream>
 #include <algorithm>
+#include <cctype>
 
 #define MAX_LINE_LEN 1024
 
 using namespace vvr;
 using namespace std;
+
+static char* trimLeft(char* s)
+{
+    while (isspace(*s)) s++;
+    return s;
+}
+
+static char* trimRight(char* s)
+{
+    int len = strlen(s);
+    if (!len) return s;
+    char* pos = s + len - 1;
+    while (pos >= s && isspace(*pos)) {
+        *pos = '\0';
+        pos--;
+    }
+    return s;
+}
+
+static char* trim(char* s)
+{
+    return trimRight(trimLeft(s));
+}
 
 Settings::Settings()
 {
@@ -24,13 +48,14 @@ void Settings::reload()
     FILE *file = fopen(m_path.c_str(), "r");
     if (!file) throw string("Cannot open config file <")+m_path+">";
 
-    char Line[MAX_LINE_LEN], Key[128], Val[MAX_LINE_LEN-128];
+    char Line[MAX_LINE_LEN], key[128], val[MAX_LINE_LEN-128];
     while (fgets(Line, MAX_LINE_LEN, file)) {
         if (Line[0] == '#') continue;
-        if(sscanf(Line, "%s = %s\n", Key, Val)==2){
-            string key(Key);
-            transform(key.begin(), key.end(), key.begin(), ::tolower);
-            m_map[key] = Val;
+        if(sscanf(Line, "%[^=]=%[^\n]", key, val)==2) {
+            transform(key, key + strlen(key), key, ::tolower);
+            char *k = trim(key);
+            char *v = trim(val);
+            m_map[k] = trim(v);
         }
     }
 
@@ -63,7 +88,7 @@ void Settings::write(const string &filename) const
     file = fopen(filename.c_str(), "w");
 
     for(map<string,string>::const_iterator it = m_map.begin(); it != m_map.end(); ++it) {
-        fprintf(file, "%s = %s \n", it->first.c_str(), it->second.c_str());
+        fprintf(file, "%s = %s\n", it->first.c_str(), it->second.c_str());
     }
 
     fclose(file);

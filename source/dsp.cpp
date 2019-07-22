@@ -64,16 +64,12 @@ vvr::dsp::Signal vvr::dsp::consecutive_threshold(const Signal &in, size_t max_co
 {
     Signal out(in);
 
-    int zero_counter = 0;
+    int zc = 0;
 
     for (int i = 0; i < in.size(); i++)
     {
-        if (!in[i]) zero_counter++;
-        else zero_counter = 0;
-        if (zero_counter < max_cons_vals)
-            out[i] = 1;
-        else
-            out[i] = 0;
+        zc = in[i] ? 0 : zc + 1;
+        out[i] = (zc < max_cons_vals);
     }
 
     return out;
