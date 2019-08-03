@@ -2,15 +2,15 @@
 #define VVR_UTILS_H
 
 #include "vvrframework_DLL.h"
-#include <string>
+#include <algorithm>
 #include <iostream>
+#include <typeinfo>
 #include <sstream>
+#include <utility>
+#include <string>
 #include <vector>
 #include <memory>
-#include <string>
-#include <typeinfo>
 #include <tuple>
-#include <utility>
 
 namespace vvr
 {
@@ -63,6 +63,46 @@ namespace vvr
     template <class T>
     std::string typestr(const T& t) { return typeid(t).name(); }
 #endif
+
+    template <class T>
+    inline std::string make_str(const T& x)
+    {
+        std::stringstream ss;
+        ss << x;
+        return ss.str();
+    }
+
+    template<class T, 
+    typename = typename std::enable_if<
+        std::is_integral<T>::value || 
+        std::is_floating_point<T>::value>::type>
+    inline std::string make_str(const T& x)
+    {
+        return std::to_string(x);
+    }
+
+    template<>
+    inline std::string make_str<std::string>(const std::string& x)
+    {
+        return x;
+    }
+
+    template <class V >
+    std::string implode(V const& v, const char* h = "")
+    {
+        const size_t n = std::strlen(h);
+        char delim = ',';
+        if (n==1) delim = h[0];
+        else if (n==3) delim = h[1];
+        std::stringstream ss;
+        if (n==3) ss << h[0];
+        auto it = std::cbegin(v);
+        const auto end = std::cend(v);
+        if (it != end) ss << *(it++);
+        while (it != end) ss << delim << *(it++);
+        if (n==3) ss << h[2];
+        return ss.str();
+    }
 
     template <class Tuple, class F, size_t... Is>
     constexpr auto apply_impl(Tuple& t, F f, std::index_sequence<Is...>) {
