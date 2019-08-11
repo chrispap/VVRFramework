@@ -64,6 +64,23 @@ namespace vvr
     std::string typestr(const T& t) { return typeid(t).name(); }
 #endif
 
+    template <typename T>
+    class BackupAndRestore {
+        T& valRef;
+        T const oldVal;
+        explicit BackupAndRestore(T &valRef) : valRef(valRef), oldVal(valRef) {}
+    public:
+        ~BackupAndRestore() { valRef = oldVal; }
+        template <typename T>
+        friend BackupAndRestore<T> scopedBackup(T& valRef);
+    };
+
+    template <typename T>
+    BackupAndRestore<T> scopedBackup(T& valRef)
+    {
+        return BackupAndRestore<T>(valRef);
+    }
+
     template <class T>
     inline std::string make_str(const T& x)
     {

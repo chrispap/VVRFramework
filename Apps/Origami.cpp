@@ -250,6 +250,7 @@ OrigamiScene::OrigamiScene()
     m_keymap['a'].add(new vvr::SimpleCmd<vvr::Axes, bool>(&getGlobalAxes(), &vvr::Axes::toggle));
     m_keymap['x'].add(new vvr::SimpleCmd<vvr::Canvas>(&m_sketch, &vvr::Canvas::clear));
     m_keymap['x'].add(new vvr::SimpleCmd<vvr::Canvas>(&m_hull, &vvr::Canvas::clear));
+    m_keymap['h'].add(new vvr::SimpleCmd<vvr::Canvas,bool>(&m_hull, &vvr::Canvas::hide));
     m_keymap['s'].add(new vvr::SimpleCmd<Paper>(m_paper.get(), &Paper::toggleFill));
     m_keymap['w'].add(new vvr::SimpleCmd<Paper>(m_paper.get(), &Paper::toggleWire));
     m_keymap['p'].add(new vvr::SimpleCmd<Paper>(m_paper.get(), &Paper::togglePts));
@@ -261,9 +262,9 @@ OrigamiScene::OrigamiScene()
 void OrigamiScene::draw()
 {
     getGlobalAxes().drawif();
-    m_paper->draw();
-    m_sketch.draw();
-    m_hull.draw();
+    m_paper->drawif();
+    m_sketch.drawif();
+    m_hull.drawif();
     m_dragger->hl.drawif();
     m_dragger->vl.drawif();
 }

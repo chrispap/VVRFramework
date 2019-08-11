@@ -177,10 +177,10 @@ private:
 /*--------------------------------------------------------------------------------------*/
 Sketcher::Sketcher()
 {
-    vvr::Shape::PointSize *= 2;
     m_bg_col = vvr::Colour("FFFFFF");
     m_perspective_proj = false;
     m_canvas.setDelOnClear(false);
+    m_show_log = true;
 
     /* Create keyboard mapping */
     m_key_map['v'].add((new vvr::SimpleCmd<Sketcher>(this, &Sketcher::toggle_croshair)));
@@ -318,6 +318,8 @@ void Sketcher::arrowEvent(vvr::ArrowDir dir, int modif)
 
 void Sketcher::draw()
 {
+    auto bkupPointSize = vvr::scopedBackup(vvr::Shape::PointSize);
+    vvr::Shape::PointSize = 22;
     enterPixelMode();
     m_grid.drawif();
     m_canvas.draw();
