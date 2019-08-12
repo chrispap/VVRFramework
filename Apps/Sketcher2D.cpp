@@ -147,6 +147,7 @@ private:
     void mouseMoved(int x, int y, int modif) override;
     void mouseReleased(int x, int y, int modif) override;
     void mouseHovered(int x, int y, int modif) override;
+    void mouseWheel(int dir, int modif) override;
     void add_spacing_to_grid(float dx, float dy, vvr::Colour);
     void make_grid();
     void save_scene();
@@ -163,6 +164,7 @@ private:
     vvr::MousePicker2D<vvr::CompositeLine>
     > PickerT;
 
+    float           m_psz = 14;
     int             m_gs = 40;
     PickerT::Ptr    m_picker;
     vvr::Canvas     m_canvas;
@@ -260,6 +262,7 @@ void Sketcher::resize()
 
 void Sketcher::mouseHovered(int x, int y, int modif)
 {
+    vvr::BackupAndRestore tmp{vvr::Shape::PointSize, m_psz};
     m_hl->set(x, y, x + 1, y);
     m_vl->set(x, y, x, y + 1);
     m_picker->do_pick(vvr::Mousepos{ x, y }, 0, false);
@@ -270,12 +273,14 @@ void Sketcher::mouseHovered(int x, int y, int modif)
 
 void Sketcher::mousePressed(int x, int y, int modif)
 {
+    vvr::BackupAndRestore tmp{vvr::Shape::PointSize, m_psz};
     m_picker->do_pick(vvr::Mousepos{ x, y }, modif, ctrlDown(modif));
     if (m_picker->get_picked()) cursorGrab();
 }
 
 void Sketcher::mouseMoved(int x, int y, int modif)
 {
+    vvr::BackupAndRestore tmp{vvr::Shape::PointSize, m_psz};
     if (m_grid.visible && !shiftDown(modif)) {
         vvr::snap_to_grid(x, y, m_gs);
     }
@@ -290,6 +295,7 @@ void Sketcher::mouseMoved(int x, int y, int modif)
 
 void Sketcher::mouseReleased(int x, int y, int modif)
 {
+    vvr::BackupAndRestore tmp{vvr::Shape::PointSize, m_psz};
     if (m_picker->get_picked()) cursorShow();
     m_picker->do_drop();
 }
@@ -316,10 +322,14 @@ void Sketcher::arrowEvent(vvr::ArrowDir dir, int modif)
     }
 }
 
+void Sketcher::mouseWheel(int dir, int modif)
+{
+    m_psz = std::clamp(m_psz + dir, 2.0f, 100.0f);
+}
+
 void Sketcher::draw()
 {
-    auto bkupPointSize = vvr::scopedBackup(vvr::Shape::PointSize);
-    vvr::Shape::PointSize = 22;
+    vvr::BackupAndRestore tmp{vvr::Shape::PointSize, m_psz};
     enterPixelMode();
     m_grid.drawif();
     m_canvas.draw();
