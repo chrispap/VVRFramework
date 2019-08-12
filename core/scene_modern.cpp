@@ -1,7 +1,8 @@
 #include <vvr/scene_modern.h>
 #include <vvr/drawing.h>
 #include <MathGeoLib.h>
-#include <QtGui> //gl.h
+#include <QtGui>
+#include <qopenglext.h>
 
 /*--------------------------------------------------------------------------------------*/
 const char* vertex_shader =
@@ -30,10 +31,25 @@ GLuint vao = 0;
 GLuint vs, fs;
 GLuint shader_program;
 
+namespace vvr {
+    struct SceneModern::Impl : QOpenGLExtraFunctions {
+        //! This class is used to avoid including 
+        //! QOpenGLExtraFunctions in the header
+        //! as it would have been necessary if 
+        // 'SceneModern' inherited from it.
+    };
+}
+
 /*--------------------------------------------------------------------------------------*/
 vvr::SceneModern::SceneModern()
 {
     m_bg_col = vvr::grey;
+    impl = new Impl;
+}
+
+vvr::SceneModern::~SceneModern()
+{
+    delete impl;
 }
 
 void vvr::SceneModern::resize()
@@ -47,32 +63,31 @@ void vvr::SceneModern::setupGL()
     int  ok;
     char infoLog[512];
 
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(float), pts_data, GL_STATIC_DRAW);
+    impl->initializeOpenGLFunctions();
+    impl->glGenBuffers(1, &vbo);
+    impl->glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    impl->glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(float), pts_data, GL_STATIC_DRAW);
+    impl->glGenVertexArrays(1, &vao);
+    impl->glBindVertexArray(vao);
+    impl->glEnableVertexAttribArray(0);
+    impl->glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    impl->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+    vs = impl->glCreateShader(GL_VERTEX_SHADER);
+    impl->glShaderSource(vs, 1, &vertex_shader, NULL);
+    impl->glCompileShader(vs);
+    impl->glGetShaderiv(vs, GL_COMPILE_STATUS, &ok);
+    if (!ok) { impl->glGetShaderInfoLog(vs, 512, NULL, infoLog); vvr_msg(infoLog); }
 
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-    glEnableVertexAttribArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+    fs = impl->glCreateShader(GL_FRAGMENT_SHADER);
+    impl->glShaderSource(fs, 1, &fragment_shader, NULL);
+    impl->glCompileShader(fs);
+    impl->glGetShaderiv(fs, GL_COMPILE_STATUS, &ok);
+    if (!ok) { impl->glGetShaderInfoLog(fs, 512, NULL, infoLog); vvr_msg(infoLog); }
 
-    vs = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vs, 1, &vertex_shader, NULL);
-    glCompileShader(vs);
-    glGetShaderiv(vs, GL_COMPILE_STATUS, &ok);
-    if (!ok) { glGetShaderInfoLog(vs, 512, NULL, infoLog); vvr_msg(infoLog); }
-
-    fs = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fs, 1, &fragment_shader, NULL);
-    glCompileShader(fs);
-    glGetShaderiv(fs, GL_COMPILE_STATUS, &ok);
-    if (!ok) { glGetShaderInfoLog(fs, 512, NULL, infoLog); vvr_msg(infoLog); }
-
-    shader_program = glCreateProgram();
-    glAttachShader(shader_program, fs);
-    glAttachShader(shader_program, vs);
-    glLinkProgram(shader_program);
+    shader_program = impl->glCreateProgram();
+    impl->glAttachShader(shader_program, fs);
+    impl->glAttachShader(shader_program, vs);
+    impl->glLinkProgram(shader_program);
 #endif
 }
 
@@ -80,9 +95,9 @@ void vvr::SceneModern::draw()
 {
 #if VVR_ENABLE_MODERN_GL
     enterPixelMode();
-    glUseProgram(shader_program);
-    glBindVertexArray(vao);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+    impl->glUseProgram(shader_program);
+    impl->glBindVertexArray(vao);
+    impl->glDrawArrays(GL_TRIANGLES, 0, 3);
     exitPixelMode();
 #endif
 }

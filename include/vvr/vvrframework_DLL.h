@@ -7,4 +7,4 @@
 #else
 #	define VVRFramework_API
 #endif
-#define VVR_ENABLE_MODERN_GL 0
+#define VVR_ENABLE_MODERN_GL 1
