@@ -66,11 +66,11 @@ void SceneArea::draw()
     }
 
     // Draw a circle centered at: (m_x , m_y).
-    Circle2D circle = Circle2D(m_x, m_y, m_rad, col_circ);
+    vvr::Circle2D circle = vvr::Circle2D(m_x, m_y, m_rad, col_circ);
     circle.draw();
 
     // Draw a triangle.
-    Triangle2D tri(-200, -200, -200, 200, m_x, m_y, col_tri);
+    vvr::Triangle2D tri(-200, -200, -200, 200, m_x, m_y, col_tri);
     tri.filled = false;
     tri.draw();
 
