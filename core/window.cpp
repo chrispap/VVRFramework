@@ -1,6 +1,7 @@
 #include "window.h"
 #include <vvr/glwidget.h>
 #include <vvr/scene.h>
+#include <vvr/scene_modern.h>
 #include <vvr/command.h>
 #include <QtWidgets>
 #include <QPushButton>
@@ -12,12 +13,11 @@
 using std::cerr;
 using std::endl;
 
-/*--------------------------------------------------------------------------------------*/
+//!---
 vvr::Window* s_window_ptr = nullptr;
-QString vvr::Window::aboutMessage = QString(
-    "Chris Papapavlou | chrispapapaulou@gmail.com ") + QString(QChar(0xA9));
+QString vvr::Window::aboutMessage = QString("Chris Papapavlou | chrispapapaulou@gmail.com ") + QString(QChar(0xA9));
 
-/*--------------------------------------------------------------------------------------*/
+//!---
 vvr::Window::Window(vvr::Scene *scene) : m_scene(scene)
 {
     ui.setupUi(this);
@@ -194,16 +194,17 @@ void vvr::Window::cursor_grab()
     QApplication::changeOverrideCursor(Qt::ClosedHandCursor);
 }
 
-/*--------------------------------------------------------------------------------------*/
+//!---
 int vvr::main_with_scene(int argc, char* argv[], vvr::Scene *scene)
 {
     QApplication app(argc, argv);
-#if VVR_ENABLE_MODERN_GL
-    QSurfaceFormat format;
-    format.setProfile(QSurfaceFormat::CoreProfile);
-    format.setVersion(4,1);
-    QSurfaceFormat::setDefaultFormat(format);
-#endif
+    if (scene->getName() == SceneModern::name)
+    {
+        QSurfaceFormat format;
+        format.setProfile(QSurfaceFormat::CoreProfile);
+        format.setVersion(4, 3);
+        QSurfaceFormat::setDefaultFormat(format);
+    }
     QPixmap pixmap(":/Icons/vvrframework-splash.png");
     QSplashScreen splash(pixmap);
     splash.show();
@@ -212,7 +213,6 @@ int vvr::main_with_scene(int argc, char* argv[], vvr::Scene *scene)
     splash.close();
     win.show();//Maximized();
     win.focusToGlWidget();
-    app.setOverrideCursor(Qt::CrossCursor);
     app.exec();
     delete scene;
     return 0;

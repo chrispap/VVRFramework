@@ -9,11 +9,12 @@ namespace vvr
     class VVRFramework_API SceneModern : public Scene
     {
         struct Impl;
-        Impl *impl;
+        Impl *gl;
     public:
+        static const char* name;
         SceneModern();
         ~SceneModern();
-        const char* getName() const override { return "Modern OpenGL scene"; }
+        const char* getName() const override { return name; }
         void draw() override;
         void resize() override;
         void setupGL();

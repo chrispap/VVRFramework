@@ -21,9 +21,13 @@ const char* fragment_shader =
 
 /*--------------------------------------------------------------------------------------*/
 float pts_data[] = {
-   0.0f,  0.5f,  0.0f,
-   0.5f, -0.5f,  0.0f,
-  -0.5f, -0.5f,  0.0f
+    0.0f,  0.5f,  0.0f,
+    0.5f, -0.5f,  0.0f,
+   -0.5f, -0.5f,  0.0f,
+
+    0.0f,  0.5f,  0.0f,
+    0.5f, -0.8f,  0.0f,
+   -0.5f, -0.5f,  0.0f,
 };
 
 GLuint vbo = 0;
@@ -32,74 +36,77 @@ GLuint vs, fs;
 GLuint shader_program;
 
 namespace vvr {
-    struct SceneModern::Impl : QOpenGLExtraFunctions {
-        //! This class is used to avoid including 
-        //! QOpenGLExtraFunctions in the header
-        //! as it would have been necessary if 
-        // 'SceneModern' inherited from it.
-    };
+    //! This class is used to avoid including QOpenGLExtraFunctions in the header
+    //! as it would have been necessary if SceneModern inherited from it.
+    struct SceneModern::Impl : QOpenGLExtraFunctions { };
 }
+
+const char * vvr::SceneModern::name = "Modern OpenGL scene";
 
 /*--------------------------------------------------------------------------------------*/
 vvr::SceneModern::SceneModern()
 {
     m_bg_col = vvr::grey;
-    impl = new Impl;
+    m_show_log = true;
+    gl = new Impl;
 }
 
 vvr::SceneModern::~SceneModern()
 {
-    delete impl;
+    delete gl;
 }
 
 void vvr::SceneModern::resize()
 {
-    if (m_first_resize) setupGL();
+    if (m_first_resize) {
+        setupGL();
+    }
 }
 
 void vvr::SceneModern::setupGL()
 {
-#if VVR_ENABLE_MODERN_GL
-    int  ok;
     char infoLog[512];
+    int  ok;
 
-    impl->initializeOpenGLFunctions();
-    impl->glGenBuffers(1, &vbo);
-    impl->glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    impl->glBufferData(GL_ARRAY_BUFFER, 9 * sizeof(float), pts_data, GL_STATIC_DRAW);
-    impl->glGenVertexArrays(1, &vao);
-    impl->glBindVertexArray(vao);
-    impl->glEnableVertexAttribArray(0);
-    impl->glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    impl->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-    vs = impl->glCreateShader(GL_VERTEX_SHADER);
-    impl->glShaderSource(vs, 1, &vertex_shader, NULL);
-    impl->glCompileShader(vs);
-    impl->glGetShaderiv(vs, GL_COMPILE_STATUS, &ok);
-    if (!ok) { impl->glGetShaderInfoLog(vs, 512, NULL, infoLog); vvr_msg(infoLog); }
+    gl->initializeOpenGLFunctions();
 
-    fs = impl->glCreateShader(GL_FRAGMENT_SHADER);
-    impl->glShaderSource(fs, 1, &fragment_shader, NULL);
-    impl->glCompileShader(fs);
-    impl->glGetShaderiv(fs, GL_COMPILE_STATUS, &ok);
-    if (!ok) { impl->glGetShaderInfoLog(fs, 512, NULL, infoLog); vvr_msg(infoLog); }
+    //---[Buffers]---
+    //! ArrayBuffer
+    gl->glGenBuffers(1, &vbo);
+    gl->glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    gl->glBufferData(GL_ARRAY_BUFFER, sizeof(pts_data), pts_data, GL_STATIC_DRAW);
+    //! VertexArray
+    gl->glGenVertexArrays(1, &vao);
+    gl->glBindVertexArray(vao);
+    gl->glEnableVertexAttribArray(0);
+    gl->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 
-    shader_program = impl->glCreateProgram();
-    impl->glAttachShader(shader_program, fs);
-    impl->glAttachShader(shader_program, vs);
-    impl->glLinkProgram(shader_program);
-#endif
+    //---[Vertex shader]---
+    vs = gl->glCreateShader(GL_VERTEX_SHADER);
+    gl->glShaderSource(vs, 1, &vertex_shader, NULL);
+    gl->glCompileShader(vs);
+    gl->glGetShaderiv(vs, GL_COMPILE_STATUS, &ok);
+    if (!ok) { gl->glGetShaderInfoLog(vs, 512, NULL, infoLog); vvr_msg(infoLog); }
+
+    //---[Fragment shader]---
+    fs = gl->glCreateShader(GL_FRAGMENT_SHADER);
+    gl->glShaderSource(fs, 1, &fragment_shader, NULL);
+    gl->glCompileShader(fs);
+    gl->glGetShaderiv(fs, GL_COMPILE_STATUS, &ok);
+    if (!ok) { gl->glGetShaderInfoLog(fs, 512, NULL, infoLog); vvr_msg(infoLog); }
+
+    //---[Compile / Link shader]---
+    shader_program = gl->glCreateProgram();
+    gl->glAttachShader(shader_program, fs);
+    gl->glAttachShader(shader_program, vs);
+    gl->glLinkProgram(shader_program);
 }
 
 void vvr::SceneModern::draw()
 {
-#if VVR_ENABLE_MODERN_GL
-    enterPixelMode();
-    impl->glUseProgram(shader_program);
-    impl->glBindVertexArray(vao);
-    impl->glDrawArrays(GL_TRIANGLES, 0, 3);
-    exitPixelMode();
-#endif
+    gl->glUseProgram(shader_program);
+    gl->glBindVertexArray(vao);
+    gl->glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 /*--------------------------------------------------------------------------------------*/
 
