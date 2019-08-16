@@ -44,6 +44,9 @@ namespace vvr
     std::string
     VVRFramework_API zpn(int num, int len);
 
+    std::string
+    VVRFramework_API read_file(const std::string &filename);
+
     inline char get_path_separator()
     {
 #ifdef _WIN32

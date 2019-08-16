@@ -4,46 +4,19 @@
 #include <QtGui>
 #include <qopenglext.h>
 
-/*--------------------------------------------------------------------------------------*/
-const char* vertex_shader =
-        "#version 410\n"
-        "in vec3 vp;"
-        "void main() {"
-        "  gl_Position = vec4(vp, 1.0);"
-        "}";
+//---
+namespace vvr { struct SceneModern::Impl : QOpenGLExtraFunctions { }; }
 
-const char* fragment_shader =
-        "#version 410\n"
-        "out vec4 frag_colour;"
-        "void main() {"
-        "  frag_colour = vec4(0.5, 0.0, 0.5, 1.0);"
-        "}";
-
-/*--------------------------------------------------------------------------------------*/
-float pts_data[] = {
-    0.0f,  0.5f,  0.0f,
-    0.5f, -0.5f,  0.0f,
-   -0.5f, -0.5f,  0.0f,
-
-    0.0f,  0.5f,  0.0f,
-    0.5f, -0.8f,  0.0f,
-   -0.5f, -0.5f,  0.0f,
-};
-
-GLuint vbo = 0;
-GLuint vao = 0;
-GLuint vs, fs;
-GLuint shader_program;
-
-namespace vvr {
-    //! This class is used to avoid including QOpenGLExtraFunctions in the header
-    //! as it would have been necessary if SceneModern inherited from it.
-    struct SceneModern::Impl : QOpenGLExtraFunctions { };
-}
-
+//---
 const char * vvr::SceneModern::name = "Modern OpenGL scene";
 
-/*--------------------------------------------------------------------------------------*/
+//---
+GLuint shader_program;
+GLuint vs, fs;
+GLuint vbo = 0;
+GLuint vao = 0;
+
+//---
 vvr::SceneModern::SceneModern()
 {
     m_bg_col = vvr::grey;
@@ -68,14 +41,26 @@ void vvr::SceneModern::setupGL()
     char infoLog[512];
     int  ok;
 
+    //---[Paths]---
+    const std::string shader_path = vvr::get_base_path() + "resources/shaders/";
+    std::string src_vert_shader = vvr::read_file(shader_path + "basic.vert");
+    const char* src_vert_shader_ptr = src_vert_shader.c_str();
+    std::string src_frag_shader = vvr::read_file(shader_path + "basic.frag");
+    const char* src_frag_shader_ptr = src_frag_shader.c_str();
+
+    //---[Geom data]---
+    vvr::Triangle3D tri({
+        { 0.0f,  0.5f, 0.0f },
+        { 0.5f, -0.5f, 0.0f },
+        { -0.5f, -0.5f, 0.0f }
+    });
+
     gl->initializeOpenGLFunctions();
 
     //---[Buffers]---
-    //! ArrayBuffer
     gl->glGenBuffers(1, &vbo);
     gl->glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    gl->glBufferData(GL_ARRAY_BUFFER, sizeof(pts_data), pts_data, GL_STATIC_DRAW);
-    //! VertexArray
+    gl->glBufferData(GL_ARRAY_BUFFER, sizeof(math::Triangle), &static_cast<math::Triangle>(tri), GL_STATIC_DRAW);
     gl->glGenVertexArrays(1, &vao);
     gl->glBindVertexArray(vao);
     gl->glEnableVertexAttribArray(0);
@@ -83,14 +68,15 @@ void vvr::SceneModern::setupGL()
 
     //---[Vertex shader]---
     vs = gl->glCreateShader(GL_VERTEX_SHADER);
-    gl->glShaderSource(vs, 1, &vertex_shader, NULL);
+    gl->glShaderSource(vs, 1, &src_vert_shader_ptr, NULL);
     gl->glCompileShader(vs);
     gl->glGetShaderiv(vs, GL_COMPILE_STATUS, &ok);
     if (!ok) { gl->glGetShaderInfoLog(vs, 512, NULL, infoLog); vvr_msg(infoLog); }
 
     //---[Fragment shader]---
+
     fs = gl->glCreateShader(GL_FRAGMENT_SHADER);
-    gl->glShaderSource(fs, 1, &fragment_shader, NULL);
+    gl->glShaderSource(fs, 1, &src_frag_shader_ptr, NULL);
     gl->glCompileShader(fs);
     gl->glGetShaderiv(fs, GL_COMPILE_STATUS, &ok);
     if (!ok) { gl->glGetShaderInfoLog(fs, 512, NULL, infoLog); vvr_msg(infoLog); }
@@ -108,6 +94,6 @@ void vvr::SceneModern::draw()
     gl->glBindVertexArray(vao);
     gl->glDrawArrays(GL_TRIANGLES, 0, 3);
 }
-/*--------------------------------------------------------------------------------------*/
+//---
 
 vvr_invoke_main_with_scene(vvr::SceneModern)

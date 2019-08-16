@@ -190,6 +190,8 @@ void KDTreeScene::createSurfacePts(int num_pts)
 
 bool KDTreeScene::idle()
 {
+    if (m_anim.paused()) return false;
+
     if (m_tree_invalidation_sec > 0 &&
         vvr::get_seconds() - m_tree_invalidation_sec > 0.8)
     {
@@ -197,6 +199,7 @@ bool KDTreeScene::idle()
         m_KDTree = new vvr::KDTree(m_pts);
         m_tree_invalidation_sec = -1;
     }
+
     m_anim.update();
     return true;
 }

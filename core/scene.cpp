@@ -91,15 +91,8 @@ void Scene::pix2mouse(int &x, int &y)
 
 void Scene::setCameraPos(const vec &pos)
 {
-    vec front0 = vec(0, 0, -1);
-    vec front = pos.Neg().Normalized();
     vec up(0, 1, 0);
-
-    if (!front0.Equals(front)) {
-        float3x3 cam_rot = float3x3::RotateFromTo(front0, front);
-        up = cam_rot * up;
-    }
-
+    vec front = pos.Neg().Normalized();
     m_frustum.SetKind(FrustumSpaceGL, FrustumRightHanded);
     m_frustum.SetFrame(pos, front, up);
 }
