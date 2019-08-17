@@ -181,22 +181,20 @@ void Scene::glResize(int w, int h)
 
 void Scene::glRender()
 {
-    /* Set projection matrix */
+    //---[Prepare matrices]---
     float4x4 pjm = m_frustum.ProjectionMatrix();
+    float4x4 mvm = m_frustum.ViewMatrix();
     pjm.Transpose(); // Colunm major for OpenGL.
+    mvm.Transpose(); // Colunm major for OpenGL.
+
+    //---[Render scene]---
+    glClearColor(m_bg_col.r / 255.0, m_bg_col.g / 255.0, m_bg_col.b / 255.0, 1);
     glViewport(0, 0, m_screen_width, m_screen_height);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_PROJECTION);
     glLoadMatrixf(pjm.ptr());
-
-    /* Set modelview matrix */
-    float4x4 mvm = m_frustum.ViewMatrix();
-    mvm.Transpose(); // Colunm major for OpenGL.
-    glClearColor(m_bg_col.r / 255.0, m_bg_col.g / 255.0, m_bg_col.b / 255.0, 1);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadMatrixf(mvm.ptr());
-
-    /* Render scene */
     draw();
 }
 
