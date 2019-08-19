@@ -135,10 +135,10 @@ std::string vvr::zpn(int num, int len)
 
 std::string vvr::read_file(const std::string &filename)
 {
-    return std::string(
-        std::istreambuf_iterator<char>(std::ifstream(filename)),
-        std::istreambuf_iterator<char>()
-    );
+    auto arg  = std::ifstream(filename);
+    auto arg1 = std::istreambuf_iterator<char>(arg);
+    const auto arg2 = std::istreambuf_iterator<char>();
+    return std::string(arg1, arg2);
 }
 
 #ifdef __GNUG__

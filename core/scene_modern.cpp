@@ -72,7 +72,7 @@ void vvr::SceneModern::Impl::setupGL()
     //---[Buffers]---
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(math::Triangle), &static_cast<math::Triangle>(tri), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(math::Triangle), static_cast<math::Triangle*>(&tri), GL_STATIC_DRAW);
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
     glEnableVertexAttribArray(0);

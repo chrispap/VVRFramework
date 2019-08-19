@@ -11,6 +11,7 @@
 #include <vector>
 #include <memory>
 #include <tuple>
+#include <cstring>
 
 namespace vvr
 {
