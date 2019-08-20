@@ -18,7 +18,7 @@ file(GLOB APP_SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}
 add_executable(AllDemo MACOSX_BUNDLE ${APP_SRC_FILES} ${UI_FILES})
 target_link_libraries(AllDemo Qt5::Widgets Qt5::OpenGL)
 target_link_libraries(AllDemo
-  optimized VVRFramework debug vvrframework_d
+  optimized VVRFramework debug VVRFramework_d
   optimized GeoLib debug GeoLib_d
   optimized MathGeoLib debug MathGeoLib_d)
 set_property(TARGET AllDemo PROPERTY FOLDER "Apps")

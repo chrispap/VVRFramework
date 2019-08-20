@@ -7,7 +7,7 @@ file(GLOB APP_SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}
 
 add_executable(Tavli MACOSX_BUNDLE ${APP_SRC_FILES})
 target_link_libraries(Tavli
-  optimized VVRFramework debug vvrframework_d
+  optimized VVRFramework debug VVRFramework_d
   optimized GeoLib debug GeoLib_d
   optimized MathGeoLib debug MathGeoLib_d)
 set_property(TARGET Tavli PROPERTY FOLDER "Apps")
