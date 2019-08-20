@@ -59,7 +59,7 @@ find_package(OpenGL REQUIRED)
 include_directories(${OPENGL_INCLUDE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rdParty/GeoLib)
-include_directories(${CMAKE_SOURCE_DIR}/3rdParty//MathGeoLib/src)
+include_directories(${CMAKE_SOURCE_DIR}/3rdParty/MathGeoLib/src)
 #########################################################################################
 
 #########################################################################################
