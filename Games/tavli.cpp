@@ -36,45 +36,45 @@ namespace tavli
     {
         vvr_decl_shared_ptr(RegionHighlighter)
 
-        bool on_pick(vvr::Drawable* drw, Ray ray);
-        void on_drop(vvr::Drawable* drw);
-        void on_drag(vvr::Drawable*, Ray, Ray) {}
+        bool on_pick(Drawable* drw, Ray ray);
+        void on_drop(Drawable* drw);
+        void on_drag(Drawable*, Ray, Ray) {}
 
     private:
-        vvr::Colour colour;
+        Colour                  colour;
     };
 
     struct PieceDragger
     {
         vvr_decl_shared_ptr(PieceDragger)
 
-        bool on_pick(vvr::Drawable* drw, Ray ray);
-        void on_drag(vvr::Drawable* drw, Ray ray0, Ray ray1);
-        void on_drop(vvr::Drawable* drw);
+        bool on_pick(Drawable* drw, Ray ray);
+        void on_drag(Drawable* drw, Ray ray0, Ray ray1);
+        void on_drop(Drawable* drw);
 
         PieceDragger(RegionPicker* rp) : regionPicker{ rp } {}
 
     private:
-        Ray             ray;
-        vvr::Colour     colour;
-        RegionPicker*   regionPicker;
+        Ray                     ray;
+        Colour                  colour;
+        RegionPicker*           regionPicker;
     };
 
     //! Game entities
     struct Piece : public Cylinder3D
     {
-        Piece(vvr::Colour col);
+        Piece(Colour col);
         void draw() const override;
         real pickdist(const Ray& ray) const override;
         void on_pick();
 
     public:
-        Region* region;
+        Region*                 region;
     };
 
     struct Region : public Triangle3D
     {
-        Region(Board* board, int id, vvr::Colour colour);
+        Region(Board* board, int id, Colour colour);
         void addPiece(Piece *piece);
         void removePiece(Piece *piece);
         void resize(float diam, float boardheight);
@@ -82,17 +82,20 @@ namespace tavli
         real pickdist(const Ray& ray) const override;
 
     public:
-        Board* board;
-        std::vector<Piece*> pieces;
-        float piecediam, boardheight;
-        vec base, top, dir;
-        size_t rows;
-        int id;
+        std::vector<Piece*>     pieces;
+        Board*                  board;
+        float                   piecediam;
+        float                   boardheight;
+        size_t                  rows;
+        vec                     base;
+        vec                     top;
+        vec                     dir;
+        int                     id;
     };
 
-    struct Board : public vvr::Drawable
+    struct Board : public Drawable
     {
-        Board(std::vector<vvr::Colour> &cols);
+        Board(std::vector<Colour> &cols);
         ~Board() override;
         void load3DModels();
         void createRegions();
@@ -110,7 +113,7 @@ namespace tavli
         PiecePicker::Ptr        piece_picker;
 
     private:
-        std::vector<vvr::Colour> colours;
+        std::vector<Colour>     colours;
         std::vector<Piece*>     pieces;
         std::vector<Region*>    regions;
         Mesh::Ptr               boardMesh;
@@ -305,31 +308,38 @@ void tavli::Board::load3DModels()
 
 void tavli::Board::createRegions()
 {
+    //! Region colours
+    vvr::Colour col1 = colours[1];
+    vvr::Colour col2 = colours[1];
+    col2.sub(20);
+
     /* Regions [Playing] */
     for (int i = 0; i < 24; ++i) {
-        regions.push_back(new Region(this, i, colours[1]));
+        regions.push_back(new Region(this, i, col1));
+        regions.back()->setColourPerVertex(col2, col1, col1);
         regionCanvas.add(regions.back());
     }
 
     /* Regions [Plakomena] */
-    regions.push_back(new Region(this, -1, colours[1])); // [i=24]
-    regions.push_back(new Region(this, 24, colours[1])); // [i=25]
+    regions.push_back(new Region(this, -1, col2)); // [i=24]
+    regions.push_back(new Region(this, 24, col2)); // [i=25]
     regions.at(24)->rows = 3;
     regions.at(25)->rows = 3;
 
     /* Regions [Mazemena] */
-    regions.push_back(new Region(this, 25, colours[1])); // [i=26]
-    regions.push_back(new Region(this, 26, colours[1])); // [i=27]
+    regions.push_back(new Region(this, 25, col2)); // [i=26]
+    regions.push_back(new Region(this, 26, col2)); // [i=27]
     regions.at(26)->rows = 4;
     regions.at(27)->rows = 4;
 
-    for (size_t i = 0; i < 4; i++) {
-        regions.at(24 + i)->visible = false;
-        regionCanvas.add(regions.at(24 + i));
+    for (size_t i = 24; i < 24 + 4; i++) {
+        regions.at(i)->visible = true;
+        regions.at(i)->setColourPerVertex(col2, col1, col1);
+        regionCanvas.add(regions.at(i));
     }
 }
 
-void tavli::Board::resize(const float width, const float height)
+void tavli::Board::resize(const float width, float height)
 {
     this->width = width;
     this->height = height;

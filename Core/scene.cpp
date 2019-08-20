@@ -22,6 +22,7 @@ using namespace math;
 /*--------------------------------------------------------------------------------------*/
 Scene::Scene()
 {
+    m_frustum.SetKind(FrustumSpaceGL, FrustumRightHanded);
     m_bg_col = vvr::white;
     m_perspective_proj = false;
     m_fullscreen = false;
@@ -46,7 +47,7 @@ void Scene::resize()
 
 void Scene::drawAxes()
 {
-    Axes(2.0 *getSceneWidth()).draw();
+    Axes(2.0f * getSceneWidth()).draw();
 }
 
 void Scene::enterPixelMode()
@@ -93,15 +94,17 @@ void Scene::setCameraPos(const vec &pos)
 {
     vec up(0, 1, 0);
     vec front = pos.Neg().Normalized();
-    m_frustum.SetKind(FrustumSpaceGL, FrustumRightHanded);
+    if (fabs(up.Dot(front)) > 0.9f) up.Set(1, 0, 0);
+    vec left = up.Cross(front);
+    up = front.Cross(left);
     m_frustum.SetFrame(pos, front, up);
 }
 
 Ray Scene::unproject(int x, int y)
 {
     return m_frustum.UnProject(
-        (float)x / getViewportWidth() * 2,
-        (float)y / getViewportHeight() * 2);
+        static_cast<float>(x) / getViewportWidth() * 2,
+        static_cast<float>(y) / getViewportHeight() * 2);
 }
 
 /*---[OpenGL]---------------------------------------------------------------------------*/
@@ -112,16 +115,16 @@ static void glInfo()
     printf(" %s\n", glGetString(GL_VENDOR));
     printf(" %s\n", glGetString(GL_RENDERER));
     printf("==================================\n\n");
-    fflush(0);
+    fflush(nullptr);
 }
 
 void Scene::glInit()
 {
-    float lz = m_camera_dist * 3;
-    static GLfloat light_position[] = { 0, 0, lz, 1 };
-    static GLfloat ambientLight[] = { .75, .75, .75, 1 };
-    static GLfloat diffuseLight[] = { .75, .75, .75, 1 };
-    static GLfloat specularLight[] = { .85, .85, .85, 1 };
+    float lz = m_camera_dist * 3.0f;
+    static GLfloat light_position[] = { 0.00f, 0.00f,    lz, 1.0f };
+    static GLfloat ambientLight[]   = { 0.75f, 0.75f, 0.75f, 1.0f };
+    static GLfloat diffuseLight[]   = { 0.75f, 0.75f, 0.75f, 1.0f };
+    static GLfloat specularLight[]  = { 0.85f, 0.85f, 0.85f, 1.0f };
     glLightfv(GL_LIGHT0, GL_POSITION, light_position);
     glLightfv(GL_LIGHT0, GL_AMBIENT, ambientLight);
     glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuseLight);
