@@ -13,8 +13,8 @@
 #include <vector>
 #include <set>
 
-static float HHH = 0.10f;
-static float dHHH = 0.01f;
+static float HHH = 0.10f;   // For manual runtime calibration
+static float dHHH = 0.01f;  // For manual runtime calibration
 
 /*---[Declarations]---------------------------------------------------------------------*/
 namespace tavli
@@ -41,7 +41,7 @@ namespace tavli
         void on_drag(Drawable*, Ray, Ray) {}
 
     private:
-        Colour                  colour;
+        Colour                  colours[3];
     };
 
     struct PieceDragger
@@ -95,7 +95,8 @@ namespace tavli
 
     struct Board : public Drawable
     {
-        Board(std::vector<Colour> &cols);
+        vvr_decl_shared_ptr(Board)
+        Board(const std::vector<Colour> &cols);
         ~Board() override;
         void load3DModels();
         void createRegions();
@@ -146,7 +147,7 @@ public:
 
 private:
     vvr::Axes*                  axes;
-    tavli::Board*               board;
+    tavli::Board::Ptr           board;
     std::vector<vvr::Colour>    colours;
 };
 
@@ -160,30 +161,24 @@ TavliScene::TavliScene(const std::vector<vvr::Colour> &colours)
     m_perspective_proj = true;
     m_fullscreen = false;
     board = nullptr;
-    reset();
+    board = tavli::Board::Make(colours);
 }
 
 TavliScene::~TavliScene()
 {
-    delete board;
+    //! board deleted by shared_ptr
+    //! no need to delete manually
 }
 
 void TavliScene::reset()
 {
     resetCamera();
-    delete board;
-    board = new tavli::Board(colours);
     board->setupGamePortes();
-    resize();
 }
 
 void TavliScene::resetCamera()
 {
-    Scene::reset();
-    vec pos = getFrustum().Pos();
-    pos.y -= 55;
-    pos.z += 25;
-    setCameraPos(pos);
+    setCameraPos({ 0, -55, getCameraDist() + 25 });
 }
 
 void TavliScene::resize()
@@ -192,11 +187,12 @@ void TavliScene::resize()
     {
         axes = &getGlobalAxes();
         axes->hide();
+        reset();
     }
 
-    const float width = 0.7f * getSceneWidth();
-    const float height = 0.7f * getSceneWidth();
-    board->resize(width, height);
+    const float w = 0.7f * getSceneWidth();
+    const float h = 0.7f * getSceneWidth();
+    board->resize(w, h);
 }
 
 void TavliScene::draw()
@@ -217,7 +213,7 @@ void TavliScene::keyEvent(unsigned char key, bool up, int modif)
     case '1': board->setupGamePortes(); break;
     case '2': board->setupGamePlakwto(); break;
     case '3': board->setupGameFevga(); break;
-    default: Scene::keyEvent(key, up, modif);
+    default: Scene::keyEvent(key, up, modif); break;
     }
 }
 
@@ -233,7 +229,9 @@ void TavliScene::mouseMoved(int x, int y, int modif)
 {
     if (board->piece_picker->picked()) {
         board->piece_picker->do_drag(unproject(x, y), modif);
-    } else if (this->altDown(modif)) Scene::mouseMoved(x, y, modif);
+    } else if (altDown(modif) || ctrlDown(modif)) {
+        Scene::mouseMoved(x, y, modif);
+    }
 }
 
 void TavliScene::mouseReleased(int x, int y, int modif)
@@ -244,16 +242,14 @@ void TavliScene::mouseReleased(int x, int y, int modif)
 
 void TavliScene::mouseHovered(int x, int y, int modif)
 {
-    //_board->region_picker->do_pick(unproject(x, y), modif);
     board->piece_picker->do_pick(unproject(x, y), modif);
     if (board->piece_picker->picked()) {
-        //auto piece = static_cast<tavli::Piece*>(_board->piece_picker->picked());
         cursorHand();
     } else cursorShow();
 }
 
 /*---[tavli::Board]---------------------------------------------------------------------*/
-tavli::Board::Board(std::vector<vvr::Colour> &colours)
+tavli::Board::Board(const std::vector<vvr::Colour> &colours)
 {
     this->colours = colours;
     load3DModels();
@@ -311,30 +307,29 @@ void tavli::Board::createRegions()
     //! Region colours
     vvr::Colour col1 = colours[1];
     vvr::Colour col2 = colours[1];
-    col2.sub(20);
+    col2.sub(-20);
 
-    /* Regions [Playing] */
+    //! Regions [Playing]
     for (int i = 0; i < 24; ++i) {
         regions.push_back(new Region(this, i, col1));
         regions.back()->setColourPerVertex(col2, col1, col1);
         regionCanvas.add(regions.back());
     }
 
-    /* Regions [Plakomena] */
+    //! Regions [Plakomena]
     regions.push_back(new Region(this, -1, col2)); // [i=24]
     regions.push_back(new Region(this, 24, col2)); // [i=25]
     regions.at(24)->rows = 3;
     regions.at(25)->rows = 3;
 
-    /* Regions [Mazemena] */
+    //! Regions [Mazemena]
     regions.push_back(new Region(this, 25, col2)); // [i=26]
     regions.push_back(new Region(this, 26, col2)); // [i=27]
     regions.at(26)->rows = 4;
     regions.at(27)->rows = 4;
 
     for (size_t i = 24; i < 24 + 4; i++) {
-        regions.at(i)->visible = true;
-        regions.at(i)->setColourPerVertex(col2, col1, col1);
+        regions.at(i)->visible = false;
         regionCanvas.add(regions.at(i));
     }
 }
@@ -652,7 +647,6 @@ void tavli::PieceDragger::on_drag(vvr::Drawable* drw, Ray ray0, Ray ray1)
     boardplane.Intersects(ray1, &d1);
     vec dv(ray1.GetPoint(d1) - ray0.GetPoint(d0));
     piece->basecenter += dv;
-    regionPicker->do_drop(ray1, 0);
     regionPicker->do_pick(ray1, 0);
     ray = ray1;
 }
@@ -674,17 +668,17 @@ bool tavli::RegionHighlighter::on_pick(vvr::Drawable* drw, Ray)
 {
     assert(typeid(Region)==typeid(*drw));
     auto reg = static_cast<Region*>(drw);
-    colour = reg->colour;
-    reg->colour.mul(1.50);
-    reg->setColourPerVertex(reg->colour, reg->colour, reg->colour);
+    std::copy(std::begin(reg->vertex_col), std::end(reg->vertex_col), std::begin(colours));
+    reg->vertex_col[0].mul(1.50);
+    reg->vertex_col[1].mul(1.50);
+    reg->vertex_col[2].mul(1.50);
     return true;
 }
 
 void tavli::RegionHighlighter::on_drop(vvr::Drawable* drw)
 {
     auto reg = static_cast<Region*>(drw);
-    reg->colour = colour;
-    reg->setColourPerVertex(colour, colour, colour);
+    std::copy(std::begin(colours), std::end(colours), std::begin(reg->vertex_col));
 }
 
 /*---[main]-----------------------------------------------------------------------------*/
@@ -696,7 +690,7 @@ namespace tavli {
             0x242622,  ///> Regions
             0x550000,  ///> Team 1
             0xBBBBBB   ///> Team 2
-        };     
+        };
         return colours;
     }
 }

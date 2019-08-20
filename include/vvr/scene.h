@@ -24,7 +24,7 @@ namespace vvr
         static inline bool altDown(int modif) { return modif & (1 << 2); }
 
     protected:
-        /*--- [Events] -----------------------------------------------------------------*/
+        /*---[Events]-------------------------------------------------------------------*/
         virtual bool idle() { return false; }
         virtual void keyEvent(unsigned char key, bool up, int modif);
         virtual void arrowEvent(ArrowDir dir, int modif);
@@ -35,7 +35,7 @@ namespace vvr
         virtual void mouseWheel(int dir, int modif);
         virtual void sliderChanged(int slider_id, float val);
 
-        /*--- [Getters / Setters] ------------------------------------------------------*/
+        /*---[Getters / Setters]--------------------------------------------------------*/
         Axes& getGlobalAxes() { return m_axes; }
         math::Frustum getFrustum() { return m_frustum; }
         int getViewportWidth() const { return m_screen_width; } // In pixels
@@ -51,12 +51,12 @@ namespace vvr
         void setSliderVal(int slider_id, float val);
         void setCameraPos(const math::vec &pos);
 
-        /*--- [Virtual] ----------------------------------------------------------------*/
+        /*---[Virtual]------------------------------------------------------------------*/
         virtual void draw() = 0;
         virtual void reset();
         virtual void resize();
 
-        /*--- [Helpers] ----------------------------------------------------------------*/
+        /*---[Helpers]------------------------------------------------------------------*/
         math::Ray unproject(int x, int y);
         void mouse2pix(int &x, int &y);
         void pix2mouse(int &x, int &y);
@@ -65,11 +65,12 @@ namespace vvr
         void drawAxes();
 
     private:
-        /*--- [OpenGL Callbacks] -------------------------------------------------------*/
+        /*---[OpenGL Callbacks]---------------------------------------------------------*/
         void glRender();
         void glInit();
         void glResize(int width, int height);
 
+        /*---[Data]---------------------------------------------------------------------*/
     protected:
         Colour          m_bg_col;
         bool            m_perspective_proj;
@@ -100,6 +101,7 @@ namespace vvr
         char            m_mouse_op;
         float           m_mouse_depth;
 
+        /*---[Friends]------------------------------------------------------------------*/
         friend class GlWidget;
         friend class Window;
     };

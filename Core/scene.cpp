@@ -22,7 +22,6 @@ using namespace math;
 /*--------------------------------------------------------------------------------------*/
 Scene::Scene()
 {
-    m_frustum.SetKind(FrustumSpaceGL, FrustumRightHanded);
     m_bg_col = vvr::white;
     m_perspective_proj = false;
     m_fullscreen = false;
@@ -96,8 +95,9 @@ void Scene::setCameraPos(const vec &pos)
     vec front = pos.Neg().Normalized();
     if (fabs(up.Dot(front)) > 0.9f) up.Set(1, 0, 0);
     vec left = up.Cross(front);
-    up = front.Cross(left);
+    up = front.Cross(left).Normalized();
     m_frustum.SetFrame(pos, front, up);
+    m_frustum.SetKind(FrustumSpaceGL, FrustumRightHanded);
 }
 
 Ray Scene::unproject(int x, int y)
@@ -177,6 +177,7 @@ void Scene::glResize(int w, int h)
         m_frustum.SetViewPlaneDistances(n, f);
     }
 
+    m_frustum.SetKind(FrustumSpaceGL, FrustumRightHanded);
     m_axes.setSize(getSceneWidth());
     resize();
     m_first_resize = false;
