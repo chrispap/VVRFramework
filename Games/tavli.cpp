@@ -24,9 +24,14 @@ namespace vvr
     {
         vvr_decl_shared_ptr(PropertyAnimation)
 
-        PropertyAnimation() : prop(nullptr)
+        PropertyAnimation() : prop(nullptr) 
+        { 
+        }
+        
+        ~PropertyAnimation()
         {
-
+            reset();
+            terminate();
         }
 
         PropertyAnimation(const T& from, const T& to, T& prop)
@@ -43,6 +48,12 @@ namespace vvr
             const bool alive =  t() < 1.0f;
             *prop = alive ? from + (d * t()) : to;
             return alive;
+        }
+
+        void terminate()
+        {
+            reset();
+            *prop =  to;
         }
 
     private:
@@ -195,7 +206,7 @@ TavliScene::TavliScene(const std::vector<vvr::Colour> &colours)
     this->colours = colours;
     m_bg_col = vvr::Colour("222222");
     m_create_menus = false;
-    m_show_log = false;
+    m_show_log = true;
     m_perspective_proj = true;
     m_fullscreen = false;
     board = nullptr;
@@ -227,6 +238,8 @@ void TavliScene::resize()
         axes->hide();
         reset();
     }
+
+    m_animations.clear();
 
     const float w = 0.7f * getSceneWidth();
     const float h = 0.7f * getSceneWidth();
@@ -282,7 +295,7 @@ void TavliScene::mouseReleased(int x, int y, int modif)
     if (piece) {
         bc1 = piece->basecenter;
         m_animations.push_back(TavliScene::PropAnim::Make(bc0, bc1, piece->basecenter));
-        m_animations.back()->setSpeed(10.0f);
+        m_animations.back()->setSpeed(30.0f);
     }
 
     cursorShow();
@@ -326,7 +339,7 @@ tavli::Board::~Board()
     clearPieces();
     regionCanvas.setDelOnClear(false);
     regionCanvas.clear();
-    for (auto &reg : regions) delete reg;
+    for (auto reg : regions) delete reg;
     vvr_msg("Deleted tavli board.");
 }
 
@@ -427,6 +440,11 @@ void tavli::Board::clearPieces()
 
 void tavli::Board::setupGamePortes()
 {
+    if (piece_picker->picked()) {
+        vvr_msg("Leave the piece you are holding first!");
+        return;
+    }
+
     clearPieces();
 
     regions.at(11)->rows = 5;
@@ -461,6 +479,11 @@ void tavli::Board::setupGamePortes()
 
 void tavli::Board::setupGamePlakwto()
 {
+    if (piece_picker->picked()) {
+        vvr_msg("Leave the piece you are holding first!");
+        return;
+    }
+
     clearPieces();
 
     regions.at(11)->rows = 5;
@@ -493,6 +516,11 @@ void tavli::Board::setupGamePlakwto()
 
 void tavli::Board::setupGameFevga()
 {
+    if (piece_picker->picked()) {
+        vvr_msg("Leave the piece you are holding first!");
+        return;
+    }
+    
     clearPieces();
 
     const int pl1reg = 11;
