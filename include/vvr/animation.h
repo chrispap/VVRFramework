@@ -6,23 +6,19 @@
 
 namespace vvr
 {
-    struct Animatable
-    {
-        virtual bool animate(float time) = 0;
-        virtual float getTotalDuration() { return 0; }
-    };
-
     struct Animation
     {
         Animation()
-            : t(m_time)
-            , m_paused(true)
+            : m_paused(true)
             , m_time(0)
             , m_speed(1)
         {
         }
 
-        const float &t;
+        float t() const
+        {
+            return m_time;
+        }
 
         void pause()
         {

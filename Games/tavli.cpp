@@ -5,6 +5,7 @@
 #include <vvr/mesh.h>
 #include <vvr/palette.h>
 #include <vvr/picking.h>
+#include <vvr/animation.h>
 #include <iostream>
 #include <fstream>
 #include <iostream>
@@ -15,6 +16,40 @@
 
 static float HHH = 0.10f;   // For manual runtime calibration
 static float dHHH = 0.01f;  // For manual runtime calibration
+
+namespace vvr
+{
+    template <typename T>
+    struct PropertyAnimation : Animation
+    {
+        vvr_decl_shared_ptr(PropertyAnimation)
+
+        PropertyAnimation() : prop(nullptr)
+        {
+
+        }
+
+        PropertyAnimation(const T& from, const T& to, T& prop)
+            : from(from)
+            , to(to)
+            , d(to-from)
+            , prop(&prop)
+        {
+        }
+
+        bool animate()
+        {
+            update(true);
+            const bool alive =  t() < 1.0f;
+            *prop = alive ? from + (d * t()) : to;
+            return alive;
+        }
+
+    private:
+        T from, to, d;
+        T* prop;
+    };
+}
 
 /*---[Declarations]---------------------------------------------------------------------*/
 namespace tavli
@@ -64,7 +99,6 @@ namespace tavli
     struct Piece : public Cylinder3D
     {
         Piece(Colour col);
-        void draw() const override;
         real pickdist(const Ray& ray) const override;
         void on_pick();
 
@@ -144,11 +178,15 @@ public:
     void mouseMoved(int x, int y, int modif) override;
     void mouseReleased(int x, int y, int modif) override;
     void mouseHovered(int x, int y, int modif) override;
+    bool idle() override;
+
+    typedef vvr::PropertyAnimation<vec> PropAnim;
 
 private:
     vvr::Axes*                  axes;
     tavli::Board::Ptr           board;
     std::vector<vvr::Colour>    colours;
+    std::vector<PropAnim::Ptr>  m_animations;
 };
 
 /*---[TavliScene]-----------------------------------------------------------------------*/
@@ -157,7 +195,7 @@ TavliScene::TavliScene(const std::vector<vvr::Colour> &colours)
     this->colours = colours;
     m_bg_col = vvr::Colour("222222");
     m_create_menus = false;
-    m_show_log = true;
+    m_show_log = false;
     m_perspective_proj = true;
     m_fullscreen = false;
     board = nullptr;
@@ -236,7 +274,17 @@ void TavliScene::mouseMoved(int x, int y, int modif)
 
 void TavliScene::mouseReleased(int x, int y, int modif)
 {
+    vec bc0, bc1;
+    tavli::Piece* piece = static_cast<tavli::Piece*>(board->piece_picker->picked());
+    if (piece) bc0 = piece->basecenter;
     board->piece_picker->do_drop(unproject(x, y), modif);
+
+    if (piece) {
+        bc1 = piece->basecenter;
+        m_animations.push_back(TavliScene::PropAnim::Make(bc0, bc1, piece->basecenter));
+        m_animations.back()->setSpeed(10.0f);
+    }
+
     cursorShow();
 }
 
@@ -246,6 +294,18 @@ void TavliScene::mouseHovered(int x, int y, int modif)
     if (board->piece_picker->picked()) {
         cursorHand();
     } else cursorShow();
+}
+
+bool TavliScene::idle()
+{
+    bool rv = false;
+    for (int i = static_cast<int>(m_animations.size()) - 1; i >= 0; --i) {
+        auto anim = m_animations.at(i);
+        bool alive = anim->animate();
+        if (!alive) m_animations.pop_back();
+        else rv = true;
+    }
+    return rv;
 }
 
 /*---[tavli::Board]---------------------------------------------------------------------*/
@@ -481,11 +541,6 @@ tavli::Piece::Piece(vvr::Colour col) : Cylinder3D(col)
     normal.Set(0, 0, 1);
 }
 
-void tavli::Piece::draw() const
-{
-    Cylinder3D::draw();
-}
-
 void tavli::Piece::on_pick()
 {
     basecenter.z = region->boardheight * 0.10f + height;
@@ -655,12 +710,18 @@ void tavli::PieceDragger::on_drop(vvr::Drawable* drw)
 {
     auto piece = static_cast<Piece*>(drw);
     auto region_drop = static_cast<Region*>(regionPicker->picked());
+    regionPicker->do_drop(ray, 0);
+
+
     if (region_drop && region_drop!=piece->region) {
         piece->region->removePiece(piece);
         region_drop->addPiece(piece);
     } else piece->region->arrangePieces(0);
+
+    vec bc1 = piece->basecenter;
+    // bc0, bc1
+
     piece->colour = colour;
-    regionPicker->do_drop(ray, 0);
 }
 
 /*---[tavli::RegionHighlighter]---------------------------------------------------------*/

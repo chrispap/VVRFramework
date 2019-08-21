@@ -221,7 +221,7 @@ void KDTreeScene::draw()
     ground.draw();
 
     //! Animate sphere
-    float t = m_anim.t;
+    float t = m_anim.t();
     vvr::Sphere3D sphere_moved(*m_sphere);
     sphere_moved.pos.x += t * ((float)GND_WIDTH / SEC_PER_FLOOR);
     math::vec sc(sphere_moved.pos);

@@ -64,7 +64,7 @@ bool AnimationScene::idle()
     anim.update();
     if (anim.paused()) return false;
     if (sphere.r > getSceneWidth() / 4) anim.setTime(0);
-    sphere.r = anim.t * 15;
+    sphere.r = anim.t() * 15;
     return true;
 }
 

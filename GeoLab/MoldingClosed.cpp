@@ -497,7 +497,7 @@ void MoldingScene::draw()
         for (int i = 0; i < m_pieces.size(); ++i)
         {
             m_anim.update();
-            C2DVector d = m_dirs[i] * m_anim.t * SPEED_PIXELS_PER_SEC;
+            C2DVector d = m_dirs[i] * m_anim.t() * SPEED_PIXELS_PER_SEC;
             C2DPolygon p = m_pieces[i];
             p.Move(d);
             vvr::draw(p, Pallete[i % 3], PIECES_SOLID);
