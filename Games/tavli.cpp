@@ -12,55 +12,11 @@
 #include <cstring>
 #include <string>
 #include <vector>
+#include <list>
 #include <set>
 
 static float HHH = 0.10f;   // For manual runtime calibration
 static float dHHH = 0.01f;  // For manual runtime calibration
-
-namespace vvr
-{
-    template <typename T>
-    struct PropertyAnimation : Animation
-    {
-        vvr_decl_shared_ptr(PropertyAnimation)
-
-        PropertyAnimation() : prop(nullptr) 
-        { 
-        }
-        
-        ~PropertyAnimation()
-        {
-            reset();
-            terminate();
-        }
-
-        PropertyAnimation(const T& from, const T& to, T& prop)
-            : from(from)
-            , to(to)
-            , d(to-from)
-            , prop(&prop)
-        {
-        }
-
-        bool animate()
-        {
-            update(true);
-            const bool alive =  t() < 1.0f;
-            *prop = alive ? from + (d * t()) : to;
-            return alive;
-        }
-
-        void terminate()
-        {
-            reset();
-            *prop =  to;
-        }
-
-    private:
-        T from, to, d;
-        T* prop;
-    };
-}
 
 /*---[Declarations]---------------------------------------------------------------------*/
 namespace tavli
@@ -76,6 +32,7 @@ namespace tavli
     //! Pickers
     typedef MousePicker3D<RegionHighlighter> RegionPicker;
     typedef MousePicker3D<PieceDragger> PiecePicker;
+    typedef PropertyAnimation<vec> PropAnim;
 
     //! Draggers
     struct RegionHighlighter
@@ -120,8 +77,8 @@ namespace tavli
     struct Region : public Triangle3D
     {
         Region(Board* board, int id, Colour colour);
-        void addPiece(Piece *piece);
-        void removePiece(Piece *piece);
+        void addPiece(Piece *piece, bool arrange = true);
+        void removePiece(Piece *piece, bool arrange = true);
         void resize(float diam, float boardheight);
         void arrangePieces(size_t index_from=0);
         real pickdist(const Ray& ray) const override;
@@ -145,7 +102,7 @@ namespace tavli
         ~Board() override;
         void load3DModels();
         void createRegions();
-        void clearPieces();
+        void clearGame();
         void setupGamePortes();
         void setupGamePlakwto();
         void setupGameFevga();
@@ -157,6 +114,7 @@ namespace tavli
         RegionPicker::Ptr       region_picker;
         PieceDragger::Ptr       piece_dragger;
         PiecePicker::Ptr        piece_picker;
+        std::list<PropAnim>     anims;
 
     private:
         std::vector<Colour>     colours;
@@ -167,6 +125,7 @@ namespace tavli
         Canvas                  regionCanvas;
         float                   width;
         float                   height;
+
     };
 }
 
@@ -191,13 +150,10 @@ public:
     void mouseHovered(int x, int y, int modif) override;
     bool idle() override;
 
-    typedef vvr::PropertyAnimation<vec> PropAnim;
-
 private:
     vvr::Axes*                  axes;
     tavli::Board::Ptr           board;
     std::vector<vvr::Colour>    colours;
-    std::vector<PropAnim::Ptr>  m_animations;
 };
 
 /*---[TavliScene]-----------------------------------------------------------------------*/
@@ -239,10 +195,9 @@ void TavliScene::resize()
         reset();
     }
 
-    m_animations.clear();
-
     const float w = 0.7f * getSceneWidth();
     const float h = 0.7f * getSceneWidth();
+    board->anims.clear();
     board->resize(w, h);
 }
 
@@ -272,6 +227,7 @@ void TavliScene::mousePressed(int x, int y, int modif)
 {
     board->piece_picker->do_pick(unproject(x, y), modif);
     if (board->piece_picker->picked()) {
+        board->anims.clear();
         cursorGrab();
     } else Scene::mousePressed(x, y, modif);
 }
@@ -287,15 +243,14 @@ void TavliScene::mouseMoved(int x, int y, int modif)
 
 void TavliScene::mouseReleased(int x, int y, int modif)
 {
-    vec bc0, bc1;
     tavli::Piece* piece = static_cast<tavli::Piece*>(board->piece_picker->picked());
-    if (piece) bc0 = piece->basecenter;
-    board->piece_picker->do_drop(unproject(x, y), modif);
 
     if (piece) {
-        bc1 = piece->basecenter;
-        m_animations.push_back(TavliScene::PropAnim::Make(bc0, bc1, piece->basecenter));
-        m_animations.back()->setSpeed(30.0f);
+        vec bc0 = piece->basecenter;
+        board->piece_picker->do_drop(unproject(x, y), modif);
+        vec bc1 = piece->basecenter;
+        auto& anim = board->anims.emplace_back(bc0, bc1, piece->basecenter);
+        anim.setPixelSpeed(piece->radius * 50);
     }
 
     cursorShow();
@@ -311,14 +266,15 @@ void TavliScene::mouseHovered(int x, int y, int modif)
 
 bool TavliScene::idle()
 {
-    bool rv = false;
-    for (int i = static_cast<int>(m_animations.size()) - 1; i >= 0; --i) {
-        auto anim = m_animations.at(i);
-        bool alive = anim->animate();
-        if (!alive) m_animations.pop_back();
-        else rv = true;
+    auto it = board->anims.begin();
+    while (it != board->anims.end()) {
+        auto& anim = *it;
+        if (!anim.animate()) {
+            it = board->anims.erase(it);
+        } else ++it;
     }
-    return rv;
+    vvr_echo(board->anims.size());
+    return !board->anims.empty();
 }
 
 /*---[tavli::Board]---------------------------------------------------------------------*/
@@ -336,7 +292,7 @@ tavli::Board::Board(const std::vector<vvr::Colour> &colours)
 
 tavli::Board::~Board()
 {
-    clearPieces();
+    clearGame();
     regionCanvas.setDelOnClear(false);
     regionCanvas.clear();
     for (auto reg : regions) delete reg;
@@ -432,20 +388,18 @@ void tavli::Board::resize(const float width, float height)
     boardMesh->setTransform(mat);
 }
 
-void tavli::Board::clearPieces()
+void tavli::Board::clearGame()
 {
+    anims.clear();
     for (auto &reg : regions) reg->pieces.clear();
+    region_picker->do_drop(math::Ray(), 0);
+    piece_picker->do_drop(math::Ray(), 0);
     pieceCanvas.clear();
 }
 
 void tavli::Board::setupGamePortes()
 {
-    if (piece_picker->picked()) {
-        vvr_msg("Leave the piece you are holding first!");
-        return;
-    }
-
-    clearPieces();
+    clearGame();
 
     regions.at(11)->rows = 5;
     regions.at(11+12)->rows = 5;
@@ -462,7 +416,7 @@ void tavli::Board::setupGamePortes()
     for (size_t i = 0; i < 15; ++i) {
         Region* reg = regions[regs[i]];
         Piece* piece = new Piece(colours[2]);
-        reg->addPiece(piece);
+        reg->addPiece(piece, false);
         pieceCanvas.add(piece);
     }
 
@@ -470,8 +424,12 @@ void tavli::Board::setupGamePortes()
     for (size_t i = 0; i < 15; ++i) {
         Region* reg = regions[23 - regs[i]];
         Piece* piece = new Piece(colours[3]);
-        reg->addPiece(piece);
+        reg->addPiece(piece, false);
         pieceCanvas.add(piece);
+    }
+
+    for (auto& reg : regions) {
+        reg->arrangePieces();
     }
 
     vvr_msg("Setup game portes.");
@@ -479,12 +437,7 @@ void tavli::Board::setupGamePortes()
 
 void tavli::Board::setupGamePlakwto()
 {
-    if (piece_picker->picked()) {
-        vvr_msg("Leave the piece you are holding first!");
-        return;
-    }
-
-    clearPieces();
+    clearGame();
 
     regions.at(11)->rows = 5;
     regions.at(11+12)->rows = 5;
@@ -499,7 +452,7 @@ void tavli::Board::setupGamePlakwto()
     for (size_t i = 0; i < 15; ++i) {
         Region* reg = regions[pl1reg];
         Piece* piece = new Piece(colours[2]);
-        reg->addPiece(piece);
+        reg->addPiece(piece, false);
         pieceCanvas.add(piece);
     }
 
@@ -507,8 +460,12 @@ void tavli::Board::setupGamePlakwto()
     for (size_t i = 0; i < 15; ++i) {
         Region* reg = regions[pl2reg];
         Piece* piece = new Piece(colours[3]);
-        reg->addPiece(piece);
+        reg->addPiece(piece, false);
         pieceCanvas.add(piece);
+    }
+
+    for (auto& reg : regions) {
+        reg->arrangePieces();
     }
 
     vvr_msg("Setup game plakwto.");
@@ -516,12 +473,7 @@ void tavli::Board::setupGamePlakwto()
 
 void tavli::Board::setupGameFevga()
 {
-    if (piece_picker->picked()) {
-        vvr_msg("Leave the piece you are holding first!");
-        return;
-    }
-    
-    clearPieces();
+    clearGame();
 
     const int pl1reg = 11;
     const int pl2reg = 11 + 12;
@@ -533,7 +485,7 @@ void tavli::Board::setupGameFevga()
     for (size_t i = 0; i < 15; ++i) {
         Region* reg = regions[pl1reg];
         Piece* piece = new Piece(colours[2]);
-        reg->addPiece(piece);
+        reg->addPiece(piece, false);
         pieceCanvas.add(piece);
     }
 
@@ -541,8 +493,12 @@ void tavli::Board::setupGameFevga()
     for (size_t i = 0; i < 15; ++i) {
         Region* reg = regions[pl2reg];
         Piece* piece = new Piece(colours[3]);
-        reg->addPiece(piece);
+        reg->addPiece(piece, false);
         pieceCanvas.add(piece);
+    }
+
+    for (auto& reg : regions) {
+        reg->arrangePieces();
     }
 
     vvr_msg("Setup game fevga.");
@@ -688,18 +644,18 @@ void tavli::Region::arrangePieces(size_t index_from)
     }
 }
 
-void tavli::Region::addPiece(Piece *piece)
+void tavli::Region::addPiece(Piece *piece, bool arrange)
 {
     pieces.push_back(piece);
     piece->region = this;
-    arrangePieces(pieces.size() - 1);
+    if (arrange) arrangePieces(pieces.size() - 1);
 }
 
-void tavli::Region::removePiece(Piece *piece)
+void tavli::Region::removePiece(Piece *piece, bool arrange)
 {
     pieces.erase(std::remove(pieces.begin(), pieces.end(), piece), pieces.end());
     piece->region = nullptr;
-    arrangePieces();
+    if (arrange) arrangePieces();
 }
 
 vvr::real tavli::Region::pickdist(const Ray &ray) const
@@ -743,11 +699,8 @@ void tavli::PieceDragger::on_drop(vvr::Drawable* drw)
 
     if (region_drop && region_drop!=piece->region) {
         piece->region->removePiece(piece);
-        region_drop->addPiece(piece);
+        region_drop->addPiece(piece, true);
     } else piece->region->arrangePieces(0);
-
-    vec bc1 = piece->basecenter;
-    // bc0, bc1
 
     piece->colour = colour;
 }

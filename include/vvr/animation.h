@@ -3,6 +3,7 @@
 
 #include "vvrframework_DLL.h"
 #include "utils.h"
+#include "macros.h"
 
 namespace vvr
 {
@@ -79,6 +80,52 @@ namespace vvr
         float m_speed;
     };
 
+    template <typename T>
+    struct PropertyAnimation : Animation
+    {
+        vvr_decl_shared_ptr(PropertyAnimation)
+
+        PropertyAnimation() : prop(nullptr)
+        {
+        }
+
+        ~PropertyAnimation()
+        {
+            terminate();
+        }
+
+        PropertyAnimation(const T& from, const T& to, T& prop)
+            : from(from)
+            , to(to)
+            , d(to-from)
+            , prop(&prop)
+        {
+        }
+
+        bool animate()
+        {
+            update(true);
+            const bool alive =  t() < 1.0f;
+            *prop = alive ? from + (d * t()) : to;
+            return alive;
+        }
+
+        void setPixelSpeed(float s)
+        {
+            const float dl = static_cast<float>(d.Length());
+            setSpeed(s/dl);
+        }
+
+        void terminate()
+        {
+            reset();
+            *prop =  to;
+        }
+
+    private:
+        T from, to, d;
+        T* prop;
+    };
 }
 
 #endif
