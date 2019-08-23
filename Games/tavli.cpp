@@ -80,8 +80,8 @@ namespace tavli
     struct Region : public Triangle3D
     {
         Region(Board* board, int id, Colour colour);
-        void addPiece(Piece *piece);
-        void removePiece(Piece *piece);
+        void addPiece(Piece *piece, bool arrange = true);
+        void removePiece(Piece *piece, bool arrange = true);
         void resize(float diam, float boardheight);
         void arrangePieces(size_t index_from=0);
         real pickdist(const Ray& ray) const override;
@@ -249,16 +249,7 @@ void TavliScene::mouseMoved(int x, int y, int modif)
 
 void TavliScene::mouseReleased(int x, int y, int modif)
 {
-    tavli::Piece* piece = static_cast<tavli::Piece*>(board->piece_picker->picked());
-
-    if (piece) {
-        vec bc0 = piece->basecenter;
-        board->piece_picker->do_drop(unproject(x, y), modif);
-        vec bc1 = piece->basecenter;
-        auto& anim = board->anims.emplace_back(bc0, bc1, piece->basecenter);
-        anim.setPixelSpeed(piece->radius * 50);
-    }
-
+    board->piece_picker->do_drop(unproject(x, y), modif);
     cursorShow();
 }
 
@@ -652,18 +643,18 @@ void tavli::Region::arrangePieces(size_t index_from)
     }
 }
 
-void tavli::Region::addPiece(Piece *piece)
+void tavli::Region::addPiece(Piece *piece, bool arrange)
 {
     piece->region = this;
     pieces.push_back(piece);
-    arrangePieces(pieces.size() - 1);
+    if (arrange) arrangePieces(pieces.size() - 1);
 }
 
-void tavli::Region::removePiece(Piece *piece)
+void tavli::Region::removePiece(Piece *piece, bool arrange)
 {
-    pieces.erase(std::remove(pieces.begin(), pieces.end(), piece), pieces.end());
     piece->region = nullptr;
-    arrangePieces();
+    pieces.erase(std::remove(pieces.begin(), pieces.end(), piece), pieces.end());
+    if (arrange) arrangePieces();
 }
 
 vvr::real tavli::Region::pickdist(const Ray &ray) const
@@ -702,15 +693,38 @@ void tavli::PieceDragger::on_drag(vvr::Drawable* drw, Ray ray0, Ray ray1)
 
 void tavli::PieceDragger::on_drop(vvr::Drawable* drw)
 {
-    auto piece = static_cast<Piece*>(drw);
-    auto region_drop = static_cast<Region*>(regionPicker->picked());
+    Piece* piece = static_cast<Piece*>(drw);
+    Region* reg_new = static_cast<Region*>(regionPicker->picked());
+    Region* reg_old = piece->region;
+    Board* board = reg_old->board;
+
+    regionPicker->do_drop(ray, 0);
     piece->colour = colour;
     if (justHlt) return;
-    regionPicker->do_drop(ray, 0);
-    if (region_drop && region_drop!=piece->region) {
-        piece->region->removePiece(piece);
-        region_drop->addPiece(piece);
-    } else piece->region->arrangePieces(0);
+
+    if (reg_new && reg_new != reg_old) {
+        //! Remove piece from old region and add it to the new
+        //! The order of the operations is important because
+        //! the old basecenters should be firstly stored in
+        //! vector 'from' and afterwards, the regions should
+        //! arrange their pieces so that the new basecenters
+        //! get computed. Only then, can we initiate the animations!
+        const float anim_speed = piece->radius * 50;
+        reg_old->removePiece(piece, false);
+        std::vector<vec> from;
+        from.reserve(reg_old->pieces.size() + 1);
+        for (auto p : reg_old->pieces) from.push_back(p->basecenter);
+        from.push_back(piece->basecenter);
+        reg_new->addPiece(piece);
+        reg_old->arrangePieces();
+        auto it = from.begin();
+        for (auto p : reg_old->pieces) {
+            board->anims.emplace_back(*it++, p->basecenter, p->basecenter);
+            board->anims.back().setPixelSpeed(anim_speed);
+        }
+        board->anims.emplace_back(*it++, piece->basecenter, piece->basecenter);
+        board->anims.back().setPixelSpeed(anim_speed);
+    } else reg_old->arrangePieces();
 }
 
 /*---[tavli::RegionHighlighter]---------------------------------------------------------*/
