@@ -45,6 +45,7 @@ namespace tavli
 
     private:
         Colour                  colours[3];
+        bool                    visible;
     };
 
     struct PieceDragger
@@ -255,7 +256,7 @@ void TavliScene::mouseReleased(int x, int y, int modif)
         board->piece_picker->do_drop(unproject(x, y), modif);
         vec bc1 = piece->basecenter;
         auto& anim = board->anims.emplace_back(bc0, bc1, piece->basecenter);
-        anim.setPixelSpeed(piece->radius * 1);
+        anim.setPixelSpeed(piece->radius * 50);
     }
 
     cursorShow();
@@ -365,6 +366,7 @@ void tavli::Board::createRegions()
 
     for (size_t i = 24; i < 24 + 4; i++) {
         regions.at(i)->visible = false;
+        regions.at(i)->setColourPerVertex(col2, col1, col1);
         regionCanvas.add(regions.at(i));
     }
 }
@@ -716,6 +718,8 @@ bool tavli::RegionHighlighter::on_pick(vvr::Drawable* drw, Ray)
 {
     assert(typeid(Region)==typeid(*drw));
     auto reg = static_cast<Region*>(drw);
+    visible = reg->visible;
+    reg->show();
     std::copy(std::begin(reg->vertex_col), std::end(reg->vertex_col), std::begin(colours));
     reg->vertex_col[0].mul(1.50);
     reg->vertex_col[1].mul(1.50);
@@ -726,6 +730,7 @@ bool tavli::RegionHighlighter::on_pick(vvr::Drawable* drw, Ray)
 void tavli::RegionHighlighter::on_drop(vvr::Drawable* drw)
 {
     auto reg = static_cast<Region*>(drw);
+    reg->visible = visible;
     std::copy(std::begin(colours), std::end(colours), std::begin(reg->vertex_col));
 }
 
