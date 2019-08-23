@@ -56,11 +56,13 @@ namespace tavli
         void on_drop(Drawable* drw);
 
         PieceDragger(RegionPicker* rp) : regionPicker{ rp } {}
+        bool setJustHlt(bool v) { bool rv{justHlt}; justHlt = v; return rv; }
 
     private:
         Ray                     ray;
         Colour                  colour;
         RegionPicker*           regionPicker;
+        bool                    justHlt = false;
     };
 
     //! Game entities
@@ -68,7 +70,7 @@ namespace tavli
     {
         Piece(Colour col);
         real pickdist(const Ray& ray) const override;
-        void on_pick();
+        void elevate();
 
     public:
         Region*                 region;
@@ -77,8 +79,8 @@ namespace tavli
     struct Region : public Triangle3D
     {
         Region(Board* board, int id, Colour colour);
-        void addPiece(Piece *piece, bool arrange = true);
-        void removePiece(Piece *piece, bool arrange = true);
+        void addPiece(Piece *piece);
+        void removePiece(Piece *piece);
         void resize(float diam, float boardheight);
         void arrangePieces(size_t index_from=0);
         real pickdist(const Ray& ray) const override;
@@ -225,9 +227,12 @@ void TavliScene::keyEvent(unsigned char key, bool up, int modif)
 
 void TavliScene::mousePressed(int x, int y, int modif)
 {
+    const bool b = board->piece_dragger->setJustHlt(true);
     board->piece_picker->do_pick(unproject(x, y), modif);
+    board->piece_dragger->setJustHlt(b);
     if (board->piece_picker->picked()) {
         board->anims.clear();
+        board->piece_picker->do_drag(unproject(x, y), modif);
         cursorGrab();
     } else Scene::mousePressed(x, y, modif);
 }
@@ -250,7 +255,7 @@ void TavliScene::mouseReleased(int x, int y, int modif)
         board->piece_picker->do_drop(unproject(x, y), modif);
         vec bc1 = piece->basecenter;
         auto& anim = board->anims.emplace_back(bc0, bc1, piece->basecenter);
-        anim.setPixelSpeed(piece->radius * 50);
+        anim.setPixelSpeed(piece->radius * 1);
     }
 
     cursorShow();
@@ -258,7 +263,9 @@ void TavliScene::mouseReleased(int x, int y, int modif)
 
 void TavliScene::mouseHovered(int x, int y, int modif)
 {
+    const bool b = board->piece_dragger->setJustHlt(true);
     board->piece_picker->do_pick(unproject(x, y), modif);
+    board->piece_dragger->setJustHlt(b);
     if (board->piece_picker->picked()) {
         cursorHand();
     } else cursorShow();
@@ -273,7 +280,6 @@ bool TavliScene::idle()
             it = board->anims.erase(it);
         } else ++it;
     }
-    vvr_echo(board->anims.size());
     return !board->anims.empty();
 }
 
@@ -416,7 +422,7 @@ void tavli::Board::setupGamePortes()
     for (size_t i = 0; i < 15; ++i) {
         Region* reg = regions[regs[i]];
         Piece* piece = new Piece(colours[2]);
-        reg->addPiece(piece, false);
+        reg->addPiece(piece);
         pieceCanvas.add(piece);
     }
 
@@ -424,7 +430,7 @@ void tavli::Board::setupGamePortes()
     for (size_t i = 0; i < 15; ++i) {
         Region* reg = regions[23 - regs[i]];
         Piece* piece = new Piece(colours[3]);
-        reg->addPiece(piece, false);
+        reg->addPiece(piece);
         pieceCanvas.add(piece);
     }
 
@@ -452,7 +458,7 @@ void tavli::Board::setupGamePlakwto()
     for (size_t i = 0; i < 15; ++i) {
         Region* reg = regions[pl1reg];
         Piece* piece = new Piece(colours[2]);
-        reg->addPiece(piece, false);
+        reg->addPiece(piece);
         pieceCanvas.add(piece);
     }
 
@@ -460,7 +466,7 @@ void tavli::Board::setupGamePlakwto()
     for (size_t i = 0; i < 15; ++i) {
         Region* reg = regions[pl2reg];
         Piece* piece = new Piece(colours[3]);
-        reg->addPiece(piece, false);
+        reg->addPiece(piece);
         pieceCanvas.add(piece);
     }
 
@@ -485,7 +491,7 @@ void tavli::Board::setupGameFevga()
     for (size_t i = 0; i < 15; ++i) {
         Region* reg = regions[pl1reg];
         Piece* piece = new Piece(colours[2]);
-        reg->addPiece(piece, false);
+        reg->addPiece(piece);
         pieceCanvas.add(piece);
     }
 
@@ -493,7 +499,7 @@ void tavli::Board::setupGameFevga()
     for (size_t i = 0; i < 15; ++i) {
         Region* reg = regions[pl2reg];
         Piece* piece = new Piece(colours[3]);
-        reg->addPiece(piece, false);
+        reg->addPiece(piece);
         pieceCanvas.add(piece);
     }
 
@@ -525,7 +531,7 @@ tavli::Piece::Piece(vvr::Colour col) : Cylinder3D(col)
     normal.Set(0, 0, 1);
 }
 
-void tavli::Piece::on_pick()
+void tavli::Piece::elevate()
 {
     basecenter.z = region->boardheight * 0.10f + height;
 }
@@ -644,18 +650,18 @@ void tavli::Region::arrangePieces(size_t index_from)
     }
 }
 
-void tavli::Region::addPiece(Piece *piece, bool arrange)
+void tavli::Region::addPiece(Piece *piece)
 {
-    pieces.push_back(piece);
     piece->region = this;
-    if (arrange) arrangePieces(pieces.size() - 1);
+    pieces.push_back(piece);
+    arrangePieces(pieces.size() - 1);
 }
 
-void tavli::Region::removePiece(Piece *piece, bool arrange)
+void tavli::Region::removePiece(Piece *piece)
 {
     pieces.erase(std::remove(pieces.begin(), pieces.end(), piece), pieces.end());
     piece->region = nullptr;
-    if (arrange) arrangePieces();
+    arrangePieces();
 }
 
 vvr::real tavli::Region::pickdist(const Ray &ray) const
@@ -680,12 +686,14 @@ void tavli::PieceDragger::on_drag(vvr::Drawable* drw, Ray ray0, Ray ray1)
     assert(dynamic_cast<Piece*>(drw));
     auto piece = static_cast<Piece*>(drw);
     float d0, d1;
-    piece->on_pick();
     Plane boardplane(piece->diskBase().ContainingPlane());
     boardplane.Intersects(ray0, &d0);
     boardplane.Intersects(ray1, &d1);
-    vec dv(ray1.GetPoint(d1) - ray0.GetPoint(d0));
-    piece->basecenter += dv;
+    //vec p0 = ray0.GetPoint(d0);
+    vec p1 = ray1.GetPoint(d1);
+    //vec dv(p1 - p0);
+    piece->basecenter = p1;
+    piece->elevate();
     regionPicker->do_pick(ray1, 0);
     ray = ray1;
 }
@@ -694,15 +702,13 @@ void tavli::PieceDragger::on_drop(vvr::Drawable* drw)
 {
     auto piece = static_cast<Piece*>(drw);
     auto region_drop = static_cast<Region*>(regionPicker->picked());
+    piece->colour = colour;
+    if (justHlt) return;
     regionPicker->do_drop(ray, 0);
-
-
     if (region_drop && region_drop!=piece->region) {
         piece->region->removePiece(piece);
-        region_drop->addPiece(piece, true);
+        region_drop->addPiece(piece);
     } else piece->region->arrangePieces(0);
-
-    piece->colour = colour;
 }
 
 /*---[tavli::RegionHighlighter]---------------------------------------------------------*/
