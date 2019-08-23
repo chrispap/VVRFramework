@@ -80,7 +80,7 @@ namespace vvr
         float m_speed;
     };
 
-    template <typename T>
+    template <typename P>
     struct PropertyAnimation : Animation
     {
         vvr_decl_shared_ptr(PropertyAnimation)
@@ -94,7 +94,7 @@ namespace vvr
             terminate();
         }
 
-        PropertyAnimation(const T& from, const T& to, T& prop)
+        PropertyAnimation(const P& from, const P& to, P& prop)
             : from(from)
             , to(to)
             , d(to-from)
@@ -123,8 +123,8 @@ namespace vvr
         }
 
     private:
-        T from, to, d;
-        T* prop;
+        P from, to, d;
+        P* prop;
     };
 }
 
