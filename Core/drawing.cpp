@@ -428,6 +428,44 @@ vvr::Ground::Ground(const real W, const real D, const real B, const real T, Colo
     m_floor_tris.push_back(vvr::Triangle3D(math::Triangle(vF, vA, vB), col));
 }
 
+vvr::Quad3D::Quad3D(const vec &pos, const vec &norm, float halfside, const vvr::Colour &col)
+    : math::Plane(pos, norm.Normalized())
+    , pos(pos)
+    , hsz(halfside)
+    , col(col)
+{
+    X = normal.Perpendicular(vec(0,0,1), vec(1,0,0));
+    Y = normal.AnotherPerpendicular(vec(0,0,1), vec(1,0,0));
+    vvr_echo(normal);
+    vvr_echo(X);
+    vvr_echo(Y);
+}
+
+void vvr::Quad3D::draw() const
+{
+    math::vec v1 = pos + (+X * hsz.x + Y * hsz.y);
+    math::vec v2 = pos + (+X * hsz.x - Y * hsz.y);
+    math::vec v3 = pos + (-X * hsz.x - Y * hsz.y);
+    math::vec v4 = pos + (-X * hsz.x + Y * hsz.y);
+    vvr::Triangle3D(math::Triangle(v1, v2, v3), col).draw();
+    vvr::Triangle3D(math::Triangle(v3, v4, v1), col).draw();
+}
+
+real vvr::Quad3D::pickdist(const math::Ray &ray) const
+{
+    math::vec v1 = pos + (+X * hsz.x + Y * hsz.y);
+    math::vec v2 = pos + (+X * hsz.x - Y * hsz.y);
+    math::vec v3 = pos + (-X * hsz.x - Y * hsz.y);
+    math::vec v4 = pos + (-X * hsz.x + Y * hsz.y);
+    vvr::Triangle3D t1(math::Triangle(v1, v2, v3), col);
+    vvr::Triangle3D t2(math::Triangle(v3, v4, v1), col);
+
+    if ((t1.Intersects(ray)) ||
+        (t2.Intersects(ray))) {
+        return 0;
+    } else return real(-1);
+}
+
 /*---[Canvas]---------------------------------------------------------------------------*/
 vvr::Canvas::Canvas() : fid(0) , del_on_clear(true)
 {

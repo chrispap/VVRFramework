@@ -18,6 +18,7 @@ using namespace math;
 
 #define VVR_FOV_MAX 160
 #define VVR_FOV_MIN 2
+#define DEFAULT_CAM_DIST 100
 
 /*--------------------------------------------------------------------------------------*/
 Scene::Scene()
@@ -28,15 +29,14 @@ Scene::Scene()
     m_create_menus = false;
     m_show_log = false;
     m_show_sliders = false;
-    m_camera_dist = 100;
-    m_fov = 30;
+    m_fov = 66;
     m_first_resize = true;
-    setCameraPos(vec(0, 0, m_camera_dist));
+    setCameraPos(vec(0, 0, DEFAULT_CAM_DIST));
 }
 
 void Scene::reset()
 {
-    setCameraPos(vec(0, 0, m_camera_dist));
+    setCameraPos(vec(0, 0, DEFAULT_CAM_DIST));
 }
 
 void Scene::resize()
@@ -120,8 +120,8 @@ static void glInfo()
 
 void Scene::glInit()
 {
-    float lz = m_camera_dist * 3.0f;
-    static GLfloat light_position[] = { 0.00f, 0.00f,    lz, 1.0f };
+    float lz = DEFAULT_CAM_DIST * 3.0f;
+    static GLfloat light_position[] = { 0.00f, lz, lz, 1.0f };
     static GLfloat ambientLight[]   = { 0.75f, 0.75f, 0.75f, 1.0f };
     static GLfloat diffuseLight[]   = { 0.75f, 0.75f, 0.75f, 1.0f };
     static GLfloat specularLight[]  = { 0.85f, 0.85f, 0.85f, 1.0f };
@@ -154,24 +154,25 @@ void Scene::glResize(int w, int h)
 {
     m_screen_width = w;
     m_screen_height = h;
+    float cam_dist = m_frustum.Pos().Length();
 
     /* Set frustum with following modes:
      * - Perspective
      * - Orthographic */
     if (m_perspective_proj)
     {
-        const float n = m_camera_dist * 0.1;
-        const float f = -m_camera_dist * 2.1;
-        m_frustum.SetVerticalFovAndAspectRatio(DegToRad(m_fov), ((float)w/h));
+        const float n = cam_dist * 0.1;
+        const float f = cam_dist * 2.0;
         m_frustum.SetViewPlaneDistances(n, f);
+        m_frustum.SetVerticalFovAndAspectRatio(DegToRad(m_fov), ((float)w/h));
         m_scene_width = m_frustum.NearPlaneWidth() / 0.1;
         m_scene_height = m_frustum.NearPlaneHeight() / 0.1;
     }
     else
     {
-        const float n = -m_camera_dist * 2;
-        const float f = m_camera_dist * 2;
-        m_scene_width = m_camera_dist / 2;
+        const float n = -cam_dist * 2;
+        const float f = cam_dist * 2;
+        m_scene_width = cam_dist / 2;
         m_scene_height = m_scene_width / ((float)w/h);
         m_frustum.SetOrthographic(m_scene_width, m_scene_height);
         m_frustum.SetViewPlaneDistances(n, f);
@@ -209,11 +210,11 @@ void Scene::keyEvent(unsigned char key, bool up, int modif)
 
     switch (isprint(key) ? tolower(key) : key) {
     case 'r': this->reset(); break;
-    case '2': setCameraPos(vec(0, -m_camera_dist, 0)); break;
-    case '4': setCameraPos(vec(-m_camera_dist, 0, 0)); break;
-    case '6': setCameraPos(vec(m_camera_dist, 0, 0)); break;
-    case '8': setCameraPos(vec(0, m_camera_dist, 0)); break;
-    case '5': setCameraPos(vec(0, 0, m_camera_dist)); break;
+    case '2': setCameraPos(vec(0, -DEFAULT_CAM_DIST, 0)); break;
+    case '4': setCameraPos(vec(-DEFAULT_CAM_DIST, 0, 0)); break;
+    case '6': setCameraPos(vec(DEFAULT_CAM_DIST, 0, 0)); break;
+    case '8': setCameraPos(vec(0, DEFAULT_CAM_DIST, 0)); break;
+    case '5': setCameraPos(vec(0, 0, DEFAULT_CAM_DIST)); break;
     }
 }
 

@@ -422,6 +422,8 @@ namespace vvr
 
     struct VVRFramework_API Cylinder3D : Shape
     {
+        vvr_decl_shared_ptr(Cylinder3D)
+
         Cylinder3D(Colour col=Colour())
             : Shape(col)
         {
@@ -464,9 +466,29 @@ namespace vvr
         }
     };
 
+    struct VVRFramework_API Quad3D : public math::Plane, vvr::Drawable
+    {
+        vvr_decl_shared_ptr(Quad3D)
+
+        Quad3D(const math::vec &pos, const math::vec &norm, float halfside, const vvr::Colour &col);
+        void draw() const override;
+        real pickdist(const math::Ray &ray) const override;
+
+        math::vec pos;
+        math::vec X, Y;
+        math::vec2d hsz;
+        vvr::Colour col;
+    };
+
     /*---[Widgets]----------------------------------------------------------------------*/
     struct VVRFramework_API Ground : Drawable
     {
+        vvr_decl_shared_ptr(Ground)
+
+        //! W: Wall length (on X)
+        //! B: Floor width (on Z)
+        //! D: Floor elevation from Y=0
+        //! T: Wall height from Y=0
         Ground(const real W, const real D, const real B, const real T, Colour colour);
         void draw() const override;
 

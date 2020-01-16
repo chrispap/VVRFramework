@@ -1,4 +1,4 @@
-#include <vvr/settings.h>
+﻿#include <vvr/settings.h>
 #include <vvr/scene.h>
 #include <vvr/mesh.h>
 #include <vvr/utils.h>
@@ -40,17 +40,32 @@ Simple2DScene::Simple2DScene()
     using namespace std::placeholders;
     m_bg_col = vvr::grey;
 
-    /* Create circles in random positions. */
-    for (int i=0; i<11; i++) {
-        int x = rand() % 800 - 400;
-        int y = rand() % 600 - 300;
-        m_canvas.add(new vvr::Circle2D(x, y, 20, vvr::white));
-    }
-    for (int i=0; i<11; i++) {
-        int x = rand() % 800 - 400;
-        int y = rand() % 600 - 300;
-        m_canvas.add(new vvr::Point3D(x, y, 0, vvr::white));
-    }
+    auto bp0 = new vvr::Point3D( {0,    0,      0});
+    auto bp1 = new vvr::Point3D( {640,  0,      0});
+    auto bp2 = new vvr::Point3D( {640,  -480,    0});
+    auto bp3 = new vvr::Point3D( {0,    -480,    0});
+
+    m_canvas.add(new vvr::CompositeLine({bp0, bp1}, vvr::black));
+    m_canvas.add(new vvr::CompositeLine({bp1, bp2}, vvr::black));
+    m_canvas.add(new vvr::CompositeLine({bp2, bp3}, vvr::black));
+    m_canvas.add(new vvr::CompositeLine({bp3, bp0}, vvr::black));
+
+    m_canvas.add(bp0);
+    m_canvas.add(bp1);
+    m_canvas.add(bp2);
+    m_canvas.add(bp3);
+
+    auto fp0 = (vvr::Point3D*) m_canvas.add(new vvr::Point3D({449.0, -250.0, 0}, vvr::red));
+    auto fp1 = (vvr::Point3D*) m_canvas.add(new vvr::Point3D({140.0, -210.0, 0}, vvr::green));
+    auto fp2 = (vvr::Point3D*) m_canvas.add(new vvr::Point3D({102.0, -291.0, 0}, vvr::blue));
+    auto fp3 = (vvr::Point3D*) m_canvas.add(new vvr::Point3D({423.0, -331.0, 0}, vvr::orange));
+    //auto fp4 = (vvr::Point3D*) m_canvas.add(new vvr::Point3D({, 0}, vvr::magenta));
+
+    m_canvas.add(new vvr::CompositeLine({fp0, fp1}, vvr::Gray));
+    m_canvas.add(new vvr::CompositeLine({fp1, fp2}, vvr::Gray));
+    m_canvas.add(new vvr::CompositeLine({fp2, fp3}, vvr::Gray));
+    m_canvas.add(new vvr::CompositeLine({fp3, fp0}, vvr::Gray));
+    //m_canvas.add(new vvr::CompositeLine({fp4, fp0}, vvr::Gray));
 
     m_picker = PickerT::Make(m_canvas);
 }
