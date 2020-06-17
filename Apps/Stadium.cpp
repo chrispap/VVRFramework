@@ -76,6 +76,8 @@ StadiumScene::StadiumScene()
 
 void StadiumScene::resize()
 {
+    vvr_echo(getViewportWidth());
+    vvr_echo(getViewportHeight());
     if (!m_first_resize) return;
     reset();
 }
@@ -95,7 +97,7 @@ void StadiumScene::draw()
     auto fru = getFrustum();
     fru.SetViewPlaneDistances(1, 300);
     setFrustum(fru);
-    getGlobalAxes().draw();
+    //getGlobalAxes().draw();
     m_field.draw();
     m_dragger->lineOfSight.drawif();
 }
