@@ -15,7 +15,8 @@
 #define vvr_echo_time_from_function(x) (void)(0)
 #endif
 
-static QWidget *s_widget_ptr;
+static QWidget *s_widget_ptr = NULL;
+static float s_dpr = 1.0f;
 
 static int make_modifier_flag(QInputEvent *event)
 {
@@ -32,17 +33,17 @@ static int make_modifier_flag(QInputEvent *event)
 void vvr::get_mouse_xy(int &x, int &y)
 {
     QPoint p = s_widget_ptr->mapFromGlobal(QCursor::pos());
-    x = p.x();
-    y = p.y();
+    x = p.x() * s_dpr;
+    y = p.y() * s_dpr;
 }
 
 /*--------------------------------------------------------------------------------------*/
 vvr::GlWidget::GlWidget(vvr::Scene *scene, QWidget *parent) : QOpenGLWidget(parent)
 {
+    s_widget_ptr = this;
     m_scene = scene;
     m_timer.setSingleShot(true);
     connect(&m_timer, SIGNAL(timeout()), this, SLOT(idle()));
-    s_widget_ptr = this;
     setMouseTracking(true);
     m_timer.start(100);
 }
@@ -69,7 +70,9 @@ void vvr::GlWidget::paintGL()
 
 void vvr::GlWidget::resizeGL(int width, int height)
 {
-    m_scene->glResize(width, height);
+    s_dpr = s_widget_ptr->devicePixelRatio();
+    vvr_echo(s_dpr);
+    m_scene->glResize(width * s_dpr, height * s_dpr);
 }
 
 /*---[Events]---------------------------------------------------------------------------*/
@@ -86,8 +89,8 @@ void vvr::GlWidget::idle()
 void vvr::GlWidget::mousePressEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton) {
-        int x = event->x();
-        int y = event->y();
+        int x = event->position().x() * s_dpr;
+        int y = event->position().y() * s_dpr;
         m_scene->mouse2pix(x, y);
         m_scene->mousePressed(x, y, make_modifier_flag(event));
         setFocus();
@@ -98,8 +101,8 @@ void vvr::GlWidget::mousePressEvent(QMouseEvent *event)
 void vvr::GlWidget::mouseReleaseEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton) {
-        int x = event->x();
-        int y = event->y();
+        int x = event->position().x() * s_dpr;
+        int y = event->position().y() * s_dpr;
         m_scene->mouse2pix(x, y);
         m_scene->mouseReleased(x, y, make_modifier_flag(event));
         setFocus();
@@ -110,8 +113,8 @@ void vvr::GlWidget::mouseReleaseEvent(QMouseEvent *event)
 void vvr::GlWidget::mouseMoveEvent(QMouseEvent *event)
 {
     vvr_echo_time_from_function("In");
-    int x = event->x();
-    int y = event->y();
+    int x = event->position().x() * s_dpr;
+    int y = event->position().y() * s_dpr;
     m_scene->mouse2pix(x, y);
 
     if (event->buttons() & Qt::LeftButton) {
@@ -129,7 +132,7 @@ void vvr::GlWidget::mouseMoveEvent(QMouseEvent *event)
 
 void vvr::GlWidget::wheelEvent(QWheelEvent *event)
 {
-    m_scene->mouseWheel(event->delta()>0?1:-1, make_modifier_flag(event));
+    m_scene->mouseWheel(event->angleDelta().y() > 0? 1: -1, make_modifier_flag(event));
     idle();
 }
 

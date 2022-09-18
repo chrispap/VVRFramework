@@ -40,10 +40,10 @@ Simple2DScene::Simple2DScene()
     using namespace std::placeholders;
     m_bg_col = vvr::grey;
 
-    auto bp0 = new vvr::Point3D( {0,    0,      0});
-    auto bp1 = new vvr::Point3D( {640,  0,      0});
-    auto bp2 = new vvr::Point3D( {640,  -480,    0});
-    auto bp3 = new vvr::Point3D( {0,    -480,    0});
+    auto bp0 = new vvr::Point3D(0, 0, 0);
+    auto bp1 = new vvr::Point3D(640, 0, 0);
+    auto bp2 = new vvr::Point3D(640, -480, 0);
+    auto bp3 = new vvr::Point3D(0, -480, 0);
 
     m_canvas.add(new vvr::CompositeLine({bp0, bp1}, vvr::black));
     m_canvas.add(new vvr::CompositeLine({bp1, bp2}, vvr::black));

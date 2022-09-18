@@ -1,9 +1,8 @@
 ### QT ###################################################################################
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
-find_package(Qt5Widgets REQUIRED)
-find_package(Qt5OpenGL  REQUIRED)
-qt5_wrap_ui(UI_FILES demo_window.ui)
+find_package(Qt6 COMPONENTS Widgets Gui OpenGL OpenGLWidgets REQUIRED)
+qt6_wrap_ui(UI_FILES demo_window.ui)
 ##########################################################################################
 
 add_definitions(-DALL_DEMO_APP)
@@ -16,7 +15,7 @@ file(GLOB APP_SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 add_executable(AllDemo MACOSX_BUNDLE ${APP_SRC_FILES} ${UI_FILES})
-target_link_libraries(AllDemo Qt5::Widgets Qt5::OpenGL)
+target_link_libraries(AllDemo Qt6::Widgets Qt6::Gui Qt6::OpenGL Qt6::OpenGLWidgets)
 target_link_libraries(AllDemo
   optimized VVRFramework debug VVRFramework_d
   optimized GeoLib debug GeoLib_d
