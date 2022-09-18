@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 3.23)
 project(VVRFramework)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -28,9 +28,9 @@ set_property(TARGET MathGeoLib PROPERTY FOLDER "Libraries")
 #########################################################################################
 
 #########################################################################################
-set_target_properties(VVRFramework PROPERTIES DEBUG_POSTFIX _d)
-set_target_properties(MathGeoLib PROPERTIES DEBUG_POSTFIX _d)
-set_target_properties(GeoLib PROPERTIES DEBUG_POSTFIX _d)
+set_target_properties(VVRFramework PROPERTIES DEBUG_POSTFIX "_d")
+set_target_properties(MathGeoLib PROPERTIES DEBUG_POSTFIX "_d")
+set_target_properties(GeoLib PROPERTIES DEBUG_POSTFIX "_d")
 #########################################################################################
 
 ### INSTALL #############################################################################
