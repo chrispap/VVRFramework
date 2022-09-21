@@ -206,8 +206,8 @@ void TavliScene::resize()
 
 void TavliScene::draw()
 {
-    axes->drawif();
-    board->drawif();
+    if (axes) axes->drawif();
+    if (board) board->drawif();
 }
 
 void TavliScene::keyEvent(unsigned char key, bool up, int modif)
