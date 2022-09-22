@@ -6,6 +6,7 @@
 #include <vvr/palette.h>
 #include <vvr/picking.h>
 #include <vvr/animation.h>
+#include <json/json.h>
 #include <iostream>
 #include <fstream>
 #include <iostream>
@@ -749,7 +750,31 @@ void tavli::RegionHighlighter::on_drop(vvr::Drawable* drw)
 }
 
 /*---[main]-----------------------------------------------------------------------------*/
-namespace tavli {
+void testJsonCpp()
+{
+    Json::Reader reader;
+    Json::Value root;
+
+    const auto filename = "/Users/chrisp/test.json";
+    std::ifstream(filename) >> root;
+
+    Json::StreamWriterBuilder builder;
+    builder["commentStyle"] = "None";
+    builder["indentation"] = "  ";
+    std::unique_ptr<Json::StreamWriter> writer(builder.newStreamWriter());
+    writer->write(root, &std::cout);
+    std::cout << std::endl;
+
+    vvr_echo(root["xxx"]);
+    vvr_echo(root["null"]);
+    vvr_echo(root["str"].asString());
+    vvr_echo(root["int"].asInt());
+    vvr_echo(root["?"]);
+    vvr_echo(root["str"].asInt());
+}
+
+namespace tavli
+{
     std::vector<vvr::Colour> GetDefaultColours()
     {
         std::vector<vvr::Colour> colours = {
@@ -787,6 +812,16 @@ int main(int argc, char* argv[])
     catch (std::string exc)
     {
         std::cerr << exc << std::endl;
+        return 1;
+    }
+    catch (std::exception &exc)
+    {
+        std::cerr << exc.what() << std::endl;
+        return 1;
+    }
+    catch (...)
+    {
+        std::cerr << "Exception!" << std::endl;
         return 1;
     }
 }

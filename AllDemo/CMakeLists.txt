@@ -19,7 +19,8 @@ target_link_libraries(AllDemo Qt6::Widgets Qt6::Gui Qt6::OpenGL Qt6::OpenGLWidge
 target_link_libraries(AllDemo
   optimized VVRFramework debug VVRFramework_d
   optimized GeoLib debug GeoLib_d
-  optimized MathGeoLib debug MathGeoLib_d)
+  optimized MathGeoLib debug MathGeoLib_d
+  jsoncpp)
 set_property(TARGET AllDemo PROPERTY FOLDER "Apps")
 if(HIDE_CONSOLE_WINDOW AND WIN32 AND MSVC)
   set_target_properties(AllDemo PROPERTIES LINK_FLAGS "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
@@ -28,5 +29,6 @@ endif()
 include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rdParty/GeoLib)
 include_directories(${CMAKE_SOURCE_DIR}/3rdParty/MathGeoLib/src)
+include_directories(${CMAKE_SOURCE_DIR}/3rdParty/jsoncpp/include)
 include_directories(${CMAKE_SOURCE_DIR})
 ##########################################################################################
