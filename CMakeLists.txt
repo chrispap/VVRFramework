@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 3.23)
 project(VVRFramework)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -13,11 +13,13 @@ SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 ### Build subdirs #######################################################################
 add_subdirectory(3rdParty/GeoLib)
 add_subdirectory(3rdParty/MathGeoLib)
-add_subdirectory(core)
+add_subdirectory(3rdParty/jsoncpp)
+add_subdirectory(Core)
 add_subdirectory(GeoLab)
 add_subdirectory(Apps)
 add_subdirectory(Games)
 add_subdirectory(AllDemo)
+add_subdirectory(NdiViewer)
 #########################################################################################
 
 #### Group (Visual Studio only) #########################################################
@@ -28,9 +30,9 @@ set_property(TARGET MathGeoLib PROPERTY FOLDER "Libraries")
 #########################################################################################
 
 #########################################################################################
-set_target_properties(VVRFramework PROPERTIES DEBUG_POSTFIX _d)
-set_target_properties(MathGeoLib PROPERTIES DEBUG_POSTFIX _d)
-set_target_properties(GeoLib PROPERTIES DEBUG_POSTFIX _d)
+set_target_properties(VVRFramework PROPERTIES DEBUG_POSTFIX "_d")
+set_target_properties(MathGeoLib PROPERTIES DEBUG_POSTFIX "_d")
+set_target_properties(GeoLib PROPERTIES DEBUG_POSTFIX "_d")
 #########################################################################################
 
 ### INSTALL #############################################################################

@@ -4,14 +4,13 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED on)
 
 ### QT ##################################################################################
-find_package(Qt5Widgets REQUIRED)
-find_package(Qt5Gui REQUIRED)
+find_package(Qt6 COMPONENTS Widgets Gui OpenGL OpenGLWidgets REQUIRED)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 set(QRCS icons.qrc)
-qt5_wrap_ui(UI_FILES window.ui)
-qt5_add_resources(RCS ${QRCS})
-GET_PROPERTY(prop TARGET Qt5::Core PROPERTY LOCATION)
+qt6_wrap_ui(UI_FILES window.ui)
+qt6_add_resources(RCS ${QRCS})
+GET_PROPERTY(prop TARGET Qt6::Core PROPERTY LOCATION)
 GET_FILENAME_COMPONENT(QT_BIN_DIR ${prop} DIRECTORY)
 #########################################################################################
 
@@ -59,12 +58,12 @@ find_package(OpenGL REQUIRED)
 include_directories(${OPENGL_INCLUDE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rdParty/GeoLib)
-include_directories(${CMAKE_SOURCE_DIR}/3rdParty//MathGeoLib/src)
+include_directories(${CMAKE_SOURCE_DIR}/3rdParty/MathGeoLib/src)
 #########################################################################################
 
 #########################################################################################
 add_library(VVRFramework SHARED ${SOURCE} ${RCS} ${UI_FILES})
-target_link_libraries(VVRFramework ${OPENGL_LIBRARIES} Qt5::Widgets Qt5::Gui)
+target_link_libraries(VVRFramework ${OPENGL_LIBRARIES} Qt6::Widgets Qt6::Gui Qt6::OpenGL Qt6::OpenGLWidgets)
 if (WIN32 OR APPLE)
   target_link_libraries(VVRFramework  GeoLib MathGeoLib)
 elseif(UNIX)

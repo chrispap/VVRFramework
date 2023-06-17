@@ -190,13 +190,21 @@ void KDTreeScene::createSurfacePts(int num_pts)
 
 bool KDTreeScene::idle()
 {
-    if (m_tree_invalidation_sec > 0 &&
-        vvr::get_seconds() - m_tree_invalidation_sec > 0.8)
+    if (m_anim.paused()) return false;
+
+    float time_from_invalidation = vvr::get_seconds() - m_tree_invalidation_sec;
+    if (m_tree_invalidation_sec > 0.0f && time_from_invalidation > 0.8f)
     {
         delete m_KDTree;
         m_KDTree = new vvr::KDTree(m_pts);
         m_tree_invalidation_sec = -1;
     }
+
+    //! Rotate camera
+    /*vec campos = { 0, 0, getCameraDist() };
+    math::float3x3 t = math::float3x3::RotateY(m_anim.t * 0.5f);
+    setCameraPos(t * campos);*/
+
     m_anim.update();
     return true;
 }
@@ -213,7 +221,7 @@ void KDTreeScene::draw()
     ground.draw();
 
     //! Animate sphere
-    float t = m_anim.t;
+    float t = m_anim.t();
     vvr::Sphere3D sphere_moved(*m_sphere);
     sphere_moved.pos.x += t * ((float)GND_WIDTH / SEC_PER_FLOOR);
     math::vec sc(sphere_moved.pos);

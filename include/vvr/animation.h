@@ -3,26 +3,23 @@
 
 #include "vvrframework_DLL.h"
 #include "utils.h"
+#include "macros.h"
 
 namespace vvr
 {
-    struct Animatable
-    {
-        virtual bool animate(float time) = 0;
-        virtual float getTotalDuration() { return 0; }
-    };
-
     struct Animation
     {
         Animation()
-            : t(m_time)
-            , m_paused(true)
+            : m_paused(true)
             , m_time(0)
             , m_speed(1)
         {
         }
 
-        const float &t;
+        float t() const
+        {
+            return m_time;
+        }
 
         void pause()
         {
@@ -83,6 +80,52 @@ namespace vvr
         float m_speed;
     };
 
+    template <typename P>
+    struct PropertyAnimation : Animation
+    {
+        vvr_decl_shared_ptr(PropertyAnimation)
+
+        PropertyAnimation() : prop(nullptr)
+        {
+        }
+
+        ~PropertyAnimation()
+        {
+            terminate();
+        }
+
+        PropertyAnimation(const P& from, const P& to, P& prop)
+            : from(from)
+            , to(to)
+            , d(to-from)
+            , prop(&prop)
+        {
+        }
+
+        bool animate()
+        {
+            update(true);
+            const bool alive =  t() < 1.0f;
+            *prop = alive ? from + (d * t()) : to;
+            return alive;
+        }
+
+        void setPixelSpeed(float s)
+        {
+            const float dl = static_cast<float>(d.Length());
+            setSpeed(s/dl);
+        }
+
+        void terminate()
+        {
+            reset();
+            *prop =  to;
+        }
+
+    private:
+        P from, to, d;
+        P* prop;
+    };
 }
 
 #endif

@@ -67,7 +67,7 @@ void FourierScene::draw()
 bool FourierScene::idle()
 {
     m_anim.update(true);
-    const float t = m_anim.t;
+    const float t = m_anim.t();
     C2DVector e(0, 0);
     size_t i = 0;
 

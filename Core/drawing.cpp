@@ -32,26 +32,24 @@ math::AABB vvr::aabbFromVertices(const std::vector<vec> &vertices)
     return math::AABB(lo, hi);
 }
 
-void drawSphere(real r, int lats, int longs)
+void drawSphere(int lats, int longs)
 {
-    int i, j;
-    for (i = 0; i <= lats; i++) {
-        real lat0 = M_PI * (-0.5 + (real)(i - 1) / lats);
-        real z0 = sin(lat0);
-        real zr0 = cos(lat0);
-
-        real lat1 = M_PI * (-0.5 + (real)i / lats);
-        real z1 = sin(lat1);
-        real zr1 = cos(lat1);
+    for (int i = 0; i <= lats; i++) {
+        double lat0 = M_PI * (-0.5 + static_cast<double>(i-1) / lats);
+        double lat1 = M_PI * (-0.5 + static_cast<double>(i) / lats);
+        double z0  = sin(lat0);
+        double zr0 = cos(lat0);
+        double z1  = sin(lat1);
+        double zr1 = cos(lat1);
         glBegin(GL_QUAD_STRIP);
-        for (j = 0; j <= longs; j++) {
-            real lng = 2 * M_PI * (real)(j - 1) / longs;
-            real x = cos(lng);
-            real y = sin(lng);
-            glNormal3f(x * zr0, y * zr0, z0);
-            glVertex3f(x * zr0, y * zr0, z0);
-            glNormal3f(x * zr1, y * zr1, z1);
-            glVertex3f(x * zr1, y * zr1, z1);
+        for (int j = 0; j <= longs; j++) {
+            double lng = 2.0 * M_PI * static_cast<double>(j-1) / longs;
+            double x = cos(lng);
+            double y = sin(lng);
+            glNormal3d(x * zr0, y * zr0, z0);
+            glVertex3d(x * zr0, y * zr0, z0);
+            glNormal3d(x * zr1, y * zr1, z1);
+            glVertex3d(x * zr1, y * zr1, z1);
         }
         glEnd();
     }
@@ -349,7 +347,7 @@ void vvr::Sphere3D::drawShape() const
     glPushMatrix();
     glTranslatef(pos.x, pos.y, pos.z);
     glScalef(r, r, r);
-    drawSphere(r, 12, 15);
+    drawSphere(12, 15);
     glPopMatrix();
 }
 
@@ -382,13 +380,13 @@ void vvr::Obb3D::drawShape() const
     vvr::Shape::PointSize = ptsz_old;
 }
 
-vvr::Obb3D::Obb3D() : num_triverts(NumVerticesInTriangulation(1, 1, 1))
+vvr::Obb3D::Obb3D() : num_triverts(static_cast<size_t>(NumVerticesInTriangulation(1, 1, 1)))
 {
     colour = vvr::Colour("dd4311");
     col_edge = vvr::Colour();
     tv = new vec[num_triverts];
     tn = new vec[num_triverts];
-    cp = new vvr::Point3D[NumVertices()];
+    cp = new vvr::Point3D[static_cast<size_t>(NumVertices())];
     SetFrom(math::AABB{ vec{ 0, 0, 0 }, vec{ 0, 0, 0 } }, math::float4x4::identity);
 }
 
@@ -428,6 +426,44 @@ vvr::Ground::Ground(const real W, const real D, const real B, const real T, Colo
     m_floor_tris.push_back(vvr::Triangle3D(math::Triangle(vB, vD, vC), col));
     m_floor_tris.push_back(vvr::Triangle3D(math::Triangle(vF, vE, vA), col));
     m_floor_tris.push_back(vvr::Triangle3D(math::Triangle(vF, vA, vB), col));
+}
+
+vvr::Quad3D::Quad3D(const vec &pos, const vec &norm, float halfside, const vvr::Colour &col)
+    : math::Plane(pos, norm.Normalized())
+    , pos(pos)
+    , hsz(halfside)
+    , col(col)
+{
+    X = normal.Perpendicular(vec(0,0,1), vec(1,0,0));
+    Y = normal.AnotherPerpendicular(vec(0,0,1), vec(1,0,0));
+    vvr_echo(normal);
+    vvr_echo(X);
+    vvr_echo(Y);
+}
+
+void vvr::Quad3D::draw() const
+{
+    math::vec v1 = pos + (+X * hsz.x + Y * hsz.y);
+    math::vec v2 = pos + (+X * hsz.x - Y * hsz.y);
+    math::vec v3 = pos + (-X * hsz.x - Y * hsz.y);
+    math::vec v4 = pos + (-X * hsz.x + Y * hsz.y);
+    vvr::Triangle3D(math::Triangle(v1, v2, v3), col).draw();
+    vvr::Triangle3D(math::Triangle(v3, v4, v1), col).draw();
+}
+
+real vvr::Quad3D::pickdist(const math::Ray &ray) const
+{
+    math::vec v1 = pos + (+X * hsz.x + Y * hsz.y);
+    math::vec v2 = pos + (+X * hsz.x - Y * hsz.y);
+    math::vec v3 = pos + (-X * hsz.x - Y * hsz.y);
+    math::vec v4 = pos + (-X * hsz.x + Y * hsz.y);
+    vvr::Triangle3D t1(math::Triangle(v1, v2, v3), col);
+    vvr::Triangle3D t2(math::Triangle(v3, v4, v1), col);
+
+    if ((t1.Intersects(ray)) ||
+        (t2.Intersects(ray))) {
+        return 0;
+    } else return real(-1);
 }
 
 /*---[Canvas]---------------------------------------------------------------------------*/

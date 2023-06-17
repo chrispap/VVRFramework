@@ -2,7 +2,10 @@
 #include <ctime>
 #include <iostream>
 #include <iomanip>
-#include <qdatetime.h>
+#include <string>
+#include <fstream>
+#include <streambuf>
+#include <QDateTime>
 #include <QDir>
 #include <QFileInfo>
 
@@ -94,6 +97,9 @@ void vvr::split(const std::string &s, char delim, std::vector<std::string> &elem
     std::stringstream ss(s);
     std::string item;
     while (std::getline(ss, item, delim)) {
+        if (item.back() == '\r') {
+            item.erase(item.back());
+        }
         elems.push_back(item);
     }
 }
@@ -128,6 +134,14 @@ std::string vvr::zpn(int num, int len)
     std::ostringstream ss;
     ss << std::setw(len) << std::setfill('0') << num;
     return ss.str();
+}
+
+std::string vvr::read_file(const std::string &filename)
+{
+    auto arg  = std::ifstream(filename);
+    auto arg1 = std::istreambuf_iterator<char>(arg);
+    const auto arg2 = std::istreambuf_iterator<char>();
+    return std::string(arg1, arg2);
 }
 
 #ifdef __GNUG__

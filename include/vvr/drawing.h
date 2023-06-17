@@ -47,7 +47,7 @@ namespace vvr
         bool visible = true;
     };
 
-    struct VVRFramework_API Shape       : Drawable
+    struct VVRFramework_API Shape : Drawable
     {
         Shape() : filled(false) { }
         Shape(Colour col, bool filled=false) : filled(filled), colour(col) { }
@@ -66,7 +66,7 @@ namespace vvr
         Colour colour;
     };
 
-    struct VVRFramework_API Canvas      : Drawable
+    struct VVRFramework_API Canvas : Drawable
     {
     private:
         struct Frame
@@ -109,7 +109,7 @@ namespace vvr
     };
 
     /*---[Shapes: 2D]-------------------------------------------------------------------*/
-    struct VVRFramework_API Point2D     : Shape
+    struct VVRFramework_API Point2D : Shape
     {
         real x, y;
 
@@ -125,7 +125,7 @@ namespace vvr
         void drawShape() const override;
     };
 
-    struct VVRFramework_API LineSeg2D   : Shape
+    struct VVRFramework_API LineSeg2D : Shape
     {
         real x1, y1;
         real x2, y2;
@@ -152,7 +152,7 @@ namespace vvr
         void drawShape() const override;
     };
 
-    struct VVRFramework_API Line2D      : Shape
+    struct VVRFramework_API Line2D : Shape
     {
         real x1, y1;
         real x2, y2;
@@ -179,7 +179,7 @@ namespace vvr
         void drawShape() const override;
     };
 
-    struct VVRFramework_API Triangle2D  : Shape
+    struct VVRFramework_API Triangle2D : Shape
     {
         real x1, y1;
         real x2, y2;
@@ -222,7 +222,7 @@ namespace vvr
         void drawShape() const override;
     };
 
-    struct VVRFramework_API Circle2D    : Shape, C2DCircle
+    struct VVRFramework_API Circle2D : Shape, C2DCircle
     {
         vvr_decl_shape(Circle2D, C2DCircle, false)
 
@@ -266,7 +266,7 @@ namespace vvr
     };
 
     /*---[Shapes: 3D]-------------------------------------------------------------------*/
-    struct VVRFramework_API Point3D     : Shape, math::vec
+    struct VVRFramework_API Point3D : Shape, math::vec
     {
         vvr_decl_shape(Point3D, vec, false)
 
@@ -285,7 +285,7 @@ namespace vvr
         void drawShape() const override;
     };
 
-    struct VVRFramework_API LineSeg3D   : Shape, math::LineSegment
+    struct VVRFramework_API LineSeg3D : Shape, math::LineSegment
     {
         vvr_decl_shape(LineSeg3D, math::LineSegment, false)
 
@@ -306,7 +306,7 @@ namespace vvr
         void drawShape() const override;
     };
 
-    struct VVRFramework_API Sphere3D    : Shape, math::Sphere
+    struct VVRFramework_API Sphere3D : Shape, math::Sphere
     {
         vvr_decl_shape(Sphere3D, math::Sphere, false)
 
@@ -319,7 +319,7 @@ namespace vvr
         void drawShape() const override;
     };
 
-    struct VVRFramework_API Aabb3D      : Shape, math::AABB
+    struct VVRFramework_API Aabb3D : Shape, math::AABB
     {
         vvr_decl_shape(Aabb3D, math::AABB, false)
 
@@ -354,7 +354,7 @@ namespace vvr
         }
     };
 
-    struct VVRFramework_API Obb3D       : Shape, math::OBB
+    struct VVRFramework_API Obb3D : Shape, math::OBB
     {
         Obb3D();
         ~Obb3D();
@@ -370,7 +370,7 @@ namespace vvr
         Point3D *cp;    // corner points
     };
 
-    struct VVRFramework_API Triangle3D  : Shape, math::Triangle
+    struct VVRFramework_API Triangle3D : Shape, math::Triangle
     {
         vvr_decl_shape(Triangle3D, math::Triangle, true)
 
@@ -420,8 +420,10 @@ namespace vvr
         }
     };
 
-    struct VVRFramework_API Cylinder3D  : Shape
+    struct VVRFramework_API Cylinder3D : Shape
     {
+        vvr_decl_shared_ptr(Cylinder3D)
+
         Cylinder3D(Colour col=Colour())
             : Shape(col)
         {
@@ -464,9 +466,29 @@ namespace vvr
         }
     };
 
-    /*---[Widgets]----------------------------------------------------------------------*/
-    struct VVRFramework_API Ground      : Drawable
+    struct VVRFramework_API Quad3D : public math::Plane, vvr::Drawable
     {
+        vvr_decl_shared_ptr(Quad3D)
+
+        Quad3D(const math::vec &pos, const math::vec &norm, float halfside, const vvr::Colour &col);
+        void draw() const override;
+        real pickdist(const math::Ray &ray) const override;
+
+        math::vec pos;
+        math::vec X, Y;
+        math::vec2d hsz;
+        vvr::Colour col;
+    };
+
+    /*---[Widgets]----------------------------------------------------------------------*/
+    struct VVRFramework_API Ground : Drawable
+    {
+        vvr_decl_shared_ptr(Ground)
+
+        //! W: Wall length (on X)
+        //! B: Floor width (on Z)
+        //! D: Floor elevation from Y=0
+        //! T: Wall height from Y=0
         Ground(const real W, const real D, const real B, const real T, Colour colour);
         void draw() const override;
 
@@ -475,7 +497,7 @@ namespace vvr
         Colour m_col;
     };
 
-    struct VVRFramework_API Axes        : Drawable
+    struct VVRFramework_API Axes : Drawable
     {
         vvr_decl_shared_ptr(Axes)
 

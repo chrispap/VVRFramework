@@ -5,6 +5,7 @@
 #include <iostream>
 #include <algorithm>
 #include <cctype>
+#include <cstring>
 
 #define MAX_LINE_LEN 1024
 
@@ -19,7 +20,7 @@ static char* trimLeft(char* s)
 
 static char* trimRight(char* s)
 {
-    int len = strlen(s);
+    int len = std::strlen(s);
     if (!len) return s;
     char* pos = s + len - 1;
     while (pos >= s && isspace(*pos)) {
@@ -52,7 +53,7 @@ void Settings::reload()
     while (fgets(Line, MAX_LINE_LEN, file)) {
         if (Line[0] == '#') continue;
         if (sscanf(Line, "%[^=]=%[^\n]", key, val) == 2) {
-            transform(key, key + strlen(key), key, ::tolower);
+            transform(key, key + std::strlen(key), key, ::tolower);
             char *k = trim(key);
             char *v = trim(val);
             m_map[k] = trim(v);

@@ -55,7 +55,7 @@ void HelixScene::draw()
 
     vec p[2];
     const float degs_from = 360 * 2;
-    const double phase = m_anim.t;
+    const double phase = m_anim.t();
 
     for (float degs = -degs_from; degs < degs_from; degs += 10)
     {

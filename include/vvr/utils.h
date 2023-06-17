@@ -11,6 +11,7 @@
 #include <vector>
 #include <memory>
 #include <tuple>
+#include <cstring>
 
 namespace vvr
 {
@@ -43,6 +44,9 @@ namespace vvr
 
     std::string
     VVRFramework_API zpn(int num, int len);
+
+    std::string
+    VVRFramework_API read_file(const std::string &filename);
 
     inline char get_path_separator()
     {

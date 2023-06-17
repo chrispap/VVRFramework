@@ -138,10 +138,10 @@ void Mesh::exportToObj(const string &filename)
         out.setRealNumberNotation(QTextStream::FixedNotation);
         out.setRealNumberPrecision(6);
 
-        out << "# Exported from VVRFramework" << endl;
-        out << "# Vertices: " << mVertices.size() << endl;
-        out << "# Normals: " << mVertexNormals.size() << endl;
-        out << "# Triangles: " << mTriangles.size() << endl;
+        out << "# Exported from VVRFramework" << "\n";
+        out << "# Vertices: " << mVertices.size() << "\n";
+        out << "# Normals: " << mVertexNormals.size() << "\n";
+        out << "# Triangles: " << mTriangles.size() << "\n";
 
         //! Export vertices
 
@@ -152,7 +152,7 @@ void Mesh::exportToObj(const string &filename)
                 << " " << v.x
                 << " " << v.y
                 << " " << v.z
-                << endl;
+                << "\n";
         }
 
         //! Export normals
@@ -164,12 +164,12 @@ void Mesh::exportToObj(const string &filename)
                 << " " << n.x
                 << " " << n.y
                 << " " << n.z
-                << endl;
+                << "\n";
         }
 
         //! Export faces
 
-        out << "s 1" << endl;
+        out << "s 1" << "\n";
         for (int i = 0; i < mTriangles.size(); i++)
         {
             const Triangle &t = mTriangles[i];
@@ -177,7 +177,7 @@ void Mesh::exportToObj(const string &filename)
                 << " " << t.vi1 + 1 << "//" << t.vi1 + 1
                 << " " << t.vi2 + 1 << "//" << t.vi2 + 1
                 << " " << t.vi3 + 1 << "//" << t.vi3 + 1
-                << endl;
+                << "\n";
         }
 
         file.close();

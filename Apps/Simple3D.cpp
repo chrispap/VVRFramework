@@ -26,39 +26,6 @@
 //#define objName "unicorn_low.obj"
 //#define objName "dragon_low_low.obj"
 
-struct CuttingPlane : public math::Plane, vvr::Drawable
-{
-    vvr_decl_shared_ptr(CuttingPlane)
-
-    math::vec pos;
-    math::vec X, Y, Z;
-    float halfside;
-    vvr::Colour col;
-
-    void draw() const override
-    {
-        math::vec v1 = pos + (+X + Y) * halfside;
-        math::vec v2 = pos + (+X - Y) * halfside;
-        math::vec v3 = pos + (-X - Y) * halfside;
-        math::vec v4 = pos + (-X + Y) * halfside;
-        vvr::Triangle3D(math::Triangle(v1, v2, v3), col).draw();
-        vvr::Triangle3D(math::Triangle(v3, v4, v1), col).draw();
-    }
-
-    CuttingPlane(const math::vec &pos, const math::vec &normal, float halfside, const vvr::Colour &col)
-        : math::Plane(pos, normal.Normalized())
-        , pos(pos)
-        , halfside(halfside)
-        , col(col)
-    {
-        Z = normal;
-        Z.PerpendicularBasis(X, Y);
-    }
-
-private:
-    ~CuttingPlane() {}
-};
-
 class Simple3DScene : public vvr::Scene
 {
 public:
@@ -89,8 +56,8 @@ private:
     vvr::Canvas m_canvas;
     vvr::Ground* m_floor;
     vvr::Aabb3D* m_box;
-    CuttingPlane::Ptr m_plane;
-    CuttingPlane::Ptr m_plane_clipped;
+    vvr::Quad3D::Ptr m_plane;
+    vvr::Quad3D::Ptr m_plane_clipped;
 };
 
 Simple3DScene::Simple3DScene()
@@ -131,7 +98,7 @@ void Simple3DScene::resize()
 
 void Simple3DScene::defineCuttingPlane(const math::vec &pos, const math::vec &normal)
 {
-    m_plane = CuttingPlane::Make(pos, normal, 10, vvr::red);
+    m_plane = vvr::Quad3D::Make(pos, normal, 10, vvr::red);
 
     std::vector<vec> vertices;
     for (auto mesh : { m_mesh_1, m_mesh_2, m_mesh_3 })
@@ -167,7 +134,7 @@ void Simple3DScene::defineCuttingPlane(const math::vec &pos, const math::vec &no
 
     float newside = sqrt(2.0f) * std::max(maxx - minx, maxy - miny);
 
-    m_plane = CuttingPlane::Make(newpos, m_plane->normal, newside / 2, vvr::red);
+    m_plane = vvr::Quad3D::Make(newpos, m_plane->normal, newside / 2, vvr::red);
 }
 
 void Simple3DScene::load3DModels()

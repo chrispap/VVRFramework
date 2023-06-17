@@ -392,7 +392,7 @@ bool Exam2016Scene::idle()
     const float deg_per_sec = 30;
     m_anim.update();
     float3x4 t = m_mesh->getTransform();
-    t.SetRotatePartY(math::DegToRad(vvr::normalize_deg(m_anim.t * deg_per_sec)));
+    t.SetRotatePartY(math::DegToRad(vvr::normalize_deg(m_anim.t() * deg_per_sec)));
     m_mesh->setTransform(t);
     return true;
 }
