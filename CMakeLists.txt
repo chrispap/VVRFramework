@@ -19,6 +19,7 @@ add_subdirectory(GeoLab)
 add_subdirectory(Apps)
 add_subdirectory(Games)
 add_subdirectory(AllDemo)
+add_subdirectory(NdiViewer)
 #########################################################################################
 
 #### Group (Visual Studio only) #########################################################
