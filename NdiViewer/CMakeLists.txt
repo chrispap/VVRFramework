@@ -1,3 +1,7 @@
+### NOTES:
+### https://stackoverflow.com/questions/68036484/qt6-qt-qpa-plugin-could-not-load-the-qt-platform-plugin-xcb-in-even-thou
+###
+
 ### QT ###################################################################################
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
@@ -26,7 +30,8 @@ elseif (MSVC)
   set(MY_LIBRARIES ${MY_LIBRARIES} ${NDI_SDK_DIR}/Lib/x86/Processing.NDI.Lib.x86.lib)
   endif()
 elseif(UNIX)
-  message(FATAL_ERROR "TODO: Configure NDI for Linux")
+  include_directories(${NDI_SDK_DIR}/include)
+  set(MY_LIBRARIES ${MY_LIBRARIES} ${NDI_SDK_DIR}/lib/x86_64-linux-gnu/libndi.so)
 endif(APPLE)
 #########################################################################################
 
