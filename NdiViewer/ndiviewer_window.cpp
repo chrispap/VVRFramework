@@ -10,6 +10,7 @@
 #include <QFuture>
 #include <QtConcurrent>
 #include <string>
+#include <atomic>
 
 #include <cstdio>
 #include <iostream>
@@ -23,6 +24,8 @@
 #pragma comment(lib, "Processing.NDI.Lib.x86.lib")
 #endif // _WIN64
 #endif // _WIN32
+
+std::atomic<int> running = 1;
 
 template<typename T>
 int ndi_recv_loop(T delegate)
@@ -40,17 +43,17 @@ int ndi_recv_loop(T delegate)
     return 0;
 
   // Wait until there is one source
-  uint32_t no_sources = 0;
+  uint32_t num_sources = 0;
   const NDIlib_source_t* p_sources = NULL;
-  while (no_sources < desired_num_sources) {
+  while (running && num_sources < desired_num_sources) {
     // Wait until the sources on the network have changed
     printf("Looking for %d sources ...\n", desired_num_sources);
     NDIlib_find_wait_for_sources(pNDI_find, 1000/* One second */);
-    p_sources = NDIlib_find_get_current_sources(pNDI_find, &no_sources);
-    for (int i = 0; i < no_sources; i++) {
+    p_sources = NDIlib_find_get_current_sources(pNDI_find, &num_sources);
+    for (int i = 0; i < num_sources; i++) {
       printf("Source [%d/%d] -- Name: [%s] -- Address: [%s]\n",
         i + 1,
-        no_sources,
+        num_sources,
         (p_sources + i)->p_ndi_name,
         (p_sources + i)->p_ip_address);
     }
@@ -72,7 +75,8 @@ int ndi_recv_loop(T delegate)
 
   // Run for one minute
   using namespace std::chrono;
-  for (const auto start = high_resolution_clock::now(); high_resolution_clock::now() - start < minutes(5);) {
+  while (running)
+  {
     // The descriptors
     NDIlib_video_frame_v2_t video_frame;
     NDIlib_audio_frame_v2_t audio_frame;
@@ -222,6 +226,7 @@ public:
 private:
     Ui::NdiViewerWindow ui;
     QVideoWidget* videoWidget;
+    QFuture<void> future;
 };
 
 NdiViewerWindow::NdiViewerWindow()
@@ -230,7 +235,7 @@ NdiViewerWindow::NdiViewerWindow()
     videoWidget = new QVideoWidget();
     ui.scrollArea->setWidget(videoWidget);
 
-    QFuture<void> future = QtConcurrent::run([this] {
+    future = QtConcurrent::run([this] {
       ndi_recv_loop([this](NDIlib_video_frame_v2_t const &vf) {
         qDebug() << vf.timestamp;
         processVideo(&vf, this->videoWidget->videoSink());
@@ -240,6 +245,8 @@ NdiViewerWindow::NdiViewerWindow()
 
 NdiViewerWindow::~NdiViewerWindow()
 {
+  running = 0;
+  future.waitForFinished();
 }
 
 /*--------------------------------------------------------------------------------------*/
