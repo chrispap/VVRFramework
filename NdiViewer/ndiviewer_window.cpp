@@ -40,18 +40,18 @@ int ndiRxLoop(T delegate)
     return 0;
 
   uint32_t num_sources = 0;
-  const NDIlib_source_t* p_sources = NULL;
-  while (running && num_sources < desired_num_sources) {
+  const NDIlib_source_t *p_sources = NULL;
+  while (running && num_sources < desired_num_sources)
+  {
     // Wait until the sources on the network have changed
     printf("Looking for %d sources ...\n", desired_num_sources);
-    NDIlib_find_wait_for_sources(pNDI_find, 1000/* One second */);
+    NDIlib_find_wait_for_sources(pNDI_find, 1000 /* One second */);
     p_sources = NDIlib_find_get_current_sources(pNDI_find, &num_sources);
-    for (int i = 0; i < num_sources; i++) {
-      printf("Source [%d/%d] -- Name: [%s] -- Address: [%s]\n",
-        i + 1,
-        num_sources,
-        (p_sources + i)->p_ndi_name,
-        (p_sources + i)->p_ip_address);
+    for (int i = 0; i < num_sources; i++)
+    {
+      const auto name = p_sources[i].p_ndi_name;
+      const auto address = p_sources[i].p_ip_address;
+      printf("Source [%d/%d] -- Name: [%s] -- Address: [%s]\n", i + 1, num_sources, name, address);
     }
   }
 
@@ -133,7 +133,6 @@ QVideoFrameFormat::PixelFormat ndiPixelFormatToPixelFormat(enum NDIlib_FourCC_vi
     return QVideoFrameFormat::PixelFormat::Format_Invalid;
   }
 }
-
 class NdiViewerWindow : public QMainWindow
 {
   Q_OBJECT
@@ -142,16 +141,12 @@ public:
   ~NdiViewerWindow();
 
 private:
-    Ui::NdiViewerWindow ui;
-    QVideoWidget* videoWidget;
-    QFuture<void> future;
-
-private:
   void processVideo(NDIlib_video_frame_v2_t const *pNdiVideoFrame, QVideoSink *videoSink);
 
 private:
   Ui::NdiViewerWindow ui;
   QVideoWidget *videoWidget;
+  QFuture<void> future;
 };
 
 void NdiViewerWindow::processVideo(NDIlib_video_frame_v2_t const *pNdiVideoFrame, QVideoSink *videoSink)
@@ -213,7 +208,7 @@ NdiViewerWindow::NdiViewerWindow()
   videoWidget = new QVideoWidget();
   ui.scrollArea->setWidget(videoWidget);
 
-    future = QtConcurrent::run([this] {
+  future = QtConcurrent::run([this] {
     ndiRxLoop([this](NDIlib_video_frame_v2_t const &vf) {
       this->processVideo(&vf, this->videoWidget->videoSink());
     });
