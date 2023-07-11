@@ -12,6 +12,7 @@
 #include <array>
 #include <cstdlib>
 #include <utility>
+#include <algorithm>
 
 namespace vvr
 {
@@ -85,7 +86,7 @@ namespace vvr
         ~Canvas();
         void draw() const override;
         Drawable* add(Drawable *drw);
-        std::vector<Drawable*>& getDrawables(int offs = 0) { return frames[fid + offs].drvec; }
+        std::vector<Drawable*>& getDrawables(int offs = 0) { return frames[std::max(0, offs + (int) fid)].drvec; }
         size_t size() const { return frames.size(); }
         size_t frameIndex() const { return fid; }
         void setDelOnClear(bool del) { del_on_clear = del; }
