@@ -1,7 +1,7 @@
 ### QT ###################################################################################
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
-find_package(Qt6 COMPONENTS Widgets Gui OpenGL OpenGLWidgets REQUIRED)
+find_package(Qt6 REQUIRED COMPONENTS Core Widgets Gui OpenGL OpenGLWidgets)
 qt6_wrap_ui(UI_FILES demo_window.ui)
 ##########################################################################################
 
