@@ -1,20 +1,16 @@
 #include "QtCore/qfuture.h"
-#include <ui_ndiviewer_window.h>
-#include <QPushButton>
-#include <QMainWindow>
+#include <Processing.NDI.Lib.h>
 #include <QApplication>
+#include <QFuture>
+#include <QMainWindow>
+#include <QPushButton>
 #include <QVideoFrame>
 #include <QVideoSink>
 #include <QVideoWidget>
-#include <QFuture>
 #include <QtConcurrent>
-#include <string>
 #include <atomic>
-
 #include <cstdio>
-#include <iostream>
-#include <chrono>
-#include <Processing.NDI.Lib.h>
+#include <ui_ndiviewer_window.h>
 
 #ifdef _WIN32
 #ifdef _WIN64

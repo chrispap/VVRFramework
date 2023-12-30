@@ -1,13 +1,9 @@
-﻿#include <vvr/settings.h>
-#include <vvr/scene.h>
+﻿#include <vvr/drawing.h>
 #include <vvr/mesh.h>
-#include <vvr/utils.h>
-#include <vvr/drawing.h>
 #include <vvr/picking.h>
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <functional>
+#include <vvr/scene.h>
+#include <vvr/settings.h>
+#include <vvr/utils.h>
 
 /*---[Simple2DScene]--------------------------------------------------------------------*/
 class Simple2DScene : public vvr::Scene

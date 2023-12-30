@@ -4,13 +4,6 @@
 #include <vvr/scene.h>
 #include <vvr/mesh.h>
 #include <vvr/animation.h>
-#include <iostream>
-#include <fstream>
-#include <iostream>
-#include <cstring>
-#include <string>
-#include <vector>
-#include <string>
 #include <MathGeoLib.h>
 
 class AnimationScene : public vvr::Scene

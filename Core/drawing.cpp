@@ -499,7 +499,8 @@ void vvr::Canvas::newFrame(bool show_old_frames)
 void vvr::Canvas::draw() const
 {
     int fi = (int) fid;
-    while (frames[fi].show_old && --fi >= 0);
+    while (frames[fi].show_old && --fi > 0);
+
     while(fi <= fid) {
         for (size_t i = 0; i < frames[fi].drvec.size(); i++) {
             frames[fi].drvec[i]->drawif();
@@ -523,6 +524,25 @@ void vvr::Canvas::resize(int i)
 
     frames.resize(i);
     fid=i-1;
+}
+
+void vvr::Canvas::truncate(int i)
+{
+    if (i<1 || i > size()-1)
+        return;
+
+    const int num_del = frames.size()-i;
+
+    if (del_on_clear) {
+        for (int fid = 0; fid < num_del; fid++) {
+            for (int si = 0; si < frames[fid].drvec.size(); si++) {
+                delete frames[fid].drvec[si];
+            }
+        }
+    }
+
+    frames.erase(frames.begin(), frames.begin() + num_del);
+    ff();
 }
 
 void vvr::Canvas::clear()

@@ -2,12 +2,10 @@
 #define VVR_DRAWING_H
 
 #include "vvrframework_DLL.h"
-#include "utils.h"
 #include "palette.h"
 #include "macros.h"
 #include <MathGeoLib.h>
 #include <GeoLib.h>
-#include <string>
 #include <vector>
 #include <array>
 #include <cstdlib>
@@ -58,7 +56,7 @@ namespace vvr
         void draw() const override;
 
         static real SetLineWidth(real v) { std::swap(v, LineWidth); return v; }
-        static real SetPointSize(real v) { std::swap(v, LineWidth); return v; }
+        static real SetPointSize(real v) { std::swap(v, PointSize); return v; }
 
         static real LineWidth;
         static real PointSize;
@@ -98,6 +96,7 @@ namespace vvr
         void rew() { fid = 0; }
         void ff() { fid = frames.size() - 1; }
         void resize(int i);
+        void truncate(int i);
         void clear();
         void clearFrame();
 

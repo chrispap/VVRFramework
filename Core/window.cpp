@@ -3,6 +3,7 @@
 #include <vvr/scene.h>
 #include <vvr/scene_modern.h>
 #include <vvr/command.h>
+#include <vvr/utils.h>
 #include <QtWidgets>
 #include <QPushButton>
 #include <QLabel>

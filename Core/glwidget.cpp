@@ -71,7 +71,6 @@ void vvr::GlWidget::paintGL()
 void vvr::GlWidget::resizeGL(int width, int height)
 {
     s_dpr = s_widget_ptr->devicePixelRatio();
-    vvr_echo(s_dpr);
     m_scene->glResize(width * s_dpr, height * s_dpr);
 }
 

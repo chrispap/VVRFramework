@@ -1,8 +1,9 @@
-#include <vvr/scene_modern.h>
-#include <vvr/drawing.h>
 #include <MathGeoLib.h>
 #include <QtGui>
 #include <qopenglext.h>
+#include <vvr/drawing.h>
+#include <vvr/scene_modern.h>
+#include <vvr/utils.h>
 
 namespace vvr
 {

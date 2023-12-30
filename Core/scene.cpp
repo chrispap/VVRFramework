@@ -1,16 +1,11 @@
-#include <vvr/scene.h>
-#include <vvr/drawing.h>
 #include <MathGeoLib.h>
-#include <cstdio>
-#include <iostream>
-#include <vector>
-#include <string>
-#include <string>
-#include <algorithm>
-#include <locale>
-#include <cmath>
-#include <cassert>
 #include <QtGui> //gl.h
+#include <cassert>
+#include <cmath>
+#include <cstdio>
+#include <vvr/drawing.h>
+#include <vvr/scene.h>
+#include <vvr/utils.h>
 
 using namespace vvr;
 using namespace std;

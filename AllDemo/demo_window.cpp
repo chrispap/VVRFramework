@@ -3,25 +3,26 @@
 #include <QPushButton>
 #include <string>
 //! Scene cpp files
-#include "Apps/Boxes.cpp"
-#include "Apps/Origami.cpp"
-#include "Apps/DNAHelix.cpp"
-#include "Apps/ContourEditor.cpp"
-#include "Apps/Sketcher2D.cpp"
-#include "Apps/LilacChaser.cpp"
 #include "Apps/ArmJoint.cpp"
+#include "Apps/Boxes.cpp"
+#include "Apps/ContourEditor.cpp"
+#include "Apps/DNAHelix.cpp"
+#include "Apps/Fourier.cpp"
+#include "Apps/KDTrees.cpp"
+#include "Apps/LilacChaser.cpp"
+#include "Apps/Origami.cpp"
+#include "Apps/RollingDisks.cpp"
 #include "Apps/Simple2D.cpp"
 #include "Apps/Simple3D.cpp"
-#include "Apps/Tutorial.cpp"
-#include "Apps/KDTrees.cpp"
-#include "Apps/Fourier.cpp"
+#include "Apps/Sketcher2D.cpp"
 #include "Apps/Stadium.cpp"
-#include "GeoLab/Molding.cpp"
-#include "GeoLab/Triangulation.cpp"
-#include "GeoLab/Mesh3D.cpp"
-#include "GeoLab/Triangle.cpp"
-#include "GeoLab/ConvexHull.cpp"
+#include "Apps/Tutorial.cpp"
 #include "Games/tavli.cpp"
+#include "GeoLab/ConvexHull.cpp"
+#include "GeoLab/Mesh3D.cpp"
+#include "GeoLab/Molding.cpp"
+#include "GeoLab/Triangle.cpp"
+#include "GeoLab/Triangulation.cpp"
 
 /*--------------------------------------------------------------------------------------*/
 template <typename T>
@@ -46,6 +47,7 @@ static void gather(T &scenes)
     scenes.push_back(new ConvexHullScene);
     scenes.push_back(new FourierScene);
     scenes.push_back(new StadiumScene);
+    scenes.push_back(new RollingDisksScene);
     scenes.push_back(new TavliScene(tavli::GetDefaultColours()));
 }
 
