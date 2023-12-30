@@ -2,16 +2,13 @@
 #define VVR_UTILS_H
 
 #include "vvrframework_DLL.h"
-#include <algorithm>
-#include <iostream>
-#include <typeinfo>
-#include <sstream>
-#include <utility>
-#include <string>
-#include <vector>
-#include <memory>
-#include <tuple>
 #include <cstring>
+#include <sstream>
+#include <string>
+#include <tuple>
+#include <typeinfo>
+#include <utility>
+#include <vector>
 
 namespace vvr
 {
