@@ -1,15 +1,12 @@
 #ifndef VVR_MESH_H
 #define VVR_MESH_H
 
-#include "vvrframework_DLL.h"
 #include "macros.h"
-#include "utils.h"
-#include "scene.h"
+#include "palette.h"
+#include "vvrframework_DLL.h"
 #include <MathGeoLib.h>
-#include <vector>
 #include <string>
-#include <list>
-#include <set>
+#include <vector>
 
 namespace vvr {
 

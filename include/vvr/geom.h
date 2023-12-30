@@ -2,8 +2,11 @@
 #define VVR_GEOM_H
 
 #include "vvrframework_DLL.h"
-#include <vvr/drawing.h>
-#include <vvr/macros.h>
+
+#include <MathGeoLib.h>
+
+#include "drawing.h"
+#include "macros.h"
 
 #include <type_traits> // To use 'std::integral_constant'.
 #include <iostream>    // To use 'std::cout'.

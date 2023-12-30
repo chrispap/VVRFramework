@@ -1,3 +1,5 @@
+#pragma once
+
 #include "vvrframework_DLL.h"
 #include <MathGeoLib.h>
 

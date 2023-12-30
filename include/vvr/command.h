@@ -2,8 +2,8 @@
 #define VVR_COMMAND_H
 
 #include "vvrframework_DLL.h"
-#include "macros.h"
 #include <unordered_map>
+#include <vector>
 
 namespace vvr
 {

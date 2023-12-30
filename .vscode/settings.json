@@ -5,6 +5,21 @@
     "CMAKE_PREFIX_PATH": "/Users/chrisp/Qt/6.5.1/macos/lib/cmake",
     "QT_QMAKE_EXECUTABLE": "/Users/chrisp/Qt/6.5.1/macos/bin/qmake"
   },
+  "cmake.debugConfig": {
+    "type": "lldb",
+    "request": "launch",
+    "name": "CMake Debug",
+    "program": "${command:cmake.launchTargetPath}",
+    "args": [
+      "--fn=fnlist"
+    ],
+    "stopAtEntry": false,
+    "cwd": "${workspaceFolder}",
+    "environment": [],
+    "externalConsole": false,
+    "MIMode": "lldb",
+    "miDebuggerPath": "/usr/bin/lldb"
+  },
   "editor.formatOnSave": true,
   "editor.formatOnSaveMode": "modifications",
   "cmake.launchBehavior": "breakAndReuseTerminal"

@@ -2,7 +2,6 @@
 #define DSP_H
 
 #include "vvrframework_DLL.h"
-#include <iostream>
 #include <vector>
 
 namespace vvr { namespace dsp

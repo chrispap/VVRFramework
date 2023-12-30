@@ -1,14 +1,13 @@
-#include <vvr/drawing.h>
-#include <vvr/mesh.h>
-#include <vvr/settings.h>
-#include <vvr/utils.h>
+#include "symmetriceigensolver3x3.h"
 #include <MathGeoLib.h>
 #include <iostream>
-#include <fstream>
-#include <cstring>
-#include <string>
 #include <set>
-#include "symmetriceigensolver3x3.h"
+#include <string>
+#include <vvr/drawing.h>
+#include <vvr/mesh.h>
+#include <vvr/scene.h>
+#include <vvr/settings.h>
+#include <vvr/utils.h>
 
 using namespace math;
 

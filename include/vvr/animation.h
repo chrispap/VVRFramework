@@ -48,17 +48,18 @@ namespace vvr
             return !m_paused;
         }
 
-        bool update(bool start=false)
+        float update(bool start=false)
         {
             float sec;
             if (m_paused) {
-                if (!start) return false;
+                if (!start) return 0;
                 m_last_update = sec = get_seconds();
             } else sec = get_seconds();
-            m_time += ((sec - m_last_update) * m_speed);
+            const float delta_time = (sec - m_last_update) * m_speed;
+            m_time += delta_time;
             m_last_update = sec;
             m_paused = false;
-            return true;
+            return delta_time;
         }
 
         void setTime(float time)

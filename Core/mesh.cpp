@@ -1,17 +1,14 @@
-#include <vvr/mesh.h>
-#include <vvr/drawing.h>
-#include <MathGeoLib.h>
 #include "tiny_obj_loader.h"
-#include <cstdio>
-#include <ctime>
-#include <cfloat>
-#include <iostream>
-#include <vector>
-#include <list>
-#include <set>
+#include <MathGeoLib.h>
 #include <QFile>
 #include <QTextStream>
 #include <QtGui> //gl.h
+#include <cstdio>
+#include <ctime>
+#include <set>
+#include <vector>
+#include <vvr/drawing.h>
+#include <vvr/mesh.h>
 
 using namespace std;
 using namespace vvr;
