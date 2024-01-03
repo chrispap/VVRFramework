@@ -26,6 +26,8 @@ Scene::Scene()
     m_show_sliders = false;
     m_fov = 66;
     m_first_resize = true;
+    m_viewcenter_x = 0;
+    m_viewcenter_y = 0;
     setCameraPos(vec(0, 0, DEFAULT_CAM_DIST));
 }
 
@@ -50,7 +52,12 @@ void Scene::enterPixelMode()
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
     glLoadIdentity();
-    glOrtho(-m_screen_width / 2, m_screen_width / 2, -m_screen_height / 2, m_screen_height / 2, 1, -1);
+    glOrtho(-m_screen_width / 2 - m_viewcenter_x,
+      m_screen_width / 2 - m_viewcenter_x,
+      -m_screen_height / 2 - m_viewcenter_y,
+      m_screen_height / 2 - m_viewcenter_y,
+      1,
+      -1);
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     glLoadIdentity();
@@ -72,16 +79,16 @@ void Scene::mouse2pix(int &x, int &y)
     *  X: Rightwards
     *  Y: Upwards
     */
-    x -= m_screen_width / 2;
-    y -= m_screen_height / 2;
+    x -= m_screen_width / 2 + m_viewcenter_x;
+    y -= m_screen_height / 2 - m_viewcenter_y;
     y = -y;
 }
 
 void Scene::pix2mouse(int &x, int &y)
 {
     y = -y;
-    y += m_screen_height / 2;
-    x += m_screen_width / 2;
+    y += m_screen_height / 2 - m_viewcenter_x;
+    x += m_screen_width / 2 + m_viewcenter_y;
 }
 
 void Scene::setCameraPos(const vec &pos)

@@ -79,6 +79,8 @@ namespace vvr
         bool            m_show_log;
         bool            m_show_sliders;
         bool            m_first_resize;
+        int             m_viewcenter_x;
+        int             m_viewcenter_y;
 
     protected:
         MacroCmd        cursorShow;

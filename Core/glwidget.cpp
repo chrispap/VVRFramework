@@ -1,13 +1,11 @@
-#include <vvr/glwidget.h>
-#include <vvr/scene.h>
-#include <vvr/macros.h>
-#include <cmath>
-#include <iostream>
 #include <QApplication>
-#include <QOpenGLContext>
 #include <QMouseEvent>
+#include <QOpenGLContext>
 #include <QTimer>
 #include <QtGui> //gl.h
+#include <vvr/glwidget.h>
+#include <vvr/macros.h>
+#include <vvr/scene.h>
 
 #define DISABLE_PRINTS 1
 #if DISABLE_PRINTS
