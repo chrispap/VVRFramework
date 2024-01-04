@@ -77,8 +77,8 @@ vvr::Window::Window(vvr::Scene *scene) : m_scene(scene)
         QTimer::singleShot(150, this, SLOT(showFullScreen()));
     } else showNormal();
 
-    move(80, 80);
-    resize(1200, 800);
+    move(55, 0);
+    resize(1400, 800);
 }
 
 void vvr::Window::createActions()

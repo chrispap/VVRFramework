@@ -1,5 +1,4 @@
 
-#include "Math/MathConstants.h"
 #include "Math/MathFunc.h"
 #include "vvr/dragging.h"
 #include <C2DLine.h>
@@ -341,6 +340,8 @@ createRoadFromPts(
 
 /*---[RollingDisks]----------------------------------------------------------*/
 
+constexpr auto hugeint = std::numeric_limits<int>::max();
+
 class RollingCarScene : public vvr::Scene
 {
 public:
@@ -360,7 +361,6 @@ private:
   void mouseReleased(int x, int y, int modif) override;
 
 private:
-  bool autoCenter = true;
   int num_wheels = 2;
   double wheel_speed;
   float wheel_radius;
@@ -369,6 +369,9 @@ private:
   vvr::Animation anim;
   std::vector<Wheel::Ptr> wheels;
   std::vector<vvr::Point3D *> road_pts;
+  vvr::Mousepos dragAnchor{hugeint, hugeint};
+  vvr::TargetAnimation<math::float2> viewCenterAnim{{0.f, 0.f}, 4000.0f};
+  bool keepWheelCentered = false;
 
   typedef vvr::PriorityPicker2D<vvr::MousePicker2D<vvr::Point3D>> PickerT;
   PickerT::Ptr picker;
@@ -403,18 +406,19 @@ RollingCarScene::RollingCarScene()
 void
 RollingCarScene::reset()
 {
+  keepWheelCentered = false;
   randomColourIndex = 0;
   vvr::Scene::reset();
   anim.reset();
   canvas.clear();
+  viewCenterAnim.reset();
+  viewCenterAnim.setValue({0.f, 0.f});
 
   wheels.clear();
   for (int i = 0; i < num_wheels; ++i) {
     auto wheel = Wheel::Make(wheel_radius, wheel_speed, road_pts, i);
     wheels.push_back(wheel);
   }
-
-  // anim.toggle();
 }
 
 bool
@@ -438,6 +442,17 @@ RollingCarScene::idle()
     wheel->update(dt, road_pts);
   }
 
+  //-- Center view on hub of first wheel
+  if (keepWheelCentered) {
+    using math::FloorInt;
+    const auto &hub = wheels.front()->getHub();
+    const math::float2 newCenter(
+      FloorInt(hub.x), step(FloorInt(hub.y), getViewportHeight() / 3));
+    viewCenterAnim.setTarget(newCenter);
+  } else {
+    viewCenterAnim.snapToTarget();
+  }
+
   return !anim.paused();
 }
 
@@ -448,18 +463,16 @@ RollingCarScene::draw()
   ScopedCounter counter{"drawing"};
 #endif
 
-  if (autoCenter) {
-    const auto &center = wheels.front()->getHub();
-    m_viewcenter_x = math::FloorInt(-center.x);
-    m_viewcenter_y = math::FloorInt(-center.y);
-  }
-  enterPixelMode();
+  math::float2 viewCenterValue = viewCenterAnim;
+  m_viewcenter_x = viewCenterValue.x;
+  m_viewcenter_y = viewCenterValue.y;
 
+  enterPixelMode();
   {
+    vvr::Canvas tmp;
     road.draw();
     canvas.draw();
 
-    vvr::Canvas tmp;
     for (int i = 0; i < wheels.size() - 1; ++i) {
       tmp.add(C2DLine(wheels[i]->getHub(), wheels[i + 1]->getHub()))->draw();
     }
@@ -470,7 +483,6 @@ RollingCarScene::draw()
 
     drawAxes();
   }
-
   exitPixelMode();
 }
 
@@ -508,12 +520,22 @@ RollingCarScene::keyEvent(unsigned char key, bool up, int modif)
   switch (key) {
   case ' ':
     anim.toggle();
+    if (anim.paused()) {
+      viewCenterAnim.pause();
+    } else {
+      viewCenterAnim.update(true);
+    }
     break;
   case 'r':
     reset();
     break;
   case 'c':
-    autoCenter = !autoCenter;
+    if (keepWheelCentered == false) {
+      keepWheelCentered = true;
+      viewCenterAnim.update(true);
+    } else {
+      keepWheelCentered = false;
+    }
     break;
   }
 
@@ -524,9 +546,6 @@ RollingCarScene::keyEvent(unsigned char key, bool up, int modif)
     reset();
   }
 }
-
-constexpr auto hugeint = std::numeric_limits<int>::max();
-static vvr::Mousepos dragAnchor{hugeint, hugeint};
 
 void
 RollingCarScene::mouseHovered(int x, int y, int modif)

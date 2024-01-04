@@ -95,37 +95,96 @@ namespace vvr
             terminate();
         }
 
-        PropertyAnimation(const P& from, const P& to, P& prop)
-            : from(from)
-            , to(to)
-            , d(to-from)
-            , prop(&prop)
+        PropertyAnimation(const P &from, const P &to, P &prop, float dur = 1.0f)
+          : from(from), to(to), d(to - from), prop(&prop), dur(dur)
         {
+          animate();
         }
+
+        float remaining() const { return dur - t(); }
 
         bool animate()
         {
             update(true);
-            const bool alive =  t() < 1.0f;
-            *prop = alive ? from + (d * t()) : to;
+            const bool alive = t() < dur;
+            if (alive) {
+              *prop = from + (d * t());
+            } else
+              terminate();
             return alive;
         }
 
         void setPixelSpeed(float s)
         {
             const float dl = static_cast<float>(d.Length());
-            setSpeed(s/dl);
+            setSpeed(s / dl / dur);
         }
 
         void terminate()
         {
-            reset();
-            *prop =  to;
+          *prop = to;
+          // reset();
         }
 
-    private:
+      private:
         P from, to, d;
-        P* prop;
+        P *prop;
+        float dur;
+    };
+
+    template <typename P>
+    struct TargetAnimation : Animation
+    {
+      vvr_decl_shared_ptr(TargetAnimation)
+
+        TargetAnimation(P const &value, float vel)
+        : value(value), target(value), dv{0.0f}, vel(vel)
+      {}
+
+      ~TargetAnimation() { value = target; }
+
+      void setTarget(P const &newTarget)
+      {
+        target = newTarget;
+        dv = (target - value).Normalized() * vel;
+        if (!paused()) animate();
+      }
+
+      void setValue(P const &newValue)
+      {
+        value = newValue;
+        target = newValue;
+        dv = P{0.0f};
+      }
+
+      void snapToTarget()
+      {
+        value = target;
+        dv = P{0.0f};
+      }
+
+      bool animate()
+      {
+        const float dt = update(true);
+        const P newValue = value + dv * dt;
+
+        if (dv.Dot(target - newValue) < 0) {
+          dv = P{0.0f};
+          value = target;
+          return false;
+        } else {
+          value = newValue;
+          return true;
+        }
+      }
+
+      operator P() const { return value; }
+
+    private:
+      P value;
+      P target;
+      P dv;
+      float vel;
     };
 }
 
