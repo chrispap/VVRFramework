@@ -4,3 +4,6 @@
 [submodule "3rdParty/jsoncpp"]
 	path = 3rdParty/jsoncpp
 	url = https://github.com/open-source-parsers/jsoncpp.git
+[submodule "3rdParty/box2d"]
+	path = 3rdParty/box2d
+	url = https://github.com/erincatto/box2d.git
