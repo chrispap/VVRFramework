@@ -124,7 +124,7 @@ Wheel::update(float dt, std::vector<vvr::Point3D *> const &road_pts)
       normal.TurnLeft(M_PI_2);
       place(seg.point, normal);
     }
-  } else if (road_seg < road_pts.size() - 1) {
+  } else {
     auto &p3 = road_pts[road_seg + 2];
 
     const C2DLine seg1(C2DPoint{p1->x, p1->y}, C2DPoint{p2->x, p2->y});
