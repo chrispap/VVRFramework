@@ -220,16 +220,37 @@ Wheel::draw() const
 /*---[Functions]-------------------------------------------------------------*/
 
 auto
-track_zigzag()
+track_simple()
 {
-  std::vector<vvr::Point3D *> pts;
-  constexpr int dx = 400;
-  constexpr int dy = dx * 0.1;
-  for (int i = 0; i < 28; ++i) {
-    pts.push_back(new vvr::Point3D((i * dx), 0, 0));
-    pts.push_back(new vvr::Point3D((i * dx) + (dx / 2.), dy, 0));
-  }
-  return pts;
+  return std::vector<vvr::Point3D *>{
+    new vvr::Point3D(0, 50, 0),
+    new vvr::Point3D(200, 10, 0),
+    new vvr::Point3D(400, 20, 0),
+    new vvr::Point3D(600, 30, 0),
+    new vvr::Point3D(900, 0, 0),
+    new vvr::Point3D(1200, 40, 0),
+    // new vvr::Point3D(0, -400, 0),
+  };
+}
+
+auto
+track_polygon()
+{
+  return std::vector<vvr::Point3D *>{
+    new vvr::Point3D(0, 0, 0),
+    new vvr::Point3D(130, 0, 0),
+    new vvr::Point3D(300, 10, 0),
+    new vvr::Point3D(400, 180, 0),
+    new vvr::Point3D(600, 150, 0),
+    new vvr::Point3D(800, 40, 0),
+    new vvr::Point3D(1000, 0, 0),
+    new vvr::Point3D(1000, -200, 0),
+    new vvr::Point3D(800, -300, 0),
+    new vvr::Point3D(400, -300, 0),
+    new vvr::Point3D(0, -500, 0),
+    new vvr::Point3D(-200, -500, 0),
+    new vvr::Point3D(0, 0, 0),
+  };
 }
 
 auto
@@ -258,37 +279,16 @@ track_spiral(float radius = 200)
 }
 
 auto
-track1()
+track_zigzag()
 {
-  return std::vector<vvr::Point3D *>{
-    new vvr::Point3D(0, 0, 0),
-    new vvr::Point3D(130, 0, 0),
-    new vvr::Point3D(300, 10, 0),
-    new vvr::Point3D(400, 180, 0),
-    new vvr::Point3D(600, 150, 0),
-    new vvr::Point3D(800, 40, 0),
-    new vvr::Point3D(1000, 0, 0),
-    new vvr::Point3D(1000, -200, 0),
-    new vvr::Point3D(800, -300, 0),
-    new vvr::Point3D(400, -300, 0),
-    new vvr::Point3D(0, -500, 0),
-    new vvr::Point3D(-200, -500, 0),
-    new vvr::Point3D(0, 0, 0),
-  };
-}
-
-auto
-track2()
-{
-  return std::vector<vvr::Point3D *>{
-    new vvr::Point3D(0, 50, 0),
-    new vvr::Point3D(200, 10, 0),
-    new vvr::Point3D(400, 20, 0),
-    new vvr::Point3D(600, 30, 0),
-    new vvr::Point3D(900, 0, 0),
-    new vvr::Point3D(1200, 40, 0),
-    new vvr::Point3D(0, -400, 0),
-  };
+  std::vector<vvr::Point3D *> pts;
+  constexpr int dx = 400;
+  constexpr int dy = dx * 0.1;
+  for (int i = 0; i < 28; ++i) {
+    pts.push_back(new vvr::Point3D((i * dx), 0, 0));
+    pts.push_back(new vvr::Point3D((i * dx) + (dx / 2.), dy, 0));
+  }
+  return pts;
 }
 
 auto
@@ -306,10 +306,10 @@ tracks()
   typedef std::function<std::vector<vvr::Point3D *>()> TrackFn;
   return std::vector<TrackFn>{
     []() {
-      return translateTrack(track1(), {-500, 0, 0});
+      return translateTrack(track_simple(), {-500, 0, 0});
     },
     []() {
-      return translateTrack(track2(), {-500, 0, 0});
+      return translateTrack(track_polygon(), {-500, 0, 0});
     },
     []() {
       return translateTrack(track_circle(), {0, 0, 0});
