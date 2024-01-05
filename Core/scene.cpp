@@ -55,7 +55,7 @@ void Scene::enterPixelMode()
     glOrtho(
      -m_screen_width   / 2 + m_viewcenter_x,
       m_screen_width   / 2 + m_viewcenter_x,
-      -m_screen_height / 2 + m_viewcenter_y,
+     -m_screen_height  / 2 + m_viewcenter_y,
       m_screen_height  / 2 + m_viewcenter_y,
       1, -1);
     glMatrixMode(GL_MODELVIEW);

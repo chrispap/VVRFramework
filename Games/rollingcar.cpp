@@ -351,6 +351,7 @@ private:
   void reset() override;
   bool idle() override;
   void draw() override;
+  void resize() override;
 
   void arrowEvent(vvr::ArrowDir dir, int modif) override;
   void keyEvent(unsigned char, bool, int) override;
@@ -361,7 +362,7 @@ private:
 
 private:
   int num_wheels = 2;
-  double wheel_speed;
+  float wheel_speed;
   float wheel_radius;
   vvr::Canvas road;
   vvr::Canvas canvas;
@@ -387,24 +388,21 @@ RollingCarScene::RollingCarScene()
   vvr::Shape::SetPointSize(12);
   vvr::Shape::SetLineWidth(5);
 
-  m_bg_col = vvr::grey;
-  m_fullscreen = false;
-  m_show_log = true;
-
-  wheel_speed = 200;
-  wheel_radius = 50;
+  vvr::Scene::m_bg_col = vvr::grey;
+  vvr::Scene::m_fullscreen = false;
+  vvr::Scene::m_show_log = true;
 
   picker = PickerT::Make(road);
-
   road_pts = tracks()[4]();
   createRoadFromPts(road_pts, road);
-
   reset();
 }
 
 void
 RollingCarScene::reset()
 {
+  wheel_speed = 0;
+  wheel_radius = 50;
   keepWheelCentered = false;
   randomColourIndex = 0;
   vvr::Scene::reset();
@@ -418,6 +416,8 @@ RollingCarScene::reset()
     auto wheel = Wheel::Make(wheel_radius, wheel_speed, road_pts, i);
     wheels.push_back(wheel);
   }
+
+  anim.toggle();
 }
 
 bool
@@ -429,7 +429,7 @@ RollingCarScene::idle()
 
   double dt = anim.update();
 
-  wheel_speed = std::clamp(wheel_speed, 0.0, 2000.0);
+  wheel_speed = std::clamp(wheel_speed, 0.0f, 400.0f * 4);
   wheel_radius = std::clamp(wheel_radius, 10.0f, 1000.0f);
 
   for (auto &wheel : wheels) {
@@ -466,28 +466,44 @@ RollingCarScene::draw()
   m_viewcenter_y = viewCenterAnim.get().y;
 
   enterPixelMode();
-  {
-    vvr::Canvas tmp;
-    road.draw();
-    canvas.draw();
 
-    for (int i = 0; i < wheels.size() - 1; ++i) {
-      tmp.add(C2DLine(wheels[i]->getHub(), wheels[i + 1]->getHub()))->draw();
-    }
+  vvr::Canvas tmp;
 
-    for (auto &wheel : wheels) {
-      wheel->draw();
-    }
+  road.draw();
+  canvas.draw();
 
-    // drawAxes();
+  for (int i = 0; i < wheels.size() - 1; ++i) {
+    tmp.add(C2DLine(wheels[i]->getHub(), wheels[i + 1]->getHub()))->draw();
   }
+
+  for (auto &wheel : wheels) {
+    wheel->draw();
+  }
+
+  drawAxes();
+
   exitPixelMode();
+}
+
+void
+RollingCarScene::resize()
+{
+  Scene::resize();
+
+  if (m_first_resize) {
+    std::cout << "Press 'r' to reset." << std::endl;
+    std::cout << "Press 'c' to keep wheel centered." << std::endl;
+    std::cout << "Press '0'-'9' to change track." << std::endl;
+    std::cout << "Press 'space' to pause." << std::endl;
+    std::cout << "Press 'up'/'down' to change speed." << std::endl;
+    std::cout << "Press 'left'/'right' to change radius." << std::endl;
+  }
 }
 
 void
 RollingCarScene::arrowEvent(vvr::ArrowDir dir, int modif)
 {
-  constexpr auto dSpeed = 50;
+  constexpr auto dSpeed = 400;
   constexpr auto dRadius = 10;
 
   switch (dir) {
@@ -504,8 +520,6 @@ RollingCarScene::arrowEvent(vvr::ArrowDir dir, int modif)
     wheel_radius += dRadius;
     break;
   }
-
-  vvr_echo(wheel_speed);
 }
 
 void
