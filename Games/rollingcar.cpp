@@ -187,8 +187,7 @@ void
 Wheel::place(C2DPoint const &ground, C2DVector normal)
 {
   normal.SetLength(tire.GetRadius());
-  C2DPoint center = ground + normal;
-  tire.SetCentre(center);
+  tire.SetCentre(ground + normal);
 }
 
 void
