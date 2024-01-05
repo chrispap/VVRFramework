@@ -555,11 +555,9 @@ RollingCarScene::mouseHovered(int x, int y, int modif)
 void
 RollingCarScene::mousePressed(int x, int y, int modif)
 {
-  if (vvr::Scene::ctrlDown(modif)) {
-    if (!picker->do_pick(vvr::Mousepos{x, y}, modif)) {
-      if (!keepWheelCentered || anim.paused()) {
-        dragAnchor = {x, y};
-      }
+  if (!picker->do_pick(vvr::Mousepos{x, y}, modif)) {
+    if (!keepWheelCentered || anim.paused()) {
+      dragAnchor = {x, y};
     }
   }
 }
