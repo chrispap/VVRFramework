@@ -463,9 +463,8 @@ RollingCarScene::draw()
   ScopedCounter counter{"drawing"};
 #endif
 
-  math::float2 viewCenterValue = viewCenterAnim;
-  m_viewcenter_x = viewCenterValue.x;
-  m_viewcenter_y = viewCenterValue.y;
+  m_viewcenter_x = viewCenterAnim.get().x;
+  m_viewcenter_y = viewCenterAnim.get().y;
 
   enterPixelMode();
   {
@@ -481,7 +480,7 @@ RollingCarScene::draw()
       wheel->draw();
     }
 
-    drawAxes();
+    // drawAxes();
   }
   exitPixelMode();
 }
@@ -558,7 +557,9 @@ RollingCarScene::mousePressed(int x, int y, int modif)
 {
   if (vvr::Scene::ctrlDown(modif)) {
     if (!picker->do_pick(vvr::Mousepos{x, y}, modif)) {
-      dragAnchor = {x, y};
+      if (!keepWheelCentered || anim.paused()) {
+        dragAnchor = {x, y};
+      }
     }
   }
 }
@@ -570,8 +571,10 @@ RollingCarScene::mouseMoved(int x, int y, int modif)
 
   if (!picker->get_picked()) {
     if (dragAnchor.x != hugeint && dragAnchor.y != hugeint) {
-      m_viewcenter_x += x - dragAnchor.x;
-      m_viewcenter_y += y - dragAnchor.y;
+      auto val = viewCenterAnim.get();
+      val.x -= x - dragAnchor.x;
+      val.y -= y - dragAnchor.y;
+      viewCenterAnim.setValue(val);
     }
   }
 }

@@ -1,9 +1,9 @@
 #ifndef VVR_ANIMATION_H
 #define VVR_ANIMATION_H
 
-#include "vvrframework_DLL.h"
-#include "utils.h"
 #include "macros.h"
+#include "utils.h"
+#include "vvrframework_DLL.h"
 
 namespace vvr
 {
@@ -146,7 +146,14 @@ namespace vvr
       void setTarget(P const &newTarget)
       {
         target = newTarget;
-        dv = (target - value).Normalized() * vel;
+        auto dv1 = (target - value);
+
+        if (dv1.Normalize()) {
+          dv = dv1 * vel;
+        } else {
+          dv = P{0.0f};
+        }
+
         if (!paused()) animate();
       }
 
@@ -178,7 +185,7 @@ namespace vvr
         }
       }
 
-      operator P() const { return value; }
+      P const &get() const { return value; }
 
     private:
       P value;

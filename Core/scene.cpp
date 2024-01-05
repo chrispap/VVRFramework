@@ -79,16 +79,16 @@ void Scene::mouse2pix(int &x, int &y)
     *  X: Rightwards
     *  Y: Upwards
     */
-    x -= m_screen_width / 2 + m_viewcenter_x;
-    y -= m_screen_height / 2 - m_viewcenter_y;
+    x -= m_screen_width / 2 - m_viewcenter_x;
+    y -= m_screen_height / 2 + m_viewcenter_y;
     y = -y;
 }
 
 void Scene::pix2mouse(int &x, int &y)
 {
     y = -y;
-    y += m_screen_height / 2 - m_viewcenter_x;
-    x += m_screen_width / 2 + m_viewcenter_y;
+    y += m_screen_height / 2 + m_viewcenter_x;
+    x += m_screen_width / 2 - m_viewcenter_y;
 }
 
 void Scene::setCameraPos(const vec &pos)
