@@ -137,7 +137,11 @@ namespace vvr
     {
       vvr_decl_shared_ptr(TargetAnimation)
 
-        TargetAnimation(P const &value, float vel)
+        TargetAnimation(float vel = 1.0f)
+        : dv{0.0f}, vel(vel)
+      {}
+
+      TargetAnimation(P const &value, float vel)
         : value(value), target(value), dv{0.0f}, vel(vel)
       {}
 

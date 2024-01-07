@@ -6,6 +6,7 @@
 #include <C2DVector.h>
 #include <MathGeoLibFwd.h>
 #include <algorithm>
+#include <box2d/box2d.h>
 #include <cmath>
 #include <functional>
 #include <limits>
@@ -44,7 +45,7 @@ template <typename T>
 T
 step(T value, T step)
 {
-  return value - value % step;
+  return floor(value / step) * step;
 }
 
 vvr::Colour
@@ -222,13 +223,12 @@ auto
 track_simple()
 {
   return std::vector<vvr::Point3D *>{
-    new vvr::Point3D(0, 50, 0),
-    new vvr::Point3D(200, 10, 0),
-    new vvr::Point3D(400, 20, 0),
-    new vvr::Point3D(600, 30, 0),
-    new vvr::Point3D(900, 0, 0),
-    new vvr::Point3D(1200, 40, 0),
-    // new vvr::Point3D(0, -400, 0),
+    new vvr::Point3D(0., 0.5, 0.),
+    new vvr::Point3D(2., 0.1, 0.),
+    new vvr::Point3D(4., 0.2, 0.),
+    new vvr::Point3D(6., 0.3, 0.),
+    new vvr::Point3D(9., 0., 0.),
+    new vvr::Point3D(12., 0.4, 0.),
   };
 }
 
@@ -236,43 +236,43 @@ auto
 track_polygon()
 {
   return std::vector<vvr::Point3D *>{
-    new vvr::Point3D(0, 0, 0),
-    new vvr::Point3D(130, 0, 0),
-    new vvr::Point3D(300, 10, 0),
-    new vvr::Point3D(400, 180, 0),
-    new vvr::Point3D(600, 150, 0),
-    new vvr::Point3D(800, 40, 0),
-    new vvr::Point3D(1000, 0, 0),
-    new vvr::Point3D(1000, -200, 0),
-    new vvr::Point3D(800, -300, 0),
-    new vvr::Point3D(400, -300, 0),
-    new vvr::Point3D(0, -500, 0),
-    new vvr::Point3D(-200, -500, 0),
-    new vvr::Point3D(0, 0, 0),
+    new vvr::Point3D(-2.0, 0.0, 0.0),
+    new vvr::Point3D(-1.0, 0.4, 0.0),
+    new vvr::Point3D(0.0, 0.5, 0.0),
+    new vvr::Point3D(1.0, 0.2, 0.0),
+    new vvr::Point3D(3.0, 0.1, 0.0),
+    new vvr::Point3D(2.0, -1.5, 0.0),
+    new vvr::Point3D(0.0, -2.5, 0.0),
+    new vvr::Point3D(0.5, -1.5, 0.0),
+    new vvr::Point3D(-2.0, 0.0, 0.0),
   };
 }
 
 auto
-track_circle(float radius = 200)
+track_circle(float radius = 2.0)
 {
   std::vector<vvr::Point3D *> pts;
   constexpr int segs = 32;
   for (int i = 0; i < segs; ++i) {
-    pts.push_back(new vvr::Point3D(
-      radius * sin(i * M_PI / segs * 2), radius * cos(i * M_PI / segs * 2), 0));
+    constexpr auto fullcircle = M_PI * 2;
+    const auto x = radius * sin(fullcircle * i / segs);
+    const auto y = radius * cos(fullcircle * i / segs);
+    pts.push_back(new vvr::Point3D(x, y, 0));
   }
   return pts;
 }
 
 auto
-track_spiral(float radius = 200)
+track_spiral(float radius = 0.2)
 {
   std::vector<vvr::Point3D *> pts;
   constexpr int segs = 32;
   for (int i = 0; i < segs; ++i) {
-    pts.push_back(new vvr::Point3D(
-      radius * sin(i * M_PI / segs * 2), radius * cos(i * M_PI / segs * 2), 0));
-    radius += 10;
+    constexpr auto fullcircle = M_PI * 2;
+    const auto x = radius * sin(fullcircle * i / segs);
+    const auto y = radius * cos(fullcircle * i / segs);
+    pts.push_back(new vvr::Point3D(x, y, 0));
+    radius += 0.1;
   }
   return pts;
 }
@@ -281,22 +281,13 @@ auto
 track_zigzag()
 {
   std::vector<vvr::Point3D *> pts;
-  constexpr int dx = 400;
-  constexpr int dy = dx * 0.1;
-  for (int i = 0; i < 28; ++i) {
+  constexpr float dx = 2.0;
+  constexpr float dy = dx * 0.1;
+  for (int i = 0; i < 20; ++i) {
     pts.push_back(new vvr::Point3D((i * dx), 0, 0));
-    pts.push_back(new vvr::Point3D((i * dx) + (dx / 2.), dy, 0));
+    pts.push_back(new vvr::Point3D((i * dx) + (dx * 0.5), dy, 0));
   }
   return pts;
-}
-
-auto
-translateTrack(std::vector<vvr::Point3D *> &&road_pts, math::float3 const &dv)
-{
-  for (auto &pt : road_pts) {
-    (*pt) += dv;
-  }
-  return road_pts;
 }
 
 auto
@@ -304,21 +295,11 @@ tracks()
 {
   typedef std::function<std::vector<vvr::Point3D *>()> TrackFn;
   return std::vector<TrackFn>{
-    []() {
-      return translateTrack(track_simple(), {-500, 0, 0});
-    },
-    []() {
-      return translateTrack(track_polygon(), {-500, 0, 0});
-    },
-    []() {
-      return translateTrack(track_circle(), {0, 0, 0});
-    },
-    []() {
-      return translateTrack(track_spiral(), {0, 0, 0});
-    },
-    []() {
-      return translateTrack(track_zigzag(), {-500, 0, 0});
-    },
+    []() { return track_simple(); },
+    []() { return track_polygon(); },
+    []() { return track_circle(); },
+    []() { return track_spiral(); },
+    []() { return track_zigzag(); },
   };
 }
 
@@ -339,7 +320,8 @@ createRoadFromPts(
 
 /*---[RollingDisks]----------------------------------------------------------*/
 
-constexpr auto hugeint = std::numeric_limits<int>::max();
+constexpr auto hugei = std::numeric_limits<int>::max();
+constexpr auto hugef = std::numeric_limits<float>::max();
 
 class RollingCarScene : public vvr::Scene
 {
@@ -352,8 +334,8 @@ private:
   bool idle() override;
   void draw() override;
   void resize() override;
-
   void arrowEvent(vvr::ArrowDir dir, int modif) override;
+  void mouseWheel(int dir, int modif) override;
   void keyEvent(unsigned char, bool, int) override;
   void mouseHovered(int x, int y, int modif) override;
   void mousePressed(int x, int y, int modif) override;
@@ -361,20 +343,22 @@ private:
   void mouseReleased(int x, int y, int modif) override;
 
 private:
-  int num_wheels = 2;
-  float wheel_speed;
-  float wheel_radius;
+  void setupPhysics();
+
+private:
+  int numWheels;
+  float wheelSpeed;
+  float wheelRadius;
   vvr::Canvas road;
   vvr::Canvas canvas;
   vvr::Animation anim;
   std::vector<Wheel::Ptr> wheels;
-  std::vector<vvr::Point3D *> road_pts;
-  vvr::Mousepos dragAnchor{hugeint, hugeint};
-  vvr::TargetAnimation<math::float2> viewCenterAnim{{0.f, 0.f}, 4000.0f};
+  std::vector<vvr::Point3D *> roadPts;
+  vvr::TargetAnimation<math::float2> worldCenter;
+  math::float2 dragAnchor{hugef, hugef};
+  math::float2 worldCenterMlstn;
+  math::float2 worldSize;
   bool keepWheelCentered = false;
-
-  typedef vvr::PriorityPicker2D<vvr::MousePicker2D<vvr::Point3D>> PickerT;
-  PickerT::Ptr picker;
 };
 
 const char *
@@ -392,32 +376,41 @@ RollingCarScene::RollingCarScene()
   vvr::Scene::m_fullscreen = false;
   vvr::Scene::m_show_log = true;
 
-  picker = PickerT::Make(road);
-  road_pts = tracks()[4]();
-  createRoadFromPts(road_pts, road);
+  roadPts = tracks()[4]();
+  createRoadFromPts(roadPts, road);
+  setupPhysics();
   reset();
+}
+
+void
+RollingCarScene::setupPhysics()
+{
+  b2Vec2 gravity(0.0f, 0.0f);
+  b2World world(gravity);
 }
 
 void
 RollingCarScene::reset()
 {
-  wheel_speed = 0;
-  wheel_radius = 50;
+  worldCenter = {{0.f, 0.f}, 10.0f};
+  worldSize = {10., 0.}; // Define only the width of the world
+  numWheels = 2;
+  wheelSpeed = 0;
+  wheelRadius = 0.25;
   keepWheelCentered = false;
   randomColourIndex = 0;
   vvr::Scene::reset();
   anim.reset();
   canvas.clear();
-  viewCenterAnim.reset();
-  viewCenterAnim.setValue({0.f, 0.f});
 
   wheels.clear();
-  for (int i = 0; i < num_wheels; ++i) {
-    auto wheel = Wheel::Make(wheel_radius, wheel_speed, road_pts, i);
+  for (int i = 0; i < numWheels; ++i) {
+    auto wheel = Wheel::Make(wheelRadius, wheelSpeed, roadPts, i);
     wheels.push_back(wheel);
   }
 
   anim.toggle();
+  resize();
 }
 
 bool
@@ -429,27 +422,26 @@ RollingCarScene::idle()
 
   double dt = anim.update();
 
-  wheel_speed = std::clamp(wheel_speed, 0.0f, 400.0f * 4);
-  wheel_radius = std::clamp(wheel_radius, 10.0f, 1000.0f);
+  wheelSpeed = std::clamp(wheelSpeed, 0.0f, 16.0f);
+  wheelRadius = std::clamp(wheelRadius, 0.01f, 10.0f);
 
   for (auto &wheel : wheels) {
-    wheel->setSpeed(wheel_speed);
-    wheel->setRadius(wheel_radius);
+    wheel->setSpeed(wheelSpeed);
+    wheel->setRadius(wheelRadius);
   }
 
   for (auto &wheel : wheels) {
-    wheel->update(dt, road_pts);
+    wheel->update(dt, roadPts);
   }
 
-  //-- Center view on hub of first wheel
+  // Center view on hub of first wheel
   if (keepWheelCentered) {
     using math::FloorInt;
     const auto &hub = wheels.front()->getHub();
-    const math::float2 newCenter(
-      FloorInt(hub.x), step(FloorInt(hub.y), getViewportHeight() / 3));
-    viewCenterAnim.setTarget(newCenter);
+    const math::float2 newCenter(hub.x, step(hub.y, worldSize.y / 4.0));
+    worldCenter.setTarget(newCenter);
   } else {
-    viewCenterAnim.snapToTarget();
+    worldCenter.snapToTarget();
   }
 
   return !anim.paused();
@@ -462,10 +454,7 @@ RollingCarScene::draw()
   ScopedCounter counter{"drawing"};
 #endif
 
-  m_viewcenter_x = viewCenterAnim.get().x;
-  m_viewcenter_y = viewCenterAnim.get().y;
-
-  enterPixelMode();
+  enter2dMode(worldCenter.get(), worldSize);
 
   vvr::Canvas tmp;
 
@@ -480,7 +469,10 @@ RollingCarScene::draw()
     wheel->draw();
   }
 
-  drawAxes();
+  {
+    vvr::BackupAndRestore tmp2{vvr::Shape::LineWidth, 2.0f};
+    drawAxes();
+  }
 
   exitPixelMode();
 }
@@ -498,44 +490,59 @@ RollingCarScene::resize()
     std::cout << "Press 'up'/'down' to change speed." << std::endl;
     std::cout << "Press 'left'/'right' to change radius." << std::endl;
   }
+
+  worldSize.y = worldSize.x * getViewportHeight() / getViewportWidth();
 }
 
 void
 RollingCarScene::arrowEvent(vvr::ArrowDir dir, int modif)
 {
-  constexpr auto dSpeed = 400;
-  constexpr auto dRadius = 10;
+  constexpr auto dSpeed = 0.4f;
 
   switch (dir) {
   case vvr::UP:
-    wheel_speed += dSpeed;
+    wheelSpeed += dSpeed;
     break;
   case vvr::DOWN:
-    wheel_speed -= dSpeed;
+    wheelSpeed -= dSpeed;
     break;
   case vvr::LEFT:
-    wheel_radius -= dRadius;
+    wheelSpeed -= dSpeed;
+    resize();
     break;
   case vvr::RIGHT:
-    wheel_radius += dRadius;
+    wheelSpeed += dSpeed;
+    resize();
     break;
   }
+}
+
+void
+RollingCarScene::mouseWheel(int dir, int modif)
+{
+  if (dir > 0) {
+    worldSize.x /= 1.5;
+  } else {
+    worldSize.x *= 1.5;
+  }
+  resize();
 }
 
 void
 RollingCarScene::keyEvent(unsigned char key, bool up, int modif)
 {
   Scene::keyEvent(key, up, modif);
-
   key = tolower(key);
+
+  std::cout << "Key pressed: '" << key << "'" << std::endl;
 
   switch (key) {
   case ' ':
     anim.toggle();
     if (anim.paused()) {
-      viewCenterAnim.pause();
+      worldCenter.pause();
     } else {
-      viewCenterAnim.update(true);
+      worldCenter.update(true);
     }
     break;
   case 'r':
@@ -544,7 +551,7 @@ RollingCarScene::keyEvent(unsigned char key, bool up, int modif)
   case 'c':
     if (keepWheelCentered == false) {
       keepWheelCentered = true;
-      viewCenterAnim.update(true);
+      worldCenter.update(true);
     } else {
       keepWheelCentered = false;
     }
@@ -553,48 +560,48 @@ RollingCarScene::keyEvent(unsigned char key, bool up, int modif)
 
   if (key >= '0' && key <= '9') {
     auto track_no = (key - '0') % tracks().size();
-    road_pts = tracks()[track_no]();
-    createRoadFromPts(road_pts, road);
+    roadPts = tracks()[track_no]();
+    createRoadFromPts(roadPts, road);
     reset();
   }
 }
 
 void
 RollingCarScene::mouseHovered(int x, int y, int modif)
-{
-  picker->do_pick(vvr::Mousepos{x, y}, modif);
-}
+{}
 
 void
 RollingCarScene::mousePressed(int x, int y, int modif)
 {
-  if (!picker->do_pick(vvr::Mousepos{x, y}, modif)) {
-    if (!keepWheelCentered || anim.paused()) {
-      dragAnchor = {x, y};
-    }
+  const float vpw = getViewportWidth();
+  const float vph = getViewportHeight();
+  const float xf = (((float)x / vpw)) * worldSize.x - worldCenter.get().x;
+  const float yf = (((float)y / vph)) * worldSize.y - worldCenter.get().y;
+
+  if (!keepWheelCentered || anim.paused()) {
+    dragAnchor = {xf, yf};
+    worldCenterMlstn = worldCenter.get();
   }
 }
 
 void
 RollingCarScene::mouseMoved(int x, int y, int modif)
 {
-  picker->do_drag(vvr::Mousepos{x, y}, modif);
-
-  if (!picker->get_picked()) {
-    if (dragAnchor.x != hugeint && dragAnchor.y != hugeint) {
-      auto val = viewCenterAnim.get();
-      val.x -= x - dragAnchor.x;
-      val.y -= y - dragAnchor.y;
-      viewCenterAnim.setValue(val);
-    }
+  if (dragAnchor.x != hugef && dragAnchor.y != hugef) {
+    const float vpw = getViewportWidth();
+    const float vph = getViewportHeight();
+    const float xf = (((float)x / vpw)) * worldSize.x - worldCenterMlstn.x;
+    const float yf = (((float)y / vph)) * worldSize.y - worldCenterMlstn.y;
+    const math::float2 t{xf - dragAnchor.x, yf - dragAnchor.y};
+    const math::float2 v{worldCenterMlstn - t};
+    worldCenter.setValue(v);
   }
 }
 
 void
 RollingCarScene::mouseReleased(int x, int y, int modif)
 {
-  picker->do_drop();
-  dragAnchor = {hugeint, hugeint};
+  dragAnchor = {hugef, hugef};
 }
 
 /*---[Invoke]---------------------------------------------------------------------------*/

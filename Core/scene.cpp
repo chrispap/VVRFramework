@@ -1,3 +1,4 @@
+#include "Math/float2.h"
 #include <MathGeoLib.h>
 #include <QtGui> //gl.h
 #include <cassert>
@@ -26,8 +27,7 @@ Scene::Scene()
     m_show_sliders = false;
     m_fov = 66;
     m_first_resize = true;
-    m_viewcenter_x = 0;
-    m_viewcenter_y = 0;
+    m_2d_center = math::float2{0.0f, 0.0f};
     setCameraPos(vec(0, 0, DEFAULT_CAM_DIST));
 }
 
@@ -46,22 +46,39 @@ void Scene::drawAxes()
     Axes(2.0f * getSceneWidth()).draw();
 }
 
-void Scene::enterPixelMode()
+void Scene::enter2dMode(math::float2 center, math::float2 size)
 {
+    // m_2d_center = center;
+    // m_2d_size = size;
+
+    const float halfWidth = size.x / 2.0;
+    const float halfHeight = size.y / 2.0;
+    const float left = center.x - halfWidth;
+    const float right = center.x + halfWidth;
+    const float bottom = center.y - halfHeight;
+    const float top = center.y + halfHeight;
+    const float nearPlane = 1;
+    const float farPlane = -1;
+
     glDisable(GL_LIGHTING);
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
     glLoadIdentity();
-    glOrtho(
-     -m_screen_width   / 2 + m_viewcenter_x,
-      m_screen_width   / 2 + m_viewcenter_x,
-     -m_screen_height  / 2 + m_viewcenter_y,
-      m_screen_height  / 2 + m_viewcenter_y,
-      1, -1);
+    glOrtho(left, right, bottom, top, nearPlane, farPlane);
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     glLoadIdentity();
     glDisable(GL_DEPTH_TEST);
+}
+
+void Scene::enter2dMode(float cx, float cy, float w, float h)
+{
+    enter2dMode(float2(cx, cy), float2(w, h));
+}
+
+void Scene::enterPixelMode()
+{
+    enter2dMode(0, 0, m_viewport_width, m_viewport_height);
 }
 
 void Scene::exitPixelMode()
@@ -75,20 +92,24 @@ void Scene::exitPixelMode()
 
 void Scene::mouse2pix(int &x, int &y)
 {
-    /* o: Center
-    *  X: Rightwards
-    *  Y: Upwards
-    */
-    x -= m_screen_width / 2 - m_viewcenter_x;
-    y -= m_screen_height / 2 + m_viewcenter_y;
-    y = -y;
+    /// [Qt Mouse event coordinates]:
+    /// - origin in the top-left
+    /// - x increases to the right
+    /// - y increases to the bottom
+
+    /// [VVR Pixel coordinates]:
+    /// - origin in the center
+    /// - x increases to the right
+    /// - y increases to the top
+
+    x = x - (m_viewport_width / 2.);
+    y = -(y - (m_viewport_height / 2.));
 }
 
 void Scene::pix2mouse(int &x, int &y)
 {
-    y = -y;
-    y += m_screen_height / 2 + m_viewcenter_x;
-    x += m_screen_width / 2 - m_viewcenter_y;
+    x = x + (m_viewport_width / 2.);
+    y = -y + (m_viewport_height / 2.);
 }
 
 void Scene::setCameraPos(const vec &pos)
@@ -154,8 +175,8 @@ void Scene::glInit()
 
 void Scene::glResize(int w, int h)
 {
-    m_screen_width = w;
-    m_screen_height = h;
+    m_viewport_width = w;
+    m_viewport_height = h;
     float cam_dist = m_frustum.Pos().Length();
 
     /* Set frustum with following modes:
@@ -196,7 +217,7 @@ void Scene::glRender()
 
     //---[Render scene]---
     glClearColor(m_bg_col.r / 255.0, m_bg_col.g / 255.0, m_bg_col.b / 255.0, 1);
-    glViewport(0, 0, m_screen_width, m_screen_height);
+    glViewport(0, 0, m_viewport_width, m_viewport_height);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_PROJECTION);
     glLoadMatrixf(pjm.ptr());
@@ -229,15 +250,14 @@ void Scene::mousePressed(int x, int y, int modif)
 {
     m_mouse_x = x;
     m_mouse_y = y;
-
-    int xx=x, yy=y;
-    pix2mouse(xx, yy);
-    glReadPixels(xx,yy, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &m_mouse_depth);
     m_frustum_mlstn = m_frustum;
 
     if (ctrlDown(modif)) {
         m_mouse_op = 't';
     } else m_mouse_op = 'r';
+
+    pix2mouse(x, y);
+    glReadPixels(x, y, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &m_mouse_depth);
 
     cursorGrab();
 }
@@ -270,8 +290,8 @@ void Scene::mouseMoved(int x, int y, int modif)
         float w = m_scene_width;
         float h = m_scene_height;
         vec dv = vec::zero;
-        dv -= right * dx * w / m_screen_width;
-        dv -= updir * dy * h / m_screen_height;
+        dv -= right * dx * w / m_viewport_width;
+        dv -= updir * dy * h / m_viewport_height;
         m_frustum.SetPos(m_frustum_mlstn.Pos() + dv);
     }
     else
@@ -297,7 +317,7 @@ void Scene::mouseWheel(int dir, int modif)
     m_fov += -4.0 * dir;
     if (m_fov < VVR_FOV_MIN) m_fov = VVR_FOV_MIN;
     else if (m_fov > VVR_FOV_MAX) m_fov = VVR_FOV_MAX;
-    glResize(m_screen_width, m_screen_height);
+    glResize(m_viewport_width, m_viewport_height);
 }
 
 void Scene::sliderChanged(int slider_id, float val)

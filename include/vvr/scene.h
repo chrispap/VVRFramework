@@ -1,6 +1,7 @@
 #ifndef VVR_SCENE_H
 #define VVR_SCENE_H
 
+#include "Math/float2.h"
 #include "vvrframework_DLL.h"
 #include <vvr/drawing.h>
 #include <vvr/command.h>
@@ -38,8 +39,8 @@ namespace vvr
         /*---[Getters / Setters]--------------------------------------------------------*/
         Axes& getGlobalAxes() { return m_axes; }
         math::Frustum getFrustum() { return m_frustum; }
-        int getViewportWidth() const { return m_screen_width; } // In pixels
-        int getViewportHeight() const { return m_screen_height; } // In pixels
+        int getViewportWidth() const { return m_viewport_width; } // In pixels
+        int getViewportHeight() const { return m_viewport_height; } // In pixels
         float getSceneWidth() const { return m_scene_width; }
         float getSceneHeight() const { return m_scene_height; }
         float getCameraDist() const { return m_camera_dist; }
@@ -58,11 +59,15 @@ namespace vvr
 
         /*---[Helpers]------------------------------------------------------------------*/
         math::Ray unproject(int x, int y);
-        void mouse2pix(int &x, int &y);
-        void pix2mouse(int &x, int &y);
+        void enter2dMode(math::float2 center, math::float2 size);
+        void enter2dMode(float cx, float cy, float w, float h);
         void enterPixelMode();
         void exitPixelMode();
         void drawAxes();
+
+    private:
+        void mouse2pix(int &x, int &y);
+        void pix2mouse(int &x, int &y);
 
     private:
         /*---[OpenGL Callbacks]---------------------------------------------------------*/
@@ -79,8 +84,6 @@ namespace vvr
         bool            m_show_log;
         bool            m_show_sliders;
         bool            m_first_resize;
-        int             m_viewcenter_x;
-        int             m_viewcenter_y;
 
     protected:
         MacroCmd        cursorShow;
@@ -96,12 +99,14 @@ namespace vvr
         float           m_camera_dist;
         float           m_scene_width;
         float           m_scene_height;
-        int             m_screen_width;
-        int             m_screen_height;
+        int             m_viewport_width;
+        int             m_viewport_height;
         int             m_mouse_x;
         int             m_mouse_y;
         char            m_mouse_op;
         float           m_mouse_depth;
+        math::float2    m_2d_center;
+        math::float2    m_2d_size;
 
         /*---[Friends]------------------------------------------------------------------*/
         friend class GlWidget;

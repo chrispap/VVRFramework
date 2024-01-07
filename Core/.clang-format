@@ -1,0 +1,23 @@
+BasedOnStyle: LLVM
+ColumnLimit: 80
+UseTab: Never
+UseCRLF: true
+InsertNewlineAtEOF: true
+TabWidth: 4
+IndentWidth: 4
+ContinuationIndentWidth: 2
+ConstructorInitializerIndentWidth: 2
+BinPackArguments: false
+AlignAfterOpenBracket: DontAlign
+AllowShortLambdasOnASingleLine: All
+AllowShortIfStatementsOnASingleLine: true
+AllowAllArgumentsOnNextLine: true
+# AlwaysBreakAfterReturnType: TopLevel
+AlwaysBreakTemplateDeclarations: 'Yes'
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterEnum: true
+  AfterStruct: true
+  AfterClass: true
+  AfterFunction: true
+  SplitEmptyFunction: false

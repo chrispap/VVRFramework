@@ -1,13 +1,11 @@
-#include <vvr/utils.h>
-#include <vvr/drawing.h>
-#include <vvr/settings.h>
-#include <vvr/scene.h>
-#include <vvr/mesh.h>
 #include <GeoLib.h>
 #include <MathGeoLib.h>
 #include <iostream>
-#include <fstream>
-#include <string>
+#include <vvr/drawing.h>
+#include <vvr/mesh.h>
+#include <vvr/scene.h>
+#include <vvr/settings.h>
+#include <vvr/utils.h>
 
 struct TutorialScene : public vvr::Scene
 {
@@ -37,6 +35,9 @@ TutorialScene::TutorialScene()
 
 void TutorialScene::draw()
 {
+    vvr::BackupAndRestore tmp1{vvr::Shape::PointSize, 10.0f};
+    vvr::BackupAndRestore tmp2{vvr::Shape::LineWidth, 10.0f};
+
     enterPixelMode();
     m_canvas.draw();
     exitPixelMode();
