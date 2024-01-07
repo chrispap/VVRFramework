@@ -20,9 +20,10 @@ target_link_libraries(Tavli
 
 add_executable(RollingCar MACOSX_BUNDLE ${ROLLINGCAR_SRC_FILES})
 target_link_libraries(RollingCar
-  optimized VVRFramework debug VVRFramework_d
-  optimized GeoLib debug GeoLib_d
-  optimized MathGeoLib debug MathGeoLib_d
+  optimized VVRFramework    debug VVRFramework_d
+  optimized GeoLib          debug GeoLib_d
+  optimized MathGeoLib      debug MathGeoLib_d
+  optimized box2d           debug box2d
   jsoncpp
 )
 
@@ -37,3 +38,4 @@ include_directories(${CMAKE_SOURCE_DIR}/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rdParty/GeoLib)
 include_directories(${CMAKE_SOURCE_DIR}/3rdParty/MathGeoLib/src)
 include_directories(${CMAKE_SOURCE_DIR}/3rdParty/jsoncpp/include)
+include_directories(${CMAKE_SOURCE_DIR}/3rdParty/box2d/include)

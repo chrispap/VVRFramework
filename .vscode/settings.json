@@ -1,6 +1,7 @@
 {
   "cmake.sourceDirectory": "${workspaceFolder}",
   "cmake.buildDirectory": "${workspaceFolder}/build-${buildType}",
+  "cmake.copyCompileCommands": "${workspaceFolder}/compile_commands.json",
   "cmake.configureSettings": {
     "CMAKE_PREFIX_PATH": "/Users/chrisp/Qt/6.5.1/macos/lib/cmake",
     "QT_QMAKE_EXECUTABLE": "/Users/chrisp/Qt/6.5.1/macos/bin/qmake"
