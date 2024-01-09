@@ -1,4 +1,6 @@
 
+#include "C2DLineSet.h"
+#include "C2DRect.h"
 #include "Math/MathFunc.h"
 #include "vvr/dragging.h"
 #include <C2DLine.h>
@@ -23,6 +25,12 @@
 #include <vvr/utils.h>
 
 #define BENCHMARKS_ON 0
+
+typedef std::vector<vvr::Point3D *> PointVector;
+
+/*---[Physics]---------------------------------------------------------------*/
+const float gbW = 20.0f;
+const float gbH = 2.0f;
 
 const vvr::Colour colours[] = {
   vvr::red,
@@ -62,10 +70,10 @@ struct Wheel : vvr::Drawable
 
   Wheel(float radius, C2DPoint const &pos, float angle);
 
-  Wheel(float radius, double wheel_speed,
-    std::vector<vvr::Point3D *> const &road_pts, int road_seg);
+  Wheel(float radius, double wheel_speed, PointVector const &road_pts,
+    int road_seg);
 
-  void update(float dt, std::vector<vvr::Point3D *> const &road_pts);
+  void update(float dt, PointVector const &road_pts);
   void move(C2DVector dir);
   void turn(float rad, C2DPoint const &pivot);
   void place(C2DPoint const &ground, C2DVector normal);
@@ -92,8 +100,8 @@ Wheel::Wheel(float radius, C2DPoint const &pos, float angle) : angle(angle)
   tire = vvr::Circle2D({pos, radius}, vvr::black);
 }
 
-Wheel::Wheel(float radius, double wheel_speed,
-  std::vector<vvr::Point3D *> const &road_pts, int road_seg)
+Wheel::Wheel(
+  float radius, double wheel_speed, PointVector const &road_pts, int road_seg)
   : road_seg(road_seg)
 {
   angle = 0;
@@ -113,7 +121,7 @@ Wheel::Wheel(float radius, double wheel_speed,
 }
 
 void
-Wheel::update(float dt, std::vector<vvr::Point3D *> const &road_pts)
+Wheel::update(float dt, PointVector const &road_pts)
 {
   auto &p1 = road_pts[road_seg + 0];
   auto &p2 = road_pts[road_seg + 1];
@@ -231,7 +239,7 @@ Wheel::draw() const
 auto
 track_simple()
 {
-  return std::vector<vvr::Point3D *>{
+  return PointVector{
     new vvr::Point3D(-5, 0., 0.),
     new vvr::Point3D(0, 0., 0.),
     new vvr::Point3D(5, 0., 0.),
@@ -241,7 +249,7 @@ track_simple()
 auto
 track_polygon()
 {
-  return std::vector<vvr::Point3D *>{
+  return PointVector{
     new vvr::Point3D(-2.0, 0.0, 0.0),
     new vvr::Point3D(-1.0, 0.4, 0.0),
     new vvr::Point3D(0.0, 0.5, 0.0),
@@ -257,7 +265,7 @@ track_polygon()
 auto
 track_circle(float radius = 2.0)
 {
-  std::vector<vvr::Point3D *> pts;
+  PointVector pts;
   constexpr int segs = 32;
   for (int i = 0; i < segs; ++i) {
     constexpr auto fullcircle = M_PI * 2;
@@ -271,7 +279,7 @@ track_circle(float radius = 2.0)
 auto
 track_spiral(float radius = 0.2)
 {
-  std::vector<vvr::Point3D *> pts;
+  PointVector pts;
   constexpr int segs = 32;
   for (int i = 0; i < segs; ++i) {
     constexpr auto fullcircle = M_PI * 2;
@@ -286,7 +294,7 @@ track_spiral(float radius = 0.2)
 auto
 track_zigzag()
 {
-  std::vector<vvr::Point3D *> pts;
+  PointVector pts;
   constexpr float dx = 2.0;
   constexpr float dy = dx * 0.1;
   for (int i = 0; i < 20; ++i) {
@@ -299,7 +307,7 @@ track_zigzag()
 auto
 tracks()
 {
-  typedef std::function<std::vector<vvr::Point3D *>()> TrackFn;
+  typedef std::function<PointVector()> TrackFn;
   return std::vector<TrackFn>{
     []() { return track_simple(); },
     []() { return track_polygon(); },
@@ -310,8 +318,7 @@ tracks()
 }
 
 void
-createRoadFromPts(
-  std::vector<vvr::Point3D *> const &road_pts, vvr::Canvas &road)
+createRoadFromPts(PointVector const &road_pts, vvr::Canvas &road)
 {
   road.setDelOnClear(false);
   road.clear();
@@ -359,7 +366,7 @@ private:
   vvr::Canvas canvas;
   vvr::Animation anim;
   std::vector<Wheel::Ptr> wheels;
-  std::vector<vvr::Point3D *> roadPts;
+  PointVector roadPts;
   vvr::TargetAnimation<math::float2> worldCenter;
   math::float2 dragAnchor{hugef, hugef};
   math::float2 worldCenterMlstn;
@@ -368,7 +375,9 @@ private:
 
   // Physics:
   b2World *world = nullptr;
-  b2Body *body = nullptr;
+  b2Body *groundBody = nullptr;
+  b2Body *bodyBall = nullptr;
+  b2Body *bodyBox = nullptr;
 };
 
 const char *
@@ -392,57 +401,10 @@ RollingCarScene::RollingCarScene()
 }
 
 void
-RollingCarScene::setupPhysics()
-{
-  if (world) {
-    delete world;
-    world = nullptr;
-  }
-
-  b2Vec2 gravity(0.0f, -10.0f);
-  world = new b2World(gravity);
-
-  // Create ground
-  b2BodyDef groundBodyDef;
-  groundBodyDef.position.Set(0.0f, -10.0f);
-  b2Body *groundBody = world->CreateBody(&groundBodyDef);
-  b2PolygonShape groundBox;
-  groundBox.SetAsBox(50.0f, 10.0f);
-  groundBody->CreateFixture(&groundBox, 0.0f);
-
-  // Create dynamic box:
-  // b2BodyDef bodyDef;
-  // bodyDef.type = b2_dynamicBody;
-  // bodyDef.position.Set(0.0f, 4.0f);
-  // body = world->CreateBody(&bodyDef);
-  // b2PolygonShape dynamicBox;
-  // dynamicBox.SetAsBox(1.0f, 1.0f);
-  // b2FixtureDef fixtureDef;
-  // fixtureDef.shape = &dynamicBox;
-  // fixtureDef.density = 1.0f;
-  // fixtureDef.friction = 0.3f;
-  // body->CreateFixture(&fixtureDef);
-
-  // Create dynamic ball:
-  b2BodyDef bodyDef;
-  bodyDef.type = b2_dynamicBody;
-  bodyDef.position.Set(0.0f, 8.0f);
-  bodyDef.angularVelocity = 1.525f * M_PI;
-  body = world->CreateBody(&bodyDef);
-  b2CircleShape dynamicCircle;
-  dynamicCircle.m_radius = 0.5f;
-  b2FixtureDef fixtureDef;
-  fixtureDef.shape = &dynamicCircle;
-  fixtureDef.density = 1.0f;
-  fixtureDef.friction = 0.3f;
-  body->CreateFixture(&fixtureDef);
-}
-
-void
 RollingCarScene::reset()
 {
-  worldCenter = {{0.f, 5.f}, 10.0f};
-  worldSize = {20., 0.}; // Define only the width of the world
+  worldCenter = {{0.f, 10.0f}, 10.0f};
+  worldSize = {50., 0.}; // Define only the width of the world
   numWheels = 2;
   wheelSpeed = 0;
   wheelRadius = 0.25;
@@ -462,6 +424,62 @@ RollingCarScene::reset()
 
   resize();
   // anim.toggle();
+}
+
+void
+RollingCarScene::setupPhysics()
+{
+  if (world) {
+    delete world;
+    world = nullptr;
+    groundBody = nullptr;
+    bodyBall = nullptr;
+    bodyBox = nullptr;
+  }
+
+  {
+    // Create ground
+    b2Vec2 gravity(0.0f, -10.0f);
+    b2BodyDef groundBodyDef;
+    b2PolygonShape groundBox;
+    groundBodyDef.position.Set(0.0f, -gbH);
+    groundBox.SetAsBox(gbW, gbH);
+    world = new b2World(gravity);
+    groundBody = world->CreateBody(&groundBodyDef);
+    groundBody->CreateFixture(&groundBox, 0.0f);
+  }
+
+  {
+    // Create dynamic ball:
+    b2BodyDef bodyDef;
+    bodyDef.type = b2_dynamicBody;
+    bodyDef.position.Set(0.0f, 6.0f);
+    bodyDef.angularVelocity = 2.5f * M_PI;
+    bodyBall = world->CreateBody(&bodyDef);
+    b2CircleShape dynamicCircle;
+    dynamicCircle.m_radius = 2.5f;
+    b2FixtureDef fixtureDef;
+    fixtureDef.shape = &dynamicCircle;
+    fixtureDef.density = 1.0f;
+    fixtureDef.friction = 10.0f;
+    bodyBall->CreateFixture(&fixtureDef);
+  }
+
+  {
+    // Create dynamic box:
+    b2BodyDef bodyDef;
+    bodyDef.type = b2_dynamicBody;
+    bodyDef.position.Set(0.0f, 2.0f);
+    bodyDef.angularVelocity = 0.525f * M_PI;
+    bodyBox = world->CreateBody(&bodyDef);
+    b2PolygonShape dynamicBox;
+    dynamicBox.SetAsBox(1.0f, 1.0f);
+    b2FixtureDef fixtureDef;
+    fixtureDef.shape = &dynamicBox;
+    fixtureDef.density = 1.0f;
+    fixtureDef.friction = 0.3f;
+    bodyBox->CreateFixture(&fixtureDef);
+  }
 }
 
 bool
@@ -501,9 +519,6 @@ RollingCarScene::idle()
     int32 velocityIterations = 6;
     int32 positionIterations = 2;
     world->Step(timeStep, velocityIterations, positionIterations);
-    b2Vec2 position = body->GetPosition();
-    auto angle = body->GetAngle();
-    printf("%4.2f %4.2f %4.2f\n", position.x, position.y, angle);
   }
 
   // End of idle:
@@ -519,10 +534,15 @@ RollingCarScene::draw()
 
   enter2dMode(worldCenter.get(), worldSize);
 
+  {
+    vvr::BackupAndRestore tmp2{vvr::Shape::LineWidth, 2.0f};
+    drawAxes();
+  }
+
   vvr::Canvas tmp;
 
-  road.draw();
-  canvas.draw();
+  // road.draw();
+  // canvas.draw();
 
   // for (int i = 0; i < wheels.size() - 1; ++i) {
   //   tmp.add(C2DLine(wheels[i]->getHub(), wheels[i + 1]->getHub()))->draw();
@@ -534,15 +554,38 @@ RollingCarScene::draw()
 
   // Render bodyPos as point
   {
-    auto bodyPos = body->GetPosition();
-    vvr::BackupAndRestore tmp2{vvr::Shape::PointSize, 25.0f};
-    Wheel w(0.5, {bodyPos.x, bodyPos.y}, -body->GetAngle());
-    w.draw();
-  }
+    {
+      const auto col = vvr::Aquamarine;
+      vvr::LineSeg2D(-gbW, 0, gbW, 0, col).draw();
+      vvr::LineSeg2D(gbW, 0, gbW, -gbH * 2, col).draw();
+      vvr::LineSeg2D(gbW, -gbH * 2, -gbW, -gbH * 2, col).draw();
+      vvr::LineSeg2D(-gbW, -gbH * 2, -gbW, 0, col).draw();
+    }
 
-  {
-    vvr::BackupAndRestore tmp2{vvr::Shape::LineWidth, 2.0f};
-    drawAxes();
+    {
+      vvr::BackupAndRestore tmp{vvr::Shape::PointSize, 25.0f};
+      auto bodyPos = bodyBall->GetPosition();
+      const auto r = bodyBall->GetFixtureList()->GetShape()->m_radius;
+      Wheel w(r, {bodyPos.x, bodyPos.y}, -bodyBall->GetAngle());
+      w.draw();
+    }
+
+    {
+      vvr::Canvas c;
+      vvr::BackupAndRestore tmp{vvr::Shape::LineWidth, 5.0f};
+      auto bodyPos = bodyBox->GetPosition();
+      auto bodyAngle = bodyBox->GetAngle();
+      C2DLineSet ls;
+      ls.AddCopy(C2DPoint{-1, 1}, C2DPoint{1, 1});
+      ls.AddCopy(C2DPoint{1, 1}, C2DPoint{1, -1});
+      ls.AddCopy(C2DPoint{1, -1}, C2DPoint{-1, -1});
+      ls.AddCopy(C2DPoint{-1, -1}, C2DPoint{-1, 1});
+      ls.RotateToRight(-bodyAngle, {0, 0});
+      ls.Move({bodyPos.x, bodyPos.y});
+      for (int i = 0; i < ls.size(); ++i) {
+        c.add(*ls.GetAt(i))->draw();
+      }
+    }
   }
 
   exitPixelMode();
