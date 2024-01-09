@@ -29,8 +29,8 @@
 typedef std::vector<vvr::Point3D *> PointVector;
 
 /*---[Physics]---------------------------------------------------------------*/
-const float gbW = 10.0f;
-const float gbH = 1.0f;
+const float gbW = 100.0f;
+const float gbH = 0.25f;
 
 const vvr::Colour colours[] = {
   vvr::red,
@@ -296,9 +296,9 @@ auto
 track_zigzag()
 {
   PointVector pts;
-  constexpr float dx = 2.0;
+  constexpr float dx = 3.0;
   constexpr float dy = dx * 0.21;
-  for (int i = 0; i < 20; ++i) {
+  for (int i = 0; i < 10; ++i) {
     pts.push_back(new vvr::Point3D((i * dx), 0, 0));
     pts.push_back(new vvr::Point3D((i * dx) + (dx * 0.5), dy, 0));
   }
@@ -328,7 +328,8 @@ createRoadFromPts(PointVector const &road_pts, vvr::Canvas &road)
     const auto &p0 = road_pts[x + 0];
     const auto &p1 = road_pts[x + 1];
     auto l = new vvr::CompositeLine({p0, p1}, vvr::Aquamarine);
-    l->collect(road);
+    // l->collect(road);
+    road.add(l);
   }
 }
 
@@ -358,6 +359,7 @@ private:
 
 private:
   void setupPhysics();
+  void simulatePhysics();
   void drawPhysics() const;
 
 private:
@@ -373,13 +375,14 @@ private:
   math::float2 worldCenterAnchor;
   math::float2 dragAnchor{hugef, hugef};
   math::float2 worldSize;
-  bool keepWheelCentered = false;
+  bool keepWheelCentered;
 
   // Physics:
   b2World *world = nullptr;
   b2Body *groundBody = nullptr;
   b2Body *bodyBall = nullptr;
-  b2Body *bodyBox = nullptr;
+  b2Body *bodyBox1 = nullptr;
+  b2Body *bodyBox2 = nullptr;
 };
 
 const char *
@@ -397,6 +400,7 @@ RollingCarScene::RollingCarScene()
   vvr::Scene::m_fullscreen = false;
   vvr::Scene::m_show_log = false;
 
+  worldSize = {20., 0.}; // Define only the width of the world
   roadPts = track_zigzag();
   createRoadFromPts(roadPts, road);
   reset();
@@ -405,17 +409,19 @@ RollingCarScene::RollingCarScene()
 void
 RollingCarScene::reset()
 {
+  vvr::Scene::reset();
+
+  keepWheelCentered = false;
   worldCenter = {
     {0.f, 3.0f},
-    50.0f
+    150.0f
   };
-  worldSize = {gbW * 2.1f, 0.}; // Define only the width of the world
+  worldCenter.update(keepWheelCentered);
+  // worldSize = {20., 0.}; // Define only the width of the world
   numWheels = 2;
   wheelSpeed = 0;
   wheelRadius = 0.25;
-  keepWheelCentered = false;
   randomColourIndex = 0;
-  vvr::Scene::reset();
   anim.reset();
   canvas.clear();
 
@@ -439,7 +445,8 @@ RollingCarScene::setupPhysics()
     world = nullptr;
     groundBody = nullptr;
     bodyBall = nullptr;
-    bodyBox = nullptr;
+    bodyBox1 = nullptr;
+    bodyBox2 = nullptr;
   }
 
   {
@@ -454,27 +461,26 @@ RollingCarScene::setupPhysics()
     b2PolygonShape groundBox;
     groundBodyDef.position.Set(0.0f, -gbH);
     groundBox.SetAsBox(gbW, gbH);
-    world->CreateBody(&groundBodyDef)->CreateFixture(&groundBox, 0.0f);
+    world->CreateBody(&groundBodyDef)
+      ->CreateFixture(&groundBox, 0.0f)
+      ->SetFriction(100);
   }
 
   {
     // Create track:
     b2BodyDef trackBodyDef;
     b2FixtureDef fixtureDef;
+    b2ChainShape chain;
     std::vector<b2Vec2> vs;
     trackBodyDef.type = b2_staticBody;
     trackBodyDef.position.Set(0.0f, 0.0f);
-
     // Reverse iterator due to need for CCW order in Box2D:
     for (auto it = roadPts.rbegin(); it != roadPts.rend(); ++it) {
       vs.push_back({(*it)->x, (*it)->y});
     }
-
-    b2ChainShape chain;
     chain.CreateLoop(vs.data(), roadPts.size());
-
     groundBody = world->CreateBody(&trackBodyDef);
-    groundBody->CreateFixture(&chain, 0.0f);
+    groundBody->CreateFixture(&chain, 0.0f)->SetFriction(114.5);
   }
 
   {
@@ -485,12 +491,13 @@ RollingCarScene::setupPhysics()
     bodyDef.type = b2_dynamicBody;
     bodyDef.position.Set(-8.0f, 1.9f);
     bodyDef.angularVelocity = -8.0f * M_PI;
-    dynamicCircle.m_radius = 0.65f;
+    dynamicCircle.m_radius = 1.85f;
     fixtureDef.shape = &dynamicCircle;
-    fixtureDef.density = 1.0f;
+    fixtureDef.density = 0.8f;
     fixtureDef.friction = 10.0f;
     bodyBall = world->CreateBody(&bodyDef);
     bodyBall->CreateFixture(&fixtureDef);
+    bodyBall->SetAngularDamping(10);
   }
 
   {
@@ -501,12 +508,17 @@ RollingCarScene::setupPhysics()
     bodyDef.type = b2_dynamicBody;
     bodyDef.position.Set(5.5f, 2.5f);
     bodyDef.angularVelocity = 0.25f * M_PI;
-    dynamicBox.SetAsBox(0.40f, 0.10f);
+    dynamicBox.SetAsBox(2.40f, 0.10f);
     fixtureDef.shape = &dynamicBox;
     fixtureDef.density = 1.0f;
-    fixtureDef.friction = 1.3f;
-    bodyBox = world->CreateBody(&bodyDef);
-    bodyBox->CreateFixture(&fixtureDef);
+    fixtureDef.friction = 10.0f;
+    bodyBox1 = world->CreateBody(&bodyDef);
+    bodyBox1->CreateFixture(&fixtureDef);
+
+    dynamicBox.SetAsBox(1.40f, 0.10f);
+    bodyDef.position.Set(15.5f, 2.5f);
+    bodyBox2 = world->CreateBody(&bodyDef);
+    bodyBox2->CreateFixture(&fixtureDef);
   }
 }
 
@@ -546,15 +558,20 @@ RollingCarScene::idle()
   }
 
   if (!anim.paused()) {
-    // Simulate physics
-    float timeStep = 1.0f / 60.0f;
-    int32 velocityIterations = 6;
-    int32 positionIterations = 2;
-    world->Step(timeStep, velocityIterations, positionIterations);
+    simulatePhysics();
   }
 
   // End of idle:
   return !anim.paused();
+}
+
+void
+RollingCarScene::simulatePhysics()
+{
+  float timeStep = 1.0f / 60.0f;
+  int32 velocityIterations = 6;
+  int32 positionIterations = 2;
+  world->Step(timeStep, velocityIterations, positionIterations);
 }
 
 void
@@ -566,13 +583,14 @@ RollingCarScene::draw()
 
   enter2dMode(worldCenter.get(), worldSize);
 
-  drawAxes();
+  // drawAxes();
 
   {
     vvr::BackupAndRestore<float> tmp[] = {
       {vvr::Shape::PointSize, 25.0f},
       {vvr::Shape::LineWidth,  5.0f}
     };
+
     drawPhysics();
   }
 
@@ -581,19 +599,19 @@ RollingCarScene::draw()
     canvas.draw();
   }
 
-  {
-    vvr::Canvas hubs;
-    for (int i = 0; i < wheels.size() - 1; ++i) {
-      hubs.add(C2DLine(wheels[i]->getHub(), wheels[i + 1]->getHub()));
-    }
-    hubs.draw();
-  }
+  // {
+  //   vvr::Canvas hubs;
+  //   for (int i = 0; i < wheels.size() - 1; ++i) {
+  //     hubs.add(C2DLine(wheels[i]->getHub(), wheels[i + 1]->getHub()));
+  //   }
+  //   hubs.draw();
+  // }
 
-  {
-    for (auto &wheel : wheels) {
-      wheel->draw();
-    }
-  }
+  // {
+  //   for (auto &wheel : wheels) {
+  //     wheel->draw();
+  //   }
+  // }
 
   exitPixelMode();
 }
@@ -644,7 +662,8 @@ RollingCarScene::drawPhysics() const
   vvr::LineSeg2D(-gbW, -gbH * 2, -gbW, 0, col).draw();
 
   drawWheel(bodyBall);
-  drawBox(bodyBox);
+  drawBox(bodyBox1);
+  drawBox(bodyBox2);
 }
 
 void
@@ -668,6 +687,7 @@ void
 RollingCarScene::arrowEvent(vvr::ArrowDir dir, int modif)
 {
   constexpr auto dSpeed = 0.4f;
+  constexpr auto dTorque = 4400.0f;
 
   switch (dir) {
   case vvr::UP:
@@ -678,12 +698,13 @@ RollingCarScene::arrowEvent(vvr::ArrowDir dir, int modif)
     break;
   case vvr::LEFT:
     // wheelSpeed -= dSpeed;
-    bodyBall->ApplyAngularImpulse(1.1f, true);
+    // bodyBall->ApplyAngularImpulse(0.5f, true);
+    bodyBall->ApplyTorque(dTorque, true);
     resize();
     break;
   case vvr::RIGHT:
     // wheelSpeed += dSpeed;
-    bodyBall->ApplyAngularImpulse(-1.1f, true);
+    bodyBall->ApplyTorque(-dTorque, true);
     resize();
     break;
   }
@@ -709,6 +730,15 @@ RollingCarScene::keyEvent(unsigned char key, bool up, int modif)
   std::cout << "Key pressed: '" << key << "'" << std::endl;
 
   switch (key) {
+  case '-':
+    worldSize.x *= 1.5;
+    resize();
+    break;
+  case '+':
+  case '=':
+    worldSize.x /= 1.5;
+    resize();
+    break;
   case ' ':
     anim.toggle();
     if (anim.paused()) {
@@ -721,11 +751,9 @@ RollingCarScene::keyEvent(unsigned char key, bool up, int modif)
     reset();
     break;
   case 'c':
-    if (keepWheelCentered == false) {
-      keepWheelCentered = true;
+    keepWheelCentered = !keepWheelCentered;
+    if (keepWheelCentered) {
       worldCenter.update(true);
-    } else {
-      keepWheelCentered = false;
     }
     break;
   }
