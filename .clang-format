@@ -9,6 +9,7 @@ ContinuationIndentWidth: 2
 ConstructorInitializerIndentWidth: 2
 BinPackArguments: false
 AlignAfterOpenBracket: DontAlign
+AlignArrayOfStructures: Right
 AllowShortLambdasOnASingleLine: All
 AllowShortIfStatementsOnASingleLine: true
 AllowAllArgumentsOnNextLine: true
@@ -20,4 +21,5 @@ BraceWrapping:
   AfterStruct: true
   AfterClass: true
   AfterFunction: true
+  AfterObjCDeclaration: true
   SplitEmptyFunction: false

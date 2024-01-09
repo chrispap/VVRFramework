@@ -70,8 +70,8 @@ namespace vvr
         T& valRef;
         T const oldVal;
     public:
-        explicit BackupAndRestore(T& ref) : valRef(ref), oldVal(ref) {}
-        explicit BackupAndRestore(T& ref, T newVal) : valRef(ref), oldVal(ref) { ref = newVal; }
+        BackupAndRestore(T& ref) : valRef(ref), oldVal(ref) {}
+        BackupAndRestore(T& ref, T newVal) : valRef(ref), oldVal(ref) { ref = newVal; }
         ~BackupAndRestore() { valRef = oldVal; }
     };
 
