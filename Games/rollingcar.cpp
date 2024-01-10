@@ -28,9 +28,12 @@
 
 typedef std::vector<vvr::Point3D *> PointVector;
 
-/*---[Physics]---------------------------------------------------------------*/
-const float gbW = 100.0f;
-const float gbH = 0.25f;
+template <typename T>
+T
+step(T value, T step)
+{
+  return floor(value / step) * step;
+}
 
 const vvr::Colour colours[] = {
   vvr::red,
@@ -48,13 +51,6 @@ const vvr::Colour colours[] = {
 };
 
 static int randomColourIndex = 0;
-
-template <typename T>
-T
-step(T value, T step)
-{
-  return floor(value / step) * step;
-}
 
 vvr::Colour
 randomColour()
@@ -306,6 +302,20 @@ track_zigzag()
 }
 
 auto
+track_sinusoid()
+{
+  PointVector pts;
+  constexpr float dx = 1.0;
+  constexpr float dy = dx * 1.21;
+  for (int i = 0; i < 1000; ++i) {
+    float x = i * dx;
+    float y = sin(x * 0.2 - 1.0) * dy + dy;
+    pts.push_back(new vvr::Point3D(x, y, 0));
+  }
+  return pts;
+}
+
+auto
 tracks()
 {
   typedef std::function<PointVector()> TrackFn;
@@ -315,6 +325,7 @@ tracks()
     []() { return track_circle(); },
     []() { return track_spiral(); },
     []() { return track_zigzag(); },
+    []() { return track_sinusoid(); },
   };
 }
 
@@ -333,288 +344,7 @@ createRoadFromPts(PointVector const &road_pts, vvr::Canvas &road)
   }
 }
 
-/*---[RollingDisks]----------------------------------------------------------*/
-
-constexpr auto hugei = std::numeric_limits<int>::max();
-constexpr auto hugef = std::numeric_limits<float>::max();
-
-class RollingCarScene : public vvr::Scene
-{
-public:
-  const char *getName() const override;
-  RollingCarScene();
-
-private:
-  void reset() override;
-  bool idle() override;
-  void draw() override;
-  void resize() override;
-  void arrowEvent(vvr::ArrowDir dir, int modif) override;
-  void mouseWheel(int dir, int modif) override;
-  void keyEvent(unsigned char, bool, int) override;
-  void mouseHovered(int x, int y, int modif) override;
-  void mousePressed(int x, int y, int modif) override;
-  void mouseMoved(int x, int y, int modif) override;
-  void mouseReleased(int x, int y, int modif) override;
-
-private:
-  void setupPhysics();
-  void simulatePhysics();
-  void drawPhysics() const;
-
-private:
-  int numWheels;
-  float wheelSpeed;
-  float wheelRadius;
-  vvr::Canvas road;
-  vvr::Canvas canvas;
-  vvr::Animation anim;
-  std::vector<Wheel::Ptr> wheels;
-  PointVector roadPts;
-  vvr::TargetAnimation<math::float2> worldCenter;
-  math::float2 worldCenterAnchor;
-  math::float2 dragAnchor{hugef, hugef};
-  math::float2 worldSize;
-  bool keepWheelCentered;
-
-  // Physics:
-  b2World *world = nullptr;
-  b2Body *groundBody = nullptr;
-  b2Body *bodyBall = nullptr;
-  b2Body *bodyBox1 = nullptr;
-  b2Body *bodyBox2 = nullptr;
-};
-
-const char *
-RollingCarScene::getName() const
-{
-  return "Rolling Car!";
-}
-
-RollingCarScene::RollingCarScene()
-{
-  vvr::Shape::SetPointSize(12);
-  vvr::Shape::SetLineWidth(5);
-
-  vvr::Scene::m_bg_col = vvr::grey;
-  vvr::Scene::m_fullscreen = false;
-  vvr::Scene::m_show_log = false;
-
-  worldSize = {20., 0.}; // Define only the width of the world
-  roadPts = track_zigzag();
-  createRoadFromPts(roadPts, road);
-  reset();
-}
-
-void
-RollingCarScene::reset()
-{
-  vvr::Scene::reset();
-
-  keepWheelCentered = false;
-  worldCenter = {
-    {0.f, 3.0f},
-    150.0f
-  };
-  worldCenter.update(keepWheelCentered);
-  // worldSize = {20., 0.}; // Define only the width of the world
-  numWheels = 2;
-  wheelSpeed = 0;
-  wheelRadius = 0.25;
-  randomColourIndex = 0;
-  anim.reset();
-  canvas.clear();
-
-  wheels.clear();
-  for (int i = 0; i < numWheels; ++i) {
-    auto wheel = Wheel::Make(wheelRadius, wheelSpeed, roadPts, i);
-    wheels.push_back(wheel);
-  }
-
-  setupPhysics();
-
-  resize();
-  anim.toggle();
-}
-
-void
-RollingCarScene::setupPhysics()
-{
-  if (world) {
-    delete world;
-    world = nullptr;
-    groundBody = nullptr;
-    bodyBall = nullptr;
-    bodyBox1 = nullptr;
-    bodyBox2 = nullptr;
-  }
-
-  {
-    // Create world:
-    b2Vec2 gravity(0.0f, -10.0f);
-    world = new b2World(gravity);
-  }
-
-  {
-    // Create ground:
-    b2BodyDef groundBodyDef;
-    b2PolygonShape groundBox;
-    groundBodyDef.position.Set(0.0f, -gbH);
-    groundBox.SetAsBox(gbW, gbH);
-    world->CreateBody(&groundBodyDef)
-      ->CreateFixture(&groundBox, 0.0f)
-      ->SetFriction(100);
-  }
-
-  {
-    // Create track:
-    b2BodyDef trackBodyDef;
-    b2FixtureDef fixtureDef;
-    b2ChainShape chain;
-    std::vector<b2Vec2> vs;
-    trackBodyDef.type = b2_staticBody;
-    trackBodyDef.position.Set(0.0f, 0.0f);
-    // Reverse iterator due to need for CCW order in Box2D:
-    for (auto it = roadPts.rbegin(); it != roadPts.rend(); ++it) {
-      vs.push_back({(*it)->x, (*it)->y});
-    }
-    chain.CreateLoop(vs.data(), roadPts.size());
-    groundBody = world->CreateBody(&trackBodyDef);
-    groundBody->CreateFixture(&chain, 0.0f)->SetFriction(114.5);
-  }
-
-  {
-    // Create ball:
-    b2BodyDef bodyDef;
-    b2CircleShape dynamicCircle;
-    b2FixtureDef fixtureDef;
-    bodyDef.type = b2_dynamicBody;
-    bodyDef.position.Set(-8.0f, 1.9f);
-    bodyDef.angularVelocity = -8.0f * M_PI;
-    dynamicCircle.m_radius = 1.85f;
-    fixtureDef.shape = &dynamicCircle;
-    fixtureDef.density = 0.8f;
-    fixtureDef.friction = 10.0f;
-    bodyBall = world->CreateBody(&bodyDef);
-    bodyBall->CreateFixture(&fixtureDef);
-    bodyBall->SetAngularDamping(10);
-  }
-
-  {
-    // Create box:
-    b2BodyDef bodyDef;
-    b2PolygonShape dynamicBox;
-    b2FixtureDef fixtureDef;
-    bodyDef.type = b2_dynamicBody;
-    bodyDef.position.Set(5.5f, 2.5f);
-    bodyDef.angularVelocity = 0.25f * M_PI;
-    dynamicBox.SetAsBox(2.40f, 0.10f);
-    fixtureDef.shape = &dynamicBox;
-    fixtureDef.density = 1.0f;
-    fixtureDef.friction = 10.0f;
-    bodyBox1 = world->CreateBody(&bodyDef);
-    bodyBox1->CreateFixture(&fixtureDef);
-
-    dynamicBox.SetAsBox(1.40f, 0.10f);
-    bodyDef.position.Set(15.5f, 2.5f);
-    bodyBox2 = world->CreateBody(&bodyDef);
-    bodyBox2->CreateFixture(&fixtureDef);
-  }
-}
-
-bool
-RollingCarScene::idle()
-{
-#if BENCHMARKS_ON
-  ScopedCounter counter{"idle"};
-#endif
-
-  double dt = anim.update();
-
-  wheelSpeed = std::clamp(wheelSpeed, 0.0f, 16.0f);
-  wheelRadius = std::clamp(wheelRadius, 0.01f, 10.0f);
-
-  for (auto &wheel : wheels) {
-    wheel->setSpeed(wheelSpeed);
-    wheel->setRadius(wheelRadius);
-  }
-
-  for (auto &wheel : wheels) {
-    wheel->update(dt, roadPts);
-  }
-
-  if (keepWheelCentered) {
-    // Center view on hub of first wheel
-    // using math::FloorInt;
-    // const auto &hub = wheels.front()->getHub();
-    // const math::float2 newCenter(hub.x, step(hub.y, worldSize.y / 4.0));
-    // worldCenter.setTarget(newCenter);
-
-    const auto &pos = bodyBall->GetPosition();
-    const math::float2 newCenter(pos.x, step(pos.y, worldSize.y / 4.0f));
-    worldCenter.setTarget(newCenter);
-  } else {
-    worldCenter.snapToTarget();
-  }
-
-  if (!anim.paused()) {
-    simulatePhysics();
-  }
-
-  // End of idle:
-  return !anim.paused();
-}
-
-void
-RollingCarScene::simulatePhysics()
-{
-  float timeStep = 1.0f / 60.0f;
-  int32 velocityIterations = 6;
-  int32 positionIterations = 2;
-  world->Step(timeStep, velocityIterations, positionIterations);
-}
-
-void
-RollingCarScene::draw()
-{
-#if BENCHMARKS_ON
-  ScopedCounter counter{"drawing"};
-#endif
-
-  enter2dMode(worldCenter.get(), worldSize);
-
-  // drawAxes();
-
-  {
-    vvr::BackupAndRestore<float> tmp[] = {
-      {vvr::Shape::PointSize, 25.0f},
-      {vvr::Shape::LineWidth,  5.0f}
-    };
-
-    drawPhysics();
-  }
-
-  {
-    road.draw();
-    canvas.draw();
-  }
-
-  // {
-  //   vvr::Canvas hubs;
-  //   for (int i = 0; i < wheels.size() - 1; ++i) {
-  //     hubs.add(C2DLine(wheels[i]->getHub(), wheels[i + 1]->getHub()));
-  //   }
-  //   hubs.draw();
-  // }
-
-  // {
-  //   for (auto &wheel : wheels) {
-  //     wheel->draw();
-  //   }
-  // }
-
-  exitPixelMode();
-}
+/*---[Box2D Drawing]---------------------------------------------------------*/
 
 void
 drawWheel(b2Body *bodyBall)
@@ -651,6 +381,294 @@ drawBox(b2Body *bodyBox)
   }
 }
 
+/*---[RollingDisks]----------------------------------------------------------*/
+
+constexpr auto hugei = std::numeric_limits<int>::max();
+constexpr auto hugef = std::numeric_limits<float>::max();
+
+class RollingCarScene : public vvr::Scene
+{
+public:
+  const char *getName() const override;
+  RollingCarScene();
+
+private:
+  void reset() override;
+  bool idle() override;
+  void draw() override;
+  void resize() override;
+  void arrowEvent(vvr::ArrowDir dir, int modif) override;
+  void mouseWheel(int dir, int modif) override;
+  void keyEvent(unsigned char, bool, int) override;
+  void mouseHovered(int x, int y, int modif) override;
+  void mousePressed(int x, int y, int modif) override;
+  void mouseMoved(int x, int y, int modif) override;
+  void mouseReleased(int x, int y, int modif) override;
+
+private:
+  void setupPhysics();
+  void simulatePhysics();
+  void drawPhysics() const;
+
+private:
+  float simulationTime;
+  float gbW;
+  float gbH;
+  int numWheels;
+  float wheelSpeed;
+  float wheelRadius;
+  vvr::Canvas road;
+  vvr::Canvas canvas;
+  vvr::Animation anim;
+  std::vector<Wheel::Ptr> wheels;
+  PointVector roadPts;
+  vvr::TargetAnimation<math::float2> worldCenter;
+  math::float2 worldCenterAnchor;
+  math::float2 dragAnchor{hugef, hugef};
+  math::float2 worldSize;
+  bool keepWheelCentered;
+
+  // Physics:
+  b2World *world = nullptr;
+  b2Body *groundBody = nullptr;
+  b2Body *bodyBall = nullptr;
+  b2Body *bodyBox1 = nullptr;
+  b2Body *bodyBox2 = nullptr;
+};
+
+const char *
+RollingCarScene::getName() const
+{
+  return "Rolling Car!";
+}
+
+RollingCarScene::RollingCarScene()
+{
+  vvr::Shape::SetPointSize(12);
+  vvr::Shape::SetLineWidth(5);
+
+  vvr::Scene::m_bg_col = vvr::grey;
+  vvr::Scene::m_fullscreen = false;
+  vvr::Scene::m_show_log = true;
+
+  worldSize = {60., 0.}; // Define only the width of the world
+  gbW = 100.0f;
+  gbH = 0.25f;
+  roadPts = track_sinusoid();
+  createRoadFromPts(roadPts, road);
+  reset();
+}
+
+void
+RollingCarScene::reset()
+{
+  vvr::Scene::reset();
+
+  randomColourIndex = 0;
+  keepWheelCentered = false;
+  worldCenter = {
+    {0.f, 3.0f},
+    150.0f
+  };
+  worldCenter.update(keepWheelCentered);
+  numWheels = 2;
+  wheelSpeed = 0;
+  wheelRadius = 0.25;
+  anim.reset();
+  canvas.clear();
+
+  wheels.clear();
+  for (int i = 0; i < numWheels; ++i) {
+    auto wheel = Wheel::Make(wheelRadius, wheelSpeed, roadPts, i);
+    wheels.push_back(wheel);
+  }
+
+  setupPhysics();
+
+  resize();
+  anim.toggle();
+}
+
+void
+RollingCarScene::setupPhysics()
+{
+  if (world) {
+    simulationTime = {0};
+    delete world;
+    world = nullptr;
+    groundBody = nullptr;
+    bodyBall = nullptr;
+    bodyBox1 = nullptr;
+    bodyBox2 = nullptr;
+  }
+
+  {
+    // Create world:
+    b2Vec2 gravity(0.0f, -5.0f);
+    world = new b2World(gravity);
+  }
+
+  {
+    // Create ground:
+    b2BodyDef groundBodyDef;
+    b2PolygonShape groundBox;
+    b2FixtureDef fixtureDef;
+    groundBodyDef.position.Set(0.0f, -gbH);
+    groundBox.SetAsBox(gbW, gbH);
+    fixtureDef.shape = &groundBox;
+    fixtureDef.density = 1.0f;
+    fixtureDef.friction = 100.0f;
+    world->CreateBody(&groundBodyDef)->CreateFixture(&fixtureDef);
+  }
+
+  {
+    // Create track:
+    b2BodyDef trackBodyDef;
+    b2FixtureDef fixtureDef;
+    b2ChainShape chain;
+    std::vector<b2Vec2> vs;
+    trackBodyDef.type = b2_staticBody;
+    trackBodyDef.position.Set(0.0f, 0.0f);
+    // Reverse iterator due to need for CCW order in Box2D:
+    for (auto it = roadPts.rbegin(); it != roadPts.rend(); ++it) {
+      vs.push_back({(*it)->x, (*it)->y});
+    }
+    fixtureDef.shape = &chain;
+    fixtureDef.density = 1.0f;
+    fixtureDef.friction = 100.0f;
+    chain.CreateLoop(vs.data(), roadPts.size());
+    groundBody = world->CreateBody(&trackBodyDef);
+    groundBody->CreateFixture(&fixtureDef);
+  }
+
+  {
+    // Create ball:
+    b2BodyDef bodyDef;
+    b2CircleShape dynamicCircle;
+    b2FixtureDef fixtureDef;
+    bodyDef.type = b2_dynamicBody;
+    bodyDef.position.Set(0.0f, 8.0f);
+    bodyDef.angularVelocity = -8.0f * M_PI;
+    dynamicCircle.m_radius = 3.0f;
+    fixtureDef.shape = &dynamicCircle;
+    fixtureDef.density = 0.040f;
+    fixtureDef.friction = 1.0f;
+    bodyBall = world->CreateBody(&bodyDef);
+    bodyBall->CreateFixture(&fixtureDef);
+    bodyBall->SetAngularDamping(2);
+  }
+
+  {
+    // Create box:
+    b2BodyDef bodyDef;
+    b2PolygonShape dynamicBox;
+    b2FixtureDef fixtureDef;
+    bodyDef.type = b2_dynamicBody;
+    bodyDef.position.Set(5.5f, 2.5f);
+    bodyDef.angularVelocity = 0.25f * M_PI;
+    dynamicBox.SetAsBox(3.40f, 0.30f);
+    fixtureDef.shape = &dynamicBox;
+    fixtureDef.density = 0.2f;
+    fixtureDef.friction = 1.0f;
+    bodyBox1 = world->CreateBody(&bodyDef);
+    bodyBox1->CreateFixture(&fixtureDef);
+
+    dynamicBox.SetAsBox(2.40f, 0.50f);
+    bodyDef.position.Set(15.5f, 2.5f);
+    bodyBox2 = world->CreateBody(&bodyDef);
+    bodyBox2->CreateFixture(&fixtureDef);
+  }
+}
+
+bool
+RollingCarScene::idle()
+{
+#if BENCHMARKS_ON
+  ScopedCounter counter{"idle"};
+#endif
+
+  double dt = anim.update();
+
+  if (keepWheelCentered) {
+    const auto &pos = bodyBall->GetPosition();
+    const math::float2 newCenter(pos.x, step(pos.y, worldSize.y / 4.0f));
+    worldCenter.setTarget(newCenter);
+  } else {
+    worldCenter.snapToTarget();
+  }
+
+  return !anim.paused();
+}
+
+void
+RollingCarScene::simulatePhysics()
+{
+  float timeStep = 1.0f / 60.0f;
+  int32 velocityIterations = 6;
+  int32 positionIterations = 2;
+  world->Step(timeStep, velocityIterations, positionIterations);
+  simulationTime += timeStep;
+}
+
+void
+RollingCarScene::draw()
+{
+#if BENCHMARKS_ON
+  ScopedCounter counter{"drawing"};
+#endif
+
+  if (!anim.paused()) {
+    constexpr auto dSpeed = 0.4f;
+    constexpr auto dTorque = 150.0f;
+
+    if (isArrowDown(vvr::LEFT)) {
+      bodyBall->ApplyTorque(dTorque, true);
+    } else if (isArrowDown(vvr::RIGHT)) {
+      bodyBall->ApplyTorque(-dTorque, true);
+    } else {
+      bodyBall->ApplyTorque(0, true);
+    }
+
+    simulatePhysics();
+  }
+
+  {
+    // Draw a clock
+    enterPixelMode();
+    vvr::BackupAndRestore<float> tmp[] = {
+      {vvr::Shape::PointSize, 15.0f},
+      {vvr::Shape::LineWidth,  5.0f}
+    };
+    const float sec = simulationTime;
+    const int vpw = this->getViewportWidth();
+    const int vph = this->getViewportHeight();
+    const int rad = 100;
+    const C2DPoint cen(-vpw / 2. + rad + 15, vph / 2. - rad - 15);
+    float th = sec * M_PI;
+    vvr::Circle2D({cen, (float)rad}, vvr::black).draw();
+    vvr::Point2D(cen.x + rad * sin(th), cen.y + rad * cos(th)).draw();
+    vvr::Point2D(cen.x + rad * sin(th / 60), cen.y + rad * cos(th / 60)).draw();
+    exitPixelMode();
+  }
+
+  enter2dMode(worldCenter.get(), worldSize);
+
+  {
+    vvr::BackupAndRestore<float> tmp[] = {
+      {vvr::Shape::PointSize, 25.0f},
+      {vvr::Shape::LineWidth,  5.0f}
+    };
+    drawPhysics();
+  }
+
+  {
+    road.draw();
+    canvas.draw();
+  }
+
+  exitPixelMode();
+}
+
 void
 RollingCarScene::drawPhysics() const
 {
@@ -685,30 +703,7 @@ RollingCarScene::resize()
 
 void
 RollingCarScene::arrowEvent(vvr::ArrowDir dir, int modif)
-{
-  constexpr auto dSpeed = 0.4f;
-  constexpr auto dTorque = 4400.0f;
-
-  switch (dir) {
-  case vvr::UP:
-    // wheelSpeed += dSpeed;
-    break;
-  case vvr::DOWN:
-    // wheelSpeed -= dSpeed;
-    break;
-  case vvr::LEFT:
-    // wheelSpeed -= dSpeed;
-    // bodyBall->ApplyAngularImpulse(0.5f, true);
-    bodyBall->ApplyTorque(dTorque, true);
-    resize();
-    break;
-  case vvr::RIGHT:
-    // wheelSpeed += dSpeed;
-    bodyBall->ApplyTorque(-dTorque, true);
-    resize();
-    break;
-  }
-}
+{}
 
 void
 RollingCarScene::mouseWheel(int dir, int modif)
@@ -727,7 +722,12 @@ RollingCarScene::keyEvent(unsigned char key, bool up, int modif)
   Scene::keyEvent(key, up, modif);
   key = tolower(key);
 
-  std::cout << "Key pressed: '" << key << "'" << std::endl;
+  if (up) {
+    std::cout << "Key released: '" << key << "'" << std::endl;
+    return;
+  } else {
+    std::cout << "Key pressed: '" << key << "'" << std::endl;
+  }
 
   switch (key) {
   case '-':
