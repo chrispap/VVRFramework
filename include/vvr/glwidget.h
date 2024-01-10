@@ -30,6 +30,7 @@ protected:
     void wheelEvent(QWheelEvent*) override;
     void keyPressEvent(QKeyEvent*) override;
     bool eventFilter(QObject*, QEvent*) override;
+    void keyEventCore(QKeyEvent *, bool pressed);
 
 private:
     Scene *m_scene;

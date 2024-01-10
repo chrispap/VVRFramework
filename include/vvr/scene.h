@@ -9,7 +9,7 @@
 
 namespace vvr
 {
-    enum ArrowDir { UP = 0, DOWN, RIGHT, LEFT };
+    enum ArrowDir { UP = 0, DOWN, RIGHT, LEFT, SIZE };
 
     class VVRFramework_API Scene
     {
@@ -51,6 +51,7 @@ namespace vvr
         void setFrustum(const math::Frustum &frustum) { m_frustum = frustum; }
         void setSliderVal(int slider_id, float val);
         void setCameraPos(const math::vec &pos);
+        bool isArrowDown(ArrowDir dir) const { return m_arrow_state[dir]; }
 
         /*---[Virtual]------------------------------------------------------------------*/
         virtual void draw() = 0;
@@ -107,6 +108,7 @@ namespace vvr
         float           m_mouse_depth;
         math::float2    m_2d_center;
         math::float2    m_2d_size;
+        volatile bool   m_arrow_state[ArrowDir::SIZE];
 
         /*---[Friends]------------------------------------------------------------------*/
         friend class GlWidget;

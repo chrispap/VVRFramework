@@ -28,6 +28,10 @@ Scene::Scene()
     m_fov = 66;
     m_first_resize = true;
     m_2d_center = math::float2{0.0f, 0.0f};
+    m_arrow_state[0] = false;
+    m_arrow_state[1] = false;
+    m_arrow_state[2] = false;
+    m_arrow_state[3] = false;
     setCameraPos(vec(0, 0, DEFAULT_CAM_DIST));
 }
 

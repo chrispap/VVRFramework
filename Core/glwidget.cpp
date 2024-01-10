@@ -135,15 +135,34 @@ void vvr::GlWidget::wheelEvent(QWheelEvent *event)
 
 void vvr::GlWidget::keyPressEvent(QKeyEvent *event)
 {
+    keyEventCore(event, true);
+}
+
+void vvr::GlWidget::keyEventCore(QKeyEvent *event, bool pressed)
+{
     int modif = make_modifier_flag(event);
     QString txt = event->text();
-    if (event->key() == Qt::Key_Escape) QApplication::quit();
-    else if (event->key() >= Qt::Key_A && event->key() <= Qt::Key_Z) m_scene->keyEvent(tolower(event->key()), false, modif);
-    else if (txt.length()>0) m_scene->keyEvent(txt.toStdString()[0],false, modif);
-    else if (event->key() == Qt::Key_Left) m_scene->arrowEvent(vvr::LEFT, modif);
-    else if (event->key() == Qt::Key_Right) m_scene->arrowEvent(vvr::RIGHT, modif);
-    else if (event->key() == Qt::Key_Up) m_scene->arrowEvent(vvr::UP, modif);
-    else if (event->key() == Qt::Key_Down) m_scene->arrowEvent(vvr::DOWN, modif);
+
+    if (event->key() == Qt::Key_Escape) {
+        QApplication::quit();
+    } else if (event->key() >= Qt::Key_A && event->key() <= Qt::Key_Z) {
+        m_scene->keyEvent(tolower(event->key()), !pressed, modif);
+    } else if (txt.length() > 0) {
+        m_scene->keyEvent(txt.toStdString()[0], !pressed, modif);
+    } else if (event->key() == Qt::Key_Left) {
+        m_scene->arrowEvent(vvr::LEFT, modif);
+        m_scene->m_arrow_state[vvr::LEFT] = pressed;
+    } else if (event->key() == Qt::Key_Right) {
+        m_scene->arrowEvent(vvr::RIGHT, modif);
+        m_scene->m_arrow_state[vvr::RIGHT] = pressed;
+    } else if (event->key() == Qt::Key_Up) {
+        m_scene->arrowEvent(vvr::UP, modif);
+        m_scene->m_arrow_state[vvr::UP] = pressed;
+    } else if (event->key() == Qt::Key_Down) {
+        m_scene->arrowEvent(vvr::DOWN, modif);
+        m_scene->m_arrow_state[vvr::DOWN] = pressed;
+    }
+
     idle();
 }
 
@@ -151,8 +170,14 @@ bool vvr::GlWidget::eventFilter(QObject *obj, QEvent *event)
 {
     if (event->type() == QEvent::KeyPress) {
         QKeyEvent *keyEvent = static_cast<QKeyEvent*>(event);
-        keyPressEvent(keyEvent);
+        keyEventCore(keyEvent, true);
         return true;
-    } else return false;
+    } else if (event->type() == QEvent::KeyRelease) {
+        QKeyEvent *keyEvent = static_cast<QKeyEvent *>(event);
+        keyEventCore(keyEvent, false);
+        return true;
+    } else {
+        return false;
+    }
 }
 /*--------------------------------------------------------------------------------------*/
