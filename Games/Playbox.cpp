@@ -66,12 +66,8 @@ struct Wheel : vvr::Drawable
 {
   vvr_decl_shared_ptr(Wheel);
 
-  Wheel(float radius, C2DPoint const &pos, float angle);
+  Wheel(float radius, C2DPoint const &pos, float angle, vvr::Colour col);
 
-  Wheel(float radius, double wheel_speed, PointVector const &road_pts,
-    int road_seg);
-
-  void update(float dt, PointVector const &road_pts);
   void move(C2DVector dir);
   void turn(float rad, C2DPoint const &pivot);
   void place(C2DPoint const &ground, C2DVector normal);
@@ -91,99 +87,12 @@ private:
   vvr::Circle2D tire;
 };
 
-Wheel::Wheel(float radius, C2DPoint const &pos, float angle) : angle(angle)
+Wheel::Wheel(float radius, C2DPoint const &pos, float angle, vvr::Colour col)
+  : angle(angle)
 {
   speed = 0;
   circumference = 2 * M_PI * radius;
-  tire = vvr::Circle2D({pos, radius}, vvr::black);
-}
-
-Wheel::Wheel(
-  float radius, double wheel_speed, PointVector const &road_pts, int road_seg)
-  : road_seg(road_seg)
-{
-  angle = 0;
-  speed = wheel_speed;
-  circumference = 2 * M_PI * radius;
-  C2DPoint ground{road_pts[road_seg]->x, road_pts[road_seg]->y};
-  C2DPoint center = ground + C2DVector(0, radius);
-  // vvr::Colour colour = randomColour();
-  vvr::Colour colour = vvr::red;
-  tire = vvr::Circle2D({center, radius}, colour);
-
-  const C2DPoint p1{road_pts[road_seg + 0]->x, road_pts[road_seg + 0]->y};
-  const C2DPoint p2{road_pts[road_seg + 1]->x, road_pts[road_seg + 1]->y};
-  const C2DLine seg(p1, p2);
-  C2DVector normal = seg.vector;
-  normal.TurnLeft(M_PI_2);
-  place(seg.point, normal);
-}
-
-void
-Wheel::update(float dt, PointVector const &road_pts)
-{
-  auto &p1 = road_pts[road_seg + 0];
-  auto &p2 = road_pts[road_seg + 1];
-
-  if (road_seg == road_pts.size() - 2) {
-    math::float3 dv = ((*p2) - (*p1)).ScaledToLength(dt * speed);
-    move(C2DVector{dv.x, dv.y});
-
-    const C2DLine seg1(C2DPoint{p1->x, p1->y}, C2DPoint{p2->x, p2->y});
-    const double proj1 = this->getHub().Project(seg1) / seg1.GetLength();
-
-    if (proj1 > 1) {
-      road_seg = 0;
-      const C2DPoint p1{road_pts[road_seg + 0]->x, road_pts[road_seg + 0]->y};
-      const C2DPoint p2{road_pts[road_seg + 1]->x, road_pts[road_seg + 1]->y};
-      const C2DLine seg(p1, p2);
-      C2DVector normal = seg.vector;
-      normal.TurnLeft(M_PI_2);
-      place(seg.point, normal);
-    }
-  } else {
-    auto &p3 = road_pts[road_seg + 2];
-
-    const C2DLine seg1(C2DPoint{p1->x, p1->y}, C2DPoint{p2->x, p2->y});
-    const C2DLine seg2(C2DPoint{p2->x, p2->y}, C2DPoint{p3->x, p3->y});
-    const float angleL = seg1.vector.AngleToLeft(seg2.vector);
-    const float angleR = seg1.vector.AngleToRight(seg2.vector);
-
-    if (angleR < angleL) {
-      // Here we handle the case where the wheel is on a hill
-      // and the next segment is relatively downhill.
-
-      const double proj1 = this->getHub().Project(seg1) / seg1.GetLength();
-      const double proj2 = this->getHub().Project(seg2) / seg2.GetLength();
-
-      if (proj1 > 1 && proj2 >= 0) {
-        C2DVector normal = seg2.vector;
-        normal.TurnLeft(M_PI_2);
-        this->place(seg2.point, normal);
-        road_seg++;
-      } else if (proj1 > 1) {
-        const auto rot_speed = speed / this->getCircumference() * 2 * M_PI;
-        this->turn(dt * rot_speed, seg2.point);
-      } else {
-        math::float3 dv = ((*p2) - (*p1)).ScaledToLength(dt * speed);
-        this->move(C2DVector{dv.x, dv.y});
-      }
-
-    } else {
-      // Here we handle the case where the wheel is on a hill
-      // and the next segment is relatively uphill.
-
-      const float dist1 = seg1.Distance(this->getHub());
-      const float dist2 = seg2.Distance(this->getHub());
-
-      if (dist2 <= dist1) {
-        road_seg++;
-      } else {
-        math::float3 dv = ((*p2) - (*p1)).ScaledToLength(dt * speed);
-        this->move(C2DVector{dv.x, dv.y});
-      }
-    }
-  }
+  tire = vvr::Circle2D({pos, radius}, col);
 }
 
 void
@@ -349,16 +258,16 @@ createRoadFromPts(PointVector const &road_pts, vvr::Canvas &road)
 /*---[Box2D Drawing]---------------------------------------------------------*/
 
 void
-drawWheel(b2Body *bodyBall)
+drawWheel(b2Body *bodyBall, vvr::Colour col)
 {
   auto bodyPos = bodyBall->GetPosition();
   const auto r = bodyBall->GetFixtureList()->GetShape()->m_radius;
-  Wheel w(r, {bodyPos.x, bodyPos.y}, -bodyBall->GetAngle());
+  Wheel w(r, {bodyPos.x, bodyPos.y}, -bodyBall->GetAngle(), col);
   w.draw();
 }
 
 void
-drawBox(b2Body *bodyBox)
+drawBox(b2Body *bodyBox, vvr::Colour colour = vvr::black)
 {
   vvr::Canvas c;
   auto bodyPos = bodyBox->GetPosition();
@@ -379,7 +288,7 @@ drawBox(b2Body *bodyBox)
   ls.RotateToRight(-bodyAngle, {0, 0});
   ls.Move({bodyPos.x, bodyPos.y});
   for (int i = 0; i < ls.size(); ++i) {
-    c.add(*ls.GetAt(i))->draw();
+    c.add(*ls.GetAt(i), colour)->draw();
   }
 }
 
@@ -428,7 +337,8 @@ private:
   // Physics:
   b2World *world = nullptr;
   b2Body *groundBody = nullptr;
-  b2Body *ballBody = nullptr;
+  b2Body *ballBody1 = nullptr;
+  b2Body *ballBody2 = nullptr;
   std::vector<b2Body *> boxBodies;
 };
 
@@ -439,12 +349,12 @@ PlayboxScene::PlayboxScene()
 
   vvr::Scene::m_bg_col = vvr::grey;
   vvr::Scene::m_fullscreen = false;
-  vvr::Scene::m_show_log = true;
+  vvr::Scene::m_show_log = false;
 
-  worldSize = {100., 0.}; // Define only the width of the world
+  worldSize = {30., 0.}; // Define only the width of the world
   gbW = 100.0f;
   gbH = 0.25f;
-  roadPts = track_sinusoid();
+  roadPts = track_zigzag();
   createRoadFromPts(roadPts, road);
   reset();
 }
@@ -458,7 +368,7 @@ PlayboxScene::reset()
   keepCentered = true;
   worldCenter = {
     {0.f, 3.0f},
-    150.0f
+    350.0f
   };
   worldCenter.update(keepCentered);
   anim.reset();
@@ -467,13 +377,13 @@ PlayboxScene::reset()
   setupPhysics();
 
   resize();
-  anim.toggle();
+  // anim.toggle();
 }
 
 void
 PlayboxScene::setCenterTarget()
 {
-  const auto &pos = ballBody->GetPosition();
+  const auto &pos = ballBody1->GetPosition();
   auto newx = pos.x;
   auto newy = step(pos.y, worldSize.y) + worldSize.y * 0.48;
   const math::float2 newCenter(newx, newy);
@@ -489,7 +399,7 @@ PlayboxScene::setupPhysics()
     delete world;
     world = nullptr;
     groundBody = nullptr;
-    ballBody = nullptr;
+    ballBody1 = nullptr;
     boxBodies.clear();
   }
 
@@ -507,7 +417,7 @@ PlayboxScene::setupPhysics()
     groundBodyDef.position.Set(0.0f, -gbH);
     groundBox.SetAsBox(gbW, gbH);
     fixtureDef.shape = &groundBox;
-    fixtureDef.density = 1.0f;
+    fixtureDef.density = 2.0f;
     fixtureDef.friction = 2.0f;
     world->CreateBody(&groundBodyDef)->CreateFixture(&fixtureDef);
   }
@@ -525,7 +435,7 @@ PlayboxScene::setupPhysics()
       vs.push_back({(*it)->x, (*it)->y});
     }
     fixtureDef.shape = &chain;
-    fixtureDef.density = 1.0f;
+    fixtureDef.density = 2.0f;
     fixtureDef.friction = 2.0f;
     chain.CreateLoop(vs.data(), roadPts.size());
     groundBody = world->CreateBody(&trackBodyDef);
@@ -538,26 +448,54 @@ PlayboxScene::setupPhysics()
     b2CircleShape dynamicCircle;
     b2FixtureDef fixtureDef;
     bodyDef.type = b2_dynamicBody;
-    bodyDef.position.Set(0.0f, 8.0f);
+    bodyDef.position.Set(-3.0f, 10.0f);
     bodyDef.angularVelocity = -8.0f * M_PI;
-    dynamicCircle.m_radius = 2.0f;
+    dynamicCircle.m_radius = 0.6f;
     fixtureDef.shape = &dynamicCircle;
-    fixtureDef.density = 0.040f;
+    fixtureDef.density = 0.05f;
     fixtureDef.friction = 1.0f;
-    ballBody = world->CreateBody(&bodyDef);
-    ballBody->CreateFixture(&fixtureDef);
-    ballBody->SetAngularDamping(2);
+    ballBody1 = world->CreateBody(&bodyDef);
+    ballBody1->CreateFixture(&fixtureDef);
+    ballBody1->SetAngularDamping(2);
   }
 
-  for (int i = 0; i < 10; ++i) {
+  {
+    // Create ball 2:
+    b2BodyDef bodyDef;
+    b2CircleShape dynamicCircle;
+    b2FixtureDef fixtureDef;
+    bodyDef.type = b2_dynamicBody;
+    bodyDef.position.Set(-1.0f, 10.0f);
+    bodyDef.angularVelocity = 0.0f * M_PI;
+    dynamicCircle.m_radius = 0.6f;
+    fixtureDef.shape = &dynamicCircle;
+    fixtureDef.density = 0.05f;
+    fixtureDef.friction = 1.0f;
+    ballBody2 = world->CreateBody(&bodyDef);
+    ballBody2->CreateFixture(&fixtureDef);
+    ballBody2->SetAngularDamping(2);
+  }
+
+  {
+    // Join ball and ball2 with distance joint:
+    b2DistanceJointDef jointDef;
+    jointDef.Initialize(ballBody1,
+      ballBody2,
+      ballBody1->GetWorldCenter(),
+      ballBody2->GetWorldCenter());
+    jointDef.collideConnected = true;
+    world->CreateJoint(&jointDef);
+  }
+
+  for (int i = 0; i < 100; ++i) {
     // Create boxes:
     b2BodyDef bodyDef;
     b2PolygonShape dynamicBox;
     b2FixtureDef fixtureDef;
     bodyDef.type = b2_dynamicBody;
-    bodyDef.position.Set(7.0f * i, 10.0f);
+    bodyDef.position.Set(4.0f * i, 8.0f);
     bodyDef.angularVelocity = 0.25f * M_PI;
-    dynamicBox.SetAsBox(3.0f, 1.50f);
+    dynamicBox.SetAsBox(1.0f, 0.3f);
     fixtureDef.shape = &dynamicBox;
     fixtureDef.density = 0.2f;
     fixtureDef.friction = 1.0f;
@@ -619,23 +557,31 @@ PlayboxScene::draw()
   };
 
   if (!anim.paused()) {
-    constexpr auto torque = 100.0f;
-    constexpr auto force = 15.0f;
-    constexpr auto impulse = 15.0f;
+    constexpr auto torque = 0.4f;
+    constexpr auto force = 0.2f;
+    constexpr auto impulse = 0.2f;
 
     if (con.brake) {
-      ballBody->ApplyTorque(torque, true);
-      ballBody->ApplyForceToCenter({-force, 0}, true);
+      ballBody1->ApplyTorque(torque, true);
+      ballBody2->ApplyTorque(torque, true);
+      ballBody1->ApplyForceToCenter({-force, 0}, true);
+      ballBody2->ApplyForceToCenter({-force, 0}, true);
     } else if (con.gas) {
-      ballBody->ApplyTorque(-torque, true);
-      ballBody->ApplyForceToCenter({+force, 0}, true);
+      ballBody1->ApplyTorque(-torque, true);
+      ballBody2->ApplyTorque(-torque, true);
+      ballBody1->ApplyForceToCenter({+force, 0}, true);
+      ballBody2->ApplyForceToCenter({+force, 0}, true);
     }
 
     if (con.downforce && prevCon.downforce == false) {
-      ballBody->ApplyLinearImpulseToCenter({0, -impulse * 2}, true);
+      ballBody1->ApplyLinearImpulseToCenter({0, -impulse * 2}, true);
+      ballBody2->ApplyLinearImpulseToCenter({0, -impulse * 2}, true);
     } else if (con.upforce && prevCon.upforce == false) {
-      ballBody->ApplyLinearImpulseToCenter({0, +impulse}, true);
+      ballBody1->ApplyLinearImpulseToCenter({0, +impulse}, true);
+      ballBody2->ApplyLinearImpulseToCenter({0, +impulse}, true);
     }
+
+    prevCon = con;
 
     simulatePhysics();
   }
@@ -647,6 +593,7 @@ PlayboxScene::draw()
       {vvr::Shape::PointSize, 10.0f},
       {vvr::Shape::LineWidth,  3.0f}
     };
+
     const float sec = simulationTime;
     const float vpw = this->getViewportWidth();
     const float vph = this->getViewportHeight();
@@ -676,31 +623,21 @@ PlayboxScene::draw()
     ring.draw();
   }
 
-  exitPixelMode();
-
   enter2dMode(worldCenter.get(), worldSize);
 
   {
     vvr::BackupAndRestore<float> tmp[] = {
-      {vvr::Shape::PointSize, 25.0f},
-      {vvr::Shape::LineWidth,  4.0f}
+      {vvr::Shape::PointSize, 15.0f},
+      {vvr::Shape::LineWidth,  5.0f}
     };
+
     drawPhysics();
     road.draw();
-  }
-
-  {
-    vvr::BackupAndRestore<float> tmp[] = {
-      {vvr::Shape::PointSize, 5.0f},
-      {vvr::Shape::LineWidth, 2.0f}
-    };
   }
 
   canvas.draw();
 
   exitPixelMode();
-
-  prevCon = con;
 }
 
 void
@@ -713,9 +650,46 @@ PlayboxScene::drawPhysics() const
   vvr::LineSeg2D(gbW, -gbH * 2, -gbW, -gbH * 2, col).draw();
   vvr::LineSeg2D(-gbW, -gbH * 2, -gbW, 0, col).draw();
 
-  drawWheel(ballBody);
+  // Draw balls:
+  drawWheel(ballBody1, vvr::red);
+  drawWheel(ballBody2, vvr::green);
+  vvr::LineSeg2D(ballBody1->GetPosition().x,
+    ballBody1->GetPosition().y,
+    ballBody2->GetPosition().x,
+    ballBody2->GetPosition().y,
+    vvr::black)
+    .draw();
+
+  // Draw boxes:
   for (auto body : boxBodies) {
     drawBox(body);
+  }
+
+  // Draw contact points:
+  for (b2Contact *con = world->GetContactList(); con; con = con->GetNext()) {
+    auto bodyA = con->GetFixtureA()->GetBody();
+    auto bodyB = con->GetFixtureB()->GetBody();
+
+    b2Body *other = nullptr;
+    if (bodyA == ballBody1)
+      other = bodyB;
+    else if (bodyB == ballBody1)
+      other = bodyA;
+
+    auto polygon = other ? dynamic_cast<b2PolygonShape *>(
+                             other->GetFixtureList()[0].GetShape())
+                         : nullptr;
+
+    if (polygon && polygon->m_count == 4) {
+      drawBox(bodyA, vvr::red);
+    }
+
+    b2WorldManifold worldManifold;
+    con->GetWorldManifold(&worldManifold);
+    for (int i = 0; i < con->GetManifold()->pointCount; ++i) {
+      b2Vec2 pos = worldManifold.points[i];
+      vvr::Point2D(pos.x, pos.y, vvr::yellow).draw();
+    }
   }
 }
 
@@ -793,6 +767,10 @@ PlayboxScene::keyEvent(unsigned char key, bool up, int modif)
       worldCenter.update(true);
     }
     break;
+  case 'i': {
+    const auto &pos = ballBody1->GetPosition();
+    std::cout << "Ball pos: [" << pos.x << ", " << pos.y << "]" << std::endl;
+  } break;
   }
 
   if (key >= '0' && key <= '9') {
