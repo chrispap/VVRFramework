@@ -150,16 +150,16 @@ void vvr::GlWidget::keyEventCore(QKeyEvent *event, bool pressed)
     } else if (txt.length() > 0) {
         m_scene->keyEvent(txt.toStdString()[0], !pressed, modif);
     } else if (event->key() == Qt::Key_Left) {
-        m_scene->arrowEvent(vvr::LEFT, modif);
+        if (pressed) m_scene->arrowEvent(vvr::LEFT, modif);
         m_scene->m_arrow_state[vvr::LEFT] = pressed;
     } else if (event->key() == Qt::Key_Right) {
-        m_scene->arrowEvent(vvr::RIGHT, modif);
+        if (pressed) m_scene->arrowEvent(vvr::RIGHT, modif);
         m_scene->m_arrow_state[vvr::RIGHT] = pressed;
     } else if (event->key() == Qt::Key_Up) {
-        m_scene->arrowEvent(vvr::UP, modif);
+        if (pressed) m_scene->arrowEvent(vvr::UP, modif);
         m_scene->m_arrow_state[vvr::UP] = pressed;
     } else if (event->key() == Qt::Key_Down) {
-        m_scene->arrowEvent(vvr::DOWN, modif);
+        if (pressed) m_scene->arrowEvent(vvr::DOWN, modif);
         m_scene->m_arrow_state[vvr::DOWN] = pressed;
     }
 

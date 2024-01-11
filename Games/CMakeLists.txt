@@ -10,6 +10,10 @@ file(GLOB ROLLINGCAR_SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}
     RollingCar.cpp
 )
 
+file(GLOB PLAYBOX_SRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}
+    Playbox.cpp
+)
+
 add_executable(Tavli MACOSX_BUNDLE ${TAVLI_SRC_FILES})
 target_link_libraries(Tavli
   optimized VVRFramework debug VVRFramework_d
@@ -23,6 +27,14 @@ target_link_libraries(RollingCar
   optimized VVRFramework    debug VVRFramework_d
   optimized GeoLib          debug GeoLib_d
   optimized MathGeoLib      debug MathGeoLib_d
+  jsoncpp
+)
+
+add_executable(Playbox MACOSX_BUNDLE ${PLAYBOX_SRC_FILES})
+target_link_libraries(Playbox
+  optimized VVRFramework    debug VVRFramework_d
+  optimized GeoLib          debug GeoLib_d
+  optimized MathGeoLib      debug MathGeoLib_d
   optimized box2d           debug box2d
   jsoncpp
 )
@@ -32,6 +44,7 @@ set_property(TARGET Tavli PROPERTY FOLDER "Apps")
 if(HIDE_CONSOLE_WINDOW AND WIN32 AND MSVC)
   set_target_properties(Tavli       PROPERTIES LINK_FLAGS "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
   set_target_properties(RollingCar  PROPERTIES LINK_FLAGS "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
+  set_target_properties(Playbox     PROPERTIES LINK_FLAGS "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
 endif()
 
 include_directories(${CMAKE_SOURCE_DIR}/include)

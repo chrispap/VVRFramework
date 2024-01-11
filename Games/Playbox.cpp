@@ -1,7 +1,11 @@
+#include "C2DLineSet.h"
+#include "box2d/b2_body.h"
+#include "box2d/b2_polygon_shape.h"
 #include <C2DLine.h>
 #include <C2DPoint.h>
 #include <C2DVector.h>
 #include <MathGeoLibFwd.h>
+#include <box2d/box2d.h>
 #include <cmath>
 #include <functional>
 #include <limits>
@@ -25,6 +29,7 @@ constexpr auto hugei = std::numeric_limits<int>::max();
 constexpr auto hugef = std::numeric_limits<float>::max();
 
 namespace {
+
 template <typename T>
 T
 step(T value, T step)
@@ -102,8 +107,8 @@ Wheel::Wheel(
   circumference = 2 * M_PI * radius;
   C2DPoint ground{road_pts[road_seg]->x, road_pts[road_seg]->y};
   C2DPoint center = ground + C2DVector(0, radius);
-  vvr::Colour colour = randomColour();
-  // vvr::Colour colour = vvr::red;
+  // vvr::Colour colour = randomColour();
+  vvr::Colour colour = vvr::red;
   tire = vvr::Circle2D({center, radius}, colour);
 
   const C2DPoint p1{road_pts[road_seg + 0]->x, road_pts[road_seg + 0]->y};
@@ -302,11 +307,11 @@ auto
 track_sinusoid()
 {
   PointVector pts;
-  constexpr float dx = 0.8;
-  constexpr float dy = dx * 0.91;
-  for (int i = 0; i < 100; ++i) {
+  constexpr float dx = 1.0;
+  constexpr float dy = dx * 3.0;
+  for (int i = 0; i < 1000; ++i) {
     float x = i * dx;
-    float y = sin(x * 1.0 - 1.0) * dy + dy;
+    float y = sin(x * 0.2 - 1.0) * dy + dy;
     pts.push_back(new vvr::Point3D(x, y, 0));
   }
   return pts;
@@ -341,15 +346,52 @@ createRoadFromPts(PointVector const &road_pts, vvr::Canvas &road)
   }
 }
 
+/*---[Box2D Drawing]---------------------------------------------------------*/
+
+void
+drawWheel(b2Body *bodyBall)
+{
+  auto bodyPos = bodyBall->GetPosition();
+  const auto r = bodyBall->GetFixtureList()->GetShape()->m_radius;
+  Wheel w(r, {bodyPos.x, bodyPos.y}, -bodyBall->GetAngle());
+  w.draw();
+}
+
+void
+drawBox(b2Body *bodyBox)
+{
+  vvr::Canvas c;
+  auto bodyPos = bodyBox->GetPosition();
+  auto bodyAngle = bodyBox->GetAngle();
+  auto shape = bodyBox->GetFixtureList()->GetShape();
+  auto polyg = dynamic_cast<b2PolygonShape *>(shape);
+  C2DLineSet ls;
+  C2DPoint boxPts[] = {
+    C2DPoint(polyg->m_vertices[0].x, polyg->m_vertices[0].y),
+    C2DPoint(polyg->m_vertices[1].x, polyg->m_vertices[1].y),
+    C2DPoint(polyg->m_vertices[2].x, polyg->m_vertices[2].y),
+    C2DPoint(polyg->m_vertices[3].x, polyg->m_vertices[3].y),
+  };
+  ls.AddCopy({boxPts[0], boxPts[1]});
+  ls.AddCopy({boxPts[1], boxPts[2]});
+  ls.AddCopy({boxPts[2], boxPts[3]});
+  ls.AddCopy({boxPts[3], boxPts[0]});
+  ls.RotateToRight(-bodyAngle, {0, 0});
+  ls.Move({bodyPos.x, bodyPos.y});
+  for (int i = 0; i < ls.size(); ++i) {
+    c.add(*ls.GetAt(i))->draw();
+  }
+}
+
 } // namespace
 
 /*---[RollingDisks]----------------------------------------------------------*/
 
-class Playbox : public vvr::Scene
+class PlayboxScene : public vvr::Scene
 {
 public:
-  const char *getName() const override;
-  Playbox();
+  const char *getName() const override { return "Playbox"; }
+  PlayboxScene();
 
 private:
   void reset() override;
@@ -365,31 +407,32 @@ private:
   void mouseReleased(int x, int y, int modif) override;
 
 private:
+  void setCenterTarget();
+  void setupPhysics();
+  void simulatePhysics();
+  void drawPhysics() const;
+
+private:
+  float gbW, gbH;
   float simulationTime;
-  float gbW;
-  float gbH;
-  int numWheels;
-  float wheelSpeed;
-  float wheelRadius;
   vvr::Canvas road;
   vvr::Canvas canvas;
   vvr::Animation anim;
-  std::vector<Wheel::Ptr> wheels;
   PointVector roadPts;
   vvr::TargetAnimation<math::float2> worldCenter;
   math::float2 worldCenterAnchor;
   math::float2 dragAnchor{hugef, hugef};
   math::float2 worldSize;
   bool keepCentered;
+
+  // Physics:
+  b2World *world = nullptr;
+  b2Body *groundBody = nullptr;
+  b2Body *ballBody = nullptr;
+  std::vector<b2Body *> boxBodies;
 };
 
-const char *
-Playbox::getName() const
-{
-  return "Rolling Car!";
-}
-
-Playbox::Playbox()
+PlayboxScene::PlayboxScene()
 {
   vvr::Shape::SetPointSize(12);
   vvr::Shape::SetLineWidth(5);
@@ -398,7 +441,7 @@ Playbox::Playbox()
   vvr::Scene::m_fullscreen = false;
   vvr::Scene::m_show_log = true;
 
-  worldSize = {20., 0.}; // Define only the width of the world
+  worldSize = {100., 0.}; // Define only the width of the world
   gbW = 100.0f;
   gbH = 0.25f;
   roadPts = track_sinusoid();
@@ -407,154 +450,299 @@ Playbox::Playbox()
 }
 
 void
-Playbox::reset()
+PlayboxScene::reset()
 {
   vvr::Scene::reset();
 
   randomColourIndex = 0;
-  keepCentered = false;
+  keepCentered = true;
   worldCenter = {
-    {0.f, 0.0f},
+    {0.f, 3.0f},
     150.0f
   };
   worldCenter.update(keepCentered);
-  numWheels = 4;
-  wheelSpeed = 0;
-  wheelRadius = 0.25;
   anim.reset();
   canvas.clear();
 
-  wheels.clear();
-  for (int i = 0; i < numWheels; ++i) {
-    auto wheel = Wheel::Make(wheelRadius, wheelSpeed, roadPts, i);
-    wheels.push_back(wheel);
-  }
+  setupPhysics();
 
   resize();
   anim.toggle();
 }
 
-bool
-Playbox::idle()
+void
+PlayboxScene::setCenterTarget()
 {
+  const auto &pos = ballBody->GetPosition();
+  auto newx = pos.x;
+  auto newy = step(pos.y, worldSize.y) + worldSize.y * 0.48;
+  const math::float2 newCenter(newx, newy);
+  worldCenter.setTarget(newCenter);
+}
 
+void
+PlayboxScene::setupPhysics()
+{
+  simulationTime = {0};
+
+  if (world) {
+    delete world;
+    world = nullptr;
+    groundBody = nullptr;
+    ballBody = nullptr;
+    boxBodies.clear();
+  }
+
+  {
+    // Create world:
+    b2Vec2 gravity(0.0f, -10.0f);
+    world = new b2World(gravity);
+  }
+
+  {
+    // Create ground:
+    b2BodyDef groundBodyDef;
+    b2PolygonShape groundBox;
+    b2FixtureDef fixtureDef;
+    groundBodyDef.position.Set(0.0f, -gbH);
+    groundBox.SetAsBox(gbW, gbH);
+    fixtureDef.shape = &groundBox;
+    fixtureDef.density = 1.0f;
+    fixtureDef.friction = 2.0f;
+    world->CreateBody(&groundBodyDef)->CreateFixture(&fixtureDef);
+  }
+
+  {
+    // Create track:
+    b2BodyDef trackBodyDef;
+    b2FixtureDef fixtureDef;
+    b2ChainShape chain;
+    std::vector<b2Vec2> vs;
+    trackBodyDef.type = b2_staticBody;
+    trackBodyDef.position.Set(0.0f, 0.0f);
+    // Reverse iterator due to need for CCW order in Box2D:
+    for (auto it = roadPts.rbegin(); it != roadPts.rend(); ++it) {
+      vs.push_back({(*it)->x, (*it)->y});
+    }
+    fixtureDef.shape = &chain;
+    fixtureDef.density = 1.0f;
+    fixtureDef.friction = 2.0f;
+    chain.CreateLoop(vs.data(), roadPts.size());
+    groundBody = world->CreateBody(&trackBodyDef);
+    groundBody->CreateFixture(&fixtureDef);
+  }
+
+  {
+    // Create ball:
+    b2BodyDef bodyDef;
+    b2CircleShape dynamicCircle;
+    b2FixtureDef fixtureDef;
+    bodyDef.type = b2_dynamicBody;
+    bodyDef.position.Set(0.0f, 8.0f);
+    bodyDef.angularVelocity = -8.0f * M_PI;
+    dynamicCircle.m_radius = 2.0f;
+    fixtureDef.shape = &dynamicCircle;
+    fixtureDef.density = 0.040f;
+    fixtureDef.friction = 1.0f;
+    ballBody = world->CreateBody(&bodyDef);
+    ballBody->CreateFixture(&fixtureDef);
+    ballBody->SetAngularDamping(2);
+  }
+
+  for (int i = 0; i < 10; ++i) {
+    // Create boxes:
+    b2BodyDef bodyDef;
+    b2PolygonShape dynamicBox;
+    b2FixtureDef fixtureDef;
+    bodyDef.type = b2_dynamicBody;
+    bodyDef.position.Set(7.0f * i, 10.0f);
+    bodyDef.angularVelocity = 0.25f * M_PI;
+    dynamicBox.SetAsBox(3.0f, 1.50f);
+    fixtureDef.shape = &dynamicBox;
+    fixtureDef.density = 0.2f;
+    fixtureDef.friction = 1.0f;
+    boxBodies.push_back(world->CreateBody(&bodyDef));
+    boxBodies.back()->CreateFixture(&fixtureDef);
+  }
+}
+
+bool
+PlayboxScene::idle()
+{
 #if BENCHMARKS_ON
   ScopedCounter counter{"idle"};
 #endif
 
   double dt = anim.update();
 
-  wheelSpeed = std::clamp(wheelSpeed, 0.0f, 16.0f);
-  wheelRadius = std::clamp(wheelRadius, 0.01f, 10.0f);
-
-  for (auto &wheel : wheels) {
-    wheel->setSpeed(wheelSpeed);
-    wheel->setRadius(wheelRadius);
-  }
-
-  for (auto &wheel : wheels) {
-    wheel->update(dt, roadPts);
-  }
-
   if (keepCentered) {
-    // Center view on hub of first wheel:
-    using math::FloorInt;
-    const auto &hub = wheels.front()->getHub();
-    const math::float2 newCenter(hub.x, step(hub.y, worldSize.y / 4.0));
-    worldCenter.setTarget(newCenter);
+    setCenterTarget();
   } else {
     worldCenter.snapToTarget();
   }
 
-  // End of idle:
   return !anim.paused();
 }
 
 void
-Playbox::draw()
+PlayboxScene::simulatePhysics()
+{
+  float timeStep = 1.0f / 60.0f;
+  int32 velocityIterations = 6;
+  int32 positionIterations = 2;
+  world->Step(timeStep, velocityIterations, positionIterations);
+  simulationTime += timeStep;
+}
+
+struct GameControls
+{
+  bool brake = false;
+  bool gas = false;
+  bool downforce = false;
+  bool upforce = false;
+};
+
+void
+PlayboxScene::draw()
 {
 #if BENCHMARKS_ON
   ScopedCounter counter{"drawing"};
 #endif
 
+  static GameControls prevCon;
+
+  const GameControls con{
+    .brake = isArrowDown(vvr::LEFT),
+    .gas = isArrowDown(vvr::RIGHT),
+    .downforce = isArrowDown(vvr::DOWN),
+    .upforce = isArrowDown(vvr::UP),
+  };
+
+  if (!anim.paused()) {
+    constexpr auto torque = 100.0f;
+    constexpr auto force = 15.0f;
+    constexpr auto impulse = 15.0f;
+
+    if (con.brake) {
+      ballBody->ApplyTorque(torque, true);
+      ballBody->ApplyForceToCenter({-force, 0}, true);
+    } else if (con.gas) {
+      ballBody->ApplyTorque(-torque, true);
+      ballBody->ApplyForceToCenter({+force, 0}, true);
+    }
+
+    if (con.downforce && prevCon.downforce == false) {
+      ballBody->ApplyLinearImpulseToCenter({0, -impulse * 2}, true);
+    } else if (con.upforce && prevCon.upforce == false) {
+      ballBody->ApplyLinearImpulseToCenter({0, +impulse}, true);
+    }
+
+    simulatePhysics();
+  }
+
+  enterPixelMode();
+
   {
-    // Draw a clock:
-    enterPixelMode();
     vvr::BackupAndRestore<float> tmp[] = {
-      {vvr::Shape::PointSize, 15.0f},
-      {vvr::Shape::LineWidth,  5.0f}
+      {vvr::Shape::PointSize, 10.0f},
+      {vvr::Shape::LineWidth,  3.0f}
     };
-    const float sec = anim.t();
-    const int vpw = this->getViewportWidth();
-    const int vph = this->getViewportHeight();
-    const int rad = 100;
-    const C2DPoint cen(-vpw / 2. + rad + 15, vph / 2. - rad - 15);
-    float th = sec * M_PI;
-    vvr::Circle2D({cen, (float)rad}, vvr::black).draw();
-    vvr::Point2D(cen.x + rad * sin(th), cen.y + rad * cos(th)).draw();
-    vvr::Point2D(cen.x + rad * sin(th / 60), cen.y + rad * cos(th / 60)).draw();
-    exitPixelMode();
+    const float sec = simulationTime;
+    const float vpw = this->getViewportWidth();
+    const float vph = this->getViewportHeight();
+    const float r = 50; // clock radius
+    const float p = 15; // padding
+    const C2DPoint c(-vpw / 2. + r + p, vph / 2. - r - p);
+    float a = sec * M_PI;
+
+    // Draw a clock
+    vvr::Circle2D ring({c, r}, vvr::white);
+    vvr::Point2D h1(c.x + r * sin(a), c.y + r * cos(a), vvr::Cornsilk);
+    vvr::Point2D h2(c.x + r * sin(a / 60), c.y + r * cos(a / 60), vvr::white);
+    ring.draw();
+    h1.draw();
+    h2.draw();
+
+    // Draw gas and brake indicators
+    ring.SetRadius(r / 2);
+    ring.Move({(r * 2 + p), r / 2});
+    ring.filled = con.brake;
+    ring.colour = vvr::red;
+    ring.draw();
+
+    ring.Move({(r + p), 0});
+    ring.filled = con.gas;
+    ring.colour = vvr::green;
+    ring.draw();
+  }
+
+  exitPixelMode();
+
+  enter2dMode(worldCenter.get(), worldSize);
+
+  {
+    vvr::BackupAndRestore<float> tmp[] = {
+      {vvr::Shape::PointSize, 25.0f},
+      {vvr::Shape::LineWidth,  4.0f}
+    };
+    drawPhysics();
+    road.draw();
   }
 
   {
-    // Draw world objects:
-    enter2dMode(worldCenter.get(), worldSize);
-    road.draw();
-    canvas.draw();
+    vvr::BackupAndRestore<float> tmp[] = {
+      {vvr::Shape::PointSize, 5.0f},
+      {vvr::Shape::LineWidth, 2.0f}
+    };
+  }
 
-    vvr::Canvas hubs;
-    for (int i = 0; i < wheels.size() - 1; ++i) {
-      hubs.add(C2DLine(wheels[i]->getHub(), wheels[i + 1]->getHub()));
-    }
-    hubs.draw();
+  canvas.draw();
 
-    for (auto &wheel : wheels) {
-      wheel->draw();
-    }
+  exitPixelMode();
 
-    exitPixelMode();
+  prevCon = con;
+}
+
+void
+PlayboxScene::drawPhysics() const
+{
+  // Draw ground:
+  const auto col = vvr::Aquamarine;
+  vvr::LineSeg2D(-gbW, 0, gbW, 0, col).draw();
+  vvr::LineSeg2D(gbW, 0, gbW, -gbH * 2, col).draw();
+  vvr::LineSeg2D(gbW, -gbH * 2, -gbW, -gbH * 2, col).draw();
+  vvr::LineSeg2D(-gbW, -gbH * 2, -gbW, 0, col).draw();
+
+  drawWheel(ballBody);
+  for (auto body : boxBodies) {
+    drawBox(body);
   }
 }
 
 void
-Playbox::resize()
+PlayboxScene::resize()
 {
   Scene::resize();
 
   if (m_first_resize) {
     std::cout << "Press 'r' to reset." << std::endl;
-    std::cout << "Press 'c' to keep wheel centered." << std::endl;
+    std::cout << "Press 'c' to keep centered." << std::endl;
     std::cout << "Press '0'-'9' to change track." << std::endl;
     std::cout << "Press 'space' to pause." << std::endl;
     std::cout << "Press '-' to zoom out." << std::endl;
     std::cout << "Press '+' to zoom in." << std::endl;
-    std::cout << "Press 'up'/'down' to change speed." << std::endl;
-    std::cout << "Press 'left'/'right' to change radius." << std::endl;
+    std::cout << "Press 'left'/'right' to move." << std::endl;
   }
 
   worldSize.y = worldSize.x * getViewportHeight() / getViewportWidth();
 }
 
 void
-Playbox::arrowEvent(vvr::ArrowDir dir, int modif)
-{
-  constexpr auto dSpeed = 0.4f;
-
-  switch (dir) {
-  case vvr::LEFT:
-    wheelSpeed -= dSpeed;
-    resize();
-    break;
-  case vvr::RIGHT:
-    wheelSpeed += dSpeed;
-    break;
-  default:
-    break;
-  }
-}
+PlayboxScene::arrowEvent(vvr::ArrowDir dir, int modif)
+{}
 
 void
-Playbox::mouseWheel(int dir, int modif)
+PlayboxScene::mouseWheel(int dir, int modif)
 {
   if (dir > 0) {
     worldSize.x /= 1.5;
@@ -565,13 +753,12 @@ Playbox::mouseWheel(int dir, int modif)
 }
 
 void
-Playbox::keyEvent(unsigned char key, bool up, int modif)
+PlayboxScene::keyEvent(unsigned char key, bool up, int modif)
 {
   Scene::keyEvent(key, up, modif);
   key = tolower(key);
 
   if (up) {
-    std::cout << "Key released: '" << key << "'" << std::endl;
     return;
   }
 
@@ -579,11 +766,15 @@ Playbox::keyEvent(unsigned char key, bool up, int modif)
   case '-':
     worldSize.x *= 1.5;
     resize();
+    setCenterTarget();
+    worldCenter.snapToTarget();
     break;
   case '+':
   case '=':
     worldSize.x /= 1.5;
     resize();
+    setCenterTarget();
+    worldCenter.snapToTarget();
     break;
   case ' ':
     anim.toggle();
@@ -613,11 +804,11 @@ Playbox::keyEvent(unsigned char key, bool up, int modif)
 }
 
 void
-Playbox::mouseHovered(int x, int y, int modif)
+PlayboxScene::mouseHovered(int x, int y, int modif)
 {}
 
 void
-Playbox::mousePressed(int x, int y, int modif)
+PlayboxScene::mousePressed(int x, int y, int modif)
 {
   const float vpw = getViewportWidth();
   const float vph = getViewportHeight();
@@ -633,7 +824,7 @@ Playbox::mousePressed(int x, int y, int modif)
 }
 
 void
-Playbox::mouseMoved(int x, int y, int modif)
+PlayboxScene::mouseMoved(int x, int y, int modif)
 {
   if (dragAnchor.x != hugef && dragAnchor.y != hugef) {
     const float vpw = getViewportWidth();
@@ -647,12 +838,12 @@ Playbox::mouseMoved(int x, int y, int modif)
 }
 
 void
-Playbox::mouseReleased(int x, int y, int modif)
+PlayboxScene::mouseReleased(int x, int y, int modif)
 {
   dragAnchor = {hugef, hugef};
 }
 
 /*---[Invoke]---------------------------------------------------------------------------*/
 #ifndef ALL_DEMO_APP
-vvr_invoke_main_with_scene(Playbox)
+vvr_invoke_main_with_scene(PlayboxScene)
 #endif
