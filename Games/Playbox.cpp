@@ -216,11 +216,13 @@ auto
 track_sinusoid()
 {
   PointVector pts;
-  constexpr float dx = 1.0;
-  constexpr float dy = dx * 3.0;
-  for (int i = 0; i < 1000; ++i) {
-    float x = i * dx;
-    float y = sin(x * 0.2 - 1.0) * dy + dy;
+  constexpr float peaks = 20;
+  constexpr float period = 18.0f;
+  constexpr float height = 1.0f;
+  for (float th = 0; th < M_PI * 2.0 * peaks; th += M_PI / 16.0) {
+    static constexpr auto f = period / M_PI / 2;
+    float x = th * f;
+    float y = sin(th - M_PI / 2) * height + height;
     pts.push_back(new vvr::Point3D(x, y, 0));
   }
   return pts;
@@ -354,7 +356,7 @@ PlayboxScene::PlayboxScene()
   worldSize = {30., 0.}; // Define only the width of the world
   gbW = 100.0f;
   gbH = 0.25f;
-  roadPts = track_zigzag();
+  roadPts = track_sinusoid();
   createRoadFromPts(roadPts, road);
   reset();
 }
@@ -442,6 +444,7 @@ PlayboxScene::setupPhysics()
     groundBody->CreateFixture(&fixtureDef);
   }
 
+  const float ballRadius = 0.6f;
   {
     // Create ball:
     b2BodyDef bodyDef;
@@ -450,7 +453,7 @@ PlayboxScene::setupPhysics()
     bodyDef.type = b2_dynamicBody;
     bodyDef.position.Set(-3.0f, 10.0f);
     bodyDef.angularVelocity = -8.0f * M_PI;
-    dynamicCircle.m_radius = 0.6f;
+    dynamicCircle.m_radius = ballRadius;
     fixtureDef.shape = &dynamicCircle;
     fixtureDef.density = 0.05f;
     fixtureDef.friction = 1.0f;
@@ -467,7 +470,7 @@ PlayboxScene::setupPhysics()
     bodyDef.type = b2_dynamicBody;
     bodyDef.position.Set(-1.0f, 10.0f);
     bodyDef.angularVelocity = 0.0f * M_PI;
-    dynamicCircle.m_radius = 0.6f;
+    dynamicCircle.m_radius = ballRadius;
     fixtureDef.shape = &dynamicCircle;
     fixtureDef.density = 0.05f;
     fixtureDef.friction = 1.0f;
@@ -495,7 +498,7 @@ PlayboxScene::setupPhysics()
     bodyDef.type = b2_dynamicBody;
     bodyDef.position.Set(4.0f * i, 8.0f);
     bodyDef.angularVelocity = 0.25f * M_PI;
-    dynamicBox.SetAsBox(1.0f, 0.3f);
+    dynamicBox.SetAsBox(1.0f, 0.1f);
     fixtureDef.shape = &dynamicBox;
     fixtureDef.density = 0.2f;
     fixtureDef.friction = 1.0f;
