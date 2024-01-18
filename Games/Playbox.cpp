@@ -1,4 +1,3 @@
-#include "C2DLineSet.h"
 #include "box2d/b2_body.h"
 #include "box2d/b2_polygon_shape.h"
 #include <C2DLine.h>
@@ -276,22 +275,18 @@ drawBox(b2Body *bodyBox, vvr::Colour colour = vvr::black)
   auto bodyAngle = bodyBox->GetAngle();
   auto shape = bodyBox->GetFixtureList()->GetShape();
   auto polyg = dynamic_cast<b2PolygonShape *>(shape);
-  C2DLineSet ls;
-  C2DPoint boxPts[] = {
-    C2DPoint(polyg->m_vertices[0].x, polyg->m_vertices[0].y),
-    C2DPoint(polyg->m_vertices[1].x, polyg->m_vertices[1].y),
-    C2DPoint(polyg->m_vertices[2].x, polyg->m_vertices[2].y),
-    C2DPoint(polyg->m_vertices[3].x, polyg->m_vertices[3].y),
-  };
-  ls.AddCopy({boxPts[0], boxPts[1]});
-  ls.AddCopy({boxPts[1], boxPts[2]});
-  ls.AddCopy({boxPts[2], boxPts[3]});
-  ls.AddCopy({boxPts[3], boxPts[0]});
-  ls.RotateToRight(-bodyAngle, {0, 0});
-  ls.Move({bodyPos.x, bodyPos.y});
-  for (int i = 0; i < ls.size(); ++i) {
-    c.add(*ls.GetAt(i), colour)->draw();
-  }
+
+  C2DPointSet ps;
+  ps.AddCopy(polyg->m_vertices[0].x, polyg->m_vertices[0].y);
+  ps.AddCopy(polyg->m_vertices[1].x, polyg->m_vertices[1].y);
+  ps.AddCopy(polyg->m_vertices[2].x, polyg->m_vertices[2].y);
+  ps.AddCopy(polyg->m_vertices[3].x, polyg->m_vertices[3].y);
+
+  ps.RotateToRight(-bodyAngle, {0, 0});
+  ps.Move({bodyPos.x, bodyPos.y});
+
+  C2DPolygon polygon(ps);
+  vvr::draw(polygon, colour, true);
 }
 
 } // namespace
@@ -421,7 +416,8 @@ PlayboxScene::setupPhysics()
     fixtureDef.shape = &groundBox;
     fixtureDef.density = 2.0f;
     fixtureDef.friction = 2.0f;
-    world->CreateBody(&groundBodyDef)->CreateFixture(&fixtureDef);
+    groundBody = world->CreateBody(&groundBodyDef);
+    groundBody->CreateFixture(&fixtureDef);
   }
 
   {
@@ -440,8 +436,8 @@ PlayboxScene::setupPhysics()
     fixtureDef.density = 2.0f;
     fixtureDef.friction = 2.0f;
     chain.CreateLoop(vs.data(), roadPts.size());
-    groundBody = world->CreateBody(&trackBodyDef);
-    groundBody->CreateFixture(&fixtureDef);
+    auto body = world->CreateBody(&trackBodyDef);
+    body->CreateFixture(&fixtureDef);
   }
 
   const float ballRadius = 0.6f;
@@ -451,7 +447,7 @@ PlayboxScene::setupPhysics()
     b2CircleShape dynamicCircle;
     b2FixtureDef fixtureDef;
     bodyDef.type = b2_dynamicBody;
-    bodyDef.position.Set(-3.0f, 10.0f);
+    bodyDef.position.Set(-5.0f, 10.0f);
     bodyDef.angularVelocity = -8.0f * M_PI;
     dynamicCircle.m_radius = ballRadius;
     fixtureDef.shape = &dynamicCircle;
@@ -490,7 +486,7 @@ PlayboxScene::setupPhysics()
     world->CreateJoint(&jointDef);
   }
 
-  for (int i = 0; i < 100; ++i) {
+  for (int i = 0; i < 1; ++i) {
     // Create boxes:
     b2BodyDef bodyDef;
     b2PolygonShape dynamicBox;
@@ -498,7 +494,7 @@ PlayboxScene::setupPhysics()
     bodyDef.type = b2_dynamicBody;
     bodyDef.position.Set(4.0f * i, 8.0f);
     bodyDef.angularVelocity = 0.25f * M_PI;
-    dynamicBox.SetAsBox(1.0f, 0.1f);
+    dynamicBox.SetAsBox(1.0f, 0.2f);
     fixtureDef.shape = &dynamicBox;
     fixtureDef.density = 0.2f;
     fixtureDef.friction = 1.0f;
@@ -584,8 +580,6 @@ PlayboxScene::draw()
       ballBody2->ApplyLinearImpulseToCenter({0, +impulse}, true);
     }
 
-    prevCon = con;
-
     simulatePhysics();
   }
 
@@ -613,24 +607,33 @@ PlayboxScene::draw()
     h1.draw();
     h2.draw();
 
-    // Draw gas and brake indicators
+    // Draw brake indicator
     ring.SetRadius(r / 2);
     ring.Move({(r * 2 + p), r / 2});
     ring.filled = con.brake;
     ring.colour = vvr::red;
     ring.draw();
 
+    // Draw gas indicator
     ring.Move({(r + p), 0});
     ring.filled = con.gas;
     ring.colour = vvr::green;
     ring.draw();
+
+    // Draw gas indicator
+    ring.Move({(r + p), 0});
+    ring.filled = (con.upforce && prevCon.upforce == false);
+    ring.colour = vvr::DarkOrchid;
+    ring.draw();
   }
+
+  prevCon = con;
 
   enter2dMode(worldCenter.get(), worldSize);
 
   {
     vvr::BackupAndRestore<float> tmp[] = {
-      {vvr::Shape::PointSize, 15.0f},
+      {vvr::Shape::PointSize, 10.0f},
       {vvr::Shape::LineWidth,  5.0f}
     };
 
@@ -668,24 +671,38 @@ PlayboxScene::drawPhysics() const
     drawBox(body);
   }
 
-  // Draw contact points:
+  // Draw contact points and bodies:
   for (b2Contact *con = world->GetContactList(); con; con = con->GetNext()) {
+
     auto bodyA = con->GetFixtureA()->GetBody();
     auto bodyB = con->GetFixtureB()->GetBody();
 
-    b2Body *other = nullptr;
-    if (bodyA == ballBody1)
-      other = bodyB;
-    else if (bodyB == ballBody1)
-      other = bodyA;
+    auto drawTouchingBoxes = [&](b2Body *ballBody) {
+      b2Body *otherBody = nullptr;
+      b2PolygonShape *polygon = nullptr;
 
-    auto polygon = other ? dynamic_cast<b2PolygonShape *>(
-                             other->GetFixtureList()[0].GetShape())
-                         : nullptr;
+      if (bodyB == ballBody) {
+        otherBody = bodyA;
+      } else if (bodyA == ballBody) {
+        otherBody = bodyB;
+      }
 
-    if (polygon && polygon->m_count == 4) {
-      drawBox(bodyA, vvr::red);
-    }
+      if (otherBody == groundBody) {
+        return;
+      }
+
+      if (otherBody && con->GetManifold()->pointCount) {
+        auto shape = otherBody->GetFixtureList()[0].GetShape();
+        polygon = dynamic_cast<b2PolygonShape *>(shape);
+      }
+
+      if (polygon && polygon->m_count == 4) {
+        drawBox(bodyA, vvr::red);
+      }
+    };
+
+    drawTouchingBoxes(ballBody1);
+    drawTouchingBoxes(ballBody2);
 
     b2WorldManifold worldManifold;
     con->GetWorldManifold(&worldManifold);
@@ -740,6 +757,10 @@ PlayboxScene::keyEvent(unsigned char key, bool up, int modif)
   }
 
   switch (key) {
+  case '\r':
+  case '\n':
+    simulatePhysics();
+    break;
   case '-':
     worldSize.x *= 1.5;
     resize();
