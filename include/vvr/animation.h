@@ -5,6 +5,47 @@
 #include "utils.h"
 #include "vvrframework_DLL.h"
 
+namespace {
+
+template <typename T>
+bool
+normalize(T &v)
+{
+  return v.Normalize();
+}
+
+template <>
+inline bool
+normalize(float &v)
+{
+  v = 1.0f;
+  return true;
+}
+
+template <>
+inline bool
+normalize(double &v)
+{
+  v = 1.0;
+  return true;
+}
+
+template <typename T>
+float
+overshoot(T const &a, T const &b)
+{
+  return a.Dot(b) < 0;
+}
+
+template <>
+float
+overshoot(float const &a, float const &b)
+{
+  return (b - a) < 0;
+}
+
+} // namespace
+
 namespace vvr
 {
     struct Animation
@@ -96,7 +137,7 @@ namespace vvr
         }
 
         PropertyAnimation(const P &from, const P &to, P &prop, float dur = 1.0f)
-          : from(from), to(to), d(to - from), prop(&prop), dur(dur)
+          : from(from), to(to), d((to - from) / dur), prop(&prop), dur(dur)
         {
           animate();
         }
@@ -105,10 +146,11 @@ namespace vvr
 
         bool animate()
         {
-            update(true);
-            const bool alive = t() < dur;
-            if (alive) {
-              *prop = from + (d * t());
+          if (!prop) return false;
+          update(true);
+          const bool alive = t() < dur;
+          if (alive) {
+            *prop = from + (d * t());
             } else
               terminate();
             return alive;
@@ -152,7 +194,7 @@ namespace vvr
         target = newTarget;
         auto dv1 = (target - value);
 
-        if (dv1.Normalize()) {
+        if (normalize(dv1)) {
           dv = dv1 * vel;
         } else {
           dv = P{0.0f};
@@ -179,7 +221,7 @@ namespace vvr
         const float dt = update(true);
         const P newValue = value + dv * dt;
 
-        if (dv.Dot(target - newValue) < 0) {
+        if (overshoot(dv, target - newValue)) {
           dv = P{0.0f};
           value = target;
           return false;

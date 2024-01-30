@@ -216,7 +216,7 @@ track_sinusoid()
 {
   PointVector pts;
   constexpr float peaks = 20;
-  constexpr float period = 18.0f;
+  constexpr float period = 10.0f;
   constexpr float height = 1.0f;
   for (float th = 0; th < M_PI * 2.0 * peaks; th += M_PI / 16.0) {
     static constexpr auto f = period / M_PI / 2;
@@ -311,6 +311,7 @@ private:
   void mousePressed(int x, int y, int modif) override;
   void mouseMoved(int x, int y, int modif) override;
   void mouseReleased(int x, int y, int modif) override;
+  void sliderChanged(int slider_id, float val) override;
 
 private:
   void setCenterTarget();
@@ -321,11 +322,15 @@ private:
 private:
   float gbW, gbH;
   float simulationTime;
+  float ballRadius;
+  int numBoxes;
   vvr::Canvas road;
   vvr::Canvas canvas;
   vvr::Animation anim;
   PointVector roadPts;
   vvr::TargetAnimation<math::float2> worldCenter;
+  vvr::PropertyAnimation<float> upIndicatorAnim;
+  float upIndicator;
   math::float2 worldCenterAnchor;
   math::float2 dragAnchor{hugef, hugef};
   math::float2 worldSize;
@@ -346,8 +351,11 @@ PlayboxScene::PlayboxScene()
 
   vvr::Scene::m_bg_col = vvr::grey;
   vvr::Scene::m_fullscreen = false;
-  vvr::Scene::m_show_log = false;
+  vvr::Scene::m_show_log = true;
+  vvr::Scene::m_show_sliders = true;
 
+  numBoxes = 10;
+  ballRadius = 0.6f;
   worldSize = {30., 0.}; // Define only the width of the world
   gbW = 100.0f;
   gbH = 0.25f;
@@ -361,6 +369,7 @@ PlayboxScene::reset()
 {
   vvr::Scene::reset();
 
+  upIndicator = 0.0f;
   randomColourIndex = 0;
   keepCentered = true;
   worldCenter = {
@@ -440,7 +449,6 @@ PlayboxScene::setupPhysics()
     body->CreateFixture(&fixtureDef);
   }
 
-  const float ballRadius = 0.6f;
   {
     // Create ball:
     b2BodyDef bodyDef;
@@ -486,7 +494,7 @@ PlayboxScene::setupPhysics()
     world->CreateJoint(&jointDef);
   }
 
-  for (int i = 0; i < 1; ++i) {
+  for (int i = 0; i < numBoxes; ++i) {
     // Create boxes:
     b2BodyDef bodyDef;
     b2PolygonShape dynamicBox;
@@ -546,19 +554,26 @@ PlayboxScene::draw()
   ScopedCounter counter{"drawing"};
 #endif
 
-  static GameControls prevCon;
+  static bool arrowDownWasPressed = false;
+  static bool arrowUpWasPressed = false;
+
+  bool arrowDownIsPressed = isArrowDown(vvr::DOWN);
+  bool arrowUpIsPressed = isArrowDown(vvr::UP);
 
   const GameControls con{
     .brake = isArrowDown(vvr::LEFT),
     .gas = isArrowDown(vvr::RIGHT),
-    .downforce = isArrowDown(vvr::DOWN),
-    .upforce = isArrowDown(vvr::UP),
+    .downforce = arrowDownIsPressed && !arrowDownWasPressed,
+    .upforce = arrowUpIsPressed && !arrowUpWasPressed,
   };
+
+  arrowDownWasPressed = arrowDownIsPressed;
+  arrowUpWasPressed = arrowUpIsPressed;
 
   if (!anim.paused()) {
     constexpr auto torque = 0.4f;
     constexpr auto force = 0.2f;
-    constexpr auto impulse = 0.2f;
+    constexpr auto impulse = 0.4f;
 
     if (con.brake) {
       ballBody1->ApplyTorque(torque, true);
@@ -572,12 +587,16 @@ PlayboxScene::draw()
       ballBody2->ApplyForceToCenter({+force, 0}, true);
     }
 
-    if (con.downforce && prevCon.downforce == false) {
+    if (con.downforce) {
       ballBody1->ApplyLinearImpulseToCenter({0, -impulse * 2}, true);
       ballBody2->ApplyLinearImpulseToCenter({0, -impulse * 2}, true);
-    } else if (con.upforce && prevCon.upforce == false) {
+    } else if (con.upforce) {
       ballBody1->ApplyLinearImpulseToCenter({0, +impulse}, true);
       ballBody2->ApplyLinearImpulseToCenter({0, +impulse}, true);
+    }
+
+    if (con.upforce) {
+      upIndicatorAnim = {1, 0, upIndicator, 0.2};
     }
 
     simulatePhysics();
@@ -620,14 +639,19 @@ PlayboxScene::draw()
     ring.colour = vvr::green;
     ring.draw();
 
-    // Draw gas indicator
-    ring.Move({(r + p), 0});
-    ring.filled = (con.upforce && prevCon.upforce == false);
+    // Draw upforce indicator
+    upIndicatorAnim.animate();
+    const float to = M_PI * 2 * upIndicator;
     ring.colour = vvr::DarkOrchid;
+    ring.Move({(r + p), 0});
+    ring.filled = false;
     ring.draw();
+    if (to > 0) {
+      ring.setRange(0, to);
+      ring.filled = true;
+      ring.draw();
+    }
   }
-
-  prevCon = con;
 
   enter2dMode(worldCenter.get(), worldSize);
 
@@ -843,6 +867,17 @@ void
 PlayboxScene::mouseReleased(int x, int y, int modif)
 {
   dragAnchor = {hugef, hugef};
+}
+
+void
+PlayboxScene::sliderChanged(int slider_id, float val)
+{
+  switch (slider_id) {
+  case 0:
+    ballRadius = 0.1 + val * 2.0;
+    reset();
+    break;
+  }
 }
 
 /*---[Invoke]---------------------------------------------------------------------------*/
