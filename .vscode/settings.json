@@ -3,17 +3,15 @@
   "cmake.buildDirectory": "${workspaceFolder}/build-${buildType}",
   "cmake.copyCompileCommands": "${workspaceFolder}/compile_commands.json",
   "cmake.configureSettings": {
-    "CMAKE_PREFIX_PATH": "/Users/chrisp/Qt/6.5.1/macos/lib/cmake",
-    "QT_QMAKE_EXECUTABLE": "/Users/chrisp/Qt/6.5.1/macos/bin/qmake"
+    "CMAKE_PREFIX_PATH": "/Users/chrisp/Qt/6.10.2/macos/lib/cmake",
+    "QT_QMAKE_EXECUTABLE": "/Users/chrisp/Qt/6.10.2/macos/bin/qmake"
   },
   "cmake.debugConfig": {
     "type": "lldb",
     "request": "launch",
     "name": "CMake Debug",
     "program": "${command:cmake.launchTargetPath}",
-    "args": [
-      "--fn=fnlist"
-    ],
+    "args": [],
     "stopAtEntry": false,
     "cwd": "${workspaceFolder}",
     "environment": [],
