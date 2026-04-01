@@ -1,5 +1,3 @@
-// #include <box2d/b2_body.h>
-// #include <box2d/b2_polygon_shape.h>
 #include <box2d/box2d.h>
 
 #include <C2DLine.h>
